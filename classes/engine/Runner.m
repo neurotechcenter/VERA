@@ -1,0 +1,272 @@
+classdef Runner < handle
+    %RUNNER Summary of this class goes here
+    %   Detailed explanation goes here
+    properties (GetAccess = public)
+        %ComponentStatus containers.Map % Invalid, Configured, Ready, Completed
+        Components
+        ComponentResultPath containers.Map
+        Project Project
+        CurrentPipelineData containers.Map
+    end
+    
+    
+    methods(Static)
+        function runner=CreateFromProject(prj)
+            runner=Runner();
+            runner.SetProject(prj);
+        end
+    end
+    
+    methods
+        function obj = Runner()
+            obj.Project;
+            obj.CurrentPipelineData = containers.Map();
+            obj.Components = {};
+            obj.ComponentResultPath = containers.Map;
+        end
+        
+        function status=GetComponentStatus(obj,name)
+            status=obj.Project.Pipeline.GetComponent(name).ComponentStatus;
+        end
+        
+          function a = get.Components(obj)
+             a = obj.Project.Pipeline.Components;
+          end
+          
+          function compId=GetNextReadyComponent(obj)
+              compId={};
+                for k=obj.Components
+                    if(strcmp(obj.GetComponentStatus(k{1}),'Ready'))
+                        compId=k{1};
+                        return;
+                    end
+                        
+                end
+          end
+        
+        function SetProject(obj,project)
+            if(isObjectTypeOf(project,'Project'))
+                ppline=project.Pipeline;
+                k=ppline.Components;
+                compStatus=containers.Map();
+                for i=1:length(k)
+                    try
+                        ppline.Components(k{i}).Initialize();
+                        compStatus(k{i})='Configured';
+                    catch
+                        compStatus(k{i})='Invalid';
+                    end
+                end
+                obj.Project=project;
+                obj.CurrentPipelineData = containers.Map();
+                obj.updateCurrentResults();
+            else
+                error('Cannot set Project, value has to be object of type Project');
+            end
+        end
+        
+        function ConfigureComponent(obj,compName)
+            wasrdy=false;
+             if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+                 wasrdy=true;
+             end
+            try
+                o=obj.Project.Pipeline.GetComponent(compName);
+                o.Initialize();
+                obj.SetComponentStatus(compName,'Configured');
+                obj.updateComponentStatus();
+                if(strcmp(obj.GetComponentStatus(compName),'Ready')) %check if results are available...
+                    if(wasrdy && obj.Project.ComponentDataAvailable(compName))
+                        obj.SetComponentStatus(compName,'Completed')
+                    end
+                end
+                obj.updateComponentStatus();
+            catch e
+                warning on;
+                warning(getReport( e, 'extended', 'hyperlinks', 'on' ));
+                obj.updateComponentStatus();
+                error(['Error during initialization of Component: ' e.message]);
+            end
+            
+        end
+        
+        function ResetComponent(obj,compName)
+            obj.resetDownstreamCompletionStatus(compName);
+        end
+        
+        function inpComp=GetInputComponentNames(obj) %components without inputs
+                inpComp=obj.Project.Pipeline.GetInputComponentNames();
+        end
+
+        function outComp=GetOutputComponentNames(obj) %components without inputs
+                outComp=obj.Project.Pipeline.GetOutputComponentNames();
+        end
+        
+        function outComp=GetProcessingComponentNames(obj) %components without inputs
+                outComp=obj.Project.Pipeline.GetProcessingComponentNames();
+        end
+        
+        
+        function RunComponent(obj,compName)
+            compValid=true;
+            obj.checkCompName(compName);
+             if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+                    obj.resetDownstreamCompletionStatus(compName);
+                    obj.updateComponentStatus();
+             end
+            [~,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,compName);
+            errStr=[];
+            for i=1:length(req_comps)
+                if(~strcmp(obj.GetComponentStatus(req_comps{i}),'Completed'))
+                    compValid=false;
+                    errStr=[errStr ' ' req_comps{i}];
+                end
+            end
+            if(~compValid)
+                error([compName 'requires the Output(s) from ' errStr ' first!']);
+            end
+            if(~strcmp(obj.GetComponentStatus(compName),'Ready') && ~strcmp(obj.GetComponentStatus(compName),'Completed'))
+                error('Current component needs to be configured first!');
+            end
+
+
+            [inp, outp,optInp]=obj.Project.Pipeline.InterfaceInformation(compName);
+            inpData=cell(numel(inp),1);
+            outpData=cell(numel(outp),1);
+            optinpData={};
+            for i=1:length(inp)
+                if(obj.CurrentPipelineData.isKey(inp{i}))
+                    inpData{i}=obj.CurrentPipelineData(inp{i});
+                else
+                    warning('Requested Component Input is not available!');
+                end
+            end
+            
+            for i=1:length(optInp)
+                if(obj.CurrentPipelineData.isKey(optInp{i}))
+                    optinpData{end+1}=optInp{i};
+                    optinpData{end+1}=obj.CurrentPipelineData(optInp{i});
+                end
+            end
+            
+
+            try
+                o=obj.Project.Pipeline.GetComponent(compName);
+
+                [outpData{:}]=o.Process(inpData{:},optinpData{:});
+                obj.SetComponentStatus(compName,'Completed');
+                savepaths=obj.Project.SaveComponentData(compName,outpData{:});%the result paths are accumulative
+                idx=find(strcmp(obj.Components,compName));
+                if(idx > 1)
+                    if(obj.ComponentResultPath.isKey(obj.Components{idx-1}))
+                        res=obj.ComponentResultPath(obj.Components{idx-1}); %get previous results if it
+                        for k=keys(savepaths)
+                            res(k{1})=savepaths(k{1});
+                        end
+                        savepaths=res;
+                    end
+                end
+                obj.ComponentResultPath(compName)=savepaths;
+                for i=1:length(outp)
+                    obj.CurrentPipelineData(outp{i})=outpData{i};
+                end
+            catch me
+                %restore old input data
+                
+                warning on;
+                warning(getReport( me, 'extended', 'hyperlinks', 'on' ));
+                obj.SetComponentStatus(compName,'Invalid');
+                
+            end
+            obj.updateComponentStatus();
+            obj.updateCurrentResults();
+            if(exist('me','var'))
+                rethrow(me);
+            end
+        end
+        
+    end
+    
+    methods(Access = protected)
+        function reset(obj)
+            obj.CurrentPipelineData= containers.Map();
+            obj.Project = [];
+        end
+        
+        function SetComponentStatus(obj,name,status)
+            if(any(strcmp({'Invalid', 'Configured', 'Ready', 'Completed'},status)))
+                obj.Project.Pipeline.GetComponent(name).ComponentStatus=status;
+                obj.Project.SaveComponent(name);
+            else
+                error([status 'is not an allowed ComponentStatus']);
+            end
+        end
+        
+        function resetDownstreamCompletionStatus(obj,compName)
+           
+            if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+                obj.SetComponentStatus(compName,'Configured');
+                [~,targComps]=outedges(obj.Project.Pipeline.DependencyGraph,compName);
+                for i=1:length(targComps)
+                    if (strcmp(obj.GetComponentStatus(targComps{i}),'Completed'))
+                        obj.resetDownstreamCompletionStatus(targComps{i});
+                    end
+                end
+            end
+            obj.updateCurrentResults();
+        end
+        
+        function updateCurrentResults(obj)
+             complRes=containers.Map();
+             for c=obj.Components
+                 if(strcmp(obj.GetComponentStatus(c{1}),'Completed'))
+                     [~,outp]=obj.Project.Pipeline.InterfaceInformation(c{1});
+                     for res=outp
+                         complRes(res{1})=c{1};
+                     end
+                 end
+             end
+            %update SavePaths & objects
+            warning on;
+            obj.ComponentResultPath=containers.Map();
+            obj.CurrentPipelineData=containers.Map();
+            for k=keys(complRes)
+                try
+                    [res,path]=obj.Project.LoadComponentData(complRes(k{1}),k);
+                    obj.ComponentResultPath(k{1})=path;
+                    obj.CurrentPipelineData(k{1})=res(k{1});
+                catch e
+                    warning(['Could not load result from Component ' complRes(k{1})]);
+                    obj.resetDownstreamCompletionStatus(complRes(k{1}));
+                end
+
+                
+            end
+        end
+        
+        function updateComponentStatus(obj)
+            
+            for k=obj.Components
+                compRdy=true;
+                [~,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,k{1});
+                for i=1:length(req_comps)
+                    if(~strcmp(obj.GetComponentStatus(req_comps{i}),'Completed'))
+                        compRdy=false;
+                    end
+                end
+                if(compRdy && strcmp(obj.GetComponentStatus(k{1}),'Configured'))
+                    obj.SetComponentStatus(k{1},'Ready');
+                end
+            end
+           
+            
+        end
+        
+        function checkCompName(obj,name)
+            if(~any(strcmp(obj.Project.Pipeline.Components,name)))
+                error([name 'is not a valid Component in this Pipeline']);
+            end
+        end
+    end
+end
+

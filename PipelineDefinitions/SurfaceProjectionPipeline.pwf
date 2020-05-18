@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="Surface Projection">
+
+    <Component Type="FreesurferSurfaceLoader"/>
+
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Template Surface"</Name>
+        <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+        <SphereIdentifier>"TemplateSphere"</SphereIdentifier>
+    </Component>
+
+    <Component Type="LoadPipelineData">
+        <Name>"Electrode Definition"</Name>
+        <Identifier>"ElectrodeDefinition"</Identifier>
+        <Type>"ElectrodeDefinition"</Type>
+    </Component>
+
+    <Component Type="LoadPipelineData">
+        <Name>"Electrode Location"</Name>
+        <Identifier>"ElectrodeLocation"</Identifier>
+        <Type>"ElectrodeLocation"</Type>
+    </Component>
+
+
+
+    <Component Type="SphericalTemplateProjection"/>
+    <Component Type="ElectrodeProjection">
+        <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
+        <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+    </Component>
+
+
+    <Component Type="MatOutput">
+        <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
+        <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+    </Component>
+
+    <View Type="Model3DView">
+    <Name>"3D View"</Name>
+    </View>
+
+    <View Type="Model3DView">
+    <Name>"Template 3D View"</Name>
+    <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+    <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+</PipelineDefinition>

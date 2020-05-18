@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding="utf-8"?>
+
+<toc version="2.0">
+    <!-- First tocitem specifies top level in Help browser Contents pane -->
+    <!-- This can be a roadmap page, as shown below, or a content page -->
+    <tocitem target="MainPage.html">Widgets Toolbox
+        
+        <!-- Getting Started Guide -->
+        <tocitem target="GettingStartedDoc.html" image="HelpIcon.GETTING_STARTED">
+            Getting Started with the Widgets Toolbox
+        </tocitem>
+        
+        <!-- User Guide -->
+        <tocitem target="UserGuide.html"  image="HelpIcon.USER_GUIDE">
+            User Guide
+        </tocitem>
+        
+        <!-- Class Reference -->
+        <tocitem target="uiw.html"  image="HelpIcon.USER_GUIDE">
+            Class Reference
+            
+            <tocitem target="uiw.abstract.html"  image="HelpIcon.USER_GUIDE">
+                Abstract Classes (Application and Widget Superclasses)
+            </tocitem>
+            
+            <tocitem target="uiw.dialog.html"  image="HelpIcon.USER_GUIDE">
+                Dialogs
+            </tocitem>
+            
+            <tocitem target="uiw.enum.html"  image="HelpIcon.USER_GUIDE">
+                Enumeration Classes (Enumerations used internally by certain widgets)
+            </tocitem>
+            
+            <tocitem target="uiw.event.html"  image="HelpIcon.USER_GUIDE">
+                Event Classes (Events used internally by certain widgets)
+            </tocitem>
+            
+            <tocitem target="uiw.mixin.html"  image="HelpIcon.USER_GUIDE">
+                Mixin Classes (Mixins that may be added to apps, widgets, etc.)
+            </tocitem>
+            
+            <tocitem target="uiw.model.html"  image="HelpIcon.USER_GUIDE">
+                Model Classes (Data models: Preferences, etc.)
+            </tocitem>
+            
+            <tocitem target="uiw.tool.html"  image="HelpIcon.USER_GUIDE">
+                Tool Classes (Related tools: Logger, LogMessage, etc.)
+            </tocitem>
+            
+            <tocitem target="uiw.utility.html"  image="HelpIcon.USER_GUIDE">
+                Utilities (Various utilities for conversions, validation, etc.)
+            </tocitem>
+            
+            <tocitem target="uiw.widget.html"  image="HelpIcon.USER_GUIDE">
+                Widgets
+            </tocitem>
+            
+        </tocitem>
+        
+        <!-- Consulting Services Website -->
+        <tocitem target="http://www.mathworks.com/services/consulting.html" 
+                 image="$toolbox/matlab/icons/webicon.gif">
+            MathWorks Consulting
+            <tocitem target="http://www.mathworks.com/services/consulting/proven-solutions/software-development-with-matlab.html" 
+                     image="$toolbox/matlab/icons/figureicon.gif">
+                Professional Software Development Services
+            </tocitem>
+        </tocitem>
+    </tocitem>
+</toc>

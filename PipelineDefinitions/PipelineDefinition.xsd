@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:element name="PipelineDefinition">
+	<xs:complexType>
+	<xs:sequence maxOccurs="unbounded" minOccurs="1">
+        <xs:element name="Component" type="ComponentType"></xs:element>
+	</xs:sequence>
+	<xs:attribute name="Name" type="xs:string" use="required"/>
+	</xs:complexType>
+</xs:element>
+
+ <xs:complexType name="ComponentType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+        	<xs:any></xs:any>
+        </xs:sequence>
+        <xs:attribute name="Type" type="xs:string" use="required" />
+        <xs:attribute name="Viewer" type="xs:string"/>
+ </xs:complexType>
+
+
+</xs:schema>

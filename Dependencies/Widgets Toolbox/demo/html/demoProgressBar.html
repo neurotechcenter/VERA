@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,IE=9,chrome=1"><meta name="generator" content="MATLAB R2019a"><title>Progress Bar</title><style type="text/css">.rtcContent { padding: 30px; } .S0 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 28.8px; min-height: 0px; white-space: pre-wrap; color: rgb(213, 80, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 24px; font-weight: 400; text-align: left;  }
+.S1 { border-left: 0px none rgb(0, 0, 0); border-right: 0px none rgb(0, 0, 0); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px; line-height: 16px; min-height: 0px; white-space: pre; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 12px;  }
+.S2 { margin: 20px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }
+.CodeBlock { background-color: #F7F7F7; margin: 10px 0 10px 0;}
+.S3 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 0px none rgb(0, 0, 0); border-radius: 4px 4px 0px 0px; padding: 6px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S4 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S5 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 0px 0px 4px 4px; padding: 0px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S6 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }</style></head><body><div class = rtcContent><h1  class = 'S0'><span>Progress Bar</span></h1><div class = 'preformatted-matlab' style = 'margin: 10px 3px 10px 55px; padding: 10px 10px 10px 5px; '><div  class = 'S1'><span style="white-space: pre;"><span>Copyright </span><span style="color: rgb(160, 32, 240);">2017-2019 The MathWorks Inc.</span></span></div></div><h2  class = 'S2'><span>Create the widget</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span>f = figure(</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Toolbar'</span><span>,</span><span style="color: rgb(160, 32, 240);">'none'</span><span>,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'MenuBar'</span><span>,</span><span style="color: rgb(160, 32, 240);">'none'</span><span>,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'NumberTitle'</span><span>,</span><span style="color: rgb(160, 32, 240);">'off'</span><span>,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Units'</span><span>,</span><span style="color: rgb(160, 32, 240);">'pixels'</span><span>,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Position'</span><span>,[100 100 320 45]);</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>movegui(f,[100 -100])</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>w = uiw.widget.ProgressBar(</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Parent'</span><span>,f,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Units'</span><span>,</span><span style="color: rgb(160, 32, 240);">'normalized'</span><span>,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Position'</span><span>,[0 0 1 1]);</span></span></div></div></div><h2  class = 'S6'><span>Start the progress bar</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% Call this when the process is beginning. This sets progress to 0 and also</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% initializes some internal states. In a future release, this may start a</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% time remaining estimate.</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>w.startProgress(</span><span style="color: rgb(160, 32, 240);">'Starting...'</span><span>)</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% If you call this without status text, it will CLEAR the last status text</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>w.startProgress()</span></span></div></div></div><h2  class = 'S6'><span>Update the progress</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span>w.setProgress(0.2, </span><span style="color: rgb(160, 32, 240);">'Step 1 begins'</span><span>)</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% If you call this without status text, it will RETAIN the last status text</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>w.setProgress(0.2)</span></span></div></div></div><h2  class = 'S6'><span>Mark the progress finished</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span>w.finishProgress(</span><span style="color: rgb(160, 32, 240);">'DONE!'</span><span>)</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% If you call this without status text, it will CLEAR the last status text</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>w.finishProgress()</span></span></div></div></div><h2  class = 'S6'><span>Set the status text without using progress</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% You can place any status message here too anytime</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>w.setStatusText(</span><span style="color: rgb(160, 32, 240);">''</span><span>)</span></span></div></div></div><h2  class = 'S6'><span>If you want a cancel button</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% This enables the cancel button</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>w.AllowCancel = true;</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% You must start the progress for it to show up</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span>w.startProgress(</span><span style="color: rgb(160, 32, 240);">'Starting... you may cancel with this button -&gt;'</span><span>);</span></span></div></div></div></div>
+<br>
+<!-- 
+##### SOURCE BEGIN #####
+%% Progress Bar
+%%
+% 
+%   Copyright 2017-2019 The MathWorks Inc.
+%
+%% Create the widget
+
+f = figure(...
+    'Toolbar','none',...
+    'MenuBar','none',...
+    'NumberTitle','off',...
+    'Units','pixels',...
+    'Position',[100 100 320 45]);
+movegui(f,[100 -100])
+
+w = uiw.widget.ProgressBar(...
+    'Parent',f,...
+    'Units','normalized',...
+    'Position',[0 0 1 1]);
+%% Start the progress bar
+
+% Call this when the process is beginning. This sets progress to 0 and also
+% initializes some internal states. In a future release, this may start a
+% time remaining estimate.
+w.startProgress('Starting...')
+
+% If you call this without status text, it will CLEAR the last status text
+w.startProgress()
+%% Update the progress
+
+w.setProgress(0.2, 'Step 1 begins')
+
+% If you call this without status text, it will RETAIN the last status text
+w.setProgress(0.2)
+%% Mark the progress finished
+
+w.finishProgress('DONE!')
+
+% If you call this without status text, it will CLEAR the last status text
+w.finishProgress()
+%% Set the status text without using progress
+
+% You can place any status message here too anytime
+w.setStatusText('')
+%% If you want a cancel button
+
+% This enables the cancel button
+w.AllowCancel = true;
+
+% You must start the progress for it to show up
+w.startProgress('Starting... you may cancel with this button ->');
+##### SOURCE END #####
+--></body></html>

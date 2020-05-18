@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="generator" content="MATLAB R2016a"><meta http-equiv="X-UA-Compatible" content="IE=edge,IE=9,chrome=1"><title>Using Widgets Toolbox</title><style type="text/css">
+* {margin: 0; padding: 0;}
+body {text-align: start; line-height: 17.234px; min-height: 0px; white-space: normal; color: rgb(0, 0, 0); font-family: Consolas, Inconsolata, Menlo, monospace; font-style: normal; font-size: 14px; font-weight: normal; text-decoration: none; white-space: normal; }
+h1, h2 {font-weight: normal;}
+.content { padding: 30px; }
+
+.S0 { margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S1 { line-height: 26.4px; min-height: 24px; white-space: pre-wrap; color: rgb(213, 80, 0); font-family: Helvetica, Arial, sans-serif; font-size: 22px; white-space: pre-wrap; margin-left: 4px; margin-top: 3px; margin-bottom: 15px; margin-right: 10px;  }
+.S2 { min-height: 0px; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S3 { line-height: 20.576px; min-height: 20px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-size: 16px; font-weight: bold; white-space: pre-wrap; margin-left: 4px; margin-top: 3px; margin-bottom: 9px; margin-right: 10px;  }
+.S4 { line-height: 21px; min-height: 17px; white-space: pre-wrap; font-family: Helvetica, Arial, sans-serif; white-space: pre-wrap; margin-left: 4px; margin-top: 2px; margin-bottom: 9px; margin-right: 10px;  }
+.S5 { margin-left: 3px; margin-top: 10px; margin-bottom: 10px; margin-right: 3px;  }
+.S6 { line-height: 15.5927px; min-height: 18px; white-space: nowrap; font-size: 12.6667px; white-space: nowrap; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S7 { min-height: 0px; white-space: pre; white-space: pre; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S8 { min-height: 0px; white-space: pre; color: rgb(160, 32, 240); white-space: pre; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S9 { min-height: 0px; white-space: pre; white-space: pre; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 45px;  }
+.S10 { min-height: 0px; white-space: pre; color: rgb(0, 0, 255); white-space: pre; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 45px;  }
+.S11 { line-height: 21px; min-height: 17px; white-space: pre-wrap; font-family: Helvetica, Arial, sans-serif; white-space: pre-wrap; margin-left: 4px; margin-top: 10px; margin-bottom: 9px; margin-right: 10px;  }
+.S12 { color: rgb(64, 64, 64); margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S13 { min-height: 0px; white-space: pre; color: rgb(160, 32, 240); white-space: pre; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 45px;  }
+.S14 { margin-left: 3px; margin-top: 10px; margin-bottom: 4px; margin-right: 3px;  }
+.S15 { min-height: 0px; white-space: pre; color: rgb(34, 139, 34); white-space: pre; margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 45px;  }
+.S16 { font-family: Helvetica, Arial, sans-serif; margin-left: 0px; margin-top: 10px; margin-bottom: 20px; margin-right: 0px;  }
+.S17 { text-align: left; line-height: 21px; white-space: pre-wrap; white-space: pre-wrap; margin-left: 56px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+.S18 { min-height: 0px; color: rgb(0, 95, 206); margin-left: 0px; margin-top: 0px; margin-bottom: 0px; margin-right: 0px;  }
+
+.LineNodeBlock {margin: 10px 0 10px 0; background-color: #F7F7F7;}
+.LineNodeBlock+.paragraphNode {margin-top: 10px;}
+.lineNode {padding-left: 10px; border-left: 1px solid #E9E9E9; border-right: 1px solid #E9E9E9;}
+.inlineWrapper:first-child .lineNode,.inlineWrapper.outputs+.inlineWrapper .lineNode {padding-top: 5px; border-top: 1px solid #E9E9E9;}
+.inlineWrapper:last-child .lineNode,.inlineWrapper.outputs .lineNode {padding-bottom: 5px; border-bottom: 1px solid #E9E9E9;}
+.lineNode .textBox {white-space: pre;}
+.outputGroup {margin: 2px 0 2px 0; padding: 2px 2px 2px 4px;}
+.outputRegion {}
+.outputParagraph {color: rgba(64, 64, 64, 1); padding: 10px 0 6px 17px; background: white; overflow-x: hidden;}
+.inlineWrapper:last-child .outputParagraph {border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;}
+.outputParagraph:empty {margin: 0;}
+.inlineElement .symbolicElement {margin-top: 1px; margin-bottom: 1px;}
+.embeddedOutputsSymbolicElement .MathEquation {margin-top: 4px; margin-bottom: 4px;}
+.embeddedOutputsSymbolicElement .MathEquation.displaySymbolicElement {margin-left: 15px;}
+.embeddedOutputsSymbolicElement .MathEquation.inlineSymbolicElement {}
+.embeddedOutputsSymbolicElement {overflow-x: auto; overflow-y: hidden;}
+.embeddedOutputsSymbolicElement { overflow: initial !important;}
+.embeddedOutputsTextElement,.embeddedOutputsVariableStringElement {font-family: Consolas, Inconsolata, Menlo, monospace; font-size: 12px; white-space: pre; word-wrap: initial; min-height: 18px; max-height: 250px; overflow: auto;}
+.textElement,.rtcDataTipElement .textElement {padding-top: 3px;}
+.embeddedOutputsTextElement.inlineElement,.embeddedOutputsVariableStringElement.inlineElement {}
+.inlineElement .textElement {}
+.embeddedOutputsTextElement,.embeddedOutputsVariableStringElement { max-height: none !important; overflow: initial !important;}
+.veSpecifier {}
+.veContainer {}
+.veSpecifierBox {height: 400px; width: 500px;}
+.veSpecifier .veTable {padding-top: 3px; padding-bottom: 4px;}
+.veSpecifierBox .veSpecifier .veContainer {position: relative; width: 100%; height: 370px;}
+.veSpecifierBox .dijitDialogPaneContent {width: 97% !important; height: 88% !important;}
+.veSpecifier .veTable .rowHeadersWrapper {padding-bottom: 0;}
+.veSpecifier .veTable .scroller .variableEditorRenderers {padding-right: 3px; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;}
+.veSpecifier .veTable .topHeaderWrapper,.veSpecifier .veTable .bottomRowHeaderWrapper {visibility: hidden; z-index: 0;}
+.veMetaSummary {font-style: italic;}
+.veSpecifier .veTable .scroller {overflow: hidden;}
+.veSpecifier .veTable:hover .scroller {overflow: auto;}
+.veSpecifier .veVariableName,.veSpecifier .veDimensionFont {font-family: Consolas, Inconsolata, Menlo, monospace; font-size: 12px;}
+.veSpecifier .veVariableName {padding-top: 2px;}
+.veSpecifier .veDimensionFont {font-style: italic; color: #9A9A9A;}
+.veSpecifier .scroller::-webkit-scrollbar-track {background-color: white;}
+.veSpecifier .scroller::-webkit-scrollbar-corner {background-color: white;}
+.veSpecifier .veTable .topRowHeaderWrapper {border: none; background-color: #F8F9FA;}
+.veSpecifier .mw_type_ListBase.showCellBorders,.veSpecifier .veTable .topHeaderWrapper,.veSpecifier .veTable .bottomRowHeaderWrapper,.veSpecifier .veTable .verticalScrollSpacer,.veSpecifier .veTable .horizontalScrollSpacer {border: none;}
+.veSpecifier .veTable .dataScrollerNode {border: 1px solid #BFBFBF;}
+.veSpecifier .veTable .columnHeaderNode,.veSpecifier .veTable .rowHeaderNode,.veSpecifier .veTable .dataBody {font-family: Arial; font-size: 13px;}
+.veSpecifier .veTable .columnHeaderNode,.veSpecifier .veTable .rowHeaderNode {color: #7F7F7F;}
+.veSpecifier .veTable .dataBody {color: #000000;}
+.veSpecifier .veTable .columnHeaderNode .cell .drag,.veSpecifier .veTable .columnHeaderNode .cell .header,.veSpecifier .veTable .topHeaderWrapper,.veSpecifier .veTable .bottomRowHeaderWrapper {background-color: #F8F9FA;}
+.veSpecifier .veTable .columnHeaderNode .cell .dragBorder {border-right: 1px solid #F8F9FA;}
+.veSpecifier .veTable .rowHeaderNode .cell {padding-top: 3px; text-align: center; border-bottom: 1px solid #F8F9FA;}
+.veSpecifier .veTable .dataBody .cell .plainText {text-align: right;}
+.veSpecifier .veTable .dataBody .row .cell {border-bottom: 1px solid #E9E9E9; border-right: 1px solid #E9E9E9;}
+.embeddedOutputsVariableElement {font-family: Consolas, Inconsolata, Menlo, monospace; font-size: 12px; white-space: pre-wrap; word-wrap: break-word; min-height: 18px; max-height: 250px; overflow: auto;}
+.variableElement {}
+.embeddedOutputsVariableElement.inlineElement {}
+.inlineElement .variableElement {}
+.variableNameElement {margin-bottom: 3px; display: inline-block;}
+.variableValue { width: 100% !important; }
+.embeddedOutputsMatrixElement {min-height: 18px; box-sizing: border-box; font-family: Consolas, Inconsolata, Menlo, monospace; font-size: 12px;}
+.embeddedOutputsMatrixElement .matrixElement,.rtcDataTipElement .matrixElement {position: relative;}
+.matrixElement .variableValue,.rtcDataTipElement .matrixElement .variableValue {white-space: pre; display: inline-block; vertical-align: top; overflow: hidden;}
+.embeddedOutputsMatrixElement.inlineElement {}
+.embeddedOutputsMatrixElement.inlineElement .topHeaderWrapper {display: none;}
+.embeddedOutputsMatrixElement.inlineElement .veTable .body {padding-top: 0 !important; max-height: 100px;}
+.inlineElement .matrixElement {max-height: 300px;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer,.rtcDataTipElement .matrixElement .valueContainer {white-space: nowrap; margin-bottom: 3px;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer .horizontalEllipsis.hide,.embeddedOutputsMatrixElement .matrixElement .verticalEllipsis.hide,.rtcDataTipElement .matrixElement .valueContainer .horizontalEllipsis.hide,.rtcDataTipElement .matrixElement .verticalEllipsis.hide {display: none;}
+.embeddedOutputsMatrixElement .matrixElement .valueContainer .horizontalEllipsis {margin-bottom: -3px;}
+.matrixElement { max-height: none !important; }
+.dijitTooltipDialog .dijitTooltipContainer .dijitTooltipContents .alertPlugin-alertMessage {min-width: 12px; max-width: 400px; max-height: 300px; overflow: auto;}
+.dijitTooltipDialog .alertPlugin-alertMessage::-webkit-scrollbar {width: 11px; height: 11px;}
+.dijitTooltipDialog .alertPlugin-alertMessage::-webkit-scrollbar-track {background-color: rgba(0, 0, 0, 0);}
+.dijitTooltipDialog .alertPlugin-alertMessage::-webkit-scrollbar-corner {background-color: rgba(0, 0, 0, 0);}
+.dijitTooltipDialog .alertPlugin-alertMessage::-webkit-scrollbar-thumb {border-radius: 7px; background-color: rgba(0, 0, 0, 0.1); border: 2px solid rgba(0, 0, 0, 0); background-clip: padding-box;}
+.dijitTooltipDialog .alertPlugin-alertMessage::-webkit-scrollbar-thumb:hover {background-color: rgba(0, 0, 0, 0.2);}
+.dijitTooltipDialog .alertPlugin-alertMessage::-webkit-scrollbar-thumb {background-color: rgba(0, 0, 0, 0);}
+.dijitTooltipDialog .alertPlugin-alertMessage:hover::-webkit-scrollbar-thumb {background-color: rgba(0, 0, 0, 0.1);}
+.dijitTooltipDialog .alertPlugin-alertMessage:hover::-webkit-scrollbar-thumb:hover {background-color: rgba(0, 0, 0, 0.2);}
+.alertPlugin-alertLine {position: absolute; display: initial; width: 40px; text-align: right; cursor: text;}
+.alertPlugin-onTextLine {visibility: hidden;}
+.alertPlugin-hasTooltip .alertPlugin-warningImg,.alertPlugin-hasTooltip .alertPlugin-errorImg {cursor: pointer;}
+.alertPlugin-alertLine .alertPlugin-warningElement,.alertPlugin-alertLine .alertPlugin-errorElement {display: inline-block; margin-right: 4px;}
+.alertPlugin-isStale {-webkit-filter: opacity(0.4) grayscale(80%); filter: opacity(0.4) grayscale(80%);}
+.diagnosticMessage-wrapper {font-family: Consolas, Inconsolata, Menlo, monospace; font-size: 12px;}
+.diagnosticMessage-wrapper.diagnosticMessage-warningType {color: rgb(255,100,0);}
+.diagnosticMessage-wrapper.diagnosticMessage-warningType a {color: rgb(255,100,0); text-decoration: underline;}
+.diagnosticMessage-wrapper.diagnosticMessage-errorType {color: rgb(230,0,0);}
+.diagnosticMessage-wrapper.diagnosticMessage-errorType a {color: rgb(230,0,0); text-decoration: underline;}
+.diagnosticMessage-wrapper .diagnosticMessage-messagePart {white-space: pre-wrap;}
+.diagnosticMessage-wrapper .diagnosticMessage-stackPart {white-space: pre;}
+.embeddedOutputsWarningElement{min-height: 18px; max-height: 250px; overflow: auto;}
+.embeddedOutputsWarningElement.inlineElement {}
+.embeddedOutputsErrorElement {min-height: 18px; max-height: 250px; overflow: auto;}
+.embeddedOutputsErrorElement.inlineElement {}
+.variableNameElement .headerElement {color: rgb(179, 179, 179); font-style: italic;}
+.variableNameElement .headerElement .headerDataType {color: rgb(147, 176, 230);}
+</style></head><body><div class = "content"><div class = 'SectionBlock containment active'><h1 class = "S1"><span class = "S2">Using Widgets Toolbox</span></h1></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Using Widgets </span></h2><div class = "S4"><span class = "S2">Widgets may be instantiated and placed within a figure in the same way as MATLAB graphics objects, such as axes or uicontrol. The specific functionality of each widget is documented by examples, and by documentation within the code files themselves.</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">f = figure(</span><span class = "S8">'Units'</span><span class = "S7">,</span><span class = "S8">'pixels'</span><span class = "S7">,</span><span class = "S8">'Position'</span><span class = "S9">,[100 100 520 100]);</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9"></span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">w = uiw.widget.FileSelector(</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Parent'</span><span class = "S7">, f, </span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Pattern'</span><span class = "S7">, {</span><span class = "S8">'*.mat'</span><span class = "S7">,</span><span class = "S8">'MATLAB MAT files (*.mat)'</span><span class = "S7">; </span><span class = "S8">'*.csv'</span><span class = "S7">,</span><span class = "S8">'CSV files (*.csv)'</span><span class = "S7">}, </span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Callback'</span><span class = "S7">,@(h,e)disp(e),</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Label'</span><span class = "S7">,</span><span class = "S8">'Choose a data file:'</span><span class = "S7">, </span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'LabelLocation'</span><span class = "S7">,</span><span class = "S8">'left'</span><span class = "S7">,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'LabelWidth'</span><span class = "S7">,110,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Units'</span><span class = "S7">, </span><span class = "S8">'pixels'</span><span class = "S7">, </span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Position'</span><span class = "S9">, [10 40 500 25]);</span></div></div></div><div class = "S11"><span class = "S2">Advanced capabilities are available, such as indicating that the user typed an invalid value.</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper outputs'><div class = "S6 lineNode"><span class = "S7">w.Value = </span><span class = "S8">'C:\InvalidFileName\SetsInvalidColor.mat'</span><span class = "S9">;</span></div><div class="outputParagraph" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><div class="inlineElement embeddedOutputsFigure" uid="29246D0A" data-testid="output_0" style="width: 528px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><div class="figureElement" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><img class="figureImage" src="data:image/png;base64,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" style="width: 520px; white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"></div></div></div></div></div><div class = "S11"><span class = "S2">To see the widget's behavior in action, look at the demo.</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">edit </span><span class = "S13">demoFileSelector</span></div></div></div><div class = "S11"><span class = "S2">To see further documentation on this widget, including the available properties and methods, see the automatically generated documentation for the specific widget.</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">doc </span><span class = "S13">uiw.widget.FileSelector</span></div></div></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Using Dialogs</span></h2><div class = "S4"><span class = "S2">Dialogs may be instantiated as an object as well, however a dialog manages its own figure. When creating the dialog, you may provide the position of a "parent" figure, and the dialog will be centered over the provided position vector.</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S15">% Create a list of names</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">load(</span><span class = "S8">'patients.mat'</span><span class = "S7">,</span><span class = "S8">'LastName'</span><span class = "S9">);</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9">LastName = sortrows(LastName);</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9"></span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S15">% Launch a dialog to select a name</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">d = uiw.dialog.SearchList(</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Title'</span><span class = "S7">,</span><span class = "S8">'Select a patient'</span><span class = "S7">,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'DialogSize'</span><span class = "S7">,[250 600],</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'List'</span><span class = "S9">,LastName);</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9"></span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S15">% Wait for dialog output</span></div></div><div class = 'inlineWrapper outputs'><div class = "S6 lineNode"><span class = "S9">[out, action] = d.waitForOutput()</span></div><div class="outputParagraph" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><div class="inlineElement embeddedOutputsVariableStringElement" uid="DDF3EDD8" data-width="498" data-testid="output_1" style="width: 528px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span class="variableNameElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">out = </span></div><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">     1
+</div></div></div><div class="inlineElement embeddedOutputsVariableStringElement" uid="511B1080" data-width="498" data-testid="output_2" style="width: 528px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span class="variableNameElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">action = </span>'cancel'</div></div></div></div></div></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Using Application Superclasses</span></h2><div class = "S4"><span class = "S2">For building whole applications, Widgets Toolbox provides classes that provide the basic necessities for common types of applications. These include:</span></div><ul class = "S16"><li class = "S17"><span class = "S0">An application window contained within a figure (superclass: uiw.abstract.AppWindow)</span></li><li class = "S17"><span class = "S0">An application window that manages a single session state. The user's session state/data may be saved to disk as a MAT file, and may be loaded back into the application at a later time.(superclass: uiw.abstract.SingleSessionApp)</span></li></ul><div class = "S4"><span class = "S2">For usage, please see the demo:</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">edit </span><span class = "S13">demoApp.m</span></div></div></div><div class = "S11"><span class = "S2">To view the implementation of an app that utilizes this functionality, please view the code within \demo\+demoAppPkg:</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">cd(fullfile(widgetsRoot,</span><span class = "S8">'demo'</span><span class = "S7">,</span><span class = "S8">'+demoAppPkg'</span><span class = "S9">))</span></div></div></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Using Logger</span></h2><div class = "S4"><span class = "S2">An important functionality in complex applications, and especially deployed applications, is logging of errors, warnings, and other messages. This is useful for debugging any issues that arise in the software. </span></div><div class = "S4"><span class = "S2">Logging is implemented as a class, and logger objects may be referenced as a singleton by giving a specific name to the logger. </span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">logName = </span><span class = "S8">'demolog'</span><span class = "S9">;</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">log = uiw.tool.Logger(logName,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'BufferSize'</span><span class = "S7">,50,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'FileLevel'</span><span class = "S7">,</span><span class = "S8">'debug'</span><span class = "S7">,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'DisplayLevel'</span><span class = "S7">,</span><span class = "S8">'warning'</span><span class = "S7">,</span><span class = "S10">...</span></div></div><div class = 'inlineWrapper outputs'><div class = "S6 lineNode"><span class = "S7">    </span><span class = "S8">'Callback'</span><span class = "S9">,@(h,e)disp(e))</span></div><div class="outputParagraph" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><div class="inlineElement embeddedOutputsVariableStringElement" uid="7766007F" data-width="498" data-testid="output_3" style="width: 528px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span class="variableNameElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">log = </span></div><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">  Logger with properties:
+
+            Name: 'demolog'
+        Messages: [3×1 uiw.tool.LogMessage]
+     LastMessage: [1×1 uiw.tool.LogMessage]
+      BufferSize: 50
+       FileLevel: DEBUG
+    DisplayLevel: WARNING
+         LogFile: 'C:\Users\rjackey\AppData\Local\Temp\Log_demolog.txt'
+        Callback: @(h,e)disp(e)
+</div></div></div></div></div></div><div class = "S11"><span class = "S2">Now, add a log message:</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper outputs'><div class = "S6 lineNode"><span class = "S7">log.write(</span><span class = "S8">'warning'</span><span class = "S7">,</span><span class = "S8">'My Warning Message'</span><span class = "S9">);</span></div><div class="outputParagraph" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><div class="inlineElement embeddedOutputsTextElement" uid="07824077" data-width="498" data-testid="output_4" style="width: 528px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">	demolog Logger:  WARNING:	My Warning Message
+  LogMessage with properties:
+
+      Message: 'My Warning Message'
+    Timestamp: 02-Jul-2018 11:08:15
+        Level: WARNING
+       Source: [0×0 handle]</div></div></div></div></div><div class = "S11"><span class = "S2">If you instantiate a logger with the same name from elsewhere in your code, you will have returned the same logger instance. This way, you can have one logger throughout different modules of your software without needing to pass the logger object handle around.</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9">log2 = uiw.tool.Logger(logName);</span></div></div><div class = 'inlineWrapper outputs'><div class = "S6 lineNode"><span class = "S9">isequal(log, log2)</span></div><div class="outputParagraph" style="white-space: normal; font-style: normal; color: rgb(64, 64, 64); font-size: 14px;"><div class="inlineElement embeddedOutputsVariableStringElement" uid="3A12CFA4" data-width="498" data-testid="output_5" style="width: 528px; white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div class="textElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;"><span class="variableNameElement" style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">ans = <span class="headerElement" style="white-space: pre; font-style: italic; color: rgb(179, 179, 179); font-size: 12px;">logical</span></span></div><div style="white-space: pre; font-style: normal; color: rgb(64, 64, 64); font-size: 12px;">   1
+</div></div></div></div></div></div><div class = "S11"><span class = "S2">For more information, see the documentation for the Logger and LogMessage classes:</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S7">doc </span><span class = "S13">uiw.tool.Logger</span></div></div><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9">doc uiw.tool.LogMessage</span></div></div></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Making an Application or Custom Widget Loggable</span></h2><div class = "S4"><span class = "S2">Additionally, if you create a new application or create your own widget by writing a new class definition, you may utilize the class uiw.mixin.HasLogger. Inheriting this class into your own class will provide easy access to the logger and to several methods for logging application-related behaviors or errors. </span></div><div class = "S4"><span class = "S2">For more information, see the documentation for this class:</span></div><div class = 'LineNodeBlock contiguous'><div class = 'inlineWrapper'><div class = "S6 lineNode"><span class = "S9">doc uiw.mixin.HasLogger</span></div></div></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Examples</span></h2><div class = "S4"><span class = "S2">This toolbox is documented primarily through examples. Please see the Examples library to explore the widgets and components, and the Class Reference for documentation of each widget class.</span></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Utilities</span></h2><div class = "S4"><span class = "S2">Please review the Utilities section from the tree on the left for a list of utilities used by various widgets. These utilities may be useful for building custom widgets or other application components.</span></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Other Classes</span></h2><div class = "S4"><span class = "S2">In addition to the above, this toolbox also contains additional classes that are shared by various widgets. These can be found in the Class Reference section, and may also be useful for building custom widgets or other application components.</span></div><ul class = "S16"><li class = "S17"><span class = "S0">Base/Abstract Classes</span></li><li class = "S17"><span class = "S0">Mixin Classes</span></li><li class = "S17"><span class = "S0">Enumeration Classes</span></li><li class = "S17"><span class = "S0">Event Classes</span></li></ul></div><div class = "S0"></div><div class = 'SectionBlock containment'><h2 class = "S3"><span class = "S2">Consulting Support</span></h2><div class = "S4"><span class = "S2">Are you getting started at building object-oriented apps in MATLAB? </span><a href = "http://www.mathworks.com/services/consulting"><span class = "S0">MathWorks Consulting</span></a><span class = "S2"> can provide </span><a href = "https://www.mathworks.com/services/consulting/proven-solutions/software-development-with-matlab.html"><span class = "S0">fee-based advice and coaching </span></a><span class = "S2">to help you get started.</span></div></div><div class = "S0"></div><div class = 'SectionBlock containment'><div class = "S4"><span class = "S2">© 2018 The MathWorks, Inc.</span></div></div></div>
+<!-- 
+##### SOURCE BEGIN #####
+%% Using Widgets Toolbox
+%% Using Widgets 
+% Widgets may be instantiated and placed within a figure in the same way as 
+% MATLAB graphics objects, such as axes or uicontrol. The specific functionality 
+% of each widget is documented by examples, and by documentation within the code 
+% files themselves.
+%%
+f = figure('Units','pixels','Position',[100 100 520 100]);
+
+w = uiw.widget.FileSelector(...
+    'Parent', f, ...
+    'Pattern', {'*.mat','MATLAB MAT files (*.mat)'; '*.csv','CSV files (*.csv)'}, ...
+    'Callback',@(h,e)disp(e),...
+    'Label','Choose a data file:', ...
+    'LabelLocation','left',...
+    'LabelWidth',110,...
+    'Units', 'pixels', ...
+    'Position', [10 40 500 25]);
+%% 
+% Advanced capabilities are available, such as indicating that the user 
+% typed an invalid value.
+
+w.Value = 'C:\InvalidFileName\SetsInvalidColor.mat';
+%% 
+% To see the widget's behavior in action, look at the demo.
+
+edit demoFileSelector
+%% 
+% To see further documentation on this widget, including the available properties 
+% and methods, see the automatically generated documentation for the specific 
+% widget.
+
+doc uiw.widget.FileSelector
+%% Using Dialogs
+% Dialogs may be instantiated as an object as well, however a dialog manages 
+% its own figure. When creating the dialog, you may provide the position of a 
+% "parent" figure, and the dialog will be centered over the provided position 
+% vector.
+%%
+% Create a list of names
+load('patients.mat','LastName');
+LastName = sortrows(LastName);
+
+% Launch a dialog to select a name
+d = uiw.dialog.SearchList(...
+    'Title','Select a patient',...
+    'DialogSize',[250 600],...
+    'List',LastName);
+
+% Wait for dialog output
+[out, action] = d.waitForOutput()
+%% Using Application Superclasses
+% For building whole applications, Widgets Toolbox provides classes that provide 
+% the basic necessities for common types of applications. These include:
+% 
+% * An application window contained within a figure (superclass: uiw.abstract.AppWindow)
+% * An application window that manages a single session state. The user's session 
+% state/data may be saved to disk as a MAT file, and may be loaded back into the 
+% application at a later time.(superclass: uiw.abstract.SingleSessionApp)
+% 
+% For usage, please see the demo:
+%%
+edit demoApp.m
+%% 
+% To view the implementation of an app that utilizes this functionality, 
+% please view the code within \demo\+demoAppPkg:
+
+cd(fullfile(widgetsRoot,'demo','+demoAppPkg'))
+%% Using Logger
+% An important functionality in complex applications, and especially deployed 
+% applications, is logging of errors, warnings, and other messages. This is useful 
+% for debugging any issues that arise in the software. 
+% 
+% Logging is implemented as a class, and logger objects may be referenced 
+% as a singleton by giving a specific name to the logger. 
+%%
+logName = 'demolog';
+log = uiw.tool.Logger(logName,...
+    'BufferSize',50,...
+    'FileLevel','debug',...
+    'DisplayLevel','warning',...
+    'Callback',@(h,e)disp(e))
+%% 
+% Now, add a log message:
+
+log.write('warning','My Warning Message');
+%% 
+% If you instantiate a logger with the same name from elsewhere in your 
+% code, you will have returned the same logger instance. This way, you can have 
+% one logger throughout different modules of your software without needing to 
+% pass the logger object handle around.
+
+log2 = uiw.tool.Logger(logName);
+isequal(log, log2)
+%% 
+% For more information, see the documentation for the Logger and LogMessage 
+% classes:
+
+doc uiw.tool.Logger
+doc uiw.tool.LogMessage
+%% Making an Application or Custom Widget Loggable
+% Additionally, if you create a new application or create your own widget by 
+% writing a new class definition, you may utilize the class uiw.mixin.HasLogger. 
+% Inheriting this class into your own class will provide easy access to the logger 
+% and to several methods for logging application-related behaviors or errors. 
+% 
+% For more information, see the documentation for this class:
+%%
+doc uiw.mixin.HasLogger
+%% Examples
+% This toolbox is documented primarily through examples. Please see the Examples 
+% library to explore the widgets and components, and the Class Reference for documentation 
+% of each widget class.
+%% Utilities
+% Please review the Utilities section from the tree on the left for a list of 
+% utilities used by various widgets. These utilities may be useful for building 
+% custom widgets or other application components.
+%% Other Classes
+% In addition to the above, this toolbox also contains additional classes that 
+% are shared by various widgets. These can be found in the Class Reference section, 
+% and may also be useful for building custom widgets or other application components.
+% 
+% * Base/Abstract Classes
+% * Mixin Classes
+% * Enumeration Classes
+% * Event Classes
+%% Consulting Support
+% Are you getting started at building object-oriented apps in MATLAB? <http://www.mathworks.com/services/consulting 
+% MathWorks Consulting> can provide <https://www.mathworks.com/services/consulting/proven-solutions/software-development-with-matlab.html 
+% fee-based advice and coaching >to help you get started.
+% 
+% © 2018 The MathWorks, Inc.
+##### SOURCE END #####
+--></body></html>

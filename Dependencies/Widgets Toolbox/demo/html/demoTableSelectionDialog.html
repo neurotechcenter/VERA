@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,IE=9,chrome=1"><meta name="generator" content="MATLAB R2019a"><title>Dialog: Table Selection</title><style type="text/css">.rtcContent { padding: 30px; } .S0 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 28.8px; min-height: 0px; white-space: pre-wrap; color: rgb(213, 80, 0); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 24px; font-weight: 400; text-align: left;  }
+.S1 { border-left: 0px none rgb(0, 0, 0); border-right: 0px none rgb(0, 0, 0); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px; line-height: 16px; min-height: 0px; white-space: pre; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 12px;  }
+.S2 { margin: 20px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }
+.CodeBlock { background-color: #F7F7F7; margin: 10px 0 10px 0;}
+.S3 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 1px solid rgb(233, 233, 233); border-bottom: 0px none rgb(0, 0, 0); border-radius: 4px 4px 0px 0px; padding: 6px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S4 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 0px none rgb(0, 0, 0); border-radius: 0px; padding: 0px 45px 0px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S5 { border-left: 1px solid rgb(233, 233, 233); border-right: 1px solid rgb(233, 233, 233); border-top: 0px none rgb(0, 0, 0); border-bottom: 1px solid rgb(233, 233, 233); border-radius: 0px 0px 4px 4px; padding: 0px 45px 4px 13px; line-height: 17.234px; min-height: 18px; white-space: nowrap; color: rgb(0, 0, 0); font-family: Menlo, Monaco, Consolas, "Courier New", monospace; font-size: 14px;  }
+.S6 { margin: 3px 10px 5px 4px; padding: 0px; line-height: 20px; min-height: 0px; white-space: pre-wrap; color: rgb(60, 60, 60); font-family: Helvetica, Arial, sans-serif; font-style: normal; font-size: 20px; font-weight: 700; text-align: left;  }</style></head><body><div class = rtcContent><h1  class = 'S0'><span>Dialog: Table Selection</span></h1><div class = 'preformatted-matlab' style = 'margin: 10px 3px 10px 55px; padding: 10px 10px 10px 5px; '><div  class = 'S1'><span style="white-space: pre;"><span>Copyright </span><span style="color: rgb(160, 32, 240);">2018-2019 The MathWorks Inc.</span></span></div></div><h2  class = 'S2'><span>Create the dialog</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span>filename = fullfile(matlabroot,</span><span style="color: rgb(160, 32, 240);">'examples'</span><span>,</span><span style="color: rgb(160, 32, 240);">'matlab'</span><span>,</span><span style="color: rgb(160, 32, 240);">'myCsvTable.dat'</span><span>);</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>tableData = readtable(filename);</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>d = uiw.dialog.TableSelection(</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'Title'</span><span>,</span><span style="color: rgb(160, 32, 240);">'My Dialog'</span><span>,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'DataTable'</span><span>,tableData,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'SelectedRows'</span><span>,1,</span><span style="color: rgb(0, 0, 255);">...</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span>    </span><span style="color: rgb(160, 32, 240);">'MultiSelect'</span><span>,true);</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% Hold down CTRL to select multiple rows with the mouse.</span></span></div></div><div class="inlineWrapper"><div  class = 'S4'></div></div><div class="inlineWrapper"><div  class = 'S4'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% If you did not want a modal dialog (modal is the default):</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% d.WindowStyle = 'normal'; %or use ...,'WindowStyle','normal') on construction</span></span></div></div></div><h2  class = 'S6'><span>Wait for output</span></h2><div class="CodeBlock"><div class="inlineWrapper"><div  class = 'S3'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">% To wait for output and get a result:</span></span></div></div><div class="inlineWrapper"><div  class = 'S5'><span style="white-space: pre;"><span style="color: rgb(34, 139, 34);">%[out, action] = d.waitForOutput()</span></span></div></div></div></div>
+<br>
+<!-- 
+##### SOURCE BEGIN #####
+%% Dialog: Table Selection
+%%
+% 
+%   Copyright 2018-2019 The MathWorks Inc.
+%
+%% Create the dialog
+
+filename = fullfile(matlabroot,'examples','matlab','myCsvTable.dat');
+tableData = readtable(filename);
+
+d = uiw.dialog.TableSelection(...
+    'Title','My Dialog',...
+    'DataTable',tableData,...
+    'SelectedRows',1,...
+    'MultiSelect',true);
+
+% Hold down CTRL to select multiple rows with the mouse.
+
+% If you did not want a modal dialog (modal is the default):
+% d.WindowStyle = 'normal'; %or use ...,'WindowStyle','normal') on construction
+%% Wait for output
+
+% To wait for output and get a result:
+%[out, action] = d.waitForOutput()
+##### SOURCE END #####
+--></body></html>

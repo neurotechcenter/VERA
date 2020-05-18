@@ -1,0 +1,224 @@
+{
+  "uiw.dialog.About":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.dialog.About"}
+     ]
+  },
+  "uiw.dialog.ListSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.dialog.ListSelector"}
+     ]
+  },
+  "uiw.dialog.SearchList":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.dialog.SearchList"}
+     ]
+  },
+  "uiw.dialog.TableSelection":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.dialog.TableSelection"}
+     ]
+  },
+
+
+  "uiw.utility.tf2onoff":
+  {
+    "inputs": 
+    [ 
+        {"name":"tf", "kind":"required", "type":[["numeric"],["logical"]]}
+    ]
+  },
+
+
+  "uiw.utility.validateColor":
+  {
+    "inputs": 
+    [ 
+        {"mutuallyExclusiveGroup":
+            [
+                [
+                    {"name":"rgb", "kind":"required", "type":["numeric","ncols=3",">=0","<=1"], "purpose":"Color in [R G B] format"}
+                ],
+                [
+                    {"name":"colorName", "kind":"required", "type":"char", "purpose":"Color name, e.g. 'white'"}
+                ]
+            ]
+        }
+    ], 
+    "outputs": 
+    [ 
+        {"name":"rgb", "type":"numeric"}
+    ] 
+  },
+
+
+  "uiw.widget.CheckboxTree":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.CheckboxTree"}
+     ]
+  },
+  "uiw.widget.CheckboxTreeNode":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.CheckboxTreeNode"}
+     ]
+  },
+  "uiw.widget.ColorOrderSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.ColorOrderSelector"}
+     ]
+  },
+  "uiw.widget.ColorSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.ColorSelector"}
+     ]
+  },
+  "uiw.widget.EditablePopup":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.EditablePopup"}
+     ]
+  },
+  "uiw.widget.EditablePopupWithButton":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.EditablePopupWithButton"}
+     ]
+  },
+  "uiw.widget.EditableText":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.EditableText"}
+     ]
+  },
+  "uiw.widget.EditableTextWithHistory":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.EditableTextWithHistory"}
+     ]
+  },
+  "uiw.widget.FileSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.FileSelector"}
+     ]
+  },
+  "uiw.widget.FolderSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.FolderSelector"}
+     ]
+  },
+  "uiw.widget.ImageSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.ImageSelector"}
+     ]
+  },
+  "uiw.widget.List":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.List"}
+     ]
+  },
+  "uiw.widget.ListSelector":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.ListSelector"}
+     ]
+  },
+  "uiw.widget.ListWithButtons":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.ListWithButtons"}
+     ]
+  },
+  "uiw.widget.Password":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Password"}
+     ]
+  },
+  "uiw.widget.Popup":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Popup"}
+     ]
+  },
+  "uiw.widget.ProgressBar":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.ProgressBar"}
+     ]
+  },
+  "uiw.widget.Slider":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Slider"}
+     ]
+  },
+  "uiw.widget.Table":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Table"}
+     ]
+  },
+  "uiw.widget.Text":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Text"}
+     ]
+  },
+  "uiw.widget.Toolbar":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Toolbar"}
+     ]
+  },
+  "uiw.widget.Tree":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.Tree"}
+     ]
+  },
+  "uiw.widget.TreeNode":
+  {
+     "inputs":
+     [
+		{"name":"opts", "kind":"properties", "type":"uiw.widget.TreeNode"}
+     ]
+  }
+}
