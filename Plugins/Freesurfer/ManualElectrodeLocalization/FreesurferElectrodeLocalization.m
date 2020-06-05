@@ -113,9 +113,9 @@ classdef FreesurferElectrodeLocalization < AComponent
             fprintf(fileID,shellcmd);
             fclose(fileID);
             if(ispc)
-                system(['ubuntu run chmod +x ''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
+                systemWSL(['chmod +x ''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
                 %system(['chmod -R +x ' freesurferPath],'-echo');
-                system(['ubuntu run ''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
+                systemWSL(['''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
             else
                 system(['chmod +x ''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
                 %system(['chmod -R +x ' freesurferPath],'-echo');

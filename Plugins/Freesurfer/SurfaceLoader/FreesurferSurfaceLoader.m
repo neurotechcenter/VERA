@@ -65,8 +65,9 @@ classdef FreesurferSurfaceLoader < AComponent
                 w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
                 w_mri_path=convertToUbuntuSubsystemPath(mri_path,subsyspath);
                 w_xfrm_matrix_out_path=convertToUbuntuSubsystemPath(xfrm_matrix_out_path,subsyspath);
-                system(['ubuntu run chmod +x ' w_xfrm_matrix_path],'-echo');
-                system(['ubuntu run ''' w_xfrm_matrix_path ''' ''' w_freesurferPath ''' ''' ...
+                systemWSL(['chmod +x ''' w_xfrm_matrix_path ''''],'-echo');
+                %system(['bash -c '' chmod +x ' w_xfrm_matrix_path ''''],'-echo');
+                systemWSL(['''' w_xfrm_matrix_path ''' ''' w_freesurferPath ''' ''' ...
                 w_mri_path ''' ''' ...
                 w_xfrm_matrix_out_path ''''],'-echo'); 
             else

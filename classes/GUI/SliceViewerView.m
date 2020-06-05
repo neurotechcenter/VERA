@@ -12,13 +12,13 @@ classdef SliceViewerView < SliceViewerXYZ & AView
     
     methods
         function obj = SliceViewerView(varargin)
-            scrollP=uix.ScrollingPanel('Parent',obj);
+            vGrid=uix.VBox('Parent',obj);
             
             obj.ImageIdentifiers = {'CT', 'MRI'};
             %obj.cbxImage=uicontrol('style','checkbox','Parent',obj.settingsGrid,'String',['Show ' obj.ImageIdentifier],'Value',1,'Callback',@obj.cbxChanged);
             %obj.cbxImage2=uicontrol('style','checkbox','Parent',obj.settingsGrid,'String',['Show ' obj.Image2Identifier],'Value',1,'Callback',@obj.cbxChanged);
             addlistener(obj,'ImageIdentifiers','PostSet',@obj.imageDefinitionChanged);
-            vGrid=uix.VBox('Parent',scrollP);
+            %vGrid=uix.VBox('Parent',scrollP);
             boxp=uix.Panel('Parent',vGrid,'Title','Contrast');
             vGridC=uix.VBox('Parent',boxp);
             obj.slMin=uicontrol('Parent',vGridC,'Style','slider','Min',0,'Max',1,'Value',1);
@@ -29,7 +29,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             
             vGridC.Heights=[20,20];
             obj.settingsGrid=uix.VBox('Parent',vGrid);
-            vGrid.Heights=[80,-1];
+            vGrid.Heights=[-1,-1];
             %addlistener(evtobj,'Component','PostSet',@PropListener.handlePropEvents);
              try
                 uix.set( obj, varargin{:} )
@@ -62,6 +62,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
                     createViewPanel(obj,obj.settingsGrid,obj.ImageIdentifiers{i},i);
                 end
             end
+            obj.settingsGrid.Children=flip(obj.settingsGrid.Children); %flip to match Z order
             uix.Empty('Parent',obj.settingsGrid);
             obj.Images=images;
             obj.ImageAlphas=alphas;
@@ -79,12 +80,12 @@ classdef SliceViewerView < SliceViewerXYZ & AView
         
         function panel=createViewPanel(obj,parent,name,idx)
             boxp=uix.Panel('Parent',parent,'Title',name);
-            panel=uix.VBox('Parent',boxp);
+            panel=uix.HBox('Parent',boxp);
 
             uicontrol('Parent',panel,'Style','text','String','Opacity');
             opSlider=uicontrol('Parent',panel,'Style','slider','Min',0,'Max',1,'Value',1,'UserData',idx);
             addlistener(opSlider, 'Value', 'PostSet',@(a,b)obj.sliderChanged(a,b,idx));
-            panel.Heights=[20,20];
+            panel.Widths=[80,-80];
         end
         
         function sliderChanged(obj,source,b,idx)

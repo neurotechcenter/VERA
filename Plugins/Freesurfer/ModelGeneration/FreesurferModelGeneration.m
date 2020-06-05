@@ -60,8 +60,8 @@ classdef FreesurferModelGeneration < AComponent
                     w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
                     w_segmentationFolder=convertToUbuntuSubsystemPath(segmentationFolder,subsyspath);
                     w_mripath=convertToUbuntuSubsystemPath(mri_path,subsyspath);
-                    system(['ubuntu run chmod +x ''' w_recon_script ''''],'-echo');
-                    shellcmd=['ubuntu run  ''' w_recon_script ''' ''' w_freesurferPath ''' ''' ...
+                    system(['bash -c chmod +x ''' w_recon_script ''''],'-echo');
+                    shellcmd=['bash -c  ''' w_recon_script ''' ''' w_freesurferPath ''' ''' ...
                     w_segmentationFolder ''' ' ...
                     'Segmentation ''' w_mripath ''''];
                 else
@@ -92,15 +92,15 @@ classdef FreesurferModelGeneration < AComponent
                     w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
                     w_mri_path=convertToUbuntuSubsystemPath(mri_path,subsyspath);
                     w_xfrm_matrix_out_path=convertToUbuntuSubsystemPath(xfrm_matrix_out_path,subsyspath);
-                    system(['ubuntu run chmod +x ''' w_xfrm_matrix_path ''''],'-echo');
-                    system(['ubuntu run ''' w_xfrm_matrix_path ''' ''' w_freesurferPath ''' ''' ...
+                    systemWSL(['chmod +x ''' w_xfrm_matrix_path ''''],'-echo');
+                    systemWSL(['''' w_xfrm_matrix_path ''' ''' w_freesurferPath ''' ''' ...
                     w_mri_path ''' ''' ...
                     w_xfrm_matrix_out_path ''''],'-echo'); 
                 else
                     error('Couldnt determine operating system');
                 end
 
-                xfrm_matrices=importdata(fullfile(xfrm_matrix_out_path,'xfrm_matrices'));
+                xfrm_matrices=importdata(fullfile(xfrm_matrix_out_psath,'xfrm_matrices'));
                 vox2ras = xfrm_matrices(1:4, :);
                 vox2rastkr = xfrm_matrices(5:8, :);
 
