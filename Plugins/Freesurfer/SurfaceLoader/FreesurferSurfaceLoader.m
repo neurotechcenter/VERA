@@ -77,10 +77,19 @@ classdef FreesurferSurfaceLoader < AComponent
             xfrm_matrices=importdata(fullfile(xfrm_matrix_out_path,'xfrm_matrices'));
             vox2ras = xfrm_matrices(1:4, :);
             vox2rastkr = xfrm_matrices(5:8, :);
+            if(ispc)
+                    pathToLhPial=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.pial'),subsyspath);
+                    pathToRhPial=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.pial'),subsyspath);
+                    pathToLhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.sphere'),subsyspath);
+                    pathToRhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.sphere'),subsyspath);
+                else
+                    pathToLhPial=fullfile(segmentationPath,'surf/lh.pial');
+                    pathToRhPial=fullfile(segmentationPath,'surf/rh.pial');
+                    pathToLhSphere=fullfile(segmentationPath,'surf/lh.sphere.reg');
+                    pathToRhSphere=fullfile(segmentationPath,'surf/rh.sphere.reg');
+           end
 
             
-            pathToLhPial=fullfile(segmentationPath,'surf/lh.pial');
-            pathToRhPial=fullfile(segmentationPath,'surf/rh.pial');
            % [~,vox2ras]=system(['mri_info --vox2ras ' fullfile(segmentationFolder,'SUBJECT','')] );
            % [~,vox2rastkr]=system(['mri_info --vox2ras-tkr ' fullfile(segmentationFolder,'SUBJECT','')] );%3d model is in ras-tkr format, we want RAS coordinates
             
@@ -108,8 +117,6 @@ classdef FreesurferSurfaceLoader < AComponent
             lsphere=obj.CreateOutput(obj.LeftSphereIdentifier);
             rsphere=obj.CreateOutput(obj.RightSphereIdentifier);
             
-            pathToLhSphere=fullfile(segmentationPath,'surf/lh.sphere.reg');
-            pathToRhSphere=fullfile(segmentationPath,'surf/rh.sphere.reg');
             [LHtempvert, LHtemptri] = read_surf(pathToLhSphere);
             [RHtempvert, RHtemptri] = read_surf(pathToRhSphere);
             lsph.vert=LHtempvert;
