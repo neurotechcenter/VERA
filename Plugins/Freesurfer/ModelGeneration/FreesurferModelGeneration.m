@@ -53,29 +53,33 @@ classdef FreesurferModelGeneration < AComponent
                  mri_path=GetFullPath(mri.Path);
                 freesurferPath=obj.GetDependency('Freesurfer');
                 recon_script=fullfile(fileparts(fileparts(mfilename('fullpath'))),'/scripts/importdata_recon-all.sh');
-
-                if(ispc)
-                    subsyspath=obj.GetDependency('UbuntuSubsystemPath');
-                    w_recon_script=convertToUbuntuSubsystemPath(recon_script,subsyspath);
-                    w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
-                    w_segmentationFolder=convertToUbuntuSubsystemPath(segmentationFolder,subsyspath);
-                    w_mripath=convertToUbuntuSubsystemPath(mri_path,subsyspath);
-                    system(['bash -c chmod +x ''' w_recon_script ''''],'-echo');
-                    shellcmd=['bash -c  ''' w_recon_script ''' ''' w_freesurferPath ''' ''' ...
-                    w_segmentationFolder ''' ' ...
-                    'Segmentation ''' w_mripath ''''];
-                else
-                system(['chmod +x ''' recon_script ''''],'-echo');
-                shellcmd=[recon_script ' ''' freesurferPath ''' ''' ...
-                segmentationFolder ''' ' ...
-                'Segmentation ''' mri_path ''''];
-                end
-                disp(['Running: ' shellcmd]);
-                disp('Running Freesurfer segmentation, this might take up to 24h, get a coffee...');
-                system(shellcmd,'-echo');
-
-           
                 segmentationPath=fullfile(segmentationFolder,'Segmentation');
+                if(~exist(segmentationPath,'dir') || (exist(segmentationPath,'dir') && strcmp(questdlg('Found an Existing Segmentation Folder! Do you want to rerun the Segmentation?','Rerun Segmentation?','Yes','No','No'),'Yes')))
+                    disp('Running Freesurfer segmentation, this might take up to 24h, get a coffee...');
+                    if(exist(segmentationPath,'dir')) 
+                        rmdir(segmentationPath,'s'); 
+                    end
+                    if(ispc)
+                        subsyspath=obj.GetDependency('UbuntuSubsystemPath');
+                        w_recon_script=convertToUbuntuSubsystemPath(recon_script,subsyspath);
+                        w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
+                        w_segmentationFolder=convertToUbuntuSubsystemPath(segmentationFolder,subsyspath);
+                        w_mripath=convertToUbuntuSubsystemPath(mri_path,subsyspath);
+                        systemWSL(['chmod +x ''' w_recon_script ''''],'-echo');
+                        shellcmd=['''' w_recon_script ''' ''' w_freesurferPath ''' ''' ...
+                        w_segmentationFolder ''' ' ...
+                        'Segmentation ''' w_mripath ''''];
+                        systemWSL(shellcmd,'-echo');
+                    else
+                        system(['chmod +x ''' recon_script ''''],'-echo');
+                        shellcmd=[recon_script ' ''' freesurferPath ''' ''' ...
+                        segmentationFolder ''' ' ...
+                        'Segmentation ''' mri_path ''''];
+                        system(shellcmd,'-echo');
+                    end
+                end
+                
+
                 surf=obj.CreateOutput(obj.SurfaceIdentifier);
                 freesurferPath=obj.GetDependency('Freesurfer');
                 xfrm_matrix_path=[fileparts(fileparts(mfilename('fullpath'))) '/scripts/get_xfrm_matrices.sh'];
@@ -100,7 +104,7 @@ classdef FreesurferModelGeneration < AComponent
                     error('Couldnt determine operating system');
                 end
 
-                xfrm_matrices=importdata(fullfile(xfrm_matrix_out_psath,'xfrm_matrices'));
+                xfrm_matrices=importdata(fullfile(xfrm_matrix_out_path,'xfrm_matrices'));
                 vox2ras = xfrm_matrices(1:4, :);
                 vox2rastkr = xfrm_matrices(5:8, :);
 

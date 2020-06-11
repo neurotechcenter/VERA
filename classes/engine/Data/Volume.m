@@ -59,7 +59,7 @@ classdef Volume < AData & IFileLoader
             catch 
                     
                     warning 'Input image transformation is not orthogonal; reslicing image'
-                    reslice_nii(path,fullfile(tpath,'buff.nii'));
+                    reslice_nii(path,fullfile(tpath,'buff.nii'),[],[],[],2);
                     obj.Image=load_nii(fullfile(tpath,'buff.nii'));
                     obj.Path=fullfile(tpath,'buff.nii');
             end
