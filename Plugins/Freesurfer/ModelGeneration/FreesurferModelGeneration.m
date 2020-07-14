@@ -38,7 +38,7 @@ classdef FreesurferModelGeneration < AComponent
             addpath(genpath(path));
             if(ispc)
                 obj.GetDependency('UbuntuSubsystemPath');
-               if(system('WHERE ubuntu >nul 2>nul echo %ERRORLEVEL%') == 1)
+               if(system('WHERE bash >nul 2>nul echo %ERRORLEVEL%') == 1)
                    error('If you want to use Freesurfer components on windows, the Windows 10 Ubuntu subsystem is required!');
                else
                    disp('Found ubuntu subsystem on Windows 10!');
