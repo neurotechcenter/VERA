@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Dependencies>
-   <Dependency Name="Freesurfer" Type="folder">"C:\\freesurfer_71"</Dependency>
-   <Dependency Name="NeuralAct" Type="folder">"C:\\NeuralAct_package"</Dependency>
-   <Dependency Name="SPM12" Type="folder">"C:\\spm12\\spm12"</Dependency>
-   <Dependency Name="UbuntuSubsystemPath" Type="folder">"/mnt/"</Dependency>
-</Dependencies>
