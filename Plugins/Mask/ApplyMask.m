@@ -39,13 +39,14 @@ classdef ApplyMask < AComponent
              vol_pxl_begin=round(max(vol_pxl_orig,[1 1 1]));
              vol_pxl_offset=min(vol_pxl_orig,[0 0 0]);
              out_pxl_begin=abs(vol_pxl_offset)+1;
-             vol_pxl_end=min(size(out.Image.img),size(vol.Image.img)-vol_pxl_offset);
+             vol_pxl_end=min(size(out.Image.img),size(vol.Image.img)-vol_pxl_begin);
+             
              imgX=out_pxl_begin(1):vol_pxl_end(1);
              imgY=out_pxl_begin(2):vol_pxl_end(2);
              imgZ=out_pxl_begin(3):vol_pxl_end(3);
-             maskX=vol_pxl_begin(1):vol_pxl_begin(1)+vol_pxl_end(1)-1+vol_pxl_offset(1);
-             maskY=vol_pxl_begin(2):vol_pxl_begin(2)+vol_pxl_end(2)-1+vol_pxl_offset(2);
-             maskZ=vol_pxl_begin(3):vol_pxl_begin(3)+vol_pxl_end(3)-1+vol_pxl_offset(3);
+             maskX=vol_pxl_begin(1):vol_pxl_begin(1)+length(imgX)-1;
+             maskY=vol_pxl_begin(2):vol_pxl_begin(2)+length(imgY)-1;
+             maskZ=vol_pxl_begin(3):vol_pxl_begin(3)+length(imgZ)-1;
              out.Image.img(imgX,imgY,imgZ)=out.Image.img(imgX,imgY,imgZ).*vol.Image.img(maskX,maskY,maskZ);
              
              
