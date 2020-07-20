@@ -31,6 +31,8 @@ classdef ApplyMask < AComponent
              reslice_nii(mask.Path,resl_mask,vol.Image.hdr.dime.pixdim(2));
              out=obj.CreateOutput(obj.OutputIdentifier);
              out.LoadFromFile(resl_mask);
+             vol.Image.img=vol.Image.img-min(min(min(vol.Image.img)));
+             
              mask_orig=([1 1 1]-out.Image.hdr.hist.originator(1:3)).*out.Image.hdr.dime.pixdim(2:4);
              vol_orig=([1 1 1]-vol.Image.hdr.hist.originator(1:3)).*vol.Image.hdr.dime.pixdim(2:4);
              cpy_orig=min(mask_orig-vol_orig,mask_orig);
