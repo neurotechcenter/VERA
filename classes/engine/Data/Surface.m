@@ -1,17 +1,20 @@
 classdef Surface < AData
-    %SURFACE Summary of this class goes here
-    %   Detailed explanation goes here
+    %Surface - Data to store Surface 
+    % Data structure for surfaces
+    % Surfaces will bit stored in the gifti format (https://www.nitrc.org/projects/gifti/)
+    % Additional information like annotations will be stored in an xml
+    % See also gifti
     
     properties
-        Model
-        Path
-        Annotation
-        AnnotationLabel
+        Model % 3D Surface Model, a struct containing vert and tri  
+        Path %Path to the gifti file
+        Annotation %Annotation for each vertex
+        AnnotationLabel 
     end
     
     properties (Dependent)
-        TriId
-        VertId
+        TriId %Identification of hemisphere 
+        VertId %Identification of hemisphere 
     end
     
     methods
@@ -21,6 +24,10 @@ classdef Surface < AData
 
         end
         function Load(obj,path)
+            % Load - override of load for Surface
+            % The surface will be stored as a gifti accompanied by an xml
+            % containing hemisphere and annotation information
+            % See also AData, gifti
             Load@AData(obj,path);
             obj.Path=obj.makeFullPath(obj.Path);
             if(~isempty(obj.Path))
@@ -32,6 +39,9 @@ classdef Surface < AData
             
         end
         function savepath=Save(obj,path)
+            %Save - override of Save for Surface
+            %Surface will be loaded from the gifti file together with the
+            %information contained in the xml
             if(~isempty(obj.Model))
                 obj.Path=fullfile(path,[obj.Name '.surf.gii']);
                 buffM.vert=obj.Model.vert;

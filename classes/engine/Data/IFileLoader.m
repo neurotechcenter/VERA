@@ -1,6 +1,7 @@
 classdef IFileLoader < handle
-    %IFILELOADER Summary of this class goes here
-    %   Detailed explanation goes here
+    %IFileLoader Interface allows it to be used together with the
+    %FileLoader Component
+    %See also FileLoader
     
     properties
     end

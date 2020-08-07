@@ -1,7 +1,27 @@
 classdef Volume < AData & IFileLoader
-    %VOLUME Summary of this class goes here
-    %   Detailed explanation goes here
+    %VOLUME Data class for MRI,CT or similar volumetric data
+    %   Volume Data is stored in the nifti format
+    %   RAS and voxel axis are assumed to be parallel, if not image will be
+    %   resliced accordingly
+    % See also AData, load_nii
     properties
+         %Volume data as struct
+        %  nii structure:
+        %
+        %	hdr -		struct with NIFTI header fields.
+        %
+        %	filetype -	Analyze format .hdr/.img (0); 
+        %			NIFTI .hdr/.img (1);
+        %			NIFTI .nii (2)
+        %
+        %	fileprefix - 	NIFTI filename without extension.
+        %
+        %	machine - 	machine string variable.
+        %
+        %	img - 		3D (or 4D) matrix of NIFTI data.
+        %
+        %	original -	the original header before any affine transform.
+        % See also load_nii
         Image
         Path
     end
@@ -14,14 +34,17 @@ classdef Volume < AData & IFileLoader
         end
         
         function coordOut=Vox2Ras(obj,coordIn)
+            %Vox2Ras transforms coordinates from Voxel space into RAS sapce
             coordOut=(coordIn(:)-obj.Image.hdr.hist.originator(1:3)').*obj.Image.hdr.dime.pixdim(2:4)';
         end
         
         function coordOut=Ras2Vox(obj,coordIn)
+            %Ras2Vox transforms RAS coordinates into voxel coordinates
             coordOut=max(min(round((coordIn(:)./obj.Image.hdr.dime.pixdim(2:4)')+obj.Image.hdr.hist.originator(1:3)'),size(obj.Image.img)),[1;1;1]);
         end
         
         function [x,y,z]=GetRasAxis(obj)
+            % Returns the projection from voxel to RAS coordinate
             x=((1:size(obj.Image.img,1))-obj.Image.hdr.hist.originator(1)).*obj.Image.hdr.dime.pixdim(2);
             y=((1:size(obj.Image.img,2))-obj.Image.hdr.hist.originator(2)).*obj.Image.hdr.dime.pixdim(3);
             z=((1:size(obj.Image.img,3))-obj.Image.hdr.hist.originator(3)).*obj.Image.hdr.dime.pixdim(4);
@@ -29,16 +52,14 @@ classdef Volume < AData & IFileLoader
         
         
         function LoadFromFile(obj,path)
-
+            % Load nifti file from path
+            % This function supports nifit as well as dicom
+            % If multiple images are found in the dicom, it will show a
+            % selection dialog
+            % See also IFileLoader
             [spath,~,ext]=fileparts(path);
             tpath=obj.GetDependency('TempPath');
             if(any(strcmpi(ext,{'.dcm','.dicom'})))
-                %gather all dicom files for this subject
-%                 fd=dir(fullfile(path,['*' ext]));
-%                 files=cell(length(fd),1);
-%                 for i=1:length(fd)
-%                     files{i}=fullfile(fd(i).folder,fd(i).name);
-%                 end
                 [~,path]=dicm2nii(spath,tpath,0);
                 if(numel(path) > 1 )
                     warning('Dicom contains multiple Image Containers!');
@@ -70,6 +91,8 @@ classdef Volume < AData & IFileLoader
         end
         
         function Load(obj,path)
+            %Load - override of serializer load
+            %See also Serializable.Load
             Load@AData(obj,path);
             obj.Path=obj.makeFullPath(obj.Path);
             if(~isempty(obj.Path))

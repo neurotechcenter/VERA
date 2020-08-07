@@ -4,7 +4,7 @@ classdef SliceViewer < uix.Grid
     properties (Access = public,SetObservable)
         Images = {}
         ImageAlphas = {}
-        SliderOrientation = 'west'  %north, west, south, east      
+        SliderOrientation = 'west'  %north, west, south, east,hide      
         CursorPosition = [];        
         Slice =1
         CursorChangedFcn = [];
@@ -253,7 +253,7 @@ classdef SliceViewer < uix.Grid
         
         function SliderOrientationChanged(obj,~,~)
             
-            switch(validatestring(obj.SliderOrientation,{'north','west','south','east'}))
+            switch(validatestring(obj.SliderOrientation,{'north','west','south','east','hide'}))
                 
                 case {'north'}
                     if(obj.Children == [obj.imageView; obj.slider])
@@ -279,6 +279,8 @@ classdef SliceViewer < uix.Grid
                     end
                     obj.Widths=[20 -1];
                     obj.Heights=[-1];
+                case {'hide'}
+                    set(obj.slider,'Visible','off');                 
                 otherwise
                     error('Unknown orientation');
                 

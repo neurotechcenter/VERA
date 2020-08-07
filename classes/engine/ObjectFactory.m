@@ -1,7 +1,8 @@
 classdef ObjectFactory
-    %AFACTORY Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %ObjectFactory - Creates new object and initializes them correctly
+    %   ObjectFactory is used to Create Components, Views and Data based on
+    %   information contained in XML format
+    %   See also Serializer
     
     methods(Access = private)
         function obj = ObjectFactory(~)
@@ -28,6 +29,7 @@ classdef ObjectFactory
                 error(['Component ' cname ' doesnt exist']);
             end
         end
+        
         function vobj = CreateComponent(cname,xmlNode)
             cI=meta.class.fromName(cname);
             if(~isempty(cI) && any(strcmp(superclasses(cname),'AComponent')) && cI.Abstract == 0)

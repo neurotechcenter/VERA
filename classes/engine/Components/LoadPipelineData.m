@@ -1,14 +1,14 @@
 classdef LoadPipelineData < AComponent
-    %LOADPIPELINEDATA Summary of this class goes here
-    %   Detailed explanation goes here
+    %LoadPipelineData load a Data object from another VERA project
     
     properties
-        Identifier
-        Type
+        Identifier %Data identifier
+        Type %Data type - See also AData
     end
     
     methods
         function obj = LoadPipelineData()
+            %LoadPipelineData - Constructor
             obj.Identifier='';
             obj.Type='';
         end
@@ -21,9 +21,13 @@ classdef LoadPipelineData < AComponent
         end
         
         function Initialize(obj)
+            % Initialize
+            %See also AComponent.Initialize
         end
         
         function [out] = Process(obj)
+            % Process - opens a file selector to select the Data xml
+            % out - Data object
             [file,path]=uigetfile('*.xml',['Please Select ' obj.Identifier]);
             if isequal(file,0)
                 error('No file selected');

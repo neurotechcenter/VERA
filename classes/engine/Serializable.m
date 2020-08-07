@@ -1,18 +1,23 @@
 classdef Serializable < handle
-    
+    %Serializeable - Handles serialization of objects
+    %Inherit from this class to enable easy serialization
+    %
     properties(Access = protected)
-        ignoreList ={}
-        acStorage ={}
-        nodeName
+        ignoreList ={} % List of properties to be ignored during serialization
+        acStorage ={} %List of non-public properties that should be stored
+        nodeName % Name of the xml tag for serialization
     end
 
     methods
         function obj=Serializable()
+            % Constructor
             obj.nodeName=class(obj);
             obj.ignoreList= {};
         end
         
         function c = Serialize(obj,docNode)
+            % Serialize - Adds a the object to the docNode of an xml object
+            % docNode - xml node under which you would like to serialize the object 
             c=docNode.createElement(obj.nodeName);
             c.setAttribute('Type',class(obj))
             
@@ -41,6 +46,8 @@ classdef Serializable < handle
         end
         
         function Deserialize(obj,docNode)
+            % Deserialize - Sets all properties defined by the xml node
+            % docNode - xml node
             if(~strcmp(docNode.Attributes.Type,class(obj)))
                 error(['Cannot deserialize xml defined Type ' docNode.Attributes.Type ' to object of Type ' class(obj)]);
             end

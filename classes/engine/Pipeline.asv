@@ -188,10 +188,6 @@ classdef Pipeline < handle
     
     methods(Access = ?AComponent)
         function AddInput(obj,cobj,Identifier,inpType)
-            %AddInput - Adds input for the current component to the
-            %pipeline
-            %   This method can only be called by a Component
-            %   See also AComponent
             if(obj.availableData.isKey(Identifier) ...
                 && isObjectTypeOf(inpType,'AData') ...
                 && strcmp(obj.availableData(Identifier),inpType))
@@ -203,19 +199,11 @@ classdef Pipeline < handle
         end
         
         function AddOptionalInput(obj,cobj,Identifier,inpType)
-            %AddOptionalInput - Adds an optional input for the current component to the
-            %pipeline
-            %   This method can only be called by a Component
-            %   See also AComponent
                 cobj.OptionalInputs{end+1}=Identifier;
                 cobj.optionalinputMap(Identifier)=inpType;
         end
         
         function AddOutput(obj,cobj,Identifier,outputType)
-            %AddOutput - Adds an output for the current component to the
-            %pipeline
-            %   This method can only be called by a Component
-            %   See also AComponent
             if(isObjectTypeOf(outputType,'AData')) %check if class exists
                 cobj.Outputs{end+1}=Identifier;
                 cobj.outputMap(Identifier)=outputType;

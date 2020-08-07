@@ -1,6 +1,6 @@
 classdef ElectrodeDefinition < AData
-    %ELECTRODEDEFINITION Summary of this class goes here
-    %   Detailed explanation goes here
+    %ElectrodeDefinition - Data object for Electrode Definitons
+    %   
     
     properties
         Definition
@@ -11,10 +11,11 @@ classdef ElectrodeDefinition < AData
         end
         
         function grps=GetGroupedDefinitions(obj)
+            %GetGroupedDefinitions Groups Electrode Definitions together if identical 
             defBuff=obj.Definition;
             grps=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{},'Id',{});
             ids=1:length(obj.Definition);
-            while(length(defBuff) ~= 0)
+            while(~isempty(defBuff))
                 newgrp.Name={defBuff(1).Name};
                 newgrp.Type=defBuff(1).Type;
                 newgrp.NElectrodes=defBuff(1).NElectrodes;

@@ -1,10 +1,10 @@
 classdef ElectrodeLocation < AData
-    %ELECTRODEDEFINITION Summary of this class goes here
-    %   Detailed explanation goes here
+    %ElectrodeLocation Electrode Location in 3D Space 
+    %
     
     properties
-        Location
-        DefinitionIdentifier
+        Location % List of electode locations in space
+        DefinitionIdentifier %Identifier connecting the location to the Electrode Definiton
     end
     
     methods

@@ -1,28 +1,61 @@
 classdef AComponent < Serializable
-    %ACOMPONENT Summary of this class goes here
-    %   Detailed explanation goes here
+    %ACOMPONENT Abstract Baseclass for all Components
+    %   A Component is an executable part of a Pipeline
+    %   Each Component defines the inputs and outputs it requires. For
+    %   exmaple, a component which coregisters a CT and an MRI will need a
+    %   CT and MRI as input. The component can only be executed if the data
+    %   is available.
+    %   To add a Component to a Pipeline it has to be added to the Pipeline
+    %   workflow file (pwf). These files are simple xml files.
+    %
+    %   Example:
+    %   Adding a Component to the Pipline. The Component Class is called
+    %   TestComponent:
+    %
+    %   <Component Type="TestComponent">
+    %   </Component>
+    %
+    %   All public properties can be configured in the pipeline definiton
+    %   file. This allows to modify Components for the use within a
+    %   pipeline. 
+    %   Example: Set the Name Property in the TestComponent to Test 
+    %
+    %   <Component Type="TestComponent">
+    %       <Name>"Test"</Test>
+    %   </Component>
+    %
+    %   For more complex datatypes the Element value is formatted as json.
+    %
+    %   Markus Adamek (adamek@neurotechcenter.org)
+    %   See also jsonencode
+
+    
+    
     properties
-        Name
-        ComponentPath
+        Name   % Unique Identifier of the Component within the Pipeline, if empty will be set to class name
+        ComponentPath % The Path in which the component information is stored
     end
     properties (SetAccess = ?Pipeline)
-        Inputs {};
-        Outputs {};
-        OptionalInputs {};
+        Inputs {};  % List of required inputs
+        Outputs {}; % List of generated outputs
+        OptionalInputs {};  % Inputs that are not necessary but will be used if available. A Component can be executed even if the optional inputs aren't available
     end
     
     properties (SetAccess = {?Runner,?Serializable})
-        ComponentStatus
+        ComponentStatus %Current Component stauts. This status determines if the component can be executed. 
     end
     
     properties (SetAccess = ?Pipeline, GetAccess = ?Pipeline)
-        inputMap
+        inputMap 
         optionalinputMap
         outputMap
         Pipeline Pipeline
     end
     methods
         function obj = AComponent()
+            % AComponent Constructor
+            % Initialize all relevant properties and configure the
+            % serialization properly
             obj.Inputs = {};
             obj.Outputs = {};
             obj.OptionalInputs = {};
@@ -36,18 +69,41 @@ classdef AComponent < Serializable
         end
         
         function type=GetOutputType(obj,outName)
+            % GetOutputType returns the datatype (subclass of AData)
+            % Returns the specific output identifier
+            % See also AData, ElectrodeDefinition, ElectrodeLocation,
+            % IFileLoader, Surface, Volume
             type=obj.outputMap(outName);
         end
         function type=GetInputType(obj,inName)
+            % Retuns the datatype for a specified identifier
+            % See also AData, ElectrodeDefinition, ElectrodeLocation,
+            % IFileLoader, Surface, Volume
             type=obj.inputMap(inName);
         end 
     end
     
     
     methods(Abstract)
-
+        % Publish - Method called when the object is added to the Pipeline
+        % This method is used to specify the inputs and outputs of the
+        % component as well as dependencies to external tools
+        % See also AComponent.AddInput, AComponent.AddOptionalInput,
+        % AComponent.AddOutput, AComponent.RequestDependency
         Publish(obj);
+        % Initialize - Has to be called at least once before Process()
+        % This method can be used to validate configurations and
+        % Dependencies before a component runs process
+        %See also AComponent.Process, AComponent.RequestDependency
         Initialize(obj);
+        % Process - runs the main task of the component
+        % varagin - Contains inputs defined in the publish section in order
+        % of definition. Optional inputs are added afterwards. Every
+        % optional input is preceded by argument naming the optional input
+        % varargout - Has to be equal to the number of specified Outputs in
+        % the Publish section. The output arguments have to be in the same
+        % order as they were specified in the Publish section
+        % See also Publish, AddInput, AddOutput, CreateOutput
         varargout = Process(varagin);
         
             
@@ -55,14 +111,32 @@ classdef AComponent < Serializable
     
     methods(Access = protected)
         function d=GetDependency(~,name)
+            % GetDependency - Tries to resolve and return a Dependency
+            % See also DependencyHandler
             d=DependencyHandler.Instance.GetDependency(name);
         end
         
         function RequestDependency(~,name,type)
+            % RequestDependency - Request a dependency to be resolved
+            % If a Dependency does not exist, it can be created with this
+            % method
+            % name - Identifier for the dependency
+            % type - Type of the dependency (Folder, File ...)
+            % See also DependencyHandler
             DependencyHandler.Instance.PostDepencenyRequest(name,type);
         end
         
         function AddOptionalInput(obj,Identifier,inpDataTypeName)
+            % AddOptionalInput add an optional input to this component
+            % In the Publish method, optional inputs can be defined
+            % If the input exists it will be added as an argument to the
+            % process method
+            % Identifier - Name associated with the data, created as an
+            % output by another component
+            % inpDataTypeName - Name of the data type - has to be a subtype
+            % of AData
+            % See also AComponent.Publish, AComponent.Process, AData,
+            % ElectrodeDefinition, IFileLoader, Surface, Volume
             if(isempty(obj.Pipeline))
                 error('Component has to be part of a Pipeline, Pipeline is only available during Publish phase');
             end
@@ -70,6 +144,16 @@ classdef AComponent < Serializable
         end
         
         function AddInput(obj,Identifier,inpDataTypeName)
+            % AddInput add an input to this component
+            % In the Publish method, inputs can be defined
+            % Inputs need to be available for the process method to be
+            % called
+            % Identifier - Name associated with the data, created as an
+            % output by another component
+            % inpDataTypeName - Name of the data type - has to be a subtype
+            % of AData
+            % See also AComponent.Publish, AComponent.Process, AData,
+            % ElectrodeDefinition, IFileLoader, Surface, Volume
             if(isempty(obj.Pipeline))
                 error('Component has to be part of a Pipeline, Pipeline is only available during Publish phase');
             end
@@ -79,6 +163,15 @@ classdef AComponent < Serializable
         end
         
         function AddOutput(obj,Identifier,outpDataTypeName)
+            % AddInput add an output to this component
+            % In the Publish method, outputs can be defined
+            % Outputs can be used as Inputs for other components
+            % Identifier - Name associated with the data, can be retrieved
+            % by other components
+            % outpDataTypeName - Name of the data type - has to be a subtype
+            % of AData
+            % See also AComponent.Publish, AComponent.Process, AData,
+            % ElectrodeDefinition, IFileLoader, Surface, Volume
             if(isempty(obj.Pipeline))
                 error('Component has to be part of a Pipeline, Pipeline is only available during Publish phase');
             end
@@ -87,6 +180,10 @@ classdef AComponent < Serializable
         end
         
         function cData=CreateOutput(obj,Identifier)
+            % CreateOutput - Creates an Output object from the Identifier
+            % type name
+            % Use in the Process method to create a new output object
+            % See also AComponent.Process, AData, ElectrodeDefinition, IFileLoader, Surface, Volume 
             if(obj.outputMap.isKey(Identifier))
                 cData=ObjectFactory.CreateData(obj.outputMap(Identifier));
                 cData.Name=Identifier;
