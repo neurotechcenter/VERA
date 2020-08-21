@@ -1,8 +1,8 @@
 classdef SliceViewerView < SliceViewerXYZ & AView
-    %SLICEVIEWERVIEW Summary of this class goes here
-    %   Detailed explanation goes here
+    %SliceViewerView VERA View of Volume Data
+    %See also AView, Volume, SliceViewer, SliceViewerXYZ
     properties (SetObservable = true)
-        ImageIdentifiers
+        ImageIdentifiers %Data Identifier 
     end
     properties (Access = protected)
         settingsGrid

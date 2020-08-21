@@ -1,6 +1,6 @@
 classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
-    %SLICEVIEWERVIEW Summary of this class goes here
-    %   Detailed explanation goes here
+    %ElectrodeDefinitionView - View associated with the Electrode Definition
+    %
     
     properties (Access = protected)
         gridDefinitionTable

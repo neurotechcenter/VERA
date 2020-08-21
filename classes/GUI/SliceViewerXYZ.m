@@ -1,6 +1,6 @@
 classdef SliceViewerXYZ < uix.Grid
-    %SLICEVIEWER3D Summary of this class goes here
-    %   Detailed explanation goes here
+    %SliceViewerXYZ - shows Volume data from different orientations
+
     
    properties (Access = public,SetObservable)
         Images ={}
@@ -63,29 +63,6 @@ classdef SliceViewerXYZ < uix.Grid
             if(obj.ignoreSliceChange)
                 return
             end
-%              switch(src)
-%                 case obj.SliceViewZ
-%                       if(~isempty(obj.SliceViewX.CursorPosition))
-%                           obj.SliceViewX.CursorPosition=src.CursorPosition;
-%                       end
-%                       if(~isempty(obj.SliceViewY.CursorPosition))
-%                           obj.SliceViewY.CursorPosition=src.CursorPosition;
-%                       end
-%                 case obj.SliceViewY
-%                       if(~isempty(obj.SliceViewX.CursorPosition))
-%                           obj.SliceViewX.CursorPosition=src.CursorPosition;
-%                       end
-%                        if(~isempty(obj.SliceViewZ.CursorPosition))
-%                            obj.SliceViewZ.CursorPosition=src.CursorPosition;
-%                       end
-%                 case obj.SliceViewX
-%                       if(~isempty(obj.SliceViewY.CursorPosition))
-%                           obj.SliceViewY.CursorPosition=src.CursorPosition;
-%                       end
-%                       if(~isempty(obj.SliceViewZ.CursorPosition))
-%                           obj.SliceViewZ.CursorPosition=src.CursorPosition;
-%                       end
-%              end
             
         end
         function setCursorOutside(obj,~,~)

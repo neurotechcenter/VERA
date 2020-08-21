@@ -1,6 +1,5 @@
 classdef ElectrodeOrderGUI < uix.Grid & handle
-    %ELECTRODEORDERGUI Summary of this class goes here
-    %   Detailed explanation goes here
+    %ElectrodeOrderGUI GUI to run Reorderelectrodes
     properties 
     end
     properties (Access = protected)

@@ -1,7 +1,5 @@
 classdef MatOutput < AComponent
-    %MATOUTPUT Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %MATOUTPUT Creates a .mat file as Output of VERA
     properties
         ElectrodeLocationIdentifier
         SurfaceIdentifier

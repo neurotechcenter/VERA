@@ -1,6 +1,6 @@
 function [phi] = calculateNeighbourAngle(c,n)
-%CALCULATENEIGHBOURANGLE Summary of this function goes here
-%   Detailed explanation goes here
+%calculateNeighbourAngle Calculates the angle between point c and two
+%points in n, assumes that points are connected in a n-c-n pattern
 cn=c-n(1,:);
 nc=c-n(2,:);
 

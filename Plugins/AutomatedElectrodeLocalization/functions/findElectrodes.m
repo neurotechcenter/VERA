@@ -1,6 +1,13 @@
 function [metric,locations,partial_matches] = findElectrodes(V,thresh,f_size,f_std,allowedVar,elInfo,plotit)
-%FIND_ELECTRODES Summary of this function goes here
-%   Detailed explanation goes here
+%findElectrodes - find all connected electrodes
+%   Creates a tree of electrodes which are connected (within a certain distance and have a 90degree angle between them)
+% V - volume
+% threshold - threshold for volume to determine electrode locations
+% f_size - gaussian smoothing kernel size
+% f_std - gaussian smoothing std
+% allowedVar - variance allowed for distance between electrodes and angles
+% elInfo - information about electrode distance
+% plotit - plots result of findElectrodes
 
 if(~exist('plotit','var'))
     plotit=[];

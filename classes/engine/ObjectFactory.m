@@ -12,6 +12,10 @@ classdef ObjectFactory
     methods (Static)
 
         function vobj = CreateView(cname, xmlNode)
+            %CreateView - Creates a View object from string
+            %cname - Name of the View object
+            %xmlNode - xml definition for data
+            %See also AView, IComponentView
             cI=meta.class.fromName(cname);
             if(~isempty(cI) && any(strcmp(superclasses(cname),'AView')) && cI.Abstract == 0)
                 vobj=feval(cname);
@@ -31,6 +35,10 @@ classdef ObjectFactory
         end
         
         function vobj = CreateComponent(cname,xmlNode)
+            %CreateData - Creates a Component object from string
+            %cname - Name of the Component object
+            %xmlNode - xml definition for Component
+            %See also AComponent
             cI=meta.class.fromName(cname);
             if(~isempty(cI) && any(strcmp(superclasses(cname),'AComponent')) && cI.Abstract == 0)
                 vobj=feval(cname);
@@ -44,6 +52,12 @@ classdef ObjectFactory
         end
         
         function c = CreateData(cname,path)
+            %CreateData - Creates a Data object from string
+            %cname - Name of the Data object
+            %path - Path to xml definition for data
+            %If cname is empty, the xml definition provided by path will be
+            %used to create the Data object
+            %See also AData
             if(isempty(cname) && ~isempty(path))
                 xstr=xml2struct(path);
                 if(isfield(xstr,'DataInformation') && ...

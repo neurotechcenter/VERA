@@ -1,11 +1,10 @@
 classdef FreesurferModelGeneration < AComponent
-    %INPUTCOMPONENT Summary of this class goes here
-    %   Detailed explanation goes here
+    %FreesurferModelGeneration Run Freesurfer segmentation 
     
     properties
-        MRIIdentifier
-        SurfaceIdentifier
-        SphereIdentifier
+        MRIIdentifier %Input MRI Data Identifier
+        SurfaceIdentifier %Output Surface Data Identifier
+        SphereIdentifier %Output Sphere Surface Volume Identifier (will start with L_ and R_ )
     end
      properties (Dependent, Access = protected)
         LeftSphereIdentifier

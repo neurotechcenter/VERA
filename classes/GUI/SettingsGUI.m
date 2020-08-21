@@ -1,6 +1,6 @@
 classdef SettingsGUI < uix.Panel
-    %SETTINGSGUI Summary of this class goes here
-    %   Detailed explanation goes here
+    %SettingsGUI - Settings GUI allows to modify Dependency Entries
+    %See also DependencyHandler
     
     properties (Access = protected)
         table
@@ -10,7 +10,6 @@ classdef SettingsGUI < uix.Panel
     methods
         function obj = SettingsGUI(varargin)
             %SETTINGSGUI Construct an instance of this class
-            %   Detailed explanation goes here
             obj.noUpdate=false;
             if(isempty(varargin) || ~strcmp(varargin,'parent'))
                 obj.Parent=figure( ...

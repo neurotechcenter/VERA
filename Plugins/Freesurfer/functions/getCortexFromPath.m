@@ -1,4 +1,8 @@
 function cortex=getCortexFromPath(pathToLhPial,pathToRhPial,tkr2ras)
+%getCortexFromPath create cortex struct from Freesurfer paths
+%pathToLhPial - path to left hemisphere pial
+%path to RhPial - path to right hemisphere pial
+%tkr2ras - transformation matrix (usually tkr to RAS coordinate system)
         [LHtempvert, LHtemptri] = read_surf(pathToLhPial);
         [RHtempvert, RHtemptri] = read_surf(pathToRhPial);
 

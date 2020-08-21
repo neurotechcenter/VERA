@@ -1,6 +1,6 @@
 classdef AutoElectrodeLocalization < AComponent
-    %AUTOELECTRODELOCALIZATION Summary of this class goes here
-    %   Detailed explanation goes here
+    %AutoElectrodeLocalization - Automated Electrode Localization
+    %Automatically determines electrode locations for Strips and Grids
     
     properties
         CTIdentifier

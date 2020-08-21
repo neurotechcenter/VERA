@@ -1,6 +1,6 @@
 function [electrodes,depthlst] = TraverseTree(tree,fieldNames,curr_depth)
-%TRAVERSETREE Summary of this function goes here
-%   Detailed explanation goes here
+%TraverseTree - Traverses through location connectivity tree to determine
+%the electrode locations 
 if(~exist('curr_depth','var'))
     curr_depth=1;
 end

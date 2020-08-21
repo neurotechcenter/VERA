@@ -1,6 +1,5 @@
 function [mask] = createElectrodeMask(imsize,elInfo)
-%CREATESTRIPMASK Summary of this function goes here
-%   Detailed explanation goes here
+%createElectrodeMask - creates a volume mask based on electrode Locations
 mask=ones(imsize);
 
 for iTag=1:size(elInfo.BoundingBox,1)

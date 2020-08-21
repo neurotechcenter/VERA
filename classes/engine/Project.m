@@ -1,16 +1,21 @@
 classdef Project < handle
-    %PROJECT Summary of this class goes here
-    %   Detailed explanation goes here
+    %PROJECT - This object represents a VERA project
+    %  The project allows to manage the pipeline and data 
     
     properties (SetAccess = protected, GetAccess = public)
-        Pipeline Pipeline
-        Path char
-        ProjectName char
+        Pipeline Pipeline % Pipeline, See also Pipeline
+        Path char % Project Path
+        ProjectName char % Project name, equals the Folder Name
     end
     
     methods
         
         function savePath=SaveComponent(obj,compName)
+            %SaveComponent - Serialize and save the component to the
+            %current project
+            %compName - Name of the Component
+            %returns the Path to which the component is saved to
+            %See also AComponent, Pipeline
                 foldern=obj.GetComponentPath(compName);
                 cobj=obj.Pipeline.GetComponent(compName);
                 savePath=fullfile(obj.Path,foldern,'componentInformation.xml');
@@ -22,6 +27,9 @@ classdef Project < handle
         end
         
         function res=ComponentDataAvailable(obj,compName)
+            %ComponentDataAvailable - Check if a Component has result data
+            %returns true if Data is available
+            %See also AData, AComponent
             [~,results]=obj.Pipeline.InterfaceInformation(compName);
             foldern=obj.GetComponentPath(compName);
             loadPath=fullfile(obj.Path,foldern,'Data');
@@ -31,7 +39,12 @@ classdef Project < handle
             end
         end
         
-        function [data,path]=LoadComponentData(obj,compName,results)
+        function [data,path]=LoadComponentData(obj,compName)
+            %LoadComponentData - Load the result of a Component
+            % compName: name of the component
+            % returns:
+            % data: cell array of output Data from Component 
+            % path: paths to the Data 
             if(~exist('results','var'))
                 [~,results]=obj.Pipeline.InterfaceInformation(compName);
             end
@@ -45,7 +58,11 @@ classdef Project < handle
             
             
         end
-        function foldern=GetComponentPath(obj,compName) %componentpaths are relative
+        function foldern=GetComponentPath(obj,compName)
+            %GetComponentPath Returns the correct storage path for a
+            %component within the project
+            %returns Folder Path
+            %See also, AComponent
             obj.checkCompName(compName);
             cobj=obj.Pipeline.GetComponent(compName);
             foldern=regexprep(cobj.Name, ' +', '_');
@@ -53,6 +70,12 @@ classdef Project < handle
         
         
         function paths=SaveComponentData(obj,compName,varargin)
+            %SaveComponentData - Save Output Data of a component
+            %compName - Name of the Component
+            %varargin - All Data objects in correct order as specified as
+            %Ouputs of the Component
+            %returns paths
+            %See also AComponent, AData, Pipeline
             foldern=obj.GetComponentPath(compName);
             cobj=obj.Pipeline.GetComponent(compName);
             savePath=fullfile(obj.Path,foldern,'Data');
@@ -87,6 +110,8 @@ classdef Project < handle
         end
         
         function createProjectFolderStructure(obj)
+            %createProjectFolderStructure Initializes the project by making
+            %sure the folder structure is available
             warning('off', 'MATLAB:MKDIR:DirectoryExists'); % turn of warning that dir already exists
             for k=obj.Pipeline.Components
                 
@@ -96,7 +121,6 @@ classdef Project < handle
                 mkdir(fullfile(obj.Path,foldern,'Data')); %each folder contains the Output Data produced
                 cobj.ComponentPath=fullfile(obj.Path,foldern);
             end
-            obj.Path
             warning('on', 'MATLAB:MKDIR:DirectoryExists');
         end
         
@@ -108,7 +132,14 @@ classdef Project < handle
     end
     
     methods (Static)
-        function prj=CreateProjectOnPath(projPath,pipelinePath)
+        function prj=CreateProjectOnPath(projPath,pipeline)
+            %CreateProjectOnPath - Create a new Project on the selected
+            %path
+            %projPath - Path to the project, Folder name will be Project
+            %Name
+            %pipeline - Pipeline object that specifies the project or path
+            %to pipeline file 
+            %returns: Project object
             [esc,projName] = fileparts(projPath);
             
             if(isempty(projName))
@@ -117,7 +148,11 @@ classdef Project < handle
                     error('Couldnt determine Project Name');
                 end
             end
-            ppline=Pipeline.CreateFromPipelineDefinition(pipelinePath);
+            if(isObjectTypeOf(pipeline,'Pipeline'))
+                ppline=pipeline;
+            else
+                ppline=Pipeline.CreateFromPipelineDefinition(pipeline);
+            end
             prj=Project();
             prj.Path=projPath;
             prj.ProjectName=projName;
@@ -127,6 +162,9 @@ classdef Project < handle
         end
         
         function [prj,pplineFile]=OpenProjectFromPath(projPath)
+            %OpenProjectFromPath - Open an existing project from Path
+            %projPath - Path to project folder
+            %returns: Project object
             pplineFile=fullfile(projPath,'pipeline.pwf');
             [esc,projName] = fileparts(projPath);
             ppline=Pipeline.CreateFromPipelineDefinition(pplineFile);

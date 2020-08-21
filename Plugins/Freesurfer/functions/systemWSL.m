@@ -1,6 +1,5 @@
 function [status,cmdout] = systemWSL(cmd,varargin)
-%SYSTEMWSL Summary of this function goes here
-%   Detailed explanation goes here
+%systemWSL - make a system call through WSL subsystem
 [status, cmdout]=system(['bash -c ''' cmd ''''],varargin{:});
 end
 

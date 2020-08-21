@@ -1,4 +1,11 @@
 function [surf] = plot3DModel(ax,model,annotation,varargin)
+%plot3DModel - Plots the 3D model with annotations from a Surface Data
+%object
+%ax - axis to be plotted on
+%model - Surface Data object
+%annotation - Annotations for each vertex
+%varargin - additional settings to be passed to trisurf
+%See also Surface, trisurf
     if(~exist('annotation','var'))
         annotation=[];
     end

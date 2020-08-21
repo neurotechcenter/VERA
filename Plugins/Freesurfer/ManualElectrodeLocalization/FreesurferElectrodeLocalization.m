@@ -1,11 +1,12 @@
 classdef FreesurferElectrodeLocalization < AComponent
-    %INPUTCOMPONENT Summary of this class goes here
-    %   Detailed explanation goes here
+    %FreesurferElectrodeLocalization - Manual Electrode Localization
+    %through Freesurfer 
+    %Component will open Freeview to fill in Point Sets 
     
     properties
-        CTIdentifier
-        ElectrodeDefinitionIdentifier
-        ElectrodeLocationIdentifier
+        CTIdentifier %Identifier for CT Volume Data 
+        ElectrodeDefinitionIdentifier %Identifier for ElectrodeDefinitions
+        ElectrodeLocationIdentifier % Identifier for Output Electrode Locations
     end
     
     methods

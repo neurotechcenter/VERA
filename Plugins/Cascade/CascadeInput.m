@@ -1,6 +1,6 @@
 classdef CascadeInput < AComponent
-    %CASCADEINPUT Summary of this class goes here
-    %   Detailed explanation goes here
+    %CascadeInput - allows Cascading VERA projects
+    %Use another VERA project as Input
     
     properties
         OutputIdentifiers

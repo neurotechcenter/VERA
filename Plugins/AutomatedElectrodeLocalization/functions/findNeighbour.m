@@ -1,5 +1,14 @@
 function [pointTree] = findNeighbour(pointId,p,electrodes,phi,electrodeIds,allowedVar,gdist,checkEnd)
-
+%findNeighbour - recursive function to determine connected points to form a
+%grid
+% pointId - current point in algorithm
+% p - next point
+% electrodes - available electrodes
+% phi - expected angle between electrode locations
+% electrodeIds - electrode Identifiers
+% allowedVar - variance allowed for distance and angle between locations
+% gdist - expected distance between electrodes
+% checkEnd 
 Y = pdist([p;electrodes]);
 D=squareform(Y);
 pointTree.Me=pointId;

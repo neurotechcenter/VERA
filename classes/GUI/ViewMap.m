@@ -1,6 +1,6 @@
 classdef ViewMap < handle
-    %VIEWMAP Summary of this class goes here
-    %   Detailed explanation goes here
+    %ViewMap - Map for all Views in a Pipeline Definition
+    %See also AView, Pipeline
     
     properties
         Views containers.Map
@@ -38,6 +38,9 @@ classdef ViewMap < handle
         end
         
         function AddView(obj,type,xmlNode)
+            %AddView - Add a View to the Map
+            %type - View type
+            %xmlNode - xml configuration for this View
             view=ObjectFactory.CreateView(type,xmlNode);
             if(any(strcmp(keys(obj.Views),view.Name)))
                 error('View Names have to be unique!');
@@ -48,12 +51,18 @@ classdef ViewMap < handle
             obj.Views(view.Name)=view;
         end
         
-        function [isCompV,comp]=IsComponentView(obj,compName)
+        function [isCompV,comp]=IsComponentView(obj,view)
+            %IsComponentView - Check if the View as a ComponentView
+            %view - name of the View
+            %returns:
+            %isCompV - true if the Component is a ComponentView
+            %comp - returns the View
+            %See also AView, IComponentView
             comp='';
             isCompV=false;
-            if(isObjectTypeOf(obj.Views(compName),'IComponentView'))
+            if(isObjectTypeOf(obj.Views(view),'IComponentView'))
                 isCompV=true;
-                comp=obj.Views(compName).Component;
+                comp=obj.Views(view).Component;
             end
             
         end

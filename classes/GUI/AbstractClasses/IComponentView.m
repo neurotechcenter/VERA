@@ -1,9 +1,11 @@
 classdef IComponentView < handle
-    %ICOMPONENTVIEW Summary of this class goes here
-    %   Detailed explanation goes here
+    %IComponentView - Interface for Views which are tied to a Component
+    % Views associated with a Component are only visible if the Component
+    % is selected
+    %See also handle, IComponent
     
     properties
-        Component
+        Component %Name/Identifier of the Component associated with the View
     end
     
     properties (Access = ?ViewMap, SetObservable)
@@ -17,6 +19,7 @@ classdef IComponentView < handle
         end
         
         function comp=GetComponent(obj)
+            %GetComponent - returns the Component associated with the View
             if(~isempty(obj.Pipeline))
                 comp=obj.Pipeline.GetComponent(obj.Component);
             else
@@ -27,6 +30,7 @@ classdef IComponentView < handle
     methods (Access = protected)
         
         function componentChanged(obj,a,b)
+            %componentChanged - Method is called whenever Components change
         end
 
     end

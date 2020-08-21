@@ -1,6 +1,6 @@
 classdef ElectrodeProjection < AComponent
-    %ELECTRODEPROJECTION Summary of this class goes here
-    %   Detailed explanation goes here
+    %ElectrodeProjection Projects electrodes onto the hull of the cortex
+    %using the NeuralAct package
     
    properties
         SurfaceIdentifier

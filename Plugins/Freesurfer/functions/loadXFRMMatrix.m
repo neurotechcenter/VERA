@@ -1,6 +1,9 @@
 function [xfrm_matrices] = loadXFRMMatrix(workspace_path,pathToFsInstallDirectory,fs_subj_dir)
-%LOADXFRMMATRIX Summary of this function goes here
-%   Detailed explanation goes here
+%loadXFRMMatrix - get xfrm matrx from freesurfer volume
+%workspace_path - path to workspace, location where xfrm_matrices file will
+%be stored
+%pathToFsInstallDirectory - path to freesurfer installation
+%fs_subj_dir - subject directory
 
 
 if(exist(fullfile(fs_subj_dir,'mri/orig.mgz'),'file') ~= 0)

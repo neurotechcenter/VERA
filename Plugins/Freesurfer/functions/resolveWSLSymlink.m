@@ -1,6 +1,5 @@
 function [resolvedFile] = resolveWSLSymlink(file,subsyspath)
-%RESOLVEWSLSYMLINK Summary of this function goes here
-%   Detailed explanation goes here
+%resolveWSLSymlink resolve symlink to get path to real file
         [~,res]=systemWSL(['readlink ' convertToUbuntuSubsystemPath(file,subsyspath)]);
     if(~isempty(res))
         resolvedFile=fullfile(fileparts(file),strtrim(res));

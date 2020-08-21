@@ -1,5 +1,6 @@
 classdef SphericalTemplateProjection < AComponent
-    %SPHERICALTEMPLATEPROJECTION Summary of this class goes here
+    %SphericalTemplateProjection Uses Freesurfers spherical coregistration
+    %to project electrodes from a single subject to a template
     %   Only works for strips and grids, not for depth electrodes!
     
     properties

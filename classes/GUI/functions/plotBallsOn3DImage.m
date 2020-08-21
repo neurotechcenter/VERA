@@ -1,5 +1,10 @@
 function [ surfs] = plotBallsOn3DImage(ax,electrodes, color, radius,varargin)
 %PLOTBALLS  Plots electrodes in assigned color
+%ax - axis to be plotted on
+%color - color to be plotted
+%radiues - size of ball to be plotted in 3d Sapce
+%varargin - additional parameters passed to surf
+%See also surf
 ELS = size(electrodes, 1);
 cmap=colormap(ax);
  hold(ax,'on');

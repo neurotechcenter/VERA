@@ -1,10 +1,11 @@
 classdef AView < handle & Serializable
-    %AVIEW Summary of this class goes here
-    %   Detailed explanation goes here
+    %AVIEW Abstract class for all Views displayed in the right part of the
+    %GUI
+    %See also Serializable, handle
     
     properties (Access = public, SetObservable)
-        Name
-        AvailableData containers.Map
+        Name % Name of the View
+        AvailableData containers.Map %Data available to the View
     end
     
     methods
@@ -16,13 +17,13 @@ classdef AView < handle & Serializable
         end
         
         function Refresh(obj)
+            %Refresh - call to abstract dataUpdate method
             obj.dataUpdate();
         end
         
     end
     
     methods (Access = protected)
-        
         
         function dataChanged(obj,~,~)
             obj.dataUpdate();
@@ -31,6 +32,8 @@ classdef AView < handle & Serializable
     end
     
     methods(Abstract, Access = protected)
+        %dataUpdate - Method will be called each time AvailableData is
+        %updated
        dataUpdate(obj);
 
     end

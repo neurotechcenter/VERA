@@ -1,6 +1,6 @@
 function [path_out] = convertToUbuntuSubsystemPath(path_in,subsysPath)
-%CONVERTTOUBUNTUSUBSYSTEMPATH Summary of this function goes here
-%   Detailed explanation goes here
+%convertToUbuntuSubsystemPath - Convert a path from from Windows to WSL Ubuntu
+%subsystem path
         path_in=GetFullPath(path_in);
         endout=regexp(path_in,filesep,'split');
         endout{1}=lower(replace(endout{1},':','')); %remove : from path and make it small letter to fit ubuntu mount scheme

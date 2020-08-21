@@ -1,8 +1,5 @@
-
-
 classdef MainGUI < handle
-    %MAINGUI Summary of this class goes here
-    %   Detailed explanation goes here
+    %MainGUI VERA main GUI
     
     properties (Access = public)
         ProjectRunner Runner

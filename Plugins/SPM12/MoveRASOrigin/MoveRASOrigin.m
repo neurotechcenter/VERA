@@ -1,7 +1,6 @@
 classdef MoveRASOrigin < AComponent
-    %ELECTRODEPROJECTION Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %MoveRASOrigin Moves the origin of RAS into the Center of the Volume
+    %pixels
    properties
         Identifier
     end

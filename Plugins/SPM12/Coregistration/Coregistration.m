@@ -1,6 +1,5 @@
 classdef Coregistration < AComponent
-    %ELECTRODEPROJECTION Summary of this class goes here
-    %   Detailed explanation goes here
+    %Coregistration Uses SPM12 to coregister Volumes to each  other
     
    properties
         MRIIdentifier

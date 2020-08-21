@@ -1,12 +1,12 @@
 classdef AlterElectrodeLabels < AComponent
-    %ALTERELECTRODELABLES Summary of this class goes here
-    %   Detailed explanation goes here
+    %AlterElectrodeLabels - Component to swap the Electrode Label between
+    %Grids/Strips/Depth electrodes with identical properties
     
     properties
-        ElectrodeDefinitionIdentifier
-        ElectrodeLocationIdentifier
-        SurfaceIdentifier
-        NewLabelIds
+        ElectrodeDefinitionIdentifier %Data Identifier for Electrode Definition
+        ElectrodeLocationIdentifier % Data Identifier for Electrode Location
+        SurfaceIdentifier % Optional Input Surface Data 
+        NewLabelIds 
     end
     
     properties (Access = protected)

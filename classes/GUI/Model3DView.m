@@ -1,9 +1,9 @@
 classdef Model3DView < AView & uix.Grid
-    %MODEL3DVIEW Summary of this class goes here
-    %   Detailed explanation goes here
+    %Model3DView - View of a Surface
+    %   Shows a Surface and the Electrode Locations if available
     properties
-        SurfaceIdentifier
-        ElectrodeLocationIdentifier
+        SurfaceIdentifier %Identifier for which surface to show
+        ElectrodeLocationIdentifier %Identifier for the Electrode Location to be shown
     end
     properties (Access = private)
         axModel
@@ -13,7 +13,6 @@ classdef Model3DView < AView & uix.Grid
     methods
         function obj = Model3DView(varargin)
             %MODEL3DVIEW Construct an instance of this class
-            %   Detailed explanation goes here
             obj.SurfaceIdentifier='Surface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             opengl hardware;

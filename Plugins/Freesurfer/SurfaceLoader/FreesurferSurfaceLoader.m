@@ -1,6 +1,5 @@
 classdef FreesurferSurfaceLoader < AComponent
-    %FREESURFERMODELLOADER Summary of this class goes here
-    %   Detailed explanation goes here
+    %FreesurferSurfaceLoader Input Component: Loads Information from Freesurfer segmentation
     
     properties
         SurfaceIdentifier

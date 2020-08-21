@@ -1,15 +1,16 @@
 classdef SliceViewer < uix.Grid
-    %SLICEVIEWERCOMPONENT Summary of this class goes here
-    %   Detailed explanation goes here
+    %SliceViewer View for Volume Data
+    %Allows the view of different Volumes on top of each other and moving
+    %through slices as well as changing transparency
     properties (Access = public,SetObservable)
-        Images = {}
-        ImageAlphas = {}
-        SliderOrientation = 'west'  %north, west, south, east,hide      
-        CursorPosition = [];        
-        Slice =1
+        Images = {} %List of Volumes to be displayed. See also Volume 
+        ImageAlphas = {} %Transparency for each Volume
+        SliderOrientation = 'west'  %north, west, south, east, hide      
+        CursorPosition = []; %Cursor position for each image
+        Slice =1 %Slice to be displayed
         CursorChangedFcn = [];
         SliceChangedFcn = [];
-        ViewAxis = [1 2 3];
+        ViewAxis = [1 2 3]; %Axis to be viewed (x,y, slider)
         SliderVisible= 'on'
     end
     properties (Access = protected)

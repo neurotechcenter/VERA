@@ -1,6 +1,5 @@
 classdef ApplyMask < AComponent
-    %APPLYMASK Summary of this class goes here
-    %   Detailed explanation goes here
+    %ApplyMask Component applies a Mask to a Volume
     
     properties
         InputIdentifier
