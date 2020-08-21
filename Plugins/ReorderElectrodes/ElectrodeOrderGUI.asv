@@ -16,12 +16,11 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
     end
     
     properties (Access = private)
-        buttonActivity 
+        buttonActivity
     end
     
     methods
         function obj = ElectrodeOrderGUI(varargin)
-                obj.buttonActivity=struct('IsPressed',false,'PointIndex',0,'Button',0);
                 obj.elocViewList={};
                 flexb=uix.HBoxFlex('Parent',obj);
                 selPanel=uix.Panel('Parent',flexb,'Title','Select Correct Definition');
@@ -195,9 +194,11 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                 sortMap=zeros(length(elLoc),1);
                 labelMap=zeros(length(elLoc),1);
                 searchI=1;
-                while(any(sortMap == 0) && ishandle(f))
+                while(any(sortMap == 0))
                     title(['Please select Electrode number ' num2str(searchI)]);
-                    [closestPIdx,button]=obj.wait3dPointClick(f);
+                    [x,y,z,button]=ginput(1);
+                    [~,closestPIdx]=min((score(:,1)-x).^2 + (score(:,2)-y).^2);
+                    disp(['Closest point index'  num2str(closestPIdx)]);
                     if(button ==1)
                         if(any(sortMap == closestPIdx))
                             disp(['Replacing point ' num2str(find(sortMap == closestPIdx))]);
@@ -208,8 +209,8 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                             sortMap(sortMap == closestPIdx)=0;
                         end
                         sortMap(searchI)=closestPIdx;
-                        labelMap(searchI)=text(elLoc(closestPIdx,1),elLoc(closestPIdx,2),elLoc(closestPIdx,3),num2str(searchI),'FontSize',8,'BackgroundColor','w');
-                    elseif(button == 2)
+                        labelMap(searchI)=text(score(closestPIdx,1),score(closestPIdx,2),num2str(searchI));
+                    elseif(button == 3)
                         if(labelMap(sortMap == closestPIdx) ~= 0)
                             disp(['Deleting point ' num2str(find(sortMap == closestPIdx))])
                             delete(labelMap(sortMap == closestPIdx));
@@ -219,7 +220,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                     end
                     searchI=find(sortMap == 0,1);
                 end
-                close(f);
+                close(selfig);
 %                 [~,sortI]=sort(elLoc(:,2));
 %                 start=find(obj.eLocations.DefinitionIdentifier == obj.elSelection.Value,1)-1;
 %                 obj.eLocations.Location(start+sortI,:)=elLoc;
@@ -241,7 +242,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                 pause(0.01);
             end
             idx=obj.buttonActivity.PointIndex;
-            button=obj.buttonActivity.Button;
+            obj.buttonActivity.Button
         end
         function callbackClickA3DPoint(obj,src, eventData, pointCloud)
         % CALLBACKCLICK3DPOINT mouse click callback function for CLICKA3DPOINT
@@ -304,13 +305,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                 set(h,'Tag','pt');  % set its Tag property for later use
 
             end
-            obj.buttonActivity.PointIndex=pointCloudIndex;
-            if(strcmp(src.SelectionType,'normal'))
-                obj.buttonActivity.Button=1;
-            else
-                obj.buttonActivity.Button=2;
-            end
-            obj.buttonActivity.IsPressed=true;
+
             fprintf('you clicked on point number %d\n', pointCloudIndex);
         end
     end
