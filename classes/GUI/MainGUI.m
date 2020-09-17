@@ -30,7 +30,7 @@ classdef MainGUI < handle
             DependencyHandler.Purge();
 
             import uiextras.jTree.*
-            obj.window=figure( ...
+            obj.window=figure('Name','VERA', ...
             'NumberTitle', 'off', ...
             'MenuBar', 'none', ...
             'Toolbar', 'none', ...
@@ -379,7 +379,7 @@ classdef MainGUI < handle
                 obj.suspendBox.Visible='on';
                % uistack(obj.suspendAnnotation,'top');
                % enableDisableFig(obj.window,'off');
-            
+                
                drawnow;
             end
                 %figure('units','pixels','position',[obj.window.Position(1)-obj.window.Position(3)/2 obj.window.Position(2)+obj.window.Position(4)/2 400 100],'windowstyle','modal');
