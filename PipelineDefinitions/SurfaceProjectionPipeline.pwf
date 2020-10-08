@@ -9,18 +9,17 @@
         <SphereIdentifier>"TemplateSphere"</SphereIdentifier>
     </Component>
 
-    <Component Type="LoadPipelineData">
-        <Name>"Electrode Definition"</Name>
-        <Identifier>"ElectrodeDefinition"</Identifier>
-        <Type>"ElectrodeDefinition"</Type>
+    <Component Type="PointSelector3D">
+        <Name>"Subject Point Selection"</Name>
+        <PointDefinitionIdentifier>"ElectrodeLocation"</PointDefinitionIdentifier>
+        <ModelIdentifier>"Surface"</ModelIdentifier>
     </Component>
 
-    <Component Type="LoadPipelineData">
-        <Name>"Electrode Location"</Name>
-        <Identifier>"ElectrodeLocation"</Identifier>
-        <Type>"ElectrodeLocation"</Type>
+    <Component Type="PointSelector3D">
+        <Name>"Template Point Selection"</Name>
+        <PointDefinitionIdentifier>"TemplateElectrodeLocation"</PointDefinitionIdentifier>
+        <ModelIdentifier>"TemplateSurface"</ModelIdentifier>
     </Component>
-
 
 
     <Component Type="SphericalTemplateProjection"/>
