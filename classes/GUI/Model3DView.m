@@ -83,10 +83,11 @@ classdef Model3DView < AView & uix.Grid
                                     plotBallsOn3DImage(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
                                     end
                                 end
-                            end
-                            for i=1:size(elPos.Location,1)
-                                text(obj.axModel,elPos.Location(i,1)+1,elPos.Location(i,2)+1,elPos.Location(i,3)+1,num2str(i),'FontSize',14,'Color','w');
-                            end
+                            
+								for i=1:size(elPos.Location,1)
+									text(obj.axModel,elPos.Location(i,1)+1,elPos.Location(i,2)+1,elPos.Location(i,3)+1,num2str(i),'FontSize',14,'Color','w');
+								end
+							end
                         end
                     end
                     alpha(obj.vSurf,obj.cSlider.Value);

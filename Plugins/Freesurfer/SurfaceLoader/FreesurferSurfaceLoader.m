@@ -54,8 +54,8 @@ classdef FreesurferSurfaceLoader < AComponent
             xfrm_matrix_out_path=GetFullPath(obj.ComponentPath);
             mri_path=fullfile(segmentationPath,'mri/orig.mgz');
             if(ismac || isunix)
-                system(['chmod +x "' xfrm_matrix_path '"'],'-echo');
-                system([xfrm_matrix_path ' ''' freesurferPath ''' ' ...
+                system(['chmod +x ''' xfrm_matrix_path ''''],'-echo');
+                system([xfrm_matrix_path ' ''' freesurferPath ''' ''' ...
                 mri_path ''' ''' ...
                 xfrm_matrix_out_path ''''],'-echo');
             elseif(ispc)

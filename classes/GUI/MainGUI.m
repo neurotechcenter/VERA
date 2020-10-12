@@ -96,7 +96,7 @@ classdef MainGUI < handle
             obj.suspendGUIWithMessage(obj,'Creating Project...');
             try
             if(folder ~= 0)
-                avail_pipelFiles=dir('PipelineDefinitions\*.pwf');
+                avail_pipelFiles=dir('PipelineDefinitions/*.pwf');
                 if(length(avail_pipelFiles) == 1)
                     pplineFile=fullfile(avail_pipelFiles(1).folder,avail_pipelFiles(1).name);
                 else

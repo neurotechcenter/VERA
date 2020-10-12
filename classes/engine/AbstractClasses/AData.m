@@ -86,7 +86,7 @@ classdef AData < Serializable
             %makeFullPath - convert relative path to full path
             %pathIn - relative path to be resolved
             %pathout - full path 
-            if(~startsWith(strtrim(pathIn),{'..\','.\'})) %path is already absolute
+            if(~startsWith(strtrim(pathIn),{'..\','.\','../','./'})) %path is already absolute
                 pathout=pathIn;
                 return;
             end
