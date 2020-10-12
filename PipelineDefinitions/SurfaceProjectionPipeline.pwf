@@ -22,10 +22,18 @@
     </Component>
 
 
-    <Component Type="SphericalTemplateProjection"/>
+    <Component Type="SphericalTemplateProjection">
+        <ElectrodeLocationOutputIdentifier>"ElectrodeLocationToTemplate"</ElectrodeLocationOutputIdentifier>
+    </Component>
     <Component Type="ElectrodeProjection">
-        <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocationToTemplate"</ElectrodeLocationIdentifier>
         <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="CombineLocations">
+        <In1>"ElectrodeLocationToTemplate"</In1>
+        <In2>"TemplateElectrodeLocation"</In2>
+        <Out>"Projection"</Out>
     </Component>
 
 
@@ -42,6 +50,12 @@
     <Name>"Template 3D View"</Name>
     <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
     <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+        <View Type="Model3DView">
+    <Name>"Point Projection Result"</Name>
+    <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+    <ElectrodeLocationIdentifier>"Projection"</ElectrodeLocationIdentifier>
     </View>
 
 </PipelineDefinition>

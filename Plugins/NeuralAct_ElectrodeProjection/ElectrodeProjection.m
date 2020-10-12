@@ -32,7 +32,7 @@ classdef ElectrodeProjection < AComponent
             substr.electrodes=[];
             substr.origIdx=[];
             definitions=[];
-            if(varargin == 2)
+            if(length(varargin) == 2)
                 definitions=varargin{2};
             end
             if(isempty(definitions))

@@ -14,7 +14,7 @@ classdef PointSelector3D < AComponent
         function obj = PointSelector3D()
             obj.PointDefinitionIdentifier='ElectrodeLocation';
             obj.ModelIdentifier='Surface';
-            obj.buttonActivity=struct('IsPressed',false,'PointIndex',0,'Button',0);
+            obj.buttonActivity=struct('IsPressed',false,'Point',0,'Button',0);
         end
         
         function Publish(obj)
@@ -31,21 +31,24 @@ classdef PointSelector3D < AComponent
             f=figure;
             cameratoolbar(f,'NoReset');
             
-            set(f, 'WindowButtonDownFcn', {@(a,b,c)obj.callbackClickA3DPoint(a,b,c), surf.Model.vert'}); 
             [annotation_remap,cmap]=createColormapFromAnnotations(surf);
             mp=plot3DModel(gca,surf.Model,annotation_remap);
+            mp.ButtonDownFcn=@(x,y)obj.callbackClickA3DPoint(x,y);
             alpha(mp,0.3)
             hold on;
             colormap(gca,cmap);
             cont=true;
             while(cont)
-                [closestPIdx,button]=obj.wait3dPointClick(f);
-                if(button ==1)
-                    
-                    points.Location(end+1,:)=surf.Model.vert(closestPIdx,:);
-                    plotBallsOn3DImage(gca,surf.Model.vert(closestPIdx,:),[],2);
-                else
-                    cont=false;
+                button=2;
+                [point,button]=obj.wait3dPointClick(f);
+                switch(button)
+                    case 1
+                        points.Location(end+1,:)=point;
+                        plotBallsOn3DImage(gca,point,[],2);
+                    case 2
+                        cont=false;
+                    case 3
+                        cont=false;
                 end
             end
             close(f);
@@ -60,61 +63,33 @@ classdef PointSelector3D < AComponent
             while(~obj.buttonActivity.IsPressed && ishandle(fig))
                 pause(0.01);
             end
-            idx=obj.buttonActivity.PointIndex;
+            idx=obj.buttonActivity.Point;
             button=obj.buttonActivity.Button;
         end
         
         
-        function callbackClickA3DPoint(obj,src, eventData, pointCloud)
+        function callbackClickA3DPoint(obj,src, eventData)
         % CALLBACKCLICK3DPOINT mouse click callback function for CLICKA3DPOINT
-        %
-        %   The transformation between the viewing frame and the point cloud frame
-        %   is calculated using the camera viewing direction and the 'up' vector.
-        %   Then, the point cloud is transformed into the viewing frame. Finally,
-        %   the z coordinate in this frame is ignored and the x and y coordinates
-        %   of all the points are compared with the mouse click location and the 
-        %   closest point is selected.
-        %
-        %   Babak Taati - May 4, 2005
-        %   revised Oct 31, 2007
-        %   revised Jun 3, 2008
-        %   revised May 19, 2009
-
-            point = get(gca, 'CurrentPoint'); % mouse click position
-            camPos = get(gca, 'CameraPosition'); % camera position
-            camTgt = get(gca, 'CameraTarget'); % where the camera is pointing to
-
-            camDir = camPos - camTgt; % camera direction
-            camUpVect = get(gca, 'CameraUpVector'); % camera 'up' vector
-
-            % build an orthonormal frame based on the viewing direction and the 
-            % up vector (the "view frame")
-            zAxis = camDir/norm(camDir);    
-            upAxis = camUpVect/norm(camUpVect); 
-            xAxis = cross(upAxis, zAxis);
-            yAxis = cross(zAxis, xAxis);
-
-            rot = [xAxis; yAxis; zAxis]; % view rotation 
-
-            % the point cloud represented in the view frame
-            rotatedPointCloud = rot * pointCloud; 
-
-            % the clicked point represented in the view frame
-            rotatedPointFront = rot * point' ;
-
-            % find the nearest neighbour to the clicked point 
-            pointCloudIndex = dsearchn(rotatedPointCloud(1:2,:)', ... 
-                rotatedPointFront(1:2));
+        % using https://www.mathworks.com/matlabcentral/fileexchange/7191-rbb3select
+        x = src.XData; 
+        y = src.YData; 
+        z = src.ZData; 
+        pt = eventData.IntersectionPoint;       % The (x0,y0,z0) coordinate you just selected
+        coordinates = [x(:),y(:),z(:)];     % matrix of your input coordinates
+        dist = pdist2(pt,coordinates);      %distance between your selection and all points
+        [~, minIdx] = min(dist);            % index of minimum distance to points
+        coordinateSelected = coordinates(minIdx,:); %the selected coordinate
+        % from here you can do anything you want with the output.  This demo
+        % just displays it in the command window.  
+       % fprintf('[x,y,z] = [%.5f, %.5f, %.5f]\n', coordinateSelected)
 
 
-            obj.buttonActivity.PointIndex=pointCloudIndex;
-            if(strcmp(src.SelectionType,'normal'))
-                obj.buttonActivity.Button=1;
-            else
-                obj.buttonActivity.Button=2;
-            end
+            obj.buttonActivity.Point=coordinateSelected;
+
+            obj.buttonActivity.Button=eventData.Button;
+
             obj.buttonActivity.IsPressed=true;
-            fprintf('you clicked on point number %d\n', pointCloudIndex);
+            %fprintf('you clicked on point number %d\n', pointCloudIndex);
         end
     end
 end

@@ -110,6 +110,12 @@ classdef AComponent < Serializable
     end
     
     methods(Access = protected)
+        
+        function path=GetTempPath(~)
+            % GetTempPath - returns the Temp Path defined in the
+            % Dependencies
+            path=obj.GetDependency('TempPath');
+        end
         function d=GetDependency(~,name)
             % GetDependency - Tries to resolve and return a Dependency
             % See also DependencyHandler
