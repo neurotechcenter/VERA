@@ -28,7 +28,7 @@ classdef MainGUI < handle
     methods
         function obj = MainGUI()
             DependencyHandler.Purge();
-
+            warning off;
             import uiextras.jTree.*
             obj.window=figure('Name','VERA', ...
             'NumberTitle', 'off', ...
@@ -65,7 +65,7 @@ classdef MainGUI < handle
             obj.treeNodes.Input=uiw.widget.TreeNode('Name','Input','Parent',obj.pipelineTree.Root,'UserData',0);
             obj.treeNodes.Processing=uiw.widget.TreeNode('Name','Processing','Parent',obj.pipelineTree.Root);
             obj.treeNodes.Output=uiw.widget.TreeNode('Name','Output','Parent',obj.pipelineTree.Root);
-
+            warning on;
 
         end
         

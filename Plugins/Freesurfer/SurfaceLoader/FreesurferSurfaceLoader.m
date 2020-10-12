@@ -79,8 +79,8 @@ classdef FreesurferSurfaceLoader < AComponent
             if(ispc)
                     pathToLhPial=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.pial'),subsyspath);
                     pathToRhPial=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.pial'),subsyspath);
-                    pathToLhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.sphere'),subsyspath);
-                    pathToRhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.sphere'),subsyspath);
+                    pathToLhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.sphere.reg'),subsyspath);
+                    pathToRhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.sphere.reg'),subsyspath);
                 else
                     pathToLhPial=fullfile(segmentationPath,'surf/lh.pial');
                     pathToRhPial=fullfile(segmentationPath,'surf/rh.pial');

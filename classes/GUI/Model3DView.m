@@ -8,6 +8,8 @@ classdef Model3DView < AView & uix.Grid
     properties (Access = private)
         axModel
         requiresUpdate = false
+        cSlider
+        vSurf
     end
     
     methods
@@ -16,10 +18,13 @@ classdef Model3DView < AView & uix.Grid
             obj.SurfaceIdentifier='Surface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             opengl hardware;
+            
             obj.axModel=axes('Parent',obj,'Units','normalized','Color','k');
             set(obj,'BackgroundColor','k');
+            obj.cSlider=uicontrol('Parent',obj,'Style','slider','Min',0,'Max',1,'Value',1);
+            addlistener(obj.cSlider, 'Value', 'PreSet',@obj.changeAlpha);
             obj.Widths=[-1];
-            obj.Heights=[-1];
+            obj.Heights=[-1, 30];
              try
                 uix.set( obj, varargin{:} )
              catch e
@@ -32,6 +37,12 @@ classdef Model3DView < AView & uix.Grid
     end
     
     methods(Access = protected)
+        function changeAlpha(obj,~,~)
+            if(~isempty(obj.vSurf))
+                alpha(obj.vSurf,obj.cSlider.Value);
+            end
+        end
+        
         function dataUpdate(obj)
             obj.updateView();
         end
@@ -39,6 +50,7 @@ classdef Model3DView < AView & uix.Grid
         function updateView(obj)
             if(~obj.AvailableData.isKey(obj.SurfaceIdentifier))
                 cla(obj.axModel);
+                obj.vSurf=[];
                 return;
             end
             surface=obj.AvailableData(obj.SurfaceIdentifier);
@@ -46,11 +58,11 @@ classdef Model3DView < AView & uix.Grid
             
               if(~isempty(surface))
                     if(~isempty(surface.Model) && isempty(surface.Annotation))
-                        plot3DModel(obj.axModel,surface.Model);
+                        obj.vSurf=plot3DModel(obj.axModel,surface.Model);
                        % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3) ,'Parent',obj.axModel,settings{:});
                     elseif(~isempty(surface.Model) && ~isempty(surface.Annotation))
                         [annotation_remap,cmap]=createColormapFromAnnotations(surface);
-                        plot3DModel(obj.axModel,surface.Model,annotation_remap);
+                        obj.vSurf=plot3DModel(obj.axModel,surface.Model,annotation_remap);
                        % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3),annotation_remap ,'Parent',obj.axModel,settings{:});
                         colormap(obj.axModel,cmap);
                         
@@ -58,18 +70,26 @@ classdef Model3DView < AView & uix.Grid
 
                        % camlight(obj.axModel,'headlight');
                         material(obj.axModel,'dull');
-                        if(obj.AvailableData.isKey(obj.ElectrodeLocationIdentifier))
-                            elPos=obj.AvailableData(obj.ElectrodeLocationIdentifier);
-                            if(~isempty(elPos))
-                                for i=unique(elPos.DefinitionIdentifier)',
-                                plotBallsOn3DImage(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
+                        elIdentifiers=obj.ElectrodeLocationIdentifier;
+                        if(~iscell(obj.ElectrodeLocationIdentifier))
+                            elIdentifiers={obj.ElectrodeLocationIdentifier};
+                        end
+                        for i_elId=1:length(elIdentifiers)
+                            
+                            if(obj.AvailableData.isKey(elIdentifiers{i_elId}))
+                                elPos=obj.AvailableData(elIdentifiers{i_elId});
+                                if(~isempty(elPos))
+                                    for i=unique(elPos.DefinitionIdentifier)',
+                                    plotBallsOn3DImage(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
+                                    end
                                 end
                             end
-                        end
-                        for i=1:size(elPos.Location,1)
-                            text(obj.axModel,elPos.Location(i,1)+1,elPos.Location(i,2)+1,elPos.Location(i,3)+1,num2str(i),'FontSize',14,'Color','w');
+                            for i=1:size(elPos.Location,1)
+                                text(obj.axModel,elPos.Location(i,1)+1,elPos.Location(i,2)+1,elPos.Location(i,3)+1,num2str(i),'FontSize',14,'Color','w');
+                            end
                         end
                     end
+                    alpha(obj.vSurf,obj.cSlider.Value);
                     %colorbar(obj.axModel);
                     set(obj.axModel,'AmbientLightColor',[1 1 1])
                     %zoom(obj.axModel,'on');
