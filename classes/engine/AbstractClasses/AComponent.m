@@ -1,4 +1,4 @@
-classdef AComponent < Serializable
+classdef (Abstract) AComponent < Serializable
     %ACOMPONENT Abstract Baseclass for all Components
     %   A Component is an executable part of a Pipeline
     %   Each Component defines the inputs and outputs it requires. For

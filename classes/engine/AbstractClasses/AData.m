@@ -1,4 +1,4 @@
-classdef AData < Serializable
+classdef (Abstract)  AData < Serializable
     %AData Abstract base class for data shared between Components
     %   Data is shared between Components via Data objects
     %   Data objects will be serialized as xml objects
