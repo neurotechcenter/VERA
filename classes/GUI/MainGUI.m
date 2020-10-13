@@ -257,8 +257,17 @@ classdef MainGUI < handle
                 uimenu(cm,'Text','Configure','Callback', @(~,~) obj.configureComponent(compName,true));
                 uimenu(cm,'Text','Run','Callback',@(~,~) obj.runComponent(compName,true));
                 uimenu(cm,'Text','Reset','Callback',@(~,~) obj.resetComponent(compName));
+                uimenu(cm,'Text','Reload Results','Callback',@(~,~) obj.reloadResults(compName));
 
                 
+        end
+        
+        function reloadResults(obj,compName)
+            obj.suspendGUIWithMessage(obj,['Reloading Results ' compName]);
+            obj.ProjectRunner.ReloadResults(compName);
+            obj.updateTreeView();
+            obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+            obj.resumeGUI(obj);
         end
         
         function resetComponent(obj,compName)

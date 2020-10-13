@@ -24,12 +24,10 @@ classdef LoadFreeviewPointFile < AComponent
         end
         
         function Initialize(obj)
-            if(any(strcmp(superclasses(obj.LocationDefinitionDataType),'ElectrodeDefinition')) || ~strcmp(obj.LocationDefinitionDataType,'ElectrodeDefinition'))
-                error('LocationDefinitionDataType has to be a subtype of ElectrodeDefinition');
+            if(any(strcmp(superclasses(obj.LocationDataType),'PointSet')) || ~strcmp(obj.LocationDataType,'PointSet'))
+                error('LocationDataType has to be a subtype of PointSet');
             end
-            if(any(strcmp(superclasses(obj.LocationDefinitionDataType),'ElectrodeLocation'))|| ~strcmp(obj.LocationDataType,'ElectrodeLocation'))
-                error('LocationIdentifierDataType has to be a subtype of ElectrodeLocation');
-            end
+
         end
         
         function elData=Process(obj,varargin)

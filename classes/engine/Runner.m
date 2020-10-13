@@ -83,6 +83,11 @@ classdef Runner < handle
             end
         end
         
+        function ReloadResults(obj,compName)
+            obj.SetComponentStatus(compName,'Completed');
+            obj.updateCurrentResults();
+        end
+        
         function ConfigureComponent(obj,compName)
             %ConfigureComponent - Run Configuration for a Component
             % If a completed component is reconfigured, it will remain

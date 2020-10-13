@@ -91,7 +91,7 @@ classdef (Abstract)  AData < Serializable
                 return;
             end
             if(obj.IsDependency('ProjectPath'))
-                pathout=fullfile(obj.GetDependency('ProjectPath'),pathIn);
+                pathout=fullfile(obj.GetDependency('ProjectPath'),strrep(pathIn,'\','/'));
             else
                 pathout=fullfile(cd,pathIn);
             end
