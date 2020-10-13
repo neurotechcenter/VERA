@@ -3,7 +3,7 @@ clearvars;
 
 
 addpath(genpath('classes'));
-addpath(genpath('Plugins'));
+addpath(genpath('Components'));
 addpath(genpath('Dependencies'));
 javaaddpath('Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.jar');
 guihandle=MainGUI();
