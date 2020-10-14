@@ -112,6 +112,13 @@ classdef Pipeline < handle
             end
         end
         
+        function graph=GetDependencyGraph(obj)
+            %GetDependencyGraph - returns the DependencyGraph for the
+            %current Pipeline
+            % see also digraph
+            graph=obj.DependencyGraph;
+        end
+        
         function AddComponent(obj,compName,compXml)
             %AddComponent - Adds a component to the Pipeline, if compXml is
             %not empty the component will be set accordingly

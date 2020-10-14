@@ -385,8 +385,7 @@ classdef MainGUI < handle
                 graph=obj.ProjectRunner.Project.Pipeline.GetDependencyGraph();
                 plot(graph,'Layout','layered','Sources',obj.ProjectRunner.Project.Pipeline.GetInputComponentNames(),...
                     'Sinks',obj.ProjectRunner.Project.Pipeline.GetOutputComponentNames(),'EdgeLabel',graph.Edges.Name,'LineWidth',2,...
-                'EdgeFontSize',12,'EdgeFontAngle','normal','NodeFontSize',16,'NodeFontAngle','normal', 'Interpreter', 'none',...
-                'ArrowSize',12);
+                'EdgeFontSize',14,'EdgeFontAngle','normal','EdgeFontSize',14,'EdgeFontAngle','normal');
             end
         end
 
