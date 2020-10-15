@@ -48,10 +48,6 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
             if(~isempty(comp))
                 for ie=1:length(comp.ElectrodeDefinition)
                     elDef=comp.ElectrodeDefinition(ie);
-                     if(isempty(tbl))
-                        tbl=cell(1,6);
-                        tbl{1,1}=false;
-                     end
                     tbl(end+1,:)={false,elDef.Type,elDef.Name,elDef.NElectrodes,elDef.Spacing,elDef.Volume};
                 end
                 obj.gridDefinitionTable.Data=tbl;
