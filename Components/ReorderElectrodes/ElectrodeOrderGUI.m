@@ -68,7 +68,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                  if(~isempty(surf))
                      [annotation_remap,cmap]=createColormapFromAnnotations(obj.curSurf);
                      mp=plot3DModel(obj.brainView,obj.curSurf.Model,annotation_remap);
-                     alpha(mp,0.3);
+                     alpha(mp,0.1);
                      colormap(obj.brainView,cmap);
                  end
                    % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3),annotation_remap ,'Parent',obj.axModel,settings{:});
@@ -89,7 +89,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
             end
              hold(obj.brainView,'on');
             vals=obj.elSelection.Value;
-            sc=scatter3(obj.brainView,obj.eLocations.Location(:,1),obj.eLocations.Location(:,2),obj.eLocations.Location(:,3),'k');
+            sc=scatter3(obj.brainView,obj.eLocations.Location(:,1),obj.eLocations.Location(:,2),obj.eLocations.Location(:,3),'filled','k');
             alpha(sc,0);
            % axHidden = axes(obj.brainView.Parent,'Visible','off','hittest','off'); % Invisible axes
             %linkprop([obj.brainView axHidden],{'CameraPosition' 'XLim' 'YLim' 'ZLim' 'Position'}); % The axes should stay aligned
@@ -181,7 +181,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                 removeToolbarExplorationButtons(f);
                 cameratoolbar(f,'NoReset');
                 hold on;
-                scatter3(elLoc(:,1), elLoc(:,2), elLoc(:,3), 'k'); 
+                scatter3(elLoc(:,1), elLoc(:,2), elLoc(:,3),'ko','filled'); 
                 
                 set(f, 'WindowButtonDownFcn', {@(a,b,c)obj.callbackClickA3DPoint(a,b,c), elLoc'}); 
 %                 if(psupLabelPos(2) < pmsupLabelPos(2))
