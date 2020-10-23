@@ -7,7 +7,7 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
 %varargin - additional settings to be passed to trisurf
 %See also Surface, trisurf
     if(~exist('annotation','var'))
-        annotation=[];
+        annotation=ones(size(model.vert,1),1);
     end
     surf=trisurf(model.tri, model.vert(:, 1), model.vert(:, 2), model.vert(:, 3),annotation ,'Parent',...
         ax,'CDataMapping', 'direct','linestyle', 'none','FaceLighting','gouraud','BackFaceLighting','unlit','AmbientStrength',1,varargin{:});

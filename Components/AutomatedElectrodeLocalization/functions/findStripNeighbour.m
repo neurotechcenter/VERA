@@ -21,7 +21,7 @@ if(isempty(D))
     return;
 end
 
-Neighbours=find(D(1,:) < gdist*(1+allowedVar) & D(1,:) > gdist*(1-allowedVar))-1;
+Neighbours=find((D(1,:) < gdist*(1+allowedVar)) & (D(1,:) > gdist*(1-allowedVar)))-1;
 if(numel(Neighbours) == 2)
     angle=calculateNeighbourAngle(p,electrodes(Neighbours,:));
     if(angle > deg2rad(phi*(1-allowedVar)) && angle < deg2rad(phi*(1+allowedVar)))
