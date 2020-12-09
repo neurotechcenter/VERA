@@ -26,7 +26,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         
         elPatches % Patches displated in ax3D using volProps Data
         
-        
+        isRunning
     end
     
     methods
@@ -36,7 +36,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             removeToolbarExplorationButtons(gcf);
           %   set(obj,'BackgroundColor','k');
             
-            
+            obj.isRunning=false;
             obj.uiListView=uicontrol('Parent',obj,'style','listbox','Callback',@obj.selectListView);%uiw.widget.Tree('Parent',obj,'MouseClickedCallback',@obj.treeClick);
             %obj.uiTree.Root.Name='Electrodes';
             obj.uiGrid=uix.Grid('Parent',obj);
@@ -218,10 +218,10 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         end
         
         function updateView(obj)
-            if(isempty(obj.Volume))
+            if(isempty(obj.Volume) || obj.isRunning)
                 return;
             end
-        
+            obj.isRunning=true;
             camera_pos=campos(obj.ax3D);
             mb=msgbox('Recalculating Segmentation....');
             if(~isempty(obj.brainSurf))
@@ -240,7 +240,11 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %[x,y,z]=meshgrid(1:size(V,2),1:size(V,1),1:size(V,3));
             %fv=isosurface(x,y,z,V);
             %p=patch(obj.ax3D,fv,'FaceColor','w','LineStyle','none');
-            obj.volProps=regionprops3(bwlabeln(V),'Volume','Centroid','BoundingBox');
+            D = -bwdist(~V);
+            D(~V) = Inf;
+            w_shed=watershed(D);
+            w_shed(~V)=0;
+            obj.volProps=regionprops3(w_shed,'Volume','Centroid','BoundingBox');
             for i=1:size(obj.volProps.BoundingBox,1)
                 obj.elPatches{i}=plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
                 hold(obj.ax3D,'on');
@@ -250,7 +254,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.colorPatches();
             axis(obj.ax3D,'equal');
             campos(obj.ax3D,camera_pos);
-     
+            obj.isRunning=false;
             close(mb);
         end
         

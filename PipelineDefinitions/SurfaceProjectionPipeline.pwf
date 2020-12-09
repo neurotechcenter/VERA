@@ -37,6 +37,61 @@
     </Component>
 
 
+
+    <Component Type="LoadFreeviewPointFile">
+        <Name>Load AC Point for Subject</Name>
+        <ElectrodeLocationIdentifier>"AC"</ElectrodeLocationIdentifier>
+    </Component>
+    <Component Type="LoadFreeviewPointFile">
+        <Name>Load PC Point for Subject</Name>
+        <ElectrodeLocationIdentifier>"PC"</ElectrodeLocationIdentifier>
+    </Component>
+        <Component Type="LoadFreeviewPointFile">
+        <Name>Load Mid-Sagittal Point for Subject</Name>
+        <ElectrodeLocationIdentifier>"MidSag"</ElectrodeLocationIdentifier>
+    </Component>
+
+        <Component Type="LoadFreeviewPointFile">
+        <Name>Load AC Point for Template</Name>
+        <ElectrodeLocationIdentifier>"TemplateAC"</ElectrodeLocationIdentifier>
+    </Component>
+    <Component Type="LoadFreeviewPointFile">
+        <Name>Load PC Point for Template</Name>
+        <ElectrodeLocationIdentifier>"TemplatePC"</ElectrodeLocationIdentifier>
+    </Component>
+        <Component Type="LoadFreeviewPointFile">
+        <Name>Load Mid-Sagittal Point for Template</Name>
+        <ElectrodeLocationIdentifier>"TemplateMidSag"</ElectrodeLocationIdentifier>
+    </Component>
+
+        <Component Type="TalairachProjection">
+        <Name>"Template Surface Talairach Projection"</Name>
+        <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
+        <SurfaceOutIdentifier>"TemplateSurfaceTalairach"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ElectrodeLocationOutIdentifier>"TemplateElectrodeLocationTalairach"</ElectrodeLocationOutIdentifier>
+        <ACIdentifier>"TemplateAC"</ACIdentifier>
+        <PCIdentifier>"TemplatePC"</PCIdentifier>
+        <MidSagIdentifier>"TemplateMidSag"</MidSagIdentifier>
+    </Component>
+
+    <Component Type="TalairachProjection">
+        <Name>"Subject Surface Talairach Projection"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <SurfaceOutIdentifier>"SurfaceTalairach"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ElectrodeLocationOutIdentifier>"ElectrodeLocationTalairach"</ElectrodeLocationOutIdentifier>
+        <ACIdentifier>"AC"</ACIdentifier>
+        <PCIdentifier>"PC"</PCIdentifier>
+        <MidSagIdentifier>"MidSag"</MidSagIdentifier>
+    </Component>
+
+    <Component Type="CombineLocations">
+        <In1>"ElectrodeLocationTalairach"</In1>
+        <In2>"TemplateElectrodeLocationTalairach"</In2>
+        <Out>"TalairachProjection"</Out>
+    </Component>
+
     <Component Type="MatOutput">
         <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
         <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
@@ -52,10 +107,16 @@
     <ElectrodeLocationIdentifier>"TemplateElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
-        <View Type="Model3DView">
+    <View Type="Model3DView">
     <Name>"Point Projection Result"</Name>
     <SurfaceIdentifier>"TemplateSurface"</SurfaceIdentifier>
     <ElectrodeLocationIdentifier>"Projection"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+    <Name>"Talairach Projection Result on Template"</Name>
+    <SurfaceIdentifier>"TemplateSurfaceTalairach"</SurfaceIdentifier>
+    <ElectrodeLocationIdentifier>"TalairachProjection"</ElectrodeLocationIdentifier>
     </View>
 
 </PipelineDefinition>

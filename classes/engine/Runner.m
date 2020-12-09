@@ -71,7 +71,7 @@ classdef Runner < handle
                     try
                         ppline.Components(k{i}).Initialize();
                         compStatus(k{i})='Configured';
-                    catch
+                    catch e
                         compStatus(k{i})='Invalid';
                     end
                 end

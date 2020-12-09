@@ -112,14 +112,12 @@ classdef MainGUI < handle
                     end
                 end
                 copyfile(pplineFile,fullfile(folder,'pipeline.pwf'));
-                DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',folder,'internal');
                 prj=Project.CreateProjectOnPath(folder,pplineFile);
                 obj.ProjectRunner=Runner.CreateFromProject(prj);
                 obj.createTreeView();
                 obj.createViews(pplineFile,prj);
                 obj.updateTreeView();
                 mkdir(fullfile(folder,'temp'));
-                DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(folder,'temp'),'internal');
                 
                 obj.fileMenuContent.CloseProject.Enable='on';
             end
@@ -139,14 +137,14 @@ classdef MainGUI < handle
             try
                 if(folder ~= 0)
                     obj.closeProject();
-                    DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',folder,'internal');
+                    
                     [prj,pplFile]=Project.OpenProjectFromPath(folder);
                     obj.ProjectRunner=Runner.CreateFromProject(prj);
                     obj.createTreeView();
                     obj.createViews(pplFile,prj);
                     obj.updateTreeView();
-                    mkdir(fullfile(folder,'temp'));
-                    DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(folder,'temp'),'internal');
+                    
+                    
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                 end
                  obj.fileMenuContent.CloseProject.Enable='on';

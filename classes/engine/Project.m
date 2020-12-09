@@ -153,7 +153,11 @@ classdef Project < handle
             else
                 ppline=Pipeline.CreateFromPipelineDefinition(pipeline);
             end
+            
             prj=Project();
+            mkdir(fullfile(folder,'temp'));
+            DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',projPath,'internal');
+            DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(projPath,'temp'),'internal');
             prj.Path=projPath;
             prj.ProjectName=projName;
             prj.Pipeline=ppline;
@@ -165,6 +169,9 @@ classdef Project < handle
             %OpenProjectFromPath - Open an existing project from Path
             %projPath - Path to project folder
             %returns: Project object
+            mkdir(fullfile(projPath,'temp'));
+            DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',projPath,'internal');
+            DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(projPath,'temp'),'internal');
             pplineFile=fullfile(projPath,'pipeline.pwf');
             [esc,projName] = fileparts(projPath);
             ppline=Pipeline.CreateFromPipelineDefinition(pplineFile);
