@@ -155,7 +155,7 @@ classdef Project < handle
             end
             
             prj=Project();
-            mkdir(fullfile(folder,'temp'));
+            mkdir(fullfile(projPath,'temp'));
             DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',projPath,'internal');
             DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(projPath,'temp'),'internal');
             prj.Path=projPath;
