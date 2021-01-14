@@ -60,20 +60,7 @@ classdef Volume < AData & IFileLoader
             [spath,~,ext]=fileparts(path);
             tpath=obj.GetDependency('TempPath');
             if(any(strcmpi(ext,{'.dcm','.dicom'})))
-                [~,path]=dicm2nii(spath,tpath,0);
-                if(numel(path) > 1 )
-                    warning('Dicom contains multiple Image Containers!');
-                    sel_name=cellfun(@(x)dir(x),path,'UniformOutput',false);
-                    sel_name=cellfun(@(x)x.name,sel_name,'UniformOutput',false);
-                    [idx,tf]=listdlg('PromptString','Please Select the correct Dicom for import','SelectionMode','single','ListString',sel_name);
-                    if(tf ~= 0)
-                        path=path{idx};
-                    else
-                        error('No Dicom selected!');
-                    end
-                else
-                path=path{1};
-                end
+                error('Cannot load from DICOM format');
             end
             try
             obj.Image=load_nii(path,[],[],[],[],[],0);

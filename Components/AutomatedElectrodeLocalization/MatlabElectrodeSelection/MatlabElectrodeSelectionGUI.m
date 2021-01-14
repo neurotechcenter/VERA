@@ -240,16 +240,26 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %[x,y,z]=meshgrid(1:size(V,2),1:size(V,1),1:size(V,3));
             %fv=isosurface(x,y,z,V);
             %p=patch(obj.ax3D,fv,'FaceColor','w','LineStyle','none');
+            disp('Running Watershed');
+            tic
             D = -bwdist(~V);
             D(~V) = Inf;
             w_shed=watershed(D);
             w_shed(~V)=0;
+            toc
+            disp('Running Segmentation');
+            tic
             obj.volProps=regionprops3(w_shed,'Volume','Centroid','BoundingBox');
+            toc
+            disp('Plotting Segments');
+            tic
             for i=1:size(obj.volProps.BoundingBox,1)
+                %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 obj.elPatches{i}=plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
                 hold(obj.ax3D,'on');
                 
             end
+            toc
             hold(obj.ax3D,'off');
             obj.colorPatches();
             axis(obj.ax3D,'equal');

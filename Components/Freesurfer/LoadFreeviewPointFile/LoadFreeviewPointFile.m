@@ -27,7 +27,6 @@ classdef LoadFreeviewPointFile < AComponent
             if(any(strcmp(superclasses(obj.LocationDataType),'PointSet')) || ~strcmp(obj.LocationDataType,'PointSet'))
                 error('LocationDataType has to be a subtype of PointSet');
             end
-
         end
         
         function elData=Process(obj,varargin)
