@@ -253,6 +253,7 @@ function [new_img, new_M] = affine(old_img, old_M, new_elem_size, verbose, bg, m
 
 
 %--------------------------------------------------------------------
+
 function img_slice = trilinear(img, dim1, dim2, M, bg)
 
    img_slice = zeros(dim1(1:2));

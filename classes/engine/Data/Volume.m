@@ -26,30 +26,56 @@ classdef Volume < AData & IFileLoader
         Path
     end
     
+    properties (Access = private)
+        RasVolume
+        VoxelSize
+    end
+    
     methods
         
         function obj=Volume()
             obj.ignoreList{end+1}='Image';
-
+            obj.RasVolume=[];
         end
         
         function coordOut=Vox2Ras(obj,coordIn)
             %Vox2Ras transforms coordinates from Voxel space into RAS sapce
-            coordOut=(coordIn(:)-obj.Image.hdr.hist.originator(1:3)').*obj.Image.hdr.dime.pixdim(2:4)';
+            coordOut= [obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1] *[coordIn(:); 1];
+            coordOut=coordOut(1:3);
         end
         
         function coordOut=Ras2Vox(obj,coordIn)
-            %Ras2Vox transforms RAS coordinates into voxel coordinates
-            coordOut=max(min(round((coordIn(:)./obj.Image.hdr.dime.pixdim(2:4)')+obj.Image.hdr.hist.originator(1:3)'),size(obj.Image.img)),[1;1;1]);
+           coordOut=[obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]\[coordIn(:); 1];
+            coordOut=coordOut(1:3);
         end
         
+        function V=GetRasSlicedVolume(obj,voxelSize)
+            if(nargin < 2)
+                voxelSize=[1 1 1];
+            end
+            %ras sliced volume 
+
+            if(~isempty(obj.RasVolume) && isequal(voxelSize,obj.VoxelSize))
+                V=obj.RasVolume;
+            else
+                tpath=fullfile(obj.GetDependency('TempPath'),'temp.nii');
+                obj.VoxelSize=voxelSize;
+                reslice_nii(obj.Path,tpath,voxelSize);
+                V=Volume();
+                V.LoadFromFile(tpath);
+                obj.RasVolume=V;
+            end
+        end
+
         function [x,y,z]=GetRasAxis(obj)
             % Returns the projection from voxel to RAS coordinate
+            if(~isfield(obj.Image.hdr.hist,'originator'))
+                error('GetRasAxis is only available for data sliced along the RAS axis');
+            end
             x=((1:size(obj.Image.img,1))-obj.Image.hdr.hist.originator(1)).*obj.Image.hdr.dime.pixdim(2);
             y=((1:size(obj.Image.img,2))-obj.Image.hdr.hist.originator(2)).*obj.Image.hdr.dime.pixdim(3);
             z=((1:size(obj.Image.img,3))-obj.Image.hdr.hist.originator(3)).*obj.Image.hdr.dime.pixdim(4);
         end
-        
         
         function LoadFromFile(obj,path)
             % Load nifti file from path
@@ -57,22 +83,32 @@ classdef Volume < AData & IFileLoader
             % If multiple images are found in the dicom, it will show a
             % selection dialog
             % See also IFileLoader
+            tpath=fullfile(obj.GetDependency('TempPath'),'dicom_convert');
+            mkdir(tpath);
             [spath,~,ext]=fileparts(path);
-            tpath=obj.GetDependency('TempPath');
             if(any(strcmpi(ext,{'.dcm','.dicom'})))
-                error('Cannot load from DICOM format');
+                dicm2nii(spath,tpath,0);
+                path=dir(fullfile(tpath,'*.nii'));
+                if(numel(path) > 1 )
+                    warning('Dicom contains multiple Image Containers!');
+                    sel_name=cellfun(@(x)x.name,path,'UniformOutput',false);
+                    [idx,tf]=listdlg('PromptString','Please Select the correct Dicom for import','SelectionMode','single','ListString',sel_name);
+                    if(tf ~= 0)
+                        path=path{idx};
+                    else
+                        error('No Dicom selected!');
+                    end
+                end
+                path=fullfile(path.folder,path.name);
             end
             try
-            obj.Image=load_nii(path,[],[],[],[],[],0);
-            obj.Path=path;
-            catch 
-                    
-                    warning 'Input image transformation is not orthogonal; reslicing image'
-                    reslice_nii(path,fullfile(tpath,'buff.nii'),[],[],[],2);
-                    obj.Image=load_nii(fullfile(tpath,'buff.nii'));
-                    obj.Path=fullfile(tpath,'buff.nii');
+                obj.Image=load_nii(path,[],[],[],[],[],0);
+                obj.Path=path;
+            catch e
+                obj.Image=load_untouch_nii(path,[],[],[],[],[]);
+                obj.Path=path;    
             end
-
+            rmdir(tpath,'s');
                % [nii.img,nii.XYZ ]=spm_read_vols(nii);
 
         end
@@ -83,13 +119,21 @@ classdef Volume < AData & IFileLoader
             Load@AData(obj,path);
             obj.Path=obj.makeFullPath(obj.Path);
             if(~isempty(obj.Path))
-            obj.Image=load_nii(obj.Path,[],[],[],[],[],0);
+                try
+                    obj.Image=load_nii(path,[],[],[],[],[],0);
+                catch
+                    obj.Image=load_untouch_nii(obj.Path,[],[],[],[],[]);
+                end
             end
         end
         function savepath=Save(obj,path)
             if(~isempty(obj.Image))
                 obj.Path=fullfile(path,[obj.Name '.nii']);
-                save_nii(obj.Image,obj.Path);
+                if(isfield(obj.Image,'untouch') && obj.Image.untouch == 1)
+                    save_untouch_nii(obj.Image,obj.Path);
+                else
+                    save_nii(obj.Image,obj.Path);
+                end
             end
             buffPath=obj.Path;
             obj.Path=obj.makeRelativePath(buffPath,true);

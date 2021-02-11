@@ -1,3 +1,4 @@
+
 classdef SliceViewer < uix.Grid
     %SliceViewer View for Volume Data
     %Allows the view of different Volumes on top of each other and moving
@@ -82,7 +83,7 @@ classdef SliceViewer < uix.Grid
         function drawImage(obj,imgIdx)
             slice=zeros(3,1);
             slice(obj.ViewAxis(3))=obj.Slice;
-            sliderSlice=obj.Images{imgIdx}.Ras2Vox(slice);
+            sliderSlice=round(obj.Images{imgIdx}.Ras2Vox(slice));
             x=1:size(obj.Images{imgIdx}.Image.img,1);
             y=1:size(obj.Images{imgIdx}.Image.img,2);
             z=1:size(obj.Images{imgIdx}.Image.img,3);
@@ -292,4 +293,3 @@ classdef SliceViewer < uix.Grid
     end
     
 end
-

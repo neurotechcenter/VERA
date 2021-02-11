@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dependencies>
+   <Dependency Name="Freesurfer" Type="folder">"/Applications/freesurfer"</Dependency>
+   <Dependency Name="NeuralAct" Type="folder">"/Users/madamek/Dropbox/NeuralAct_package"</Dependency>
+   <Dependency Name="SPM12" Type="folder">"/Applications/spm12"</Dependency>
+</Dependencies>

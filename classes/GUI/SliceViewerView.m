@@ -57,7 +57,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             delete(obj.settingsGrid.Children);
             for i = 1:length(obj.ImageIdentifiers)
                 if(obj.AvailableData.isKey(obj.ImageIdentifiers{i}))
-                    images{end+1}=obj.AvailableData(obj.ImageIdentifiers{i});
+                    images{end+1}=obj.AvailableData(obj.ImageIdentifiers{i}).GetRasSlicedVolume();
                     alphas{end+1}=1;
                     createViewPanel(obj,obj.settingsGrid,obj.ImageIdentifiers{i},i);
                 end

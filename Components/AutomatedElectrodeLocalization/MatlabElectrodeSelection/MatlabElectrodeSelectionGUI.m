@@ -225,11 +225,23 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             camera_pos=campos(obj.ax3D);
             mb=msgbox('Recalculating Segmentation....');
             if(~isempty(obj.brainSurf))
-                obj.axSurf=plot3DModel(obj.ax3D,obj.brainSurf.Model);
+                [annotation_remap,cmap]=createColormapFromAnnotations(obj.brainSurf);
+                obj.axSurf=plot3DModel(obj.ax3D,obj.brainSurf.Model,annotation_remap);
                 alpha(obj.axSurf,obj.slBrainAlpha.Value);
                 set(obj.axSurf,'HitTest','off');
                 set(obj.axSurf,'PickableParts','none');
+                colormap(obj.ax3D,cmap);
                 hold(obj.ax3D,'on');
+            else
+                camlight(obj.ax3D,'headlight');
+                set(obj.ax3D,'xtick',[]);
+                set(obj.ax3D,'ytick',[]);
+                axis(obj.ax3D,'equal');
+                axis(obj.ax3D,'off');
+                xlim(obj.ax3D,'auto');
+                ylim(obj.ax3D,'auto');
+                set(obj.ax3D,'clipping','off');
+                set(obj.ax3D,'XColor', 'none','YColor','none','ZColor','none')
             end
             obj.elPatches={};
             V=permute(obj.Volume.Image.img,[2 1 3]);
@@ -257,7 +269,9 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 obj.elPatches{i}=plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
                 hold(obj.ax3D,'on');
-                
+                material(obj.elPatches{i},'dull');
+                set(obj.elPatches{i},'clipping','off');
+       
             end
             toc
             hold(obj.ax3D,'off');

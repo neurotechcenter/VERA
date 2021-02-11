@@ -7,7 +7,7 @@ classdef FSDicomImport < AComponent
     end
     
     methods
-        function obj = FSDicomExport()
+        function obj = FSDicomImport()
 
         end
         
