@@ -8,6 +8,7 @@ classdef ElectrodeDefinition < AData
     
     methods
         function obj = ElectrodeDefinition()
+            obj.Definition=struct('Type',[],'Name',[],'NElectrodes',[],'Spacing',[],'Volume',[]);
         end
         
         function grps=GetGroupedDefinitions(obj)

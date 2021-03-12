@@ -10,21 +10,20 @@
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
-
- <Component Type="FreesurferSurfaceLoader" />
-
-	<Component Type="ElectrodeDefinitionConfiguration">
-		<Identifier>"ElectrodeDefinition"</Identifier>
-		<Name>"Electrode Definition"</Name>
-    </Component>
+    <Component Type="ImportROSFile" />
+    <Component Type="FreesurferSurfaceLoader" />
     <Component Type="MoveRASOrigin"/>
-	
     <Component Type="Coregistration"/>
-    <Component Type="BuildSkullMask"/>
-	<Component Type="ApplyMask"/>
-	
-    <Component Type="AutoElectrodeLocalization"/>
-    <Component Type="AlterElectrodeLabels"/>
+    <Component Type="Coregistration">
+           <Name>"Coregister ROSA Trajectories"</Name>
+           <CTIdentifier>"ROSAVolume"</CTIdentifier>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+    </Component>
+    <Component Type="ElectrodeTransformation">
+            <TIdentifier>"T_ROSA"</TIdentifier>
+            <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
+    </Component>
+    <Component Type="MatlabElectrodeSelection"/>
 	<Component Type="FreesurferElectrodeLocalization"/>
     <Component Type="ReorderElectrodes"/>
     <Component Type="ElectrodeProjection"/>
@@ -49,17 +48,12 @@
     </Component>
 	
 	
-<View Type="SliceViewerView"/>
-<View Type="ElectrodeDefinitionView" Component="Electrode Definition">
-    <Name>"Electrode Definition"</Name>
-</View>
 <View Type="Model3DView">
 <Name>"3D View"</Name>
 </View>
 
 <View Type="SliceViewerView">
     <Name>"View Skull Mask"</Name>
-    <Image2Identifier>"Skullmask"</Image2Identifier>
 </View>
 
 <View Type="Model3DView">

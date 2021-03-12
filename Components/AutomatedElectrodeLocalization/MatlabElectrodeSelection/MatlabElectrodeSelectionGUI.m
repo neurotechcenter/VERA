@@ -27,6 +27,8 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         elPatches % Patches displated in ax3D using volProps Data
         
         isRunning
+        
+        trajectories
     end
     
     methods
@@ -35,7 +37,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             cameratoolbar(gcf,'NoReset');
             removeToolbarExplorationButtons(gcf);
           %   set(obj,'BackgroundColor','k');
-            
+            obj.trajectories=[];
             obj.isRunning=false;
             obj.uiListView=uicontrol('Parent',obj,'style','listbox','Callback',@obj.selectListView);%uiw.widget.Tree('Parent',obj,'MouseClickedCallback',@obj.treeClick);
             %obj.uiTree.Root.Name='Electrodes';
@@ -95,6 +97,11 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.slMinThresh.Max=max(max(max(vol.Image.img)));
             obj.slMinThresh.SliderStep=[1/(obj.slMinThresh.Max- obj.slMinThresh.Min) 1/(obj.slMinThresh.Max- obj.slMinThresh.Min)];
             obj.slMinThresh.Value=obj.slMinThresh.Max-20;
+            obj.updateView();
+        end
+        
+        function SetTrajectories(obj,traj)
+            obj.trajectories=traj;
             obj.updateView();
         end
         
@@ -243,32 +250,37 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 set(obj.ax3D,'clipping','off');
                 set(obj.ax3D,'XColor', 'none','YColor','none','ZColor','none')
             end
+            obj.plotTrajectories();
             obj.elPatches={};
             V=permute(obj.Volume.Image.img,[2 1 3]);
-            V=smooth3(V,'gaussian');
-            V(V < obj.slMinThresh.Value) = 0;
-            %V=smooth3(V,'box',3);
-            %V=(V > obj.slMinThresh.Value);
-            %[x,y,z]=meshgrid(1:size(V,2),1:size(V,1),1:size(V,3));
-            %fv=isosurface(x,y,z,V);
-            %p=patch(obj.ax3D,fv,'FaceColor','w','LineStyle','none');
-            disp('Running Watershed');
-            tic
-            D = -bwdist(~V);
-            D(~V) = Inf;
-            w_shed=watershed(D);
-            w_shed(~V)=0;
-            toc
-            disp('Running Segmentation');
-            tic
-            obj.volProps=regionprops3(w_shed,'Volume','Centroid','BoundingBox');
-            toc
+            %V=smooth3(V,'gaussian');
+            V(V <= obj.slMinThresh.Value) = 0;
+            V(V > obj.slMinThresh.Value) = 1;
+            obj.volProps=regionprops3(bwconncomp(V),'Volume','Centroid','BoundingBox');
+%             V(V <= obj.slMinThresh.Value) = 0;
+%             %V(V > obj.slMinThresh.Value) = 1;
+%             %V=smooth3(V,'box',3);
+%             V=(V > obj.slMinThresh.Value);
+%             disp('Running Watershed');
+%             tic
+%             D = -bwdist(~V);
+%             D(~V) = Inf;
+%             w_shed=watershed(D);
+%             w_shed(~V)=0;
+%             toc
+%             disp('Running Segmentation');
+%             tic
+%             obj.volProps=regionprops3(bwconncomp(w_shed),'Volume','Centroid','BoundingBox');
+%             toc
             disp('Plotting Segments');
             tic
             for i=1:size(obj.volProps.BoundingBox,1)
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
-                obj.elPatches{i}=plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
+                [x,y,z]=sphere;
+                patch_center=obj.Volume.Vox2Ras(obj.volProps.Centroid(i,1:3))';
                 hold(obj.ax3D,'on');
+                obj.elPatches{i}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',i,'EdgeColor','none'); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
+                
                 material(obj.elPatches{i},'dull');
                 set(obj.elPatches{i},'clipping','off');
        
@@ -279,7 +291,24 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             axis(obj.ax3D,'equal');
             campos(obj.ax3D,camera_pos);
             obj.isRunning=false;
+            
             close(mb);
+            
+            
+        end
+        
+        function plotTrajectories(obj)
+            identifiers=unique(obj.trajectories.DefinitionIdentifier);
+            if(~isempty(obj.trajectories))
+                hold(obj.ax3D,'on');
+                for i=1:length(identifiers)
+                    traj=obj.trajectories.Location(obj.trajectories.DefinitionIdentifier==identifiers(i),:);
+                    plot3(obj.ax3D,traj(:,1),traj(:,2),traj(:,3),'r','LineWidth',3);
+                    text(obj.ax3D,traj(1,1),traj(1,2),traj(1,3),obj.elDefinition.Definition(identifiers(i)).Name,'FontSize',16,'Interpreter','none','BackgroundColor','w');
+                    
+                end
+                hold(obj.ax3D,'off');
+            end
         end
         
         function colorPatches(obj)

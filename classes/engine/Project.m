@@ -189,7 +189,6 @@ classdef Project < handle
                     if(isfield(xmlstrct,'ComponentInformation') && ...
                         numel(xmlstrct.ComponentInformation{1}) ==1 && ...
                         isfield(xmlstrct.ComponentInformation{1},'Component'))
-
                         cobj.Deserialize(xmlstrct.ComponentInformation{1}.Component{1});
                     end
                 end

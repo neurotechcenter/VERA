@@ -8,6 +8,7 @@ classdef ElectrodeLocation < PointSet
     
     methods
         function obj = ElectrodeLocation()
+            obj.DefinitionIdentifier=zeros(1,0,'uint32');
         end
 
 

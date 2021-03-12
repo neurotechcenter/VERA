@@ -8,6 +8,7 @@ classdef PointSet < AData
     
     methods
         function obj = PointSet()
+            obj.Location=zeros(0,3);
         end
 
     end

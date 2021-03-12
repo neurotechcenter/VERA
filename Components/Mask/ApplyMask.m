@@ -26,8 +26,8 @@ classdef ApplyMask < AComponent
          function out=Process(obj,vol,mask)
              %reslice mask to fit the input volume
              resl_mask=fullfile(obj.GetDependency('TempPath'),'resliced_mask.nii');
-             if(all(vol.Image.hdr.dime.pixdim(2:4) == vol.Image.hdr.dime.pixdim(2)))
              reslice_nii(mask.Path,resl_mask,vol.Image.hdr.dime.pixdim(2));
+             vol.LoadFromFile(resl_mask);
              out=obj.CreateOutput(obj.OutputIdentifier);
              out.LoadFromFile(resl_mask);
              vol.Image.img=vol.Image.img-min(min(min(vol.Image.img)));
@@ -49,12 +49,6 @@ classdef ApplyMask < AComponent
              maskY=vol_pxl_begin(2):vol_pxl_begin(2)+length(imgY)-1;
              maskZ=vol_pxl_begin(3):vol_pxl_begin(3)+length(imgZ)-1;
              out.Image.img(imgX,imgY,imgZ)=out.Image.img(imgX,imgY,imgZ).*vol.Image.img(maskX,maskY,maskZ);
-             
-             
-             
-             else
-                 error('Input voxels have to be isotropic');
-             end
              
          end
     end

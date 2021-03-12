@@ -14,7 +14,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
         function obj = SliceViewerView(varargin)
             vGrid=uix.VBox('Parent',obj);
             
-            obj.ImageIdentifiers = {'CT', 'MRI'};
+            obj.ImageIdentifiers = {};
             %obj.cbxImage=uicontrol('style','checkbox','Parent',obj.settingsGrid,'String',['Show ' obj.ImageIdentifier],'Value',1,'Callback',@obj.cbxChanged);
             %obj.cbxImage2=uicontrol('style','checkbox','Parent',obj.settingsGrid,'String',['Show ' obj.Image2Identifier],'Value',1,'Callback',@obj.cbxChanged);
             addlistener(obj,'ImageIdentifiers','PostSet',@obj.imageDefinitionChanged);
@@ -55,11 +55,21 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             images={};
             alphas={};
             delete(obj.settingsGrid.Children);
-            for i = 1:length(obj.ImageIdentifiers)
-                if(obj.AvailableData.isKey(obj.ImageIdentifiers{i}))
-                    images{end+1}=obj.AvailableData(obj.ImageIdentifiers{i}).GetRasSlicedVolume();
+            imgIdentifiers={};
+            if(isempty(obj.ImageIdentifiers))
+                for k=keys(obj.AvailableData)
+                    if(isObjectTypeOf(obj.AvailableData(k{1}),'Volume'))
+                        imgIdentifiers{end+1}=k{1};
+                    end
+                end
+            else
+                imgIdentifiers=obj.ImageIdentifiers;
+            end
+            for i = 1:length(imgIdentifiers)
+                if(obj.AvailableData.isKey(imgIdentifiers{i}))
+                    images{end+1}=obj.AvailableData(imgIdentifiers{i}).GetRasSlicedVolume();
                     alphas{end+1}=1;
-                    createViewPanel(obj,obj.settingsGrid,obj.ImageIdentifiers{i},i);
+                    createViewPanel(obj,obj.settingsGrid,imgIdentifiers{i},i);
                 end
             end
             obj.settingsGrid.Children=flip(obj.settingsGrid.Children); %flip to match Z order

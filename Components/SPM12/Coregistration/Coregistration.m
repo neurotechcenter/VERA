@@ -4,18 +4,21 @@ classdef Coregistration < AComponent
    properties
         MRIIdentifier
         CTIdentifier
+        TIdentifier
     end
     
     methods
         function obj = Coregistration()
             obj.MRIIdentifier='MRI';
             obj.CTIdentifier='CT';
+            obj.TIdentifier='T';
             
         end
         function Publish(obj)
             obj.AddInput(obj.MRIIdentifier,'Volume');
             obj.AddInput(obj.CTIdentifier,'Volume');
             obj.AddOutput(obj.CTIdentifier,'Volume');
+            obj.AddOutput(obj.TIdentifier,'TransformationMatrix');
             obj.RequestDependency('SPM12','folder');
         end
         function Initialize(obj)
@@ -24,7 +27,7 @@ classdef Coregistration < AComponent
             
         end
         
-        function [ct] = Process(obj,mri,ct)
+        function [ct,T] = Process(obj,mri,ct)
             [a,b,c]=fileparts(mri.Path);
             pref_mri=fullfile(a,['r' b c]);
             
@@ -65,19 +68,12 @@ classdef Coregistration < AComponent
             MM = zeros(4,4,numel(PO));
             MM(:,:,1) = spm_get_space(PO.fname);
             spm_get_space(PO.fname, M\MM(:,:,1));
-
-            %P            = {job.ref.fname; job.source.fname};
-            %no reslice
-           % spm_reslice(P);
-
-           % out.cfiles = PO;
-           % out.M      = M;
-           % out.rfiles = cell(size(out.cfiles));
-           % [pth,nam,ext,num] = spm_fileparts(out.cfiles.fname);
-           % out.rfiles{1} = fullfile(pth,[job.roptions.prefix, nam, ext, num]);
             
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%% end spm code %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            T=obj.CreateOutput(obj.TIdentifier);
+            T.T(:,:,1)=inv(job.source.mat);
+            T.T(:,:,2)=M\MM(:,:,1);
             ct=obj.CreateOutput(obj.CTIdentifier);
             ct.LoadFromFile(pref_ct);
             

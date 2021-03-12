@@ -5,6 +5,7 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
     properties
         Identifier char % Identifier of Output Data, Default is 'ElectrodeDefinition'
         ElectrodeDefinition % Electrode Definitions
+        
     end
     
     methods

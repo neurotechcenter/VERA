@@ -10,19 +10,13 @@
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
-
- <Component Type="FreesurferSurfaceLoader" />
-
+    <Component Type="FreesurferSurfaceLoader" />
 	<Component Type="ElectrodeDefinitionConfiguration">
 		<Identifier>"ElectrodeDefinition"</Identifier>
 		<Name>"Electrode Definition"</Name>
     </Component>
     <Component Type="MoveRASOrigin"/>
-	
     <Component Type="Coregistration"/>
-    <Component Type="BuildSkullMask"/>
-	<Component Type="ApplyMask"/>
-	
     <Component Type="MatlabElectrodeSelection"/>
 	<Component Type="FreesurferElectrodeLocalization"/>
     <Component Type="ReorderElectrodes"/>
@@ -48,7 +42,7 @@
     </Component>
 	
 	
-<View Type="SliceViewerView"/>
+
 <View Type="ElectrodeDefinitionView" Component="Electrode Definition">
     <Name>"Electrode Definition"</Name>
 </View>
@@ -58,7 +52,6 @@
 
 <View Type="SliceViewerView">
     <Name>"View Skull Mask"</Name>
-    <Image2Identifier>"Skullmask"</Image2Identifier>
 </View>
 
 <View Type="Model3DView">

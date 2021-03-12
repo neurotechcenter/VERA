@@ -151,7 +151,7 @@ classdef MainGUI < handle
                  obj.configureAll();
                  obj.resumeGUI(obj);
             catch e
-                warning(e.message);
+                warning(getReport(e,'extended'));
             end
             obj.resumeGUI(obj);
         end

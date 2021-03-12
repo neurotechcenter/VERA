@@ -21,7 +21,7 @@ classdef SliceViewer < uix.Grid
         posText=[]
         silentChange = false
         imageObjs = {}
-        oldImages={};
+      %  oldImages={};
     end
     
     methods
@@ -73,9 +73,16 @@ classdef SliceViewer < uix.Grid
     methods (Access = protected)
         
         function alphaChanged(obj,~,~)
+
            if(~isempty(obj.imageObjs) && ~obj.silentChange)
                for i=1:length(obj.ImageAlphas)
-                    alpha(obj.imageObjs{i},obj.ImageAlphas{i});
+                    curr_slice=zeros(3,1);
+                    curr_slice(obj.ViewAxis(3))=obj.Slice;
+                    sliderSlice=round(obj.Images{i}.Ras2Vox(curr_slice));
+                    slice_num=sliderSlice(obj.ViewAxis(3));
+                    if(slice_num > 0 && slice_num < size(obj.Images{i}.Image.img,obj.ViewAxis(3)))
+                        alpha(obj.imageObjs{i},obj.ImageAlphas{i});
+                    end
                end
            end
         end
@@ -101,37 +108,64 @@ classdef SliceViewer < uix.Grid
                 case 3
                     z=sliderSlice(obj.ViewAxis(3));
             end
-            img=obj.Images{imgIdx}.Image.img(x,y,z,:);
+            if(any([x y z] < 1) || (max(x) > size(obj.Images{imgIdx}.Image.img,1) || max(y) > size(obj.Images{imgIdx}.Image.img,2) || max(z) > size(obj.Images{imgIdx}.Image.img,3)))
+                img=NaN;
+            else
+                img=obj.Images{imgIdx}.Image.img(x,y,z,:);
+                 img=squeeze(permute(img,obj.ViewAxis))';
+            end
             
-            img=squeeze(permute(img,obj.ViewAxis))';
+           
             hold(obj.imageView,'on');
-            if(imgIdx > length(obj.imageObjs))
-                obj.imageObjs{imgIdx}=imagesc(obj.imageView,'XData',X,'YData',Y,'CDATA',img,'ButtonDownFcn',@obj.click,'Clipping','off','AlphaData',obj.ImageAlphas{imgIdx});
+            if((imgIdx > length(obj.imageObjs)))
+             
+                if(~isnan(img))      
+                    obj.imageObjs{imgIdx}=imagesc(obj.imageView,'XData',X,'YData',Y,'CDATA',img,'ButtonDownFcn',@obj.click,'Clipping','off','AlphaData',obj.ImageAlphas{imgIdx});
+                else
+                    obj.imageObjs{imgIdx}=imagesc(obj.imageView,'XData',X,'YData',Y,'CDATA',zeros(length(Y),length(X)),'ButtonDownFcn',@obj.click,'Clipping','off','AlphaData',0);
+                end
                 set(obj.imageView,'YDir','normal');
                  if(obj.ViewAxis(1) == 1)
                     set(obj.imageView,'XDir','reverse');
                  end
                  set(obj.imageView,'xtick',[])
                   set(obj.imageView,'ytick',[])
-                 axis(obj.imageView,'square');
+                 
                  xlim(obj.imageView,'auto')
                  ylim(obj.imageView,'auto')
                  set(obj.imageView,'Color','k')
                 colormap(obj.imageView,'gray');
+                [xl,yl]=getLims(obj);
                 set(obj.imageView,'xlimmode','manual',...
                                    'ylimmode','manual',...
                                    'zlimmode','manual',...
                                    'climmode','manual',...
                                    'alimmode','manual',...
-                                   'xlim',[min(X) max(X)],'ylim',[min(Y) max(Y)]);
+                                   'xlim',xl,'ylim',yl);
+                axis(obj.imageView,'equal');
                     
             else
+                if(~isnan(img))
                     set(obj.imageObjs{imgIdx},'CData',img,'XData',X,'YData',Y,'AlphaData',obj.ImageAlphas{imgIdx});
+                else
+                    set(obj.imageObjs{imgIdx},'AlphaData',0);
+                end
             end
             hold(obj.imageView,'off');
             obj.updateCursor();
 
             
+        end
+        
+        function [xl, yl]=getLims(obj)
+            xd=[];
+            yd=[];
+            for i=1:length(obj.imageObjs)
+                xd=[xd obj.imageObjs{i}.XData];
+                yd=[yd obj.imageObjs{i}.YData];
+            end
+            xl=[min(xd) max(xd)];
+            yl=[min(yd) max(yd)];
         end
         
         function updateCursor(obj)
@@ -173,8 +207,10 @@ classdef SliceViewer < uix.Grid
                     obj.slider.Value=obj.Slice;  
                 end
             end
-            for i=1:length(obj.Images)
-                obj.drawImage(i); 
+            if(~obj.silentChange)
+                for i=1:length(obj.Images)
+                    obj.drawImage(i); 
+                end
             end
         end
         
@@ -205,46 +241,53 @@ classdef SliceViewer < uix.Grid
         end
         
         function imagePreChanged(obj,src,event)
-            obj.oldImages=obj.Images;
+           % obj.oldImages=obj.Images;
         end
         
         function imageChanged(obj,src,event)
             %check if handles have changed
             obj.silentChange=true;
-            oldImageObjs=obj.imageObjs;
+            delete([obj.imageObjs{:}]);
             obj.imageObjs={};
-            oldAlpha=obj.ImageAlphas;
             obj.ImageAlphas={};
             z_min=zeros(length(obj.Images),1);
             z_max=zeros(length(obj.Images),1);
-            remainderIdx=[];
             c_min=zeros(length(obj.Images),1);
             c_max=zeros(length(obj.Images),1);
-        
-            for i=1:length(obj.Images)
-                XYZ=cell(3,1);
-                [XYZ{:}]=obj.Images{i}.GetRasAxis();
-               z_min(i)=min(XYZ{obj.ViewAxis(3)});
-               z_max(i)=max(XYZ{obj.ViewAxis(3)});
-                if(any(isequal(obj.Images{i},[obj.oldImages{:}])))
-                    obj.imageObjs{i}=oldImageObjs{isequal(obj.Images{i},[obj.oldImages{:}])};
-                    obj.ImageAlphas{i}=oldAlpha{isequal(obj.Images{i},[obj.oldImages{:}])};
-                    remainderIdx(end+1)=find(isequal(obj.Images{i},[obj.oldImages{:}]));
-                else
-                    obj.ImageAlphas{i}=1;
-                    obj.drawImage(i);
-                end
-               c_min(i)=min(min(min(obj.Images{i}.Image.img)));
-               c_max(i)=max(max(max(obj.Images{i}.Image.img)));
-            end
-            delete([oldImageObjs{setdiff(1:length(oldImageObjs),remainderIdx)}]);
-            obj.silentChange=false;
-            obj.oldImages={}; %remove handles 
+            
             if(~isempty(obj.Images))
+                for i=1:length(obj.Images)
+                   XYZ=cell(3,1);
+                   [XYZ{:}]=obj.Images{i}.GetRasAxis();
+                   z_min(i)=min(XYZ{obj.ViewAxis(3)});
+                   z_max(i)=max(XYZ{obj.ViewAxis(3)});
+                   c_min(i)=min(min(min(obj.Images{i}.Image.img)));
+                   c_max(i)=max(max(max(obj.Images{i}.Image.img)));
+                end
                 obj.slider.Min=min(z_min);
                 obj.slider.Max=max(z_max);
+                obj.slider.Value=mean([obj.slider.Max obj.slider.Min]);
+                obj.Slice=mean([obj.slider.Max obj.slider.Min]);
+            end
+            
+          
+            for i=1:length(obj.Images)
+                %if(any(isequal(obj.Images{i},[obj.oldImages{:}])))
+                %    obj.imageObjs{i}=oldImageObjs{isequal(obj.Images{i},[obj.oldImages{:}])};
+                %    obj.ImageAlphas{i}=oldAlpha{isequal(obj.Images{i},[obj.oldImages{:}])};
+                %    remainderIdx(end+1)=find(isequal(obj.Images{i},[obj.oldImages{:}]));
+                %else
+                    obj.ImageAlphas{i}=1;
+                    obj.drawImage(i);
+                %end
+
             end
             obj.SetColorLimits([min(c_min) max(c_max)]);
+            
+            %delete([oldImageObjs{setdiff(1:length(oldImageObjs),remainderIdx)}]);
+            obj.silentChange=false;
+           % obj.oldImages={}; %remove handles 
+
             
             
         end

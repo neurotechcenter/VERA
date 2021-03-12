@@ -47,7 +47,7 @@ classdef (Abstract) AComponent < Serializable
     
     properties (SetAccess = ?Pipeline, GetAccess = ?Pipeline)
         inputMap 
-        optionalinputMap
+        optionalinputMap 
         outputMap
         Pipeline Pipeline
     end
@@ -61,6 +61,7 @@ classdef (Abstract) AComponent < Serializable
             obj.OptionalInputs = {};
             obj.inputMap = containers.Map;
             obj.outputMap = containers.Map;
+            obj.optionalinputMap = containers.Map;
             obj.Name=class(obj);
             obj.nodeName='Component';
             obj.ignoreList{end+1}='ComponentPath';

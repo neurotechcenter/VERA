@@ -24,7 +24,7 @@ classdef BuildSkullMask < AComponent
             addpath(obj.GetDependency('SPM12'));
         end
         
-        function mask=Process(obj,mri)
+        function [mask,T]=Process(obj,mri)
             mask=obj.CreateOutput(obj.MaskIdentifier);
             spmpath=obj.GetDependency('SPM12');
             %https://en.wikibooks.org/wiki/Neuroimaging_Data_Processing/Skull_Stripping#SPM

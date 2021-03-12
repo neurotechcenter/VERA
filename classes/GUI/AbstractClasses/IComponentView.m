@@ -12,18 +12,31 @@ classdef IComponentView < handle
         Pipeline Pipeline
     end
     
+    properties(Access = protected)
+        comp
+    end
+    
     methods
         function obj = IComponentView()
             obj.Component = '';
              addlistener(obj,'Pipeline','PostSet',@obj.componentChanged);
         end
         
+        function SetComponent(obj,comp)
+            obj.comp=comp;
+            obj.componentChanged([],[]);
+        end
+        
         function comp=GetComponent(obj)
             %GetComponent - returns the Component associated with the View
-            if(~isempty(obj.Pipeline))
-                comp=obj.Pipeline.GetComponent(obj.Component);
+            if(~isempty(obj.comp))
+                comp=obj.comp;
             else
-                error('No Pipeline associated with this View!');
+                if(~isempty(obj.Pipeline))
+                    comp=obj.Pipeline.GetComponent(obj.Component);
+                else
+                    error('No Pipeline associated with this View!');
+                end
             end
         end
     end

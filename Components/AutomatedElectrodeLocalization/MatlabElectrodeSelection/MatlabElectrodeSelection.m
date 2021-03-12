@@ -9,6 +9,7 @@ classdef MatlabElectrodeSelection < AComponent
         CTIdentifier % Identifier for CT
         SurfaceIdentifier % Optional Surface Identifier
         ElectrodeLocationIdentifier % Identifier for Electrode Locations
+        TrajectoryIdentifier
     end
     properties (Access = private)
         buttonActivity
@@ -20,6 +21,7 @@ classdef MatlabElectrodeSelection < AComponent
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             obj.CTIdentifier='CT';
             obj.SurfaceIdentifier='Surface';
+            obj.TrajectoryIdentifier='Trajectory';
             obj.buttonActivity=struct('IsPressed',false,'Point',0,'Button',0);
         end
         
@@ -27,6 +29,7 @@ classdef MatlabElectrodeSelection < AComponent
             obj.AddInput(obj.CTIdentifier,'Volume');
             obj.AddInput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
             obj.AddOptionalInput(obj.SurfaceIdentifier,'Surface');
+            obj.AddOptionalInput(obj.TrajectoryIdentifier,'ElectrodeLocation');
             obj.AddOutput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
         end
         
@@ -38,8 +41,15 @@ classdef MatlabElectrodeSelection < AComponent
             f=figure('MenuBar', 'none', ...
                 'Toolbar', 'none');
             selFig=MatlabElectrodeSelectionGUI('Parent',f);
-            if(length(varargin) == 2)
-                selFig.SetSurface(varargin{2});
+            if(length(varargin) > 1)
+                for i=1:2:length(varargin)
+                    if(strcmp(varargin{i},obj.SurfaceIdentifier))
+                        selFig.SetSurface(varargin{i+1});
+                    end
+                    if(strcmp(varargin{i},obj.TrajectoryIdentifier))
+                        selFig.SetTrajectories(varargin{i+1});
+                    end
+                end
             end
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
             selFig.SetElectrodeLocation(out);

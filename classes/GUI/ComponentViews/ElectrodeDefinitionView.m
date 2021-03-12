@@ -1,7 +1,6 @@
 classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
     %ElectrodeDefinitionView - View associated with the Electrode Definition
     %
-    
     properties (Access = protected)
         gridDefinitionTable
         buttonGrid
@@ -32,9 +31,10 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
              catch e
                 delete( obj )
                 e.throwAsCaller()
-            end
-            
+             end
         end
+            
+        
     end
     
     methods(Access = protected)
