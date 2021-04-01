@@ -40,12 +40,15 @@ classdef Volume < AData & IFileLoader
         
         function coordOut=Vox2Ras(obj,coordIn)
             %Vox2Ras transforms coordinates from Voxel space into RAS sapce
-            coordOut= [obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1] *[coordIn(:); 1];
+            %Input coordinates are assumed to be in MATLABs 1 index system
+            coordOut= [obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1] *[coordIn(:)-1; 1];
             coordOut=coordOut(1:3);
         end
         
         function coordOut=Ras2Vox(obj,coordIn)
-           coordOut=[obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]\[coordIn(:); 1];
+            %Ras2Vox transforms RAS values into Matlab 1 based voxel
+            %coordinates
+           coordOut=[obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]\[coordIn(:)+2; 1];
             coordOut=coordOut(1:3);
         end
         
