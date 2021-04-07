@@ -29,6 +29,8 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         isRunning
         
         trajectories
+        
+        trajMenu
     end
     
     methods
@@ -58,6 +60,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             end
             cm = uicontextmenu(gcf);
             uimenu(cm,'Text','Find All','Callback', @(~,~) obj.findConnectedElectrodes());
+            obj.trajMenu=uimenu(cm,'Text','Auto Detect','Callback', @(~,~) obj.findAllElectrodes(),'Enable','off');
             obj.uiListView.UIContextMenu=cm;
             %set(gcf, 'WindowButtonDownFcn', {@(a,b)obj.callbackClickA3DPoint(a,b)}); 
         end
@@ -103,6 +106,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         function SetTrajectories(obj,traj)
             obj.trajectories=traj;
             obj.updateView();
+            set(obj.trajMenu,'Enable','on');
         end
         
     end
@@ -126,6 +130,10 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             end
             obj.uiListView.String=vals;
             bj.uiListView.Value=oldVal;
+        end
+        
+        function findAllElectrodes(obj)
+            disp('Not implmented!');
         end
                 
         function findConnectedElectrodes(obj)
@@ -284,7 +292,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 [x,y,z]=sphere;
                 patch_center=obj.Volume.Vox2Ras(obj.volProps.Centroid(i,1:3))';
                 hold(obj.ax3D,'on');
-                obj.elPatches{i}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',i,'EdgeColor','none','FaceAlpha',1); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
+                obj.elPatches{i}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',i,'EdgeColor','none','FaceAlpha',1,'FaceLighting','none'); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
                 %scatter3(obj.ax3D,patch_center(1),patch_center(2),patch_center(3),60,'+','LineWidth',2); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
                 
                 material(obj.elPatches{i},'dull');
