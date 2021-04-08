@@ -312,8 +312,9 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         end
         
         function plotTrajectories(obj)
-            identifiers=unique(obj.trajectories.DefinitionIdentifier);
+            
             if(~isempty(obj.trajectories))
+                identifiers=unique(obj.trajectories.DefinitionIdentifier);
                 hold(obj.ax3D,'on');
                 for i=1:length(identifiers)
                     traj=obj.trajectories.Location(obj.trajectories.DefinitionIdentifier==identifiers(i),:);
