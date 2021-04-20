@@ -225,7 +225,6 @@ classdef MainGUI < handle
 
         
         function createTreeView(obj)
-            delete(obj.componentMenu);
             if(~isempty(obj.ProjectRunner))
 
                 delete(obj.treeNodes.Input.Children);
@@ -256,16 +255,12 @@ classdef MainGUI < handle
         
         function cm=buildContextMenu(obj,compName)
                 cm = uicontextmenu(obj.window);
-                obj.addContextEntries(cm,compName);
-
-                
-        end
-        
-        function addContextEntries(obj,cm,compName)
                 uimenu(cm,'Text','Configure','Callback', @(~,~) obj.configureComponent(compName,true));
                 uimenu(cm,'Text','Run','Callback',@(~,~) obj.runComponent(compName,true));
                 uimenu(cm,'Text','Reset','Callback',@(~,~) obj.resetComponent(compName));
                 uimenu(cm,'Text','Reload Results','Callback',@(~,~) obj.reloadResults(compName));
+
+                
         end
         
         function reloadResults(obj,compName)
@@ -332,12 +327,7 @@ classdef MainGUI < handle
         
         function treeClick(obj,a,b)
             if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData) && b.SelectionType == 'normal')
-                context=b.Nodes.UIContextMenu;
-                delete(obj.componentMenu);
-                if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
-                    obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
-                    obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
-                end
+                obj.componentMenu=uimenu
                 %update Views
                 vs=keys(obj.viewTabs);
                 for i=1:length(vs)

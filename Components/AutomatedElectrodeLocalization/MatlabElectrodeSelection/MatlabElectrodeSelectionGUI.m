@@ -129,16 +129,48 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
 
             end
             obj.uiListView.String=vals;
-            bj.uiListView.Value=oldVal;
+            obj.uiListView.Value=oldVal;
         end
         
         function findAllElectrodes(obj)
-            disp('Not implmented!');
+            elDefIdx=obj.uiListView.Value;
+            disp(['Running fully automated Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
+            linep=obj.trajectories.Location((obj.trajectories.DefinitionIdentifier == elDefIdx),:);
+            centroids=obj.getRASCentroids();
+            
+            centroid_dist=nan(size(centroids,1),1);
+
+            v1=linep(1,:);
+            v2=linep(2,:);
+            d=[];
+            for ii=1:size(centroids)
+                a = v1 - v2;
+                b = centroids(ii,:) - v2;
+                d(ii) = norm(cross(a,b)) / norm(a);
+            end
+          
+            [~,I]=sort(d);
+            closest_centroid=centroids(I,:);
+            found_els=closest_centroid(1:obj.elDefinition.Definition(elDefIdx).NElectrodes,:);
+            del_mask=[];
+            for i=1:size(found_els,1)
+                pIdx=obj.findPrevSelectedPoint(pointCloud(obj.elLocations.Location),found_els(i,:));
+                if(~isempty(pIdx))
+                    del_mask(end+1)=i;
+                end
+            end
+            found_els(del_mask,:)=[];
+            obj.elLocations.RemoveWithIdentifier(elDefIdx);
+            obj.elLocations.AddWithIdentifier(elDefIdx,found_els);
+            obj.findConnectedElectrodes(false);
         end
                 
-        function findConnectedElectrodes(obj)
+        function findConnectedElectrodes(obj,override)
+            if(~exist('override','var'))
+                override=true;
+            end
             elDefIdx=obj.uiListView.Value;
-            disp(['Running automated Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
+            disp(['Running Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
             
             elMask=obj.elLocations.DefinitionIdentifier == elDefIdx;
             locs=obj.elLocations.Location(elMask,:);
@@ -167,28 +199,32 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             gdist=obj.elDefinition.Definition(elDefIdx).Spacing;
             found_locs=cell(size(locs,1),1);
             numElFound=zeros(size(locs,1),1);
-            
+            pIdx=[];
             
             for iel=1:size(locs,1)
-                pIdx(iel)=obj.findPrevSelectedPoint(pointCloud(centroids),locs(iel,:));
+                p=obj.findPrevSelectedPoint(pointCloud(centroids),locs(iel,:));
+                if(isempty(p))
+                    continue
+                end
+                pIdx(end+1)=p;
                 lcentroids=centroids;
                 bNames=1:size(centroids,1);
-                lcentroids(pIdx(iel),:)=[];
-                bNames(pIdx(iel))=[];
+                lcentroids(pIdx(end),:)=[];
+                bNames(pIdx(end))=[];
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
                    % poss=findNeighbour(pIdx,locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);
-                    func=@(x)(numel(TraverseTree(findNeighbour(pIdx(iel),locs(iel,:),lcentroids,90,bNames,x,gdist,true),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
+                    func=@(x)(numel(TraverseTree(findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,x,gdist,true),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 else
                    % poss=findStripNeighbour(pIdx,locs(iel,:),lcentroids,bNames,gvar_best,gdist);
-                    func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(iel),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
+                    func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
                 gvar_best=fminsearchbnd(func,gvar,0.05,0.5,o);
                 disp(gvar_best);
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
-                   poss=findNeighbour(pIdx(iel),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);
+                   poss=findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);
                    % func=@(x)(numel(TraverseTree(findNeighbour(pIdx,locs(iel,:),lcentroids,90,bNames,x,gdist,true),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 else
-                   poss=findStripNeighbour(pIdx(iel),locs(iel,:),lcentroids,bNames,gvar_best,gdist,true);
+                   poss=findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,gvar_best,gdist,true);
                     %func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx,locs(iel,:),lcentroids,bNames,x,gdist),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
 
@@ -198,24 +234,26 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                     
                 
             end
-            remList=[];
-            for iel=1:size(locs,1)
-                if(numel(intersect(found_locs{iel},pIdx)) < length(pIdx))
-                    remList(end+1)=iel;
+            if(~override)
+                remList=[];
+                for iel=1:size(locs,1)
+                    if(numel(intersect(found_locs{iel},pIdx)) < length(pIdx))
+                        remList(end+1)=iel;
+                    end
                 end
+                numElFound(remList)=[];
+                found_locs(remList)=[];
             end
-            numElFound(remList)=[];
-            found_locs(remList)=[];
+
             [~,idx]=max(numElFound);
             if(isempty(numElFound))
                 disp('No Electrodes found that match the criteria');
             else
                 disp(['Electrodes found: ' num2str(numElFound(idx))]);
+                obj.elLocations.RemoveWithIdentifier(elDefIdx);
+                obj.elLocations.AddWithIdentifier(elDefIdx,centroids(found_locs{idx},:))
             end
-            obj.elLocations.DefinitionIdentifier(elMask)=[];
-            obj.elLocations.Location(elMask,:)=[];
-            obj.elLocations.Location(end+1:end+numElFound(idx),:)=centroids(found_locs{idx},:);
-            obj.elLocations.DefinitionIdentifier(end+1:end+numElFound(idx))=elDefIdx*ones(numElFound(idx),1);
+
             obj.updateListView();
             obj.colorPatches();            
             

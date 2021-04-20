@@ -8,7 +8,7 @@ function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segme
                     mri_path ''' ''' ...
                     xfrm_matrix_out_path ''''],'-echo');
                 elseif(ispc)
-                    subsyspath=ependencyHandler.Instance.GetDependency('UbuntuSubsystemPath');
+                    subsyspath=DependencyHandler.Instance.GetDependency('UbuntuSubsystemPath');
                     w_xfrm_matrix_path=convertToUbuntuSubsystemPath(xfrm_matrix_path,subsyspath);
                     w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
                     w_mri_path=convertToUbuntuSubsystemPath(mri_path,subsyspath);
