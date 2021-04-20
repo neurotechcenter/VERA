@@ -12,7 +12,8 @@ classdef SliceViewer < uix.Grid
         CursorChangedFcn = [];
         SliceChangedFcn = [];
         ViewAxis = [1 2 3]; %Axis to be viewed (x,y, slider)
-        SliderVisible= 'on'
+        SliderVisible= 'on'      
+        ElectrodeLocation
     end
     properties (Access = protected)
         slider
@@ -21,6 +22,7 @@ classdef SliceViewer < uix.Grid
         posText=[]
         silentChange = false
         imageObjs = {}
+        currElectrodes = {}
       %  oldImages={};
     end
     
@@ -33,7 +35,6 @@ classdef SliceViewer < uix.Grid
             axis(obj.imageView,'fill')
             addlistener(obj,'Images','PreSet',@obj.imagePreChanged);
             addlistener(obj,'Images','PostSet',@obj.imageChanged);
-            
             addlistener(obj,'ImageAlphas','PostSet',@obj.alphaChanged);
             addlistener(obj,'SliderVisible','PostSet',@obj.sliderVisibilityChanged);
             
@@ -76,6 +77,9 @@ classdef SliceViewer < uix.Grid
 
            if(~isempty(obj.imageObjs) && ~obj.silentChange)
                for i=1:length(obj.ImageAlphas)
+                    if(length(obj.imageObjs) < i)
+                        continue;
+                    end
                     curr_slice=zeros(3,1);
                     curr_slice(obj.ViewAxis(3))=obj.Slice;
                     sliderSlice=round(obj.Images{i}.Ras2Vox(curr_slice));
@@ -153,7 +157,7 @@ classdef SliceViewer < uix.Grid
             end
             hold(obj.imageView,'off');
             obj.updateCursor();
-
+            obj.updateElectrodeLocations();
             
         end
         
@@ -166,6 +170,23 @@ classdef SliceViewer < uix.Grid
             end
             xl=[min(xd) max(xd)];
             yl=[min(yd) max(yd)];
+        end
+        
+        function updateElectrodeLocations(obj)
+            if(~isempty(obj.ElectrodeLocation))
+                if(~isempty(obj.currElectrodes))
+                    delete([obj.currElectrodes{:}]);
+
+                    obj.currElectrodes={};
+                end
+                for iel=1:size(obj.ElectrodeLocation.Location,1)
+                    eloc=obj.ElectrodeLocation.Location(iel,:);
+                    if(abs(round(eloc(obj.ViewAxis(3)))-round(obj.Slice)) < 0.5)
+                        hold(obj.imageView,'on')
+                        obj.currElectrodes{end+1}=scatter(obj.imageView,eloc(obj.ViewAxis(1)),eloc(obj.ViewAxis(2)),10,'or','fill','LineWidth',0.5);
+                    end
+                end
+            end
         end
         
         function updateCursor(obj)
@@ -182,7 +203,7 @@ classdef SliceViewer < uix.Grid
 
                 if(obj.CursorPosition(obj.ViewAxis(3)) == obj.Slice)
                     hold(obj.imageView,'on')
-                    obj.currCursor=scatter(obj.imageView,obj.CursorPosition(obj.ViewAxis(1)),obj.CursorPosition(obj.ViewAxis(2)),200,'+r','LineWidth',1.5);
+                    obj.currCursor=scatter(obj.imageView,obj.CursorPosition(obj.ViewAxis(1)),obj.CursorPosition(obj.ViewAxis(2)),200,'+g','LineWidth',1.5);
                     obj.posText=text(obj.imageView,0,...
                         0.05,...
                         ['  X: ' num2str(obj.CursorPosition(1),'%4.1f') '     Y: '...

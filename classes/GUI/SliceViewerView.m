@@ -3,6 +3,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
     %See also AView, Volume, SliceViewer, SliceViewerXYZ
     properties (SetObservable = true)
         ImageIdentifiers %Data Identifier 
+        ElectrodeLocationIdentifier
     end
     properties (Access = protected)
         settingsGrid
@@ -13,7 +14,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
     methods
         function obj = SliceViewerView(varargin)
             vGrid=uix.VBox('Parent',obj);
-            
+            obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             obj.ImageIdentifiers = {};
             %obj.cbxImage=uicontrol('style','checkbox','Parent',obj.settingsGrid,'String',['Show ' obj.ImageIdentifier],'Value',1,'Callback',@obj.cbxChanged);
             %obj.cbxImage2=uicontrol('style','checkbox','Parent',obj.settingsGrid,'String',['Show ' obj.Image2Identifier],'Value',1,'Callback',@obj.cbxChanged);
@@ -52,6 +53,15 @@ classdef SliceViewerView < SliceViewerXYZ & AView
         
         
         function updateView(obj)
+                        %add electrode locations
+            if(isKey(obj.AvailableData,obj.ElectrodeLocationIdentifier))
+                elLocs=obj.AvailableData(obj.ElectrodeLocationIdentifier);
+                if(isObjectTypeOf(elLocs,'ElectrodeLocation'))
+                    obj.ElectrodeLocation=elLocs;
+                end
+            else
+                obj.ElectrodeLocation=[];
+            end
             images={};
             alphas={};
             delete(obj.settingsGrid.Children);
@@ -65,6 +75,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             else
                 imgIdentifiers=obj.ImageIdentifiers;
             end
+            obj.supressUpdate=false;
             for i = 1:length(imgIdentifiers)
                 if(obj.AvailableData.isKey(imgIdentifiers{i}))
                     images{end+1}=obj.AvailableData(imgIdentifiers{i}).GetRasSlicedVolume();
@@ -79,12 +90,13 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             clims=obj.GetColorLimits();
             obj.supressUpdate=true;
             obj.slMin.Min=clims(1);
-            obj.slMin.Value=clims(1);
             obj.slMin.Max=clims(2);
+            obj.slMin.Value=clims(1);
             obj.slMax.Min=clims(1);
             obj.slMax.Max=clims(2);
             obj.slMax.Value=clims(2);
             obj.supressUpdate=false;
+
 
         end
         

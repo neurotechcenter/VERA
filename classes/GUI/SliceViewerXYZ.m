@@ -7,6 +7,7 @@ classdef SliceViewerXYZ < uix.Grid
         ImageAlphas = {}
         Cursor =[]
         SliderVisible= 'on'
+        ElectrodeLocation
     end
     
     properties (Access = protected)
@@ -30,6 +31,7 @@ classdef SliceViewerXYZ < uix.Grid
              obj.SliceViewY=SliceViewer('Parent',obj,'SliderOrientation','east',...
                  'CursorChangedFcn',@obj.setCursor,'SliceChangedFcn',@obj.sliceChanged,'ViewAxis',[1 3 2],'BackgroundColor','k');
             addlistener(obj,'Images','PostSet',@obj.imageChanged);
+            addlistener(obj,'ElectrodeLocation','PostSet',@obj.electrodeLocationChanged);
             addlistener(obj,'ImageAlphas','PostSet',@obj.alphasChanged);
             addlistener(obj,'Cursor','PostSet',@obj.setCursorOutside);
             addlistener(obj,'SliderVisible','PostSet',@obj.sliderVisibilityChanged);
@@ -51,8 +53,12 @@ classdef SliceViewerXYZ < uix.Grid
             obj.SliceViewZ.SetColorLimits(lims);
         end
         
-        function lim=GetColorLimits(obj)
-            lim=obj.SliceViewX.GetColorLimits();
+        function clim_t=GetColorLimits(obj)
+            clim_t=[inf -inf];
+            for i=1:length(obj.Images)
+                clim_t(1)=min(clim_t(1),obj.Images{i}.Image.hdr.dime.glmin);
+                clim_t(2)=max(clim_t(2),obj.Images{i}.Image.hdr.dime.glmax);
+            end
         end
 
     end
@@ -123,6 +129,12 @@ classdef SliceViewerXYZ < uix.Grid
             obj.SliceViewX.SliderVisible=obj.SliderVisible;
             obj.SliceViewY.SliderVisible=obj.SliderVisible;
             obj.SliceViewZ.SliderVisible=obj.SliderVisible;
+        end
+        
+        function electrodeLocationChanged(obj,~,~)
+            obj.SliceViewX.ElectrodeLocation=obj.ElectrodeLocation;
+            obj.SliceViewY.ElectrodeLocation=obj.ElectrodeLocation;
+            obj.SliceViewZ.ElectrodeLocation=obj.ElectrodeLocation;
         end
     end
 end
