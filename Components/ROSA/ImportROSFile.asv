@@ -91,7 +91,6 @@ classdef ImportROSFile < AComponent
                 trajectories.Location(end+1,:)=ras_projected.Trajectories(ii).start;
                 trajectories.DefinitionIdentifier(end+1)=ii;
                 trajectories.Location(end+1,:)=ras_projected.Trajectories(ii).end;
-                definitions.Definition(ii).NElectrodes=obj.calculateNumContacts([ras_projected.Trajectories(ii).start; ras_projected.Trajectories(ii).end]);
             end
              
             volume.LoadFromFile(ras_projected.displays{1});
@@ -103,23 +102,9 @@ classdef ImportROSFile < AComponent
             definitions.Definition=obj.ElectrodeDefinition;
         end
         
-        function numC=calculateNumContacts(obj,traj)
-            shankLength=pdist(traj)-3;
-            if(shankLength <= 12.5)
-                numC=4;
-            elseif(shankLength <= 19.5)
-                numC=6;
-            elseif(shankLength <= 26.5)
-                numC=8;
-            elseif(shankLength <= 33.5)
-                numC=10;
-            elseif(shankLength <= 40.5)
-                numC=12;
-            elseif(shankLength <= 47.5)
-                numC=14;
-            else
-                numC=16;
-            end
+        function calculateNumContacts(obj,traj)
+            shankLength=pdist()
+            if(pdist)
         end
     end
     
