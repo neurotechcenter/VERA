@@ -1,4 +1,4 @@
-function [ surfs] = plotBallsOn3DImage(ax,electrodes, color, radius,varargin)
+function [ surfs] = plotBallsOnVolume(ax,electrodes, color, radius,varargin)
 %PLOTBALLS  Plots electrodes in assigned color
 %ax - axis to be plotted on
 %color - color to be plotted

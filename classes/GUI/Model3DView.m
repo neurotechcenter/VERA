@@ -80,7 +80,7 @@ classdef Model3DView < AView & uix.Grid
                                 elPos=obj.AvailableData(elIdentifiers{i_elId});
                                 if(~isempty(elPos))
                                     for i=unique(elPos.DefinitionIdentifier)',
-                                    plotBallsOn3DImage(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
+                                    plotBallsOnVolume(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
                                     end
                                 end
                             
