@@ -168,7 +168,8 @@ classdef Pipeline < handle
                 for io=1:length(outp)
                     for cp=c+1:length(obj.Components) %search if it is input for any other component
                         outcp=obj.componentMap(compKeys{cp}).Outputs;
-                        inpcp=obj.componentMap(compKeys{cp}).Inputs;%[obj.componentMap(compKeys{cp}).Inputs obj.componentMap(compKeys{cp}).OptionalInputs];
+                        inpcp=[obj.componentMap(compKeys{cp}).Inputs obj.componentMap(compKeys{cp}).OptionalInputs];
+                       
                         if(any(strcmp(inpcp,outp{io})))
                             s{end+1}=compKeys{c};
                             t{end+1}=compKeys{cp};

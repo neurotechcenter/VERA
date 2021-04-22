@@ -46,7 +46,7 @@ classdef LoadFreeviewPointFile < AComponent
                 el=importelectrodes(fullfile(path,files{i_f}));
                 if(~isempty(elDef))
                     elDefNames = {elDef.Definition.Name};
-                    identifier=find(strcmp(files{i_f}(1:end-4),elDefNames),1);
+                    identifier=find(strcmp(files{i_f},elDefNames),1);
                 end
                 elData.Location=[elData.Location; el];
                 elData.DefinitionIdentifier=[elData.DefinitionIdentifier; identifier*ones(length(el),1)];
