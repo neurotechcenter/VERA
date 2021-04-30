@@ -89,7 +89,7 @@ classdef Volume < AData & IFileLoader
             tpath=fullfile(obj.GetDependency('TempPath'),'dicom_convert');
             mkdir(tpath);
             [spath,~,ext]=fileparts(path);
-            if(any(strcmpi(ext,{'.dcm','.dicom'})))
+            if(any(strcmpi(ext,{'.dcm','.dicom',''})))
                 dicm2nii(spath,tpath,0);
                 path=dir(fullfile(tpath,'*.nii'));
                 if(numel(path) > 1 )
