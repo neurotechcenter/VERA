@@ -57,7 +57,6 @@ classdef Volume < AData & IFileLoader
                 voxelSize=[1 1 1];
             end
             %ras sliced volume 
-
             if(~isempty(obj.RasVolume) && isequal(voxelSize,obj.VoxelSize))
                 V=obj.RasVolume;
             else
@@ -67,6 +66,7 @@ classdef Volume < AData & IFileLoader
                 V=Volume();
                 V.LoadFromFile(tpath);
                 obj.RasVolume=V;
+                rmdir(tpath);
             end
         end
 
@@ -88,8 +88,9 @@ classdef Volume < AData & IFileLoader
             % See also IFileLoader
             tpath=fullfile(obj.GetDependency('TempPath'),'dicom_convert');
             mkdir(tpath);
+            try
             [spath,~,ext]=fileparts(path);
-            if(any(strcmpi(ext,{'.dcm','.dicom'})))
+            if(any(strcmpi(ext,{'.dcm','.dicom',''})))
                 dicm2nii(spath,tpath,0);
                 path=dir(fullfile(tpath,'*.nii'));
                 if(numel(path) > 1 )
@@ -111,7 +112,9 @@ classdef Volume < AData & IFileLoader
                 obj.Image=load_untouch_nii(path,[],[],[],[],[]);
                 obj.Path=path;    
             end
-            rmdir(tpath,'s');
+            catch
+            end
+            rmdir(tpath,'s'); %ensure that temp folder is deleted
                % [nii.img,nii.XYZ ]=spm_read_vols(nii);
 
         end
@@ -129,6 +132,7 @@ classdef Volume < AData & IFileLoader
                 end
             end
         end
+        
         function savepath=Save(obj,path)
             if(~isempty(obj.Image))
                 obj.Path=fullfile(path,[obj.Name '.nii']);
