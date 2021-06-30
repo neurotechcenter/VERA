@@ -49,17 +49,13 @@ function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segme
                 [~,rlabel,rct]=read_annotation(fullfile(segmentationPath,'label/rh.aparc.annot'));
                 %lhtri=lhtri+1; 
                 %rhtri=rhtri+1+size(lhtri,1);
-                names={lct.struct_names{:} rct.struct_names{:}};
-                identifiers=[lct.table(:,5); rct.table(:,5)];
-                u_identifiers=unique(identifiers);
-                colortable=[lct.table(:,1:3); rct.table(:,1:3)]/255;
-                u_colortable=zeros(numel(u_identifiers),3);
-                for i=1:length(u_identifiers)
-                    u_colortable(i,:)=colortable(find(identifiers == u_identifiers(i),1),:);
-                end
+                names=lct.struct_names;
+                u_identifiers=lct.table(:,5);
+                u_colortable=[lct.table(:,1:3)]/255;
+                
 
                 surf.Annotation=[llabel; rlabel];
-                surf.AnnotationLabel=struct('Name',uniqueStrCell(names)','Identifier',num2cell(u_identifiers),'PreferredColor',num2cell(u_colortable,2));
+                surf.AnnotationLabel=struct('Name',names,'Identifier',num2cell(u_identifiers),'PreferredColor',num2cell(u_colortable,2));
 
                 [LHtempvert, LHtemptri] = read_surf(pathToLhSphere);
                 [RHtempvert, RHtemptri] = read_surf(pathToRhSphere);
