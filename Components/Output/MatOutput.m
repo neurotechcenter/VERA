@@ -36,7 +36,8 @@ classdef MatOutput < AComponent
             viewstruct.enableaxis=0;
             viewstruct.lightingtype='gouraud';
             [electrodeLabels,LabelName]=obj.findLabels(eLocs,surf);
-            annotation=surf.Annotation;
+            annotation.Annotation=surf.Annotation;
+            annotation.AnnotationLabel=surf.AnnotationLabel;
             tala=struct('electrodes',eLocs.Location,'activations',zeros(size(eLocs.Location,1),1),'trielectrodes',eLocs.Location);
             vcontribs = [];
             [file,path]=uiputfile('*.mat');
@@ -50,7 +51,7 @@ classdef MatOutput < AComponent
                  p=elocs.Location(ie,:);
                 [~,vId]=min((surf.Model.vert(:,1)-p(1)).^2 + (surf.Model.vert(:,2)-p(2)).^2 + (surf.Model.vert(:,3)-p(3)).^2);
                 labelId(ie)=surf.Annotation(vId);
-               
+                
                 labelName(labelId(ie))= ['' surf.AnnotationLabel(([surf.AnnotationLabel.Identifier] == labelId(ie))).Name];
              end
         end
