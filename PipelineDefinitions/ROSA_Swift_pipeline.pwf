@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="Freesurfer Segmentation Pipeline">
+<PipelineDefinition Name="ROSA Swift Pipeline">
 
 
     <Component Type="FileLoader">
@@ -48,16 +48,13 @@
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
   
-    <View Type="ElectrodeDefinitionView" Component="Electrode Definition">
-    	<Name>"Electrode Definition"</Name>
-    </View>
 	
-    <View Type="SliceViewerView">
-    	<Name>"Slice Viewer"</Name>
-    </View>
-
     <View Type="Model3DView">
 	<Name>"3D View"</Name>
+    </View>
+
+    <View Type="SliceViewerView">
+    	<Name>"Slice Viewer"</Name>
     </View>
 
 
