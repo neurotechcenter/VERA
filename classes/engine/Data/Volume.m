@@ -66,7 +66,8 @@ classdef Volume < AData & IFileLoader
                 V=Volume();
                 V.LoadFromFile(tpath);
                 obj.RasVolume=V;
-                rmdir(tpath);
+                delete(tpath);
+
             end
         end
 
