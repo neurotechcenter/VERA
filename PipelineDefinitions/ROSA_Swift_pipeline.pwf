@@ -12,17 +12,25 @@
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
-    <Component Type="FreesurferSurfaceLoader" />
+    <Component Type="ImportROSFile"/>
 
-    <Component Type="ElectrodeDefinitionConfiguration">
-	<Identifier>"ElectrodeDefinition"</Identifier>
-	<Name>"Electrode Definition"</Name>
-    </Component>
+    <Component Type="FreesurferSurfaceLoader"/>
 
 
     <Component Type="MoveRASOrigin"/>
 
     <Component Type="Coregistration"/>
+
+    <Component Type="Coregistration">
+	<Name>"Coregister ROSA Trajectories"</Name>
+        <CTIdentifier>"ROSAVolume"</CTIdentifier>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+    </Component>
+
+    <Component Type="ElectrodeTransformation">
+        <TIdentifier>"T_ROSA"</TIdentifier>
+        <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
+    </Component>
 
     <Component Type="MatlabElectrodeSelection"/>
 
@@ -31,20 +39,19 @@
     <Component Type="ReorderElectrodes"/>
 
     <Component Type="ElectrodeProjection"/>
-
 	
+
     <Component Type="MatOutput" />
 
     <Component Type="ReportGenerator">
 	<Name>"Report Generator MRI"</Name>
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
-
   
     <View Type="ElectrodeDefinitionView" Component="Electrode Definition">
     	<Name>"Electrode Definition"</Name>
     </View>
-
+	
     <View Type="SliceViewerView">
     	<Name>"Slice Viewer"</Name>
     </View>
