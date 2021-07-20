@@ -63,6 +63,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.uiListView.UIContextMenu=cm;
             cameratoolbar(gcf,'NoReset');
             removeToolbarExplorationButtons(gcf);
+ 
             %set(gcf, 'WindowButtonDownFcn', {@(a,b)obj.callbackClickA3DPoint(a,b)}); 
         end
         
@@ -277,7 +278,6 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 return;
             end
             obj.isRunning=true;
-            camera_pos=campos(obj.ax3D);
             mb=msgbox('Recalculating Segmentation....');
             if(~isempty(obj.brainSurf))
                 [annotation_remap,cmap]=createColormapFromAnnotations(obj.brainSurf);
@@ -323,10 +323,10 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             disp('Plotting Segments');
             tic
             hold(obj.ax3D,'on');
-           % A=[obj.Volume.Image.hdr.hist.srow_x; obj.Volume.Image.hdr.hist.srow_y; obj.Volume.Image.hdr.hist.srow_z;0 0 0 1];
-           % [f,v]=isosurface(V,0);
-           % v=[v ones(size(v,1),1)]*A';
-            %p = patch(obj.ax3D,'Faces',f,'Vertices',v(:,1:3),'FaceAlpha',0.1,'EdgeColor','none');
+            A=[obj.Volume.Image.hdr.hist.srow_x; obj.Volume.Image.hdr.hist.srow_y; obj.Volume.Image.hdr.hist.srow_z;0 0 0 1];
+            [f,v]=isosurface(V,0);
+             v=[v ones(size(v,1),1)]*A';
+            p = patch(obj.ax3D,'Faces',f,'Vertices',v(:,1:3),'FaceAlpha',0.1,'EdgeColor','none');
             for i=1:size(obj.volProps.BoundingBox,1)
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 [x,y,z]=sphere;
@@ -343,7 +343,6 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             hold(obj.ax3D,'off');
             obj.colorPatches();
             axis(obj.ax3D,'equal');
-            campos(obj.ax3D,camera_pos);
             obj.isRunning=false;
             
             close(mb);

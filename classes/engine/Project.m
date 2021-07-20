@@ -169,7 +169,9 @@ classdef Project < handle
             %OpenProjectFromPath - Open an existing project from Path
             %projPath - Path to project folder
             %returns: Project object
-            mkdir(fullfile(projPath,'temp'));
+            if(~exist(fullfile(projPath,'temp'),'dir'))
+                mkdir(fullfile(projPath,'temp'));
+            end
             DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',projPath,'internal');
             DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(projPath,'temp'),'internal');
             pplineFile=fullfile(projPath,'pipeline.pwf');
