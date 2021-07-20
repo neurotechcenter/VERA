@@ -36,8 +36,12 @@ classdef Serializable < handle
             p=setdiff(p,obj.ignoreList);
             for i=1:numel(p)
                 if(~isempty(obj.(p{i})))
-                    settingel=docNode.createElement(p{i});
-                    settingel.appendChild(docNode.createTextNode(jsonencode(obj.(p{i}))));
+                    if(~isa(obj.(p{i}),'char') && isObjectTypeOf(obj.(p{i}),'Serializable'))
+                        settingel=obj.(p{i}).Serialize(docNode);
+                    else
+                        settingel=docNode.createElement(p{i});
+                        settingel.appendChild(docNode.createTextNode(jsonencode(obj.(p{i}))));
+                    end
                     %changed to be saved as mat file for each component
                     c.appendChild(settingel);
                 end
@@ -60,7 +64,13 @@ classdef Serializable < handle
                 par=docNode.(fileprops{i});
                 if(any(strcmp(fileprops{i},p)))
                     par=docNode.(fileprops{i});
-                    obj.(fileprops{i})=jsondecode(par{1}.Text);
+                    if(isfield(par{1},'Attributes') && isfield(par{1}.Attributes,'Type'))
+                        data=feval(par{1}.Attributes.Type);
+                        data.Deserialize(par{1});
+                        obj.(fileprops{i})=data;
+                    else
+                        obj.(fileprops{i})=jsondecode(par{1}.Text);
+                    end
 %                 elseif(obj.allowDynamicProps)
 %                     addprop(obj,fileprops{i});
 %                     obj.(fileprops{i})=jsondecode(par{1}.Text);

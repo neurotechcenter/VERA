@@ -10,6 +10,8 @@ classdef MatlabElectrodeSelection < AComponent
         SurfaceIdentifier % Optional Surface Identifier
         ElectrodeLocationIdentifier % Identifier for Electrode Locations
         TrajectoryIdentifier
+        Data
+        
     end
     properties (Access = private)
         buttonActivity
@@ -23,6 +25,7 @@ classdef MatlabElectrodeSelection < AComponent
             obj.SurfaceIdentifier='Surface';
             obj.TrajectoryIdentifier='Trajectory';
             obj.buttonActivity=struct('IsPressed',false,'Point',0,'Button',0);
+            obj.Data=[];
         end
         
         function Publish(obj)
@@ -37,7 +40,11 @@ classdef MatlabElectrodeSelection < AComponent
         end
         
         function out=Process(obj,ct,def,varargin)
+            if(isempty(obj.Data))
+                obj.Data=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
+            end
             
+            out=obj.Data;
             f=figure('MenuBar', 'none', ...
                 'Toolbar', 'none');
             selFig=MatlabElectrodeSelectionGUI('Parent',f);
@@ -51,13 +58,12 @@ classdef MatlabElectrodeSelection < AComponent
                     end
                 end
             end
-            out=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
+            %out=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
             selFig.SetElectrodeLocation(out);
             selFig.SetElectrodeDefintion(def);
             selFig.SetVolume(ct);
             
             uiwait(f);
-
         end
     end
 end

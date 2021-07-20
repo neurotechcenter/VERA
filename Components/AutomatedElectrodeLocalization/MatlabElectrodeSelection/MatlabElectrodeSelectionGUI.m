@@ -36,8 +36,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
     methods
         function obj = MatlabElectrodeSelectionGUI(varargin)
             
-            cameratoolbar(gcf,'NoReset');
-            removeToolbarExplorationButtons(gcf);
+
           %   set(obj,'BackgroundColor','k');
             obj.trajectories=[];
             obj.isRunning=false;
@@ -62,6 +61,8 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             uimenu(cm,'Text','Find All','Callback', @(~,~) obj.findConnectedElectrodes());
             obj.trajMenu=uimenu(cm,'Text','Auto Detect','Callback', @(~,~) obj.findAllElectrodes(),'Enable','off');
             obj.uiListView.UIContextMenu=cm;
+            cameratoolbar(gcf,'NoReset');
+            removeToolbarExplorationButtons(gcf);
             %set(gcf, 'WindowButtonDownFcn', {@(a,b)obj.callbackClickA3DPoint(a,b)}); 
         end
         
@@ -149,9 +150,10 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 d(ii) = norm(cross(a,b)) / norm(a);
             end
           
-            [~,I]=sort(d);
+            [dist,I]=sort(d);
+            I=I(dist < obj.elDefinition.Definition(elDefIdx).Spacing);
             closest_centroid=centroids(I,:);
-            found_els=closest_centroid(1:obj.elDefinition.Definition(elDefIdx).NElectrodes,:);
+            found_els=closest_centroid(1:min(obj.elDefinition.Definition(elDefIdx).NElectrodes,numel(I)),:);
             del_mask=[];
             for i=1:size(found_els,1)
                 pIdx=obj.findPrevSelectedPoint(pointCloud(obj.elLocations.Location),found_els(i,:));
