@@ -47,10 +47,11 @@ classdef ReportGenerator < AComponent
              mkdir(fullfile(path,'IMAGING'));
             save(fullfile(path,'IMAGING','brain.mat'),'cortex','ix','tala','viewstruct','cmapstruct','vcontribs','annotation','annotationlabel');
             mkdir(fullfile(path,'IMAGING','NIfTI','MRI'));
-            img_m=load_nii(image.GetRasSlicedVolume().Path);
-            save_nii(img_m,fullfile(path,'IMAGING','NIfTI','MRI',[obj.ImageIdentifier '.img']));
+            RAS_img=image.GetRasSlicedVolume();
             
-             compPath=fullfile(path,'IMAGING','Electrodes');
+            
+            RAS_img.SaveNiiToPath(fullfile(path,'IMAGING','NIfTI','MRI',[obj.ImageIdentifier '.img']));
+            compPath=fullfile(path,'IMAGING','Electrodes');
              mkdir(compPath);
              for i=1:length(elDef.Definition)
                 str='\n';
