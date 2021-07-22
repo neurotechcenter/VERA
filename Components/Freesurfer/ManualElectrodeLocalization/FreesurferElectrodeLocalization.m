@@ -78,7 +78,9 @@ classdef FreesurferElectrodeLocalization < AComponent
                 end
                 str=[str 'info \nnumpoints ' num2str(numeDefEls) '\nuseRealRAS 1'];
                 
-                wayptfileIds{i}=[compPath '/' regexprep(elDef.Definition(i).Name,' +','_') '.dat'];
+                wayptfileIds{i}=[compPath '/' regexprep(regexprep(elDef.Definition(i).Name,' +','_'),'[<>:"/\|?*]','_${num2str(cast($0,''uint8''))}') '.dat'];
+                
+                %wayptfileIds{i}=regexprep(wayptfileIds{i},'[<>:"/\|?*]','_${num2str(sscanf(''a'',''%x''))}');
                 if(~acceptAll && exist(wayptfileIds{i},'file'))
                     answer=questdlg(['Existing Point file for ' elDef.Definition(i).Name ' found!'],'Override?','Override all','Keep all','Keep all');
                     switch(answer)
