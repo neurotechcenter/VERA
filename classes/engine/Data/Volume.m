@@ -69,6 +69,7 @@ classdef Volume < AData & IFileLoader
                 reslice_nii(obj.Path,tpath,voxelSize);
                 V=Volume();
                 V.LoadFromFile(tpath);
+                V.Path='';
                 obj.RasVolume=V;
                 delete(tpath);
             end
