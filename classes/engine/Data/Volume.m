@@ -140,9 +140,9 @@ classdef Volume < AData & IFileLoader
         
         function SaveNiiToPath(obj,path)
             if(isfield(obj.Image,'untouch') && obj.Image.untouch == 1)
-                save_untouch_nii(obj.Image,obj.Path);
+                save_untouch_nii(obj.Image,path);
             else
-                save_nii(obj.Image,obj.Path);
+                save_nii(obj.Image,path);
             end           
         end
         function savepath=Save(obj,path)
