@@ -35,7 +35,7 @@ classdef FreesurferDatExport < AComponent
                 end
                 str=[str 'info \nnumpoints ' num2str(numeDefEls) '\nuseRealRAS 1'];
                 
-                wayptfileIds{i}=[compPath '/' regexprep(elDef.Definition(i).Name,' +','_') '.dat'];
+                wayptfileIds{i}=[compPath '/' regexprep(regexprep(elDef.Definition(i).Name,' +','_'),'[<>:"/\|?*]','_${num2str(cast($0,''uint8''))}') '.dat'];
                 fileID = fopen(wayptfileIds{i},'w');
                 fprintf(fileID,str);
                 fclose(fileID);
