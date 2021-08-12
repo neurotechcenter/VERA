@@ -323,10 +323,10 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             disp('Plotting Segments');
             tic
             hold(obj.ax3D,'on');
-            A=[obj.Volume.Image.hdr.hist.srow_x; obj.Volume.Image.hdr.hist.srow_y; obj.Volume.Image.hdr.hist.srow_z;0 0 0 1];
-            [f,v]=isosurface(V,0);
-             v=[v ones(size(v,1),1)]*A';
-            p = patch(obj.ax3D,'Faces',f,'Vertices',v(:,1:3),'FaceAlpha',0.1,'EdgeColor','none');
+            %A=[obj.Volume.Image.hdr.hist.srow_x; obj.Volume.Image.hdr.hist.srow_y; obj.Volume.Image.hdr.hist.srow_z;0 0 0 1];
+            %[f,v]=isosurface(V,0);
+            % v=[v ones(size(v,1),1)]*A';
+            %p = patch(obj.ax3D,'Faces',f,'Vertices',v(:,1:3),'FaceAlpha',0.1,'EdgeColor','none');
             for i=1:size(obj.volProps.BoundingBox,1)
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 [x,y,z]=sphere;
@@ -425,7 +425,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         end
         
         function callbackClickA3DPoint(obj,src, eventData)
-            fprintf('you clicked on point number %d\n', src.UserData);
+           % fprintf('you clicked on point number %d\n', src.UserData);
             if(obj.uiListView.Value < 1)
                 warning('No Electrode Definition selected, Location will not be added');
             else

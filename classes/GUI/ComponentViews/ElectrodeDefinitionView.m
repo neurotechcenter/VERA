@@ -1,6 +1,9 @@
 classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
     %ElectrodeDefinitionView - View associated with the Electrode Definition
     %
+    properties (Access = public)
+        History
+    end
     properties (Access = protected)
         gridDefinitionTable
         buttonGrid
@@ -52,12 +55,14 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 end
                 obj.gridDefinitionTable.Data=tbl;
             end
+            comp.History={};
         end
         
         function compUpdate(obj)
             comp=obj.GetComponent();
             if(~isempty(comp))
                 tbl=obj.gridDefinitionTable.Data;
+                obj.History{end+1}={'Update',tbl};
                 if(isempty(tbl))
                     comp.ElectrodeDefinition=[];
                 else
@@ -73,6 +78,7 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
         
         
         function addButtonPressed(obj,~,~)
+            comp=obj.GetComponent();
             tbl=obj.gridDefinitionTable.Data;
             if(isempty(tbl))
                 tbl=cell(1,6);
@@ -81,15 +87,18 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 tbl(end+1,:)={false,[],'',[],[],[]};
             end
             obj.gridDefinitionTable.Data=tbl;
+            comp.History{end+1}={'Add',length(tbl)};
         end
         
         function deleteButtonPressed(obj,~,~)
+            comp=obj.GetComponent();
             tbl=obj.gridDefinitionTable.Data;
             if(~isempty(tbl))
                 idx=[tbl{:,1}];
                 tbl(idx,:)=[];
             end
             obj.gridDefinitionTable.Data=tbl;
+            comp.History{end+1}={'Delete',find(idx)};
         end
         
         

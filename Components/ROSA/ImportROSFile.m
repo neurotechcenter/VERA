@@ -7,6 +7,7 @@ classdef ImportROSFile < AComponent
         ElectrodeDefinitionIdentifier
         VolumeIdentifier
         ElectrodeDefinition
+        History
     end
     
     methods
@@ -14,12 +15,14 @@ classdef ImportROSFile < AComponent
             obj.TrajectoryIdentifier='Trajectory';
             obj.VolumeIdentifier='ROSAVolume';
             obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
+            obj.History={};
         end
         
         function Publish(obj)
             obj.AddOutput(obj.TrajectoryIdentifier,'ElectrodeLocation');
             obj.AddOutput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
             obj.AddOutput(obj.VolumeIdentifier,'Volume');
+            obj.ignoreList{end+1}='History';
         end
         
         function Initialize(obj)
@@ -100,7 +103,23 @@ classdef ImportROSFile < AComponent
             elView=ElectrodeDefinitionView('Parent',h);
             elView.SetComponent(obj);
             uiwait(h);
+            hist=obj.History;
             definitions.Definition=obj.ElectrodeDefinition;
+            for i=1:length(hist)
+                cmd=hist{i}{1};
+                val=hist{i}{2};
+                if(strcmp(cmd,'Add'))
+                elseif(strcmp(cmd,'Delete'))
+                    for i_traj=1:length(val)
+                        trajectories.Location(trajectories.DefinitionIdentifier == val(i),:)=[];
+                        trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier == val(i))=[];
+                        trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i))=trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i)) -1;
+                    end
+                elseif(strcmp(cmd,'Update'))
+                else
+                    error('unknown ElectrodeDefinitionView history command');
+                end
+            end
         end
         
         function numC=calculateNumContacts(obj,traj)
