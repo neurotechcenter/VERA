@@ -75,12 +75,11 @@ classdef SliceViewerXYZ < uix.Grid
             if(obj.ignoreSliceChange) %avoid multiple changes
                 return
             end
-            obj.ignoreSliceChange=true;
+
             obj.SliceViewX.CursorPosition=    obj.Cursor;
             obj.SliceViewY.CursorPosition=    obj.Cursor;
             obj.SliceViewZ.CursorPosition=    obj.Cursor;
-            obj.ignoreSliceChange=false;
-            
+
             
         end
         

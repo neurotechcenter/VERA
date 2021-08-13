@@ -212,6 +212,16 @@ classdef SliceViewer < uix.Grid
                         'Color','white','Units','normalized','FontSize',12);
                      hold(obj.imageView,'off');
                 end
+            else
+                if(~isempty(obj.currCursor))
+                    delete(obj.currCursor);
+
+                    obj.currCursor=[];
+                end
+                if(~isempty(obj.posText))
+                    delete(obj.posText)
+                    obj.posText=[];
+                end
             end
         end
         
@@ -237,7 +247,9 @@ classdef SliceViewer < uix.Grid
         
         function cursorPosChanged(obj,~,~)
             obj.silentChange=true;
-            obj.Slice=obj.CursorPosition(obj.ViewAxis(3));
+            if(~isempty(obj.CursorPosition))
+                obj.Slice=obj.CursorPosition(obj.ViewAxis(3));
+            end
             obj.silentChange=false;
             obj.updateCursor();
         end

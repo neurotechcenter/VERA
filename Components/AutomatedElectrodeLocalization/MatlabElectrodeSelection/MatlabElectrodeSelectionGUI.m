@@ -60,6 +60,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             cm = uicontextmenu(gcf);
             uimenu(cm,'Text','Find All','Callback', @(~,~) obj.findConnectedElectrodes());
             obj.trajMenu=uimenu(cm,'Text','Auto Detect','Callback', @(~,~) obj.findAllElectrodes(),'Enable','off');
+            uimenu(cm,'Text','Remove All','Callback', @(~,~) obj.removeElectrodes());
             obj.uiListView.UIContextMenu=cm;
             cameratoolbar(gcf,'NoReset');
             removeToolbarExplorationButtons(gcf);
@@ -134,6 +135,18 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.uiListView.Value=oldVal;
         end
         
+        function removeElectrodes(obj)
+            elDefIdx=obj.uiListView.Value;
+            elMask=obj.elLocations.DefinitionIdentifier == elDefIdx;
+            locs=obj.elLocations.Location(elMask,:);
+            if(isempty(locs))
+                return;
+            end
+            obj.elLocations.RemoveWithIdentifier(elDefIdx);
+            obj.updateListView();
+            obj.colorPatches();  
+        end
+        
         function findAllElectrodes(obj)
             elDefIdx=obj.uiListView.Value;
             disp(['Running fully automated Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
@@ -144,9 +157,9 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
 
             v1=linep(1,:);
             v2=linep(2,:);
-            d=[];
-            for ii=1:size(centroids)
-                a = v1 - v2;
+            d=[];%calculate how close electrodes are on a line
+            a = v1 - v2;
+            for ii=1:size(centroids) 
                 b = centroids(ii,:) - v2;
                 d(ii) = norm(cross(a,b)) / norm(a);
             end
@@ -154,7 +167,14 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             [dist,I]=sort(d);
             I=I(dist < obj.elDefinition.Definition(elDefIdx).Spacing);
             closest_centroid=centroids(I,:);
-            found_els=closest_centroid(1:min(obj.elDefinition.Definition(elDefIdx).NElectrodes,numel(I)),:);
+            
+            %resort to distance from outer alignment point - this avoids
+            Y = pdist([v1;closest_centroid]);
+            D=squareform(Y);
+            [dist,I]=sort(D(1,2:end));
+            closest_centroid=closest_centroid(I,:);
+            I=I(dist < pdist([v1;v2]));
+            found_els=closest_centroid(I,:);
             del_mask=[];
             for i=1:size(found_els,1)
                 pIdx=obj.findPrevSelectedPoint(pointCloud(obj.elLocations.Location),found_els(i,:));

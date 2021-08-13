@@ -55,7 +55,9 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 end
                 obj.gridDefinitionTable.Data=tbl;
             end
-            comp.History={};
+            if(isprop(comp,'History'))
+                comp.History={};
+            end
         end
         
         function compUpdate(obj)
@@ -87,7 +89,9 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 tbl(end+1,:)={false,[],'',[],[],[]};
             end
             obj.gridDefinitionTable.Data=tbl;
-            comp.History{end+1}={'Add',length(tbl)};
+             if(isprop(comp,'History'))
+                comp.History{end+1}={'Add',length(tbl)};
+             end
         end
         
         function deleteButtonPressed(obj,~,~)
@@ -98,7 +102,9 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 tbl(idx,:)=[];
             end
             obj.gridDefinitionTable.Data=tbl;
-            comp.History{end+1}={'Delete',find(idx)};
+             if(isprop(comp,'History'))
+                comp.History{end+1}={'Delete',find(idx)};
+             end
         end
         
         

@@ -1,4 +1,4 @@
-function rot_matrix = affine_rotation(alpha_x, alpha_y, alpha_z)
+function [rotate_x,rotate_y,rotate_z,rot_matrix] = affine_rotation(alpha_x, alpha_y, alpha_z)
 
 
 rotate_x = [            1,            0,             0, 0;...
