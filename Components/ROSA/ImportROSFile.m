@@ -37,7 +37,7 @@ classdef ImportROSFile < AComponent
             volume=obj.CreateOutput(obj.VolumeIdentifier);
             
             
-            rot2ras=affine_rotation(deg2rad(0),deg2rad(0),deg2rad(180));
+            [~,~,~,rot2ras]=affine_rotation(deg2rad(0),deg2rad(0),deg2rad(180));
             outpath=obj.GetDependency('TempPath');
             
             for i=1:length(rosa_parsed.displays)

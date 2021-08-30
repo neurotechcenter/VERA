@@ -201,7 +201,7 @@ classdef SliceViewer < uix.Grid
                     obj.posText=[];
                 end
 
-                if(obj.CursorPosition(obj.ViewAxis(3)) == obj.Slice)
+                if(abs(obj.CursorPosition(obj.ViewAxis(3)) - obj.Slice) < 0.5 )
                     hold(obj.imageView,'on')
                     obj.currCursor=scatter(obj.imageView,obj.CursorPosition(obj.ViewAxis(1)),obj.CursorPosition(obj.ViewAxis(2)),200,'+g','LineWidth',1.5);
                     obj.posText=text(obj.imageView,0,...
@@ -239,9 +239,7 @@ classdef SliceViewer < uix.Grid
                 end
             end
             if(~obj.silentChange)
-                for i=1:length(obj.Images)
-                    obj.drawImage(i); 
-                end
+                obj.redrawImages();
             end
         end
         
@@ -252,6 +250,14 @@ classdef SliceViewer < uix.Grid
             end
             obj.silentChange=false;
             obj.updateCursor();
+            obj.redrawImages();
+
+        end
+        
+        function redrawImages(obj)
+            for i=1:length(obj.Images)
+                obj.drawImage(i); 
+            end
         end
         
         

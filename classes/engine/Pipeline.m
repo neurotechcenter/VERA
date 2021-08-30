@@ -38,6 +38,7 @@ classdef Pipeline < handle
                     end
                 end
                 
+                
             else
                 error('Pipeline definition xml malformed');
             end

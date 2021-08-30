@@ -40,6 +40,9 @@ classdef AlignmentGUI < SliceViewerXYZ
             addlistener(obj.slMin, 'Value', 'PostSet',@obj.changecMin);
             addlistener( obj.slMax, 'Value', 'PostSet',@obj.changecMax);
             obj.supressUpdate=false;
+            if(~isempty(obj.AlignmentParent.AC))
+                    obj.Cursor=obj.AlignmentParent.AC;
+            end
         end
         
         function AlignmentselectionChanged(obj,~,~)

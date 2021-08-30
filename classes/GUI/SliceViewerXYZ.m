@@ -60,6 +60,18 @@ classdef SliceViewerXYZ < uix.Grid
                 clim_t(2)=max(clim_t(2),obj.Images{i}.Image.hdr.dime.glmax);
             end
         end
+        
+        function JumpToCursor(obj,cursor)
+            if nargin < 2
+                cursor=obj.Cursor;
+            else
+                obj.Cursor=cursor;
+            end
+            obj.SliceViewX.Slice=cursor(1);
+            obj.SliceViewY.Slice=cursor(2);
+            obj.SliceViewZ.Slice=cursor(3);        
+            
+        end
 
     end
     
