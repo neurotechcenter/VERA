@@ -27,16 +27,23 @@ function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segme
 
                 %freesurfer 7 works with symlinks which cannot be resolved
                 %under windows so we need to get the correct target
+                fallbackSuffix='';
+                fd=dir(fullfile(segmentationPath,'surf/lh.pial'));
+                if(fd.bytes == 0) %something went wrong with the symlink
+                    fallbackSuffix='.T1';
+                    warning('lh.pial is 0 byte -- will fallback to lh.pial.T1 and rh.pial.T1');
+                end
+                
                 if(ispc)
-                    pathToLhPial=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.pial'),subsyspath);
-                    pathToRhPial=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.pial'),subsyspath);
+                    pathToLhPial=resolveWSLSymlink(fullfile(segmentationPath,['surf/lh.pial' fallbackSuffix]),subsyspath);
+                    pathToRhPial=resolveWSLSymlink(fullfile(segmentationPath,['surf/rh.pial' fallbackSuffix]),subsyspath);
                     pathToLhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/lh.sphere.reg'),subsyspath);
                     pathToRhSphere=resolveWSLSymlink(fullfile(segmentationPath,'surf/rh.sphere.reg'),subsyspath);
                 else
-                    pathToLhPial=fullfile(segmentationPath,'surf/lh.pial');
-                    pathToRhPial=fullfile(segmentationPath,'surf/rh.pial');
-                    pathToLhSphere=fullfile(segmentationPath,'surf/lh.sphere.reg');
-                    pathToRhSphere=fullfile(segmentationPath,'surf/rh.sphere.reg');
+                    pathToLhPial=resolveSymlink(fullfile(segmentationPath,['surf/lh.pial' fallbackSuffix]));
+                    pathToRhPial=resolveSymlink(fullfile(segmentationPath,['surf/rh.pial' fallbackSuffix]));
+                    pathToLhSphere=resolveSymlink(fullfile(segmentationPath,'surf/lh.sphere.reg'));
+                    pathToRhSphere=resolveSymlink(fullfile(segmentationPath,'surf/rh.sphere.reg'));
                 end
                % [~,vox2ras]=system(['mri_info --vox2ras ' fullfile(segmentationFolder,'SUBJECT','')] );
                % [~,vox2rastkr]=system(['mri_info --vox2ras-tkr ' fullfile(segmentationFolder,'SUBJECT','')] );%3d model is in ras-tkr format, we want RAS coordinates
