@@ -5,13 +5,38 @@ classdef Coregistration < AComponent
         MRIIdentifier
         CTIdentifier
         TIdentifier
-    end
+   end
+   properties (Dependent) %different name to support other naming other than MRI and CT to avoid confusion
+       ReferenceIdentifier 
+       CoregistrationIdentifier
+   end
+    
+   
     
     methods
+        function value=get.ReferenceIdentifier(obj)
+            value=obj.MRIIdentifier;
+        end
+        
+        function value=get.CoregistrationIdentifier(obj)
+            value=obj.CTIdentifier;
+        end
+        
+        function set.ReferenceIdentifier(obj,value)
+            obj.MRIIdentifier=value;
+        end
+        
+        function set.CoregistrationIdentifier(obj,value)
+            obj.CTIdentifier=value;
+        end
+        
+        
         function obj = Coregistration()
             obj.MRIIdentifier='MRI';
             obj.CTIdentifier='CT';
             obj.TIdentifier='T';
+            obj.ignoreList{end+1}='ReferenceIdentifier';
+            obj.ignoreList{end+1}='CoregistrationIdentifier';
             
         end
         function Publish(obj)

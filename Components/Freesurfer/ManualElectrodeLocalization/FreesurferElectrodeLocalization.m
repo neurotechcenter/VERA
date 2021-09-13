@@ -128,7 +128,7 @@ classdef FreesurferElectrodeLocalization < AComponent
             electrodes=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
             for i=1:length(wayptfileIds)
                 el=importelectrodes(wayptfileIds{i});
-                if(length(el) ~= elDef.Definition(i).NElectrodes)
+                if(size(el,1) ~= elDef.Definition(i).NElectrodes)
                     error(['Expected ' num2str(elDef.Definition(i).NElectrodes) ' for ' elDef.Definition(i).Type ' ' elDef.Definition(i).Name ' but total count was ' num2str(length(el))])
                 end
                 electrodes.Location=[electrodes.Location ;el];
