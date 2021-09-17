@@ -149,6 +149,7 @@ classdef Volume < AData & IFileLoader
             if(~isempty(obj.Image))
                 obj.Path=fullfile(path,[obj.Name '.nii']);
                 if(isfield(obj.Image,'untouch') && obj.Image.untouch == 1)
+                    obj.Image.hdr.hist.magic='n+1';
                     save_untouch_nii(obj.Image,obj.Path);
                 else
                     save_nii(obj.Image,obj.Path);
