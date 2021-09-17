@@ -48,8 +48,21 @@ classdef LoadFreeviewPointFile < AComponent
                     elDefNames = {elDef.Definition.Name};
                     identifier=find(strcmp(files{i_f}(1:end-4),elDefNames),1);
                 end
-                elData.Location=[elData.Location; el];
-                elData.DefinitionIdentifier=[elData.DefinitionIdentifier; identifier*ones(length(el),1)];
+                if(~isempty(identifier))
+                    elData.AddWithIdentifier(identifier,el);
+                else
+                    [idx,tf]=listdlg('PromptString','Select Corresponding Definition','SelectionMode','single','ListString',{avail_pipelFiles.name});
+                    if(~isempty(idx))
+                        if(any(elData.DefinitionIdentifier == idx))
+                            answ=questdlg('Do you want to override the existing electrode Locations?','Override?','yes','no');
+                            if(strcmp(answ,'no'))
+                                continue;
+                            end
+                            elData.RemoveWithIdentifier(idx);
+                        end
+                        elData.AddWithIdentifier(idx,el);
+                    end
+                end
             end
             
             

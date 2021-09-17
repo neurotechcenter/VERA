@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineDefinition Name="Swift Pipeline">
 
+    <Component Type="ElectrodeDefinitionConfiguration">
+	<Identifier>"ElectrodeDefinition"</Identifier>
+	<Name>"Electrode Definition"</Name>
+    </Component>
 
     <Component Type="FileLoader">
         <Identifier>"CT"</Identifier>
@@ -14,12 +18,7 @@
 
     <Component Type="FreesurferSurfaceLoader" />
 
-    <Component Type="ElectrodeDefinitionConfiguration">
-	<Identifier>"ElectrodeDefinition"</Identifier>
-	<Name>"Electrode Definition"</Name>
-    </Component>
-
-
+    
     <Component Type="MoveRASOrigin"/>
 
     <Component Type="Coregistration"/>
