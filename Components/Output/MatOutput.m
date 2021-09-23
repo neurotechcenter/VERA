@@ -2,17 +2,20 @@ classdef MatOutput < AComponent
     %MATOUTPUT Creates a .mat file as Output of VERA
     properties
         ElectrodeLocationIdentifier
+        ElectrodeDefinitionIdentifier
         SurfaceIdentifier
     end
     
     methods
         function obj = MatOutput()
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
+            obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
             obj.SurfaceIdentifier='Surface';
         end
         
         function Publish(obj)
             obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
+            obj.AddInput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
             obj.AddInput(obj.SurfaceIdentifier,'Surface');
             
         end
@@ -21,7 +24,7 @@ classdef MatOutput < AComponent
         function Initialize(obj)
         end
         
-        function []= Process(obj, eLocs,surf)
+        function []= Process(obj, eLocs,eDef,surf)
             
             cortex=surf.Model;
             ix=1;
@@ -38,10 +41,21 @@ classdef MatOutput < AComponent
             [electrodeLabels,LabelName]=obj.findLabels(eLocs,surf);
             annotation.Annotation=surf.Annotation;
             annotation.AnnotationLabel=surf.AnnotationLabel;
+            electrodeDefinition.Definition=eDef.Definition;
+            electrodeNames=cell(size(eLocs.DefinitionIdentifier,1),1);
+            idx=1;
+            order=unique(eLocs.DefinitionIdentifier,'stable');
+            for i=1:length(order)
+                for ii=1:eDef.Definition(order(i)).NElectrodes
+                    electrodeNames{idx}=[eDef.Definition(order(i)).Name num2str(ii)];
+                    idx=idx+1;
+                end
+            end
+            electrodeDefinition.DefinitionIdentifier=eLocs.DefinitionIdentifier;
             tala=struct('electrodes',eLocs.Location,'activations',zeros(size(eLocs.Location,1),1),'trielectrodes',eLocs.Location);
             vcontribs = [];
             [file,path]=uiputfile('*.mat');
-            save(fullfile(path,file),'cortex','ix','tala','viewstruct','cmapstruct','vcontribs','electrodeLabels','LabelName','annotation');
+            save(fullfile(path,file),'cortex','ix','tala','viewstruct','electrodeNames','cmapstruct','vcontribs','electrodeDefinition','electrodeLabels','LabelName','annotation');
         end
         
         function [labelId,labelName]=findLabels(~,elocs,surf)

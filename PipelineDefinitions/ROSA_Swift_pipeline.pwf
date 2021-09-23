@@ -41,7 +41,9 @@
     <Component Type="ElectrodeProjection"/>
 	
 
-    <Component Type="MatOutput" />
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat"</Name>
+    </Component>
 
     <Component Type="ReportGenerator">
 	<Name>"Report Generator MRI"</Name>
