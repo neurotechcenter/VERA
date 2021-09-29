@@ -93,12 +93,28 @@ classdef MainGUI < handle
             obj.pipelineTree.Root.Name='Project';
         end
         
+        function start_dir=getProjectDefaultPath(~)
+            if(DependencyHandler.Instance.IsDependency('ProjectDefaultPath'))
+                start_dir=DependencyHandler.Instance.GetDependency('ProjectDefaultPath');
+            else
+                start_dir='./';
+            end
+        end
+        
+        function setProjectDefaultPath(~,path)
+            if(~DependencyHandler.Instance.IsDependency('ProjectDefaultPath'))
+                DependencyHandler.Instance.CreateAndSetDependency('ProjectDefaultPath',fileparts(path),'folder');
+            end
+        end
+        
         
         function createNewProject(obj)
-            folder=uigetdir('./','Select Project Folder');
+
+            folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
             obj.suspendGUIWithMessage(obj,'Creating Project...');
             try
             if(folder ~= 0)
+                obj.setProjectDefaultPath(folder);
                 avail_pipelFiles=dir('PipelineDefinitions/*.pwf');
                 if(length(avail_pipelFiles) == 1)
                     pplineFile=fullfile(avail_pipelFiles(1).folder,avail_pipelFiles(1).name);
@@ -133,10 +149,11 @@ classdef MainGUI < handle
 
         %end
         function openProject(obj,~,~)
-            folder=uigetdir('./','Select Project Folder');
+            folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
             obj.suspendGUIWithMessage(obj,'Opening Project...');
             try
                 if(folder ~= 0)
+                    obj.setProjectDefaultPath(folder);
                     obj.closeProject();
                     
                     [prj,pplFile]=Project.OpenProjectFromPath(folder);
