@@ -51,7 +51,7 @@ classdef LoadFreeviewPointFile < AComponent
                 if(~isempty(identifier))
                     elData.AddWithIdentifier(identifier,el);
                 else
-                    [idx,tf]=listdlg('PromptString','Select Corresponding Definition','SelectionMode','single','ListString',{avail_pipelFiles.name});
+                    [idx,~]=listdlg('PromptString',{'Select Corresponding Definition','for',files{i_f}},'SelectionMode','single','ListString',{elDefNames});
                     if(~isempty(idx))
                         if(any(elData.DefinitionIdentifier == idx))
                             answ=questdlg('Do you want to override the existing electrode Locations?','Override?','yes','no');
