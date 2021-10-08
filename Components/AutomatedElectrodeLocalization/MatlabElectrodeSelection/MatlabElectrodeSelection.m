@@ -33,6 +33,7 @@ classdef MatlabElectrodeSelection < AComponent
             obj.AddInput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
             obj.AddOptionalInput(obj.SurfaceIdentifier,'Surface');
             obj.AddOptionalInput(obj.TrajectoryIdentifier,'ElectrodeLocation');
+            obj.AddOptionalInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
             obj.AddOutput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
         end
         
@@ -55,6 +56,16 @@ classdef MatlabElectrodeSelection < AComponent
                     end
                     if(strcmp(varargin{i},obj.TrajectoryIdentifier))
                         selFig.SetTrajectories(varargin{i+1});
+                    end
+                    
+                    if(strcmp(varargin{i},obj.ElectrodeLocationIdentifier))
+                        if(isempty(obj.Data))
+                            out.DefinitionIdentifier=varargin{i+1}.DefinitionIdentifier;
+                            out.Location=varargin{i+1}.Location;
+                        elseif(strcmp(questdlg('Old Matlab Electrode information available, do you want to override existing data?','Override existing data?','Override','Keep',''),'Override'))
+                            out.DefinitionIdentifier=varargin{i+1}.DefinitionIdentifier;
+                            out.Location=varargin{i+1}.Location;
+                        end
                     end
                 end
             end

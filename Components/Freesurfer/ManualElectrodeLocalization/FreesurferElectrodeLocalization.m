@@ -7,6 +7,7 @@ classdef FreesurferElectrodeLocalization < AComponent
         CTIdentifier %Identifier for CT Volume Data 
         ElectrodeDefinitionIdentifier %Identifier for ElectrodeDefinitions
         ElectrodeLocationIdentifier % Identifier for Output Electrode Locations
+        TrajectoryIdentifier % Identifier for Output Electrode Locations
     end
     
     methods
@@ -14,11 +15,13 @@ classdef FreesurferElectrodeLocalization < AComponent
             obj.CTIdentifier='CT';
             obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
+            obj.TrajectoryIdentifier='Trajectory';
         end
         function Publish(obj)
             obj.AddInput(obj.CTIdentifier,'Volume');
             obj.AddInput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
             obj.AddOptionalInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
+            obj.AddOptionalInput(obj.TrajectoryIdentifier,'ElectrodeLocation');
             obj.AddOutput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
             obj.RequestDependency('Freesurfer','folder');
             if(ispc)
@@ -45,8 +48,13 @@ classdef FreesurferElectrodeLocalization < AComponent
             acceptAll = false;
             override = true;
             wayptfileIds=cell(length(elDef.Definition),1);
-            if((length(varargin) > 0) && strcmp(varargin{1},obj.ElectrodeLocationIdentifier)) %electoodes exist
-                eLocsIn=varargin{2};
+            for i=1:length(varargin)
+                if(strcmp(varargin{i},obj.ElectrodeLocationIdentifier))
+                    eLocsIn=varargin{i+1};
+                end
+                if(strcmp(varargin{i},obj.TrajectoryIdentifier))
+                    traj=varargin{i+1};
+                end
             end
             freesurferPath=obj.GetDependency('Freesurfer');
             compPath=obj.ComponentPath;
@@ -64,7 +72,7 @@ classdef FreesurferElectrodeLocalization < AComponent
                           'export FS_LOAD_DWI=0 \n ' ...
                           'freeview -v "' convertToUbuntuSubsystemPath(ctpath,subsyspath) '" '];
             end
-
+            traj_files={};
             for i=1:length(elDef.Definition)
                 str='\n';
                 if(exist('eLocsIn','var'))
@@ -79,7 +87,22 @@ classdef FreesurferElectrodeLocalization < AComponent
                 str=[str 'info \nnumpoints ' num2str(numeDefEls) '\nuseRealRAS 1'];
                 
                 wayptfileIds{i}=[compPath '/' regexprep(regexprep(elDef.Definition(i).Name,' +','_'),'[<>:"/\|?*]','_${num2str(cast($0,''uint8''))}') '.dat'];
-                
+                if(exist('traj','var'))
+                str_traj='\n';
+                currLocs=find(traj.DefinitionIdentifier == i);
+                for l=1:length(currLocs)
+                    str_traj=[str_traj num2str(traj.Location(currLocs(l),:)) '\n'];
+                end
+                numeDefEls_traj=length(currLocs);
+                    
+                str_traj=[str_traj 'info \nnumpoints ' num2str(numeDefEls_traj) '\nuseRealRAS 1'];   
+                traj_files{i}=[compPath '/traj_' regexprep(regexprep(elDef.Definition(i).Name,' +','_'),'[<>:"/\|?*]','_${num2str(cast($0,''uint8''))}') '_' num2str(elDef.Definition(i).NElectrodes)  '.dat'];
+                fileID = fopen(traj_files{i},'w');
+                fprintf(fileID,str_traj);
+                fclose(fileID);
+
+                end
+                    
                 %wayptfileIds{i}=regexprep(wayptfileIds{i},'[<>:"/\|?*]','_${num2str(sscanf(''a'',''%x''))}');
                 if(~acceptAll && exist(wayptfileIds{i},'file'))
                     answer=questdlg(['Existing Point file for ' elDef.Definition(i).Name ' found!'],'Override?','Override all','Keep all','Keep all');
@@ -108,6 +131,13 @@ classdef FreesurferElectrodeLocalization < AComponent
                     shellcmd=[shellcmd '-c "' convertToUbuntuSubsystemPath(wayptfileIds{i},subsyspath) '" '];
                 else
                     shellcmd=[shellcmd '-c "' wayptfileIds{i} '" '];
+                end
+            end
+            for i=1:length(traj_files)
+                if(ispc)
+                    shellcmd=[shellcmd '-c "' convertToUbuntuSubsystemPath(traj_files{i},subsyspath) '" '];
+                else
+                    shellcmd=[shellcmd '-c "' traj_files{i} '" '];
                 end
             end
             %open freesurfer with CT and waypoint files
