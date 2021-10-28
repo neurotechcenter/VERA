@@ -331,14 +331,14 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             V=(V > obj.slMinThresh.Value);
             disp('Running Watershed');
             tic
-            D = bwdist(V);
+            %D = bwdist(V);
             %D(~V) = Inf;
-            w_shed=watershed(D);
-            w_shed(~V)=0;
+            %w_shed=watershed(D);
+            %w_shed(~V)=0;
             toc
             disp('Running Segmentation');
             tic
-            obj.volProps=regionprops3(w_shed,'Volume','Centroid','BoundingBox');
+            obj.volProps=regionprops3(V,'Volume','Centroid','BoundingBox');
             toc
             disp('Plotting Segments');
             tic

@@ -36,8 +36,20 @@ classdef Copy < AComponent
 
         end
         
-        function [out] = Process(obj,out)
+        function [out] = Process(obj,in)
+            out=obj.CreateOutput(obj.CopyToIdentifier);
+            m=metaclass(in);
+            p={m.PropertyList.Name};
+            for i=1:numel(m.PropertyList) %remove all items which do not have public set/get accessors and are not in the acStorage list
+             if((iscell(m.PropertyList(i).GetAccess) ||...
+                iscell(m.PropertyList(i).SetAccess)||...
+                ~strcmp(m.PropertyList(i).GetAccess,'public') ||...
+                ~strcmp(m.PropertyList(i).SetAccess,'public')) || strcmp(m.PropertyList(i).Name,'Name'))
 
+             else
+                 out.(m.PropertyList(i).Name)=in.(m.PropertyList(i).Name);
+             end
+            end
         end
     end
 end
