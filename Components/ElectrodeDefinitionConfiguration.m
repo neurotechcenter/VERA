@@ -39,7 +39,10 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
             %ElectrodeDefinitionView
              out=obj.CreateOutput(obj.Identifier);
              if(isempty(obj.ElectrodeDefinition))
-                 error('No Electrodes Defined!');
+                h=figure;
+                elView=ElectrodeDefinitionView('Parent',h);
+                elView.SetComponent(obj);
+                uiwait(h);
              end
              out.Definition=obj.ElectrodeDefinition;
         end

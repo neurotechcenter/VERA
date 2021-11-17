@@ -5,6 +5,10 @@ classdef ElectrodeDefinition < AData
     properties
         Definition
     end
+
+    properties(Constant)
+        ElectrodeTypes ={'Grid','Strip','Depth','DBS','Medtronic 3387','Medtronic 3389','Boston Vercise Directional'}
+    end
     
     methods
         function obj = ElectrodeDefinition()

@@ -80,8 +80,8 @@ classdef AlterElectrodeLabels < AComponent
                     colormap(elView,cmap);
                 end
 
-                plotBallsOn3DImage(elView,eLoc.Location(idef(i) ~= eLoc.DefinitionIdentifier,:),[0 0 0],2);
-                plotBallsOn3DImage(elView,eLoc.Location(idef(i) == eLoc.DefinitionIdentifier,:),[1 1 0],4);
+                plotBallsOnVolume(elView,eLoc.Location(idef(i) ~= eLoc.DefinitionIdentifier,:),[0 0 0],2);
+                plotBallsOnVolume(elView,eLoc.Location(idef(i) == eLoc.DefinitionIdentifier,:),[1 1 0],4);
                 waitfor(selfig);
                 if(obj.acceptId>0)
                     inewDef(i)=(obj.acceptId);
