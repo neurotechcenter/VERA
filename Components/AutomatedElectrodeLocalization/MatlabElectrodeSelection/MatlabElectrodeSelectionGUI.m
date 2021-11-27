@@ -201,6 +201,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                error('The automated detection Algorithm requires at least 1 electrode preselected. Preferable an Edge Location');
             end
             o.Display='iter';
+            o.TolX=0.01;
             o.PlotFcns=[];
             o.OutputFcn=[];
             
@@ -218,7 +219,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             occIdx(occIdx == 0)=[];
             centroids(occIdx,:)=[];
             %bNames=1:size(centroids,1);
-            gvar=0.2;
+            gvar=0.3;
             gdist=obj.elDefinition.Definition(elDefIdx).Spacing;
             found_locs=cell(size(locs,1),1);
             numElFound=zeros(size(locs,1),1);
@@ -241,7 +242,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                    % poss=findStripNeighbour(pIdx,locs(iel,:),lcentroids,bNames,gvar_best,gdist);
                     func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
-                gvar_best=fminsearchbnd(func,gvar,0.05,0.5,o);
+                gvar_best=fminbnd(func,0.0,0.5,o);
                 disp(gvar_best);
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
                    poss=findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);
@@ -329,16 +330,16 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %V(V > obj.slMinThresh.Value) = 1;
             %V=smooth3(V,'box',3);
             V=(V > obj.slMinThresh.Value);
-            disp('Running Watershed');
-            tic
+            %disp('Running Watershed');
+            %tic
             %D = bwdist(V);
             %D(~V) = Inf;
             %w_shed=watershed(D);
             %w_shed(~V)=0;
-            toc
+            %toc
             disp('Running Segmentation');
             tic
-            obj.volProps=regionprops3(V,'Volume','Centroid','BoundingBox');
+            obj.volProps=regionprops3(bwconncomp(V,26),'Volume','Centroid','BoundingBox');
             toc
             disp('Plotting Segments');
             tic
