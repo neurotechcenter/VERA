@@ -14,6 +14,10 @@ classdef ElectrodeLocation < PointSet
             obj.Location(obj.DefinitionIdentifier == identifier,:)=[];
             obj.DefinitionIdentifier(obj.DefinitionIdentifier == identifier)=[];
         end
+
+        function elLocs=GetWithIdentifier(obj,identifier)
+            elLocs=obj.Location(obj.DefinitionIdentifier==identifier,:);
+        end
         function AddWithIdentifier(obj,identifier,location)
             dim=size(location);
             if(dim(1)== 3 && dim(2)~= 3)
