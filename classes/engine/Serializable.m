@@ -7,6 +7,13 @@ classdef Serializable < handle
         acStorage ={} %List of non-public properties that should be stored
         nodeName % Name of the xml tag for serialization
     end
+    
+    methods(Access = protected)
+        function deSerializationDone(obj,docNode)
+            %deSerializationDone is called after deserialization for
+            %initial initialization
+        end
+    end
 
     methods
         function obj=Serializable()
@@ -78,6 +85,7 @@ classdef Serializable < handle
                     warning(['Property ' fileprops{i} ' cannot be set! Property is not defined in object of type ' class(obj)]);
                 end
             end
+            obj.deSerializationDone(docNode);
         end
     end
 end

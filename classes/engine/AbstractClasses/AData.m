@@ -1,4 +1,4 @@
-classdef (Abstract)  AData < Serializable
+classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
     %AData Abstract base class for data shared between Components
     %   Data is shared between Components via Data objects
     %   Data objects will be serialized as xml objects
@@ -27,6 +27,7 @@ classdef (Abstract)  AData < Serializable
             
         end
          
+         
         function xmlPath=Save(obj,path)
             %Save - serialize and save to xml 
             % path - path to save to, file name is determined by Identifier
@@ -46,6 +47,7 @@ classdef (Abstract)  AData < Serializable
             %path - folder path
                 path=fullfile(path,[obj.Name '.xml']);
         end
+        
         
         function d=GetDependency(~,name)
             %GetDependency - Retrieve Dependency from Handler

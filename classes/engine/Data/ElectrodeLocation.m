@@ -4,15 +4,22 @@ classdef ElectrodeLocation < PointSet
     
     properties
         DefinitionIdentifier %Identifier connecting the location to the Electrode Definiton
+        Label
     end
     
     methods
         function obj = ElectrodeLocation()
             obj.DefinitionIdentifier=zeros(1,0,'uint32');
+            obj.Label={};
+        end
+        
+        function SetLabel(obj,identifier, label)
+            obj.Label{identifier}=label;
         end
         function RemoveWithIdentifier(obj, identifier)
             obj.Location(obj.DefinitionIdentifier == identifier,:)=[];
             obj.DefinitionIdentifier(obj.DefinitionIdentifier == identifier)=[];
+            obj.Label(obj.DefinitionIdentifier == identifier)=[];
         end
 
         function elLocs=GetWithIdentifier(obj,identifier)
@@ -25,9 +32,18 @@ classdef ElectrodeLocation < PointSet
             end
            obj.DefinitionIdentifier(end+1:end+dim(1))=identifier*ones(dim(1),1);
            obj.Location(end+1:end+dim(1),:)=location;
-            
+           obj.Label(end+1:end+dim(1))={''};
         end
 
+    end
+    
+    methods (Access = protected)
+        function deSerializationDone(obj,docNode)
+            fileprops=fieldnames(docNode);
+            if(~any(strcmp('Label',fileprops))) %make sure Label gets filled correctly if the property wasnt serialized .. important for backwards compatability
+                obj.Label(1:size(obj.Location,1))={''};
+            end
+        end
     end
 end
 

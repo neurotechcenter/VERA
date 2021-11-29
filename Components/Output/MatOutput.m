@@ -55,7 +55,8 @@ classdef MatOutput < AComponent
             tala=struct('electrodes',eLocs.Location,'activations',zeros(size(eLocs.Location,1),1),'trielectrodes',eLocs.Location);
             vcontribs = [];
             [file,path]=uiputfile('*.mat');
-            save(fullfile(path,file),'cortex','ix','tala','viewstruct','electrodeNames','cmapstruct','vcontribs','electrodeDefinition','electrodeLabels','LabelName','annotation');
+            SecondaryLabel=eLocs.Label;
+            save(fullfile(path,file),'cortex','ix','tala','viewstruct','electrodeNames','cmapstruct','vcontribs','electrodeDefinition','electrodeLabels','LabelName','annotation','SecondaryLabel');
         end
         
         function [labelId,labelName]=findLabels(~,elocs,surf)

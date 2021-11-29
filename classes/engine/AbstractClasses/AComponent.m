@@ -186,13 +186,17 @@ classdef (Abstract) AComponent < Serializable
             obj.Pipeline.AddOutput(obj,Identifier,outpDataTypeName);
         end
         
-        function cData=CreateOutput(obj,Identifier)
+        function cData=CreateOutput(obj,Identifier,template)
             % CreateOutput - Creates an Output object from the Identifier
             % type name
             % Use in the Process method to create a new output object
-            % See also AComponent.Process, AData, ElectrodeDefinition, IFileLoader, Surface, Volume 
+            % See also AComponent.Process, AData, ElectrodeDefinition, IFileLoader, Surface, Volume
             if(obj.outputMap.isKey(Identifier))
-                cData=ObjectFactory.CreateData(obj.outputMap(Identifier));
+                if(exist('template','var')) %copy from template
+                    cData=copy(template);
+                else
+                    cData=ObjectFactory.CreateData(obj.outputMap(Identifier));
+                end
                 cData.Name=Identifier;
             else
                 error('Requested Output is not part of this Component, All Outputs have to be defined during the Publish phase');
