@@ -22,7 +22,7 @@ classdef FindSurfaceBrodmanLabels < AComponent
         function [surfOut]=Process(obj,surfIn)
             surfOut=obj.CreateOutput(obj.TalairachElectrodeLocationIdentifier,surfIn);
             jarFile=[fileparts(mfilename('fullpath')) '/talairach.jar'];
-            BA=findBrodmanLabel(elLocs.Location,jarFile);
+            BA=findBrodmanLabel(elLocs.Location,jarFile,obj.GetDependency('TempPath'));
             surfOut.Label=BA;
         end
         
