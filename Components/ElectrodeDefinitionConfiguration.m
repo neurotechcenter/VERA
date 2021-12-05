@@ -7,6 +7,8 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
         ElectrodeDefinition % Electrode Definitions
         
     end
+
+    
     
     methods
  function obj = ElectrodeDefinitionConfiguration()

@@ -10,6 +10,9 @@ classdef TalairachProjection < AComponent
         AC
         PC
         MidSag
+        ProjectionType
+        AdditionalSurfaceIdentifiers
+        AdditionalSurfaceOutIdentifiers
     end
     
     methods
@@ -25,6 +28,8 @@ classdef TalairachProjection < AComponent
             obj.SurfaceOutIdentifier='TalairachSurface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             obj.ElectrodeLocationOutIdentifier='TailairachElectrodeLocation';
+            obj.ProjectionType='Talairach';
+            obj.AdditionalSurfaceIdentifiers={};
             
         end
         
@@ -34,25 +39,35 @@ classdef TalairachProjection < AComponent
             obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation')
             obj.AddOutput(obj.SurfaceOutIdentifier,'Surface');
             obj.AddOutput(obj.ElectrodeLocationOutIdentifier,'ElectrodeLocation')
+            for i=1:length(obj.AdditionalSurfaceIdentifiers)
+                obj.AddInput(obj.AdditionalSurfaceIdentifiers{i},'Surface');
+                obj.AddOutput(obj.AdditionalSurfaceOutIdentifiers{i},'Surface');
+            end
         end
         
         function Initialize(obj)
+            validatestring(obj.ProjectionType,{'talairach','mni','none'});
         end
         
-        function [surfOut,eLocsOut]=Process(obj,mri,surf,eLocs)
+        function varargout=Process(obj,mri,surf,eLocs,varargin)
             
             f=figure;
             AlignmentGUI('Parent',f,'Images',{mri.GetRasSlicedVolume()},'AlignmentParent',obj);
             uiwait(f);
-            surfOut=obj.CreateOutput(obj.SurfaceOutIdentifier);
-            surfOut.Annotation=surf.Annotation;
-            surfOut.AnnotationLabel=surf.AnnotationLabel;
-            surfOut.TriId=surf.TriId;
-            surfOut.VertId=surf.VertId;
+            varargout{2}=obj.CreateOutput(obj.SurfaceOutIdentifier);
+            varargout{2}.Annotation=surf.Annotation;
+            varargout{2}.AnnotationLabel=surf.AnnotationLabel;
+            varargout{2}.TriId=surf.TriId;
+            varargout{2}.VertId=surf.VertId;
             
-            eLocsOut=obj.CreateOutput(obj.ElectrodeLocationOutIdentifier);
-            eLocsOut.DefinitionIdentifier=eLocs.DefinitionIdentifier;
-            [surfOut.Model,eLocsOut.Location]=projectToStandard(surf.Model,eLocs.Location,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],'talairach');
+            varargout{1}=obj.CreateOutput(obj.ElectrodeLocationOutIdentifier);
+            varargout{1}.DefinitionIdentifier=eLocs.DefinitionIdentifier;
+            [varargout{2}.Model,varargout{1}.Location]=projectToStandard(surf.Model,eLocs.Location,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],obj.ProjectionType);
+            for i=1:length(obj.AdditionalSurfaceIdentifiers)
+                varargout{2+i}=obj.CreateOutput(obj.AdditionalSurfaceIdentifiers{i},varargin{i});
+                [~,varargout{2+i}.Model.vert]=projectToStandard(surf.Model,varargout{2+i}.Model.vert,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],obj.ProjectionType);
+            end
+            
         end
     end
 end
