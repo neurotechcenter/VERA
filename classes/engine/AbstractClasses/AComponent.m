@@ -45,7 +45,7 @@ classdef (Abstract) AComponent < Serializable
         ComponentStatus %Current Component stauts. This status determines if the component can be executed. 
     end
     
-    properties (SetAccess = ?Pipeline, GetAccess = ?Pipeline)
+    properties (SetAccess = ?Pipeline, GetAccess = public)
         inputMap 
         optionalinputMap 
         outputMap
@@ -106,6 +106,8 @@ classdef (Abstract) AComponent < Serializable
         % order as they were specified in the Publish section
         % See also Publish, AddInput, AddOutput, CreateOutput
         varargout = Process(varagin);
+        
+     %   helptext=Documentation(obj);
         
             
     end
