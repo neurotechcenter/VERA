@@ -283,6 +283,7 @@ classdef MainGUI < handle
                 uimenu(cm,'Text','Run','Callback',@(~,~) obj.runComponent(compName,true));
                 uimenu(cm,'Text','Reset','Callback',@(~,~) obj.resetComponent(compName));
                 uimenu(cm,'Text','Reload Results','Callback',@(~,~) obj.reloadResults(compName));
+                uimenu(cm,'Text','Show Help','Callback',@(~,~) showDocumentation(obj.ProjectRunner.Project.Pipeline.GetComponent(compName)));
         end
         
         function reloadResults(obj,compName)

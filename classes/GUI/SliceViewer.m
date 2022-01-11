@@ -181,7 +181,7 @@ classdef SliceViewer < uix.Grid
                 end
                 for iel=1:size(obj.ElectrodeLocation.Location,1)
                     eloc=obj.ElectrodeLocation.Location(iel,:);
-                    if(abs(round(eloc(obj.ViewAxis(3)))-round(obj.Slice)) < 0.5)
+                    if(abs(round(eloc(obj.ViewAxis(3)))-round(obj.Slice)) < 2)
                         hold(obj.imageView,'on')
                         obj.currElectrodes{end+1}=scatter(obj.imageView,eloc(obj.ViewAxis(1)),eloc(obj.ViewAxis(2)),10,'or','fill','LineWidth',0.5);
                     end
