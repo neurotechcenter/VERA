@@ -5,7 +5,7 @@ function [BA,labels] = findBrodmanLabel(data,jarFile,tempFolder)
 writematrix(data,fullfile(tempFolder,'data.csv'),'Delimiter','\t');
 
 %java -cp talairach.jar org.talairach.ExcelToTD 2, data.txt
-%system(['java -cp ' jarFile ' org.talairach.ExcelToTD 4:11, ' fullfile(tempFolder,'data.csv')]);
+system(['java -cp ' jarFile ' org.talairach.ExcelToTD 4:11, ' fullfile(tempFolder,'data.csv')]);
 fid = fopen(fullfile(tempFolder,'data.csv.td'),'r');
 tline = fgetl(fid);
 i=1;

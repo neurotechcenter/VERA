@@ -19,6 +19,8 @@ classdef LabelVolume2Surface < AComponent
             obj.SurfaceIdentifier='';
             obj.LabelIds=[];
             obj.LabelNames={};
+                       obj.ignoreList{end+1}='internalIds';
+           obj.ignoreList{end+1}='LabelNames';
         end
         
         function  Publish(obj)
@@ -27,8 +29,7 @@ classdef LabelVolume2Surface < AComponent
             end
            obj.AddInput(obj.VolumeIdentifier,'Volume');
            obj.AddOutput(obj.SurfaceIdentifier,'Surface');
-           obj.ignoreList{end+1}='internalIds';
-           obj.ignoreList{end+1}='LabelNames';
+
         end
 
         function Initialize(obj)

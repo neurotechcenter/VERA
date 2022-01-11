@@ -49,7 +49,10 @@ classdef FindBrodmanLabels < AComponent
 
             else %assume its ElectrodeLocation
                 
-                BA=findBrodmanLabel(dataIn.Location,jarFile);
+                BA=findBrodmanLabel(dataIn.Location,jarFile,obj.GetDependency('TempPath'));
+                for i=1:length(BA)
+                    dataOut.SetAnnotation(i,'BrodmanArea',BA{i});
+                end
                 dataOut.Label=BA;
             end
         end

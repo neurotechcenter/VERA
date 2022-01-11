@@ -56,8 +56,8 @@ classdef Volume < AData & IFileLoader
         function coordOut=Ras2Vox(obj,coordIn)
             %Ras2Vox transforms RAS values into Matlab 1 based voxel
             %coordinates
-           coordOut=[obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]\[coordIn(:)+2; 1];
-            coordOut=coordOut(1:3);
+           coordOut=[obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]\[coordIn(:); 1];
+           coordOut=coordOut(1:3)+1;
         end
         
         function V=GetRasSlicedVolume(obj,voxelSize,forceReslice)

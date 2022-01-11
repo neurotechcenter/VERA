@@ -55,7 +55,8 @@ classdef DBSLeadDetection < AComponent
                     end
                     locId=find(strcmp({elDef.Definition.Type},available_types{i}));
                     for ii=1:length(locId)
-                        elLoc.AddWithIdentifier(locId(ii),CT.Vox2Ras( pacer_ct.getMatlabIdxFromNiftiWorldCoordinates(elecModels{ii}.getContactPositions3D()')'));
+                        loc=pacer_ct.getMatlabIdxFromNiftiWorldCoordinates(elecModels{ii}.getContactPositions3D()')';
+                        elLoc.AddWithIdentifier(locId(ii),CT.Vox2Ras([loc(:,1) loc(:,2) loc(:,3)] ));
                     end
                 end
             end

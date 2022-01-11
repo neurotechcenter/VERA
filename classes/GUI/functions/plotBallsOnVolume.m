@@ -19,8 +19,13 @@ if(isempty(color))
     set(ax,'ColorOrderIndex',index+1);
     color=colors(index+1,:);
 end
+if(numel(color) == 1)
+    cmap_id=color;
+else
  cmap(end+1,:)=color;
  colormap(ax,cmap);
+ cmap_id=(size(cmap,1));
+end
  %caxis(ax,[1 size(cmap,1)]);
 for els = 1 : ELS    
     %original electrode locations:
@@ -36,7 +41,7 @@ for els = 1 : ELS
     Y = R * Y + ye;
     Z = R * Z + ze;
 
-    surfs{end+1}=surf(ax,X, Y, Z, ones(size(Z,1))*(size(cmap,1)),'FaceColor','flat','FaceLighting','none','CDataMapping', 'direct','LineStyle','none',varargin{:});
+    surfs{end+1}=surf(ax,X, Y, Z, ones(size(Z,1))*cmap_id,'FaceColor','flat','FaceLighting','none','CDataMapping', 'direct','LineStyle','none',varargin{:});
 
 end
     
