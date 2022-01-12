@@ -5,11 +5,14 @@ classdef PointSet < AData
     properties
         Location
         Label
+        Annotation
     end
     
     methods
         function obj = PointSet()
             obj.Location=zeros(0,3);
+            obj.Annotation=struct;
+            obj.Label={};
         end
         function SetLabel(obj,identifier, label)
             for i=1:length(identifier)
@@ -22,6 +25,13 @@ classdef PointSet < AData
                     obj.Label{identifier(i)}{end+1}=label;
                 end
             end
+        end
+        function SetAnnotation(obj, identifier, label, value)
+            if(isfield(obj.Annotation,identifier) &&  ~isempty(obj.Annotation(identifier).(label)))
+                error(['Annotation ' label ' is already set for Electrode ' num2str(identifier) '!']);
+            end
+            obj.Annotation(identifier).(label)=value;
+            
         end
     end
     

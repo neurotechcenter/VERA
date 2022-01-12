@@ -4,18 +4,11 @@ classdef ElectrodeLocation < PointSet
     
     properties
         DefinitionIdentifier %Identifier connecting the location to the Electrode Definiton
-<<<<<<< HEAD
-        Label
-        Annotation
-=======
->>>>>>> cdb5d4ec773373136dff7d136bf7492dec49621f
     end
     
     methods
         function obj = ElectrodeLocation()
             obj.DefinitionIdentifier=zeros(1,0,'uint32');
-            obj.Label={};
-            obj.Annotation=struct;
         end
         
 
@@ -38,13 +31,8 @@ classdef ElectrodeLocation < PointSet
            obj.Location(end+1:end+dim(1),:)=location;
            obj.Label(end+1:end+dim(1))={''};
         end
-        function SetAnnotation(obj, identifier, label, value)
-            if(isfield(obj.Annotation,identifier) &&  ~isempty(obj.Annotation(identifier).(label)))
-                error(['Annotation ' label ' is already set for Electrode ' num2str(identifier) '!']);
-            end
-            obj.Annotation(identifier).(label)=value;
-            
-        end
+
+
 
     end
    
