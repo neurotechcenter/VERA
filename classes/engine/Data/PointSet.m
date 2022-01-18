@@ -33,6 +33,13 @@ classdef PointSet < AData
             obj.Annotation(identifier).(label)=value;
             
         end
+        function annot=GetAnnotation(obj, identifier, label)
+            if(length(obj.Annotation) >= identifier && isfield(obj.Annotation(identifier),label))
+                annot=obj.Annotation(identifier).(label);
+            else
+                annot=[];
+            end
+        end
     end
     
     methods (Access = protected)

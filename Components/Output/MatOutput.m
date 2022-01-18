@@ -42,6 +42,8 @@ classdef MatOutput < AComponent
             annotation.Annotation=surf.Annotation;
             annotation.AnnotationLabel=surf.AnnotationLabel;
             electrodeDefinition.Definition=eDef.Definition;
+            electrodeDefinition.Annotation=eLocs.Annotation;
+            electrodeDefinition.Label=eLocs.Label;
             electrodeNames=cell(size(eLocs.DefinitionIdentifier,1),1);
             idx=1;
             order=unique(eLocs.DefinitionIdentifier,'stable');
