@@ -16,7 +16,11 @@ classdef PointSet < AData
         end
         function SetLabel(obj,identifier, label)
             for i=1:length(identifier)
-                obj.Label{identifier(i)}=label;
+                if(iscell(label))
+                    obj.Label{identifier(i)}=label;
+                else
+                    obj.Label{identifier(i)}={label};
+                end
             end
         end
         function AddLabel(obj,identifier, label)

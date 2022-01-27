@@ -76,7 +76,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                         [~,dist]=findNearestNeighbors(pointCloud(vert),out.Location(i_loc,:),1);
                         old_data=out.GetAnnotation(i_loc,'Distance');
                         old_data_label=out.GetAnnotation(i_loc,'Label');
-
+                        old_data_label_id=out.GetAnnotation(i_loc,'LabelId');
 
                         voxLoc=round(vol.Ras2Vox(out.Location(i_loc,:)));
                         if((voxLoc(1) <= size(binaryVol,1)) && (voxLoc(2) <= size(binaryVol,2)) && (voxLoc(3) <= size(binaryVol,3)) && all(voxLoc >= 1))
@@ -87,8 +87,10 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                         end
                         old_data(end+1)=dist;
                         old_data_label{end+1}=obj.internalLabels{i};
+                        old_data_label_id(end+1)=obj.internalIds(i);
                         out.SetAnnotation(i_loc,'Distance',old_data);
-                        out.SetAnnotation(i_loc,'Label',old_data_label);                      
+                        out.SetAnnotation(i_loc,'Label',old_data_label); 
+                        out.SetAnnotation(i_loc,'LabelId',old_data_label_id);
                      end
                 end
             end
