@@ -13,7 +13,6 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
             %   Detailed explanation goes here
             obj.SurfaceIdentifier ='Surface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
-            obj.LabelDistance=1;
         end
         
         function  Publish(obj)
