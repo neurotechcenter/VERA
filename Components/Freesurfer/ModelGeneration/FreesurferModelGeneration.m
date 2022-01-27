@@ -5,6 +5,7 @@ classdef FreesurferModelGeneration < AComponent
         MRIIdentifier %Input MRI Data Identifier
         SurfaceIdentifier %Output Surface Data Identifier
         SphereIdentifier %Output Sphere Surface Volume Identifier (will start with L_ and R_ )
+        AnnotationType
     end
      properties (Dependent, Access = protected)
         LeftSphereIdentifier
@@ -17,6 +18,7 @@ classdef FreesurferModelGeneration < AComponent
             obj.MRIIdentifier='MRI';
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
+            obj.AnnotationType='annot';
         end
         
         function value=get.LeftSphereIdentifier(obj)
@@ -78,7 +80,7 @@ classdef FreesurferModelGeneration < AComponent
                     end
                 end
                 
-                [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath));
+                [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType);
                 surf=obj.CreateOutput(obj.SurfaceIdentifier);
                 surf.Model=surf_model.Model;
                 surf.Annotation=surf_model.Annotation;

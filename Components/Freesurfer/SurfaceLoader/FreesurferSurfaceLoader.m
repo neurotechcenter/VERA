@@ -4,6 +4,7 @@ classdef FreesurferSurfaceLoader < AComponent
     properties
         SurfaceIdentifier
         SphereIdentifier
+        AnnotationType
     end
     
     properties (Dependent, Access = protected)
@@ -22,6 +23,7 @@ classdef FreesurferSurfaceLoader < AComponent
         function obj = FreesurferSurfaceLoader()
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
+            obj.AnnotationType='annot';
         end
         function Publish(obj)
             obj.AddOutput(obj.SurfaceIdentifier,'Surface');
@@ -48,7 +50,7 @@ classdef FreesurferSurfaceLoader < AComponent
         function [surf,lsphere,rsphere] = Process(obj)
             [segmentationPath]=uigetdir([],['Please select ' obj.SurfaceIdentifier]);
             freesurferPath=obj.GetDependency('Freesurfer');
-            [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath));
+            [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType);
             surf=obj.CreateOutput(obj.SurfaceIdentifier);
             surf.Model=surf_model.Model;
             surf.Annotation=surf_model.Annotation;

@@ -37,7 +37,8 @@ classdef FSDicomImport < AComponent
                  error([obj.Identifier ' selection aborted']);
              end
             dicom_path=fullfile(path,file);
-            nii_path=fullfile(obj.GetDependency('TempPath'),'temp.nii');
+            [~,temp_name]=fileparts(tempname);
+            nii_path=fullfile(obj.GetDependency('TempPath'),[temp_name '.nii']);
             
             out=obj.CreateOutput(obj.Identifier);
             freesurferPath=obj.GetDependency('Freesurfer');
@@ -60,6 +61,7 @@ classdef FSDicomImport < AComponent
                 w_nii_path ''''],'-echo'); 
             end
             out.LoadFromFile(nii_path);
+            delete(nii_path);
             
         end
     end
