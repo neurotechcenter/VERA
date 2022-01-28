@@ -10,7 +10,7 @@ cmap=zeros(numel(surface.AnnotationLabel)+1,3);
 name=cell(numel(surface.AnnotationLabel)+1,1);
 name_id=zeros(numel(surface.AnnotationLabel)+1,1);
 annotation_remap=zeros(size(surface.Annotation));
-for i=1:length(cmap)-1
+for i=1:size(cmap,1)-1
     cmap(i,:)=surface.AnnotationLabel(i).PreferredColor;
     annotation_remap(surface.Annotation == surface.AnnotationLabel(i).Identifier)=i;
     name{i}=surface.AnnotationLabel(i).Name;

@@ -1,4 +1,4 @@
-classdef Surface < AData
+classdef Surface < AData & IFileLoader
     %Surface - Data to store Surface 
     % Data structure for surfaces
     % Surfaces will bit stored in the gifti format (https://www.nitrc.org/projects/gifti/)
@@ -22,6 +22,18 @@ classdef Surface < AData
             obj.ignoreList{end+1}='Model';
             obj.ignoreList{end+1}='Annotation';
 
+        end
+
+        function LoadFromFile(obj,path)
+                buffG=gifti(path);
+                obj.Model.vert=double(buffG.vertices);
+                obj.Model.tri=buffG.faces;
+                if(isfield(buffG,'cdata'))
+                    obj.Annotation=buffG.cdata;
+                else
+                    obj.Annotation=zeros(size(obj.Model.vert,1),1);
+
+                end
         end
         function Load(obj,path)
             % Load - override of load for Surface
