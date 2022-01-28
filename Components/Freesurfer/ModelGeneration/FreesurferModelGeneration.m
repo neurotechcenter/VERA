@@ -18,7 +18,7 @@ classdef FreesurferModelGeneration < AComponent
             obj.MRIIdentifier='MRI';
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
-            obj.AnnotationType='annot';
+            obj.AnnotationType='aparc';
         end
         
         function value=get.LeftSphereIdentifier(obj)

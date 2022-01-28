@@ -23,7 +23,7 @@ classdef FreesurferSurfaceLoader < AComponent
         function obj = FreesurferSurfaceLoader()
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
-            obj.AnnotationType='annot';
+            obj.AnnotationType='aparc';
         end
         function Publish(obj)
             obj.AddOutput(obj.SurfaceIdentifier,'Surface');
