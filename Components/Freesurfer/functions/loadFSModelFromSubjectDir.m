@@ -61,11 +61,11 @@ function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segme
                 u_colortable=[lct.table(:,1:3); rct.table(:,1:3)]/255;
                 [u_identifiers,ia]=unique(u_identifiers);
 
-                names=names{ia};
+                names=names(ia);
                 u_colortable=u_colortable(ia,:);
 
                 surf.Annotation=[llabel; rlabel];
-                surf.AnnotationLabel=struct('Name',names,'Identifier',num2cell(u_identifiers),'PreferredColor',num2cell(u_colortable,2));
+                surf.AnnotationLabel=struct('Name',names','Identifier',num2cell(u_identifiers),'PreferredColor',num2cell(u_colortable,2));
 
                 [LHtempvert, LHtemptri] = read_surf(pathToLhSphere);
                 [RHtempvert, RHtemptri] = read_surf(pathToRhSphere);
