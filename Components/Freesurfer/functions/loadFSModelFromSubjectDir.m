@@ -29,7 +29,7 @@ function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segme
                 %under windows so we need to get the correct target
                 fallbackSuffix='';
                 fd=dir(fullfile(segmentationPath,'surf/lh.pial'));
-                if(fd.bytes == 0) %something went wrong with the symlink
+                if(isempty(fd) || fd.bytes == 0) %something went wrong with the symlink
                     fallbackSuffix='.T1';
                     warning('lh.pial is 0 byte -- will fallback to lh.pial.T1 and rh.pial.T1');
                 end

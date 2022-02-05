@@ -6,6 +6,7 @@ classdef LabelVolume2Surface < AComponent
         SurfaceIdentifier
         LabelIds
         LabelNames
+        Smoothing
     end
 
     properties (Access = protected)
@@ -21,6 +22,7 @@ classdef LabelVolume2Surface < AComponent
             obj.LabelNames={};
                        obj.ignoreList{end+1}='internalIds';
            obj.ignoreList{end+1}='LabelNames';
+           obj.Smoothing=[];
         end
         
         function  Publish(obj)
@@ -77,6 +79,9 @@ classdef LabelVolume2Surface < AComponent
                 binaryVol(vol.Image.img == obj.internalIds(i))=true;
                 if(any(any(any(binaryVol)))) %only add if it exists
                     [x,y,z]=meshgrid(1:size(binaryVol,2),1:size(binaryVol,1),1:size(binaryVol,3));
+                    if(~isempty(obj.Smoothing))
+                        binaryVol=smooth3(binaryVol,'box',obj.Smoothing);
+                    end
                     [tri,vert]=isosurface(x,y,z,binaryVol);
                     tri=tri + size(vert_tot, 1);
                     vert=[vert(:,2) vert(:,1) vert(:,3)];
