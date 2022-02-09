@@ -5,7 +5,10 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
     properties
         Identifier char % Identifier of Output Data, Default is 'ElectrodeDefinition'
         ElectrodeDefinition % Electrode Definitions
-        
+    end
+    
+    properties
+        internalDefinitions
     end
 
     
@@ -15,6 +18,7 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
             %ElectrodeDefinitionConfiguration - Constructor
             obj.Identifier='ElectrodeDefinition';
             obj.ElectrodeDefinition=[];
+            obj.internalDefinitions=[];
  end
         
         function Publish(obj)
@@ -24,11 +28,8 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
         end
         
         function Initialize(obj)
-            % Initialize - Check if Identifier Tag is initialized
-            % See also AComponent.Initialize
-            if(isempty(obj.Identifier))
-                error('No Identifier Tag specified');
-            end
+            obj.internalDefinitions=obj.ElectrodeDefinition;
+            obj.ElectrodeDefinition=[]; %remove existing definitions until after check
         end
         
         function [out] = Process(obj)
@@ -41,10 +42,19 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
             %ElectrodeDefinitionView
              out=obj.CreateOutput(obj.Identifier);
              if(isempty(obj.ElectrodeDefinition))
+                obj.ElectrodeDefinition=obj.internalDefinitions;
                 h=figure;
                 elView=ElectrodeDefinitionView('Parent',h);
                 elView.SetComponent(obj);
                 uiwait(h);
+             end
+             field = fieldnames(obj.ElectrodeDefinition);
+             for i=1:length(obj.ElectrodeDefinition)
+                 for f=1:length(field)
+                     if(isempty(obj.ElectrodeDefinition(i).(field{f})))
+                         error([field{f} ' is missing values!']);
+                     end
+                 end
              end
              out.Definition=obj.ElectrodeDefinition;
         end

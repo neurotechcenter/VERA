@@ -164,6 +164,7 @@ classdef Runner < handle
             compValid=true;
             obj.checkCompName(compName);
              if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+                    obj.ConfigureComponent(compName);
                     obj.resetDownstreamCompletionStatus(compName);
                     obj.updateComponentStatus();
              end
