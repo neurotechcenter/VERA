@@ -47,7 +47,7 @@ classdef MatlabElectrodeSelection < AComponent
             
             out=obj.Data;
             f=figure('MenuBar', 'none', ...
-                'Toolbar', 'none');
+                'Toolbar', 'none','Name',obj.Name);
             selFig=MatlabElectrodeSelectionGUI('Parent',f);
             if(length(varargin) > 1)
                 for i=1:2:length(varargin)

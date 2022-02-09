@@ -133,9 +133,6 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         function runFullShankDetection(obj)
             f = waitbar(0,'Running Shank detection');
             for i=1:length(obj.elDefinition.Definition)
-                obj.elLocations.RemoveWithIdentifier(i);
-            end
-            for i=1:length(obj.elDefinition.Definition)
                 obj.uiListView.Value=i;
                 obj.findAllElectrodes();
                 waitbar(i/length(obj.elDefinition.Definition),f);
@@ -151,7 +148,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             o.PlotFcns=[];
             o.OutputFcn=[];
             min_res=fminbnd(@(x) obj.testTreshold(Nelecs,x),obj.slMinThresh.Max*0.8,obj.slMinThresh.Max,o);
-            obj.testTreshold(Nelecs,min_res);
+            testTreshold(Nelecs,min_res);
         end
         
         function metric=testTreshold(obj,NElecs, thresh)
@@ -211,22 +208,18 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %resort to distance from outer alignment point - this avoids
             Y = pdist([v1;closest_centroid]);
             D=squareform(Y);
-            found_els=closest_centroid;
-            if(~isempty(D))
-                [dist,I]=sort(D(1,2:end));
-                closest_centroid=closest_centroid(I,:);
-                I=I(dist < pdist([v1;v2]));
-                found_els=closest_centroid(I,:);
-                del_mask=[];
-                for i=1:size(found_els,1)
-                    pIdx=obj.findPrevSelectedPoint(pointCloud(obj.elLocations.Location),found_els(i,:));
-                    if(~isempty(pIdx))
-                        del_mask(end+1)=i;
-                    end
+            [dist,I]=sort(D(1,2:end));
+            closest_centroid=closest_centroid(I,:);
+            I=I(dist < pdist([v1;v2]));
+            found_els=closest_centroid(I,:);
+            del_mask=[];
+            for i=1:size(found_els,1)
+                pIdx=obj.findPrevSelectedPoint(pointCloud(obj.elLocations.Location),found_els(i,:));
+                if(~isempty(pIdx))
+                    del_mask(end+1)=i;
                 end
-                found_els(del_mask,:)=[];
             end
-            
+            found_els(del_mask,:)=[];
             obj.elLocations.RemoveWithIdentifier(elDefIdx);
             obj.elLocations.AddWithIdentifier(elDefIdx,found_els);
             if(size(found_els,1) > 0)
@@ -288,7 +281,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                    % poss=findStripNeighbour(pIdx,locs(iel,:),lcentroids,bNames,gvar_best,gdist);
                     func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
-                gvar_best=fminbnd(func,0.0,0.3,o);
+                gvar_best=fminbnd(func,0.0,0.5,o);
                 disp(gvar_best);
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
                    poss=findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);
@@ -395,33 +388,24 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             % v=[v ones(size(v,1),1)]*A';
             %p = patch(obj.ax3D,'Faces',f,'Vertices',v(:,1:3),'FaceAlpha',0.1,'EdgeColor','none');
             if(~isempty(obj.brainSurf))
-                max_lim=max(obj.brainSurf.Model.vert);
-                min_lim=min(obj.brainSurf.Model.vert);
+                max(obj.brainSurf.Model.vert)
+                min(obj.brainSurf.Model.vert)
             else
-                max_lim=[inf inf inf];
-                min_lim=[-inf -inf -inf];
+                
             end
-            [x,y,z]=sphere;
-            to_remove=[];
             for i=1:size(obj.volProps.BoundingBox,1)
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 
-                
+                [x,y,z]=sphere;
                 patch_center=obj.Volume.Vox2Ras(obj.volProps.Centroid(i,1:3))';
-                if(all(patch_center < max_lim) &&  all(patch_center > min_lim))
-                    end_idx=length(obj.elPatches)+1;
-                    hold(obj.ax3D,'on');
-                    obj.elPatches{end_idx}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',end_idx,'EdgeColor','none','FaceAlpha',1,'FaceLighting','none'); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
-                    %scatter3(obj.ax3D,patch_center(1),patch_center(2),patch_center(3),60,'+','LineWidth',2); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
-
-                    material(obj.elPatches{end_idx},'dull');
-                    set(obj.elPatches{end_idx},'clipping','off');
-                else
-                    to_remove(end+1)=i;
-                end
+                hold(obj.ax3D,'on');
+                obj.elPatches{end+1}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',i,'EdgeColor','none','FaceAlpha',1,'FaceLighting','none'); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
+                %scatter3(obj.ax3D,patch_center(1),patch_center(2),patch_center(3),60,'+','LineWidth',2); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
+                
+                material(obj.elPatches{end},'dull');
+                set(obj.elPatches{end},'clipping','off');
        
             end
-            obj.volProps(to_remove,:)=[];
             toc
             hold(obj.ax3D,'off');
             obj.colorPatches();
