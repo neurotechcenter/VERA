@@ -56,6 +56,16 @@ classdef Pipeline < handle
             obj.availableDataPerStage={};
         end
         
+        function execSequence=GetProcessingSequence(obj,compName)
+            %GetProcessingSequence - Returns the required processing
+            %sequence to successfully execute a specific component
+            % compName - name of the component which should be executed
+            % execSequence - Sequence of components that needs to be
+            % executed excluding compName
+            [~,execSequence]=inedges(obj.DependencyGraph,compName);
+            
+        end
+        
         function processComp=GetProcessingComponentNames(obj)
             %GetProcessingComponentNames - Returns the names of all
             %Processing Components

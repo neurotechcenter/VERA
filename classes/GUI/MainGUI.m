@@ -239,6 +239,27 @@ classdef MainGUI < handle
             end
         end
         
+        function success=runTo(obj,component)
+            comps_to_run=obj.ProjectRunner.GetProcessingSequence(component);
+            success=1;
+            for i=1:length(comps_to_run)
+                obj.runTo(comps_to_run{i});
+                if(~strcmp(obj.ProjectRunner.GetComponentStatus(comps_to_run{i}),'Completed'))
+                    success=obj.runComponent(comps_to_run{i});
+                    if(success == 0)
+                        obj.updateTreeView();
+                        obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                        break;
+                    end
+                end
+            end
+            if(success == 1)
+                if(~strcmp(obj.ProjectRunner.GetComponentStatus(component),'Completed'))
+                    obj.runComponent(component,true);
+                end
+            end
+        end
+        
 
         
         function createTreeView(obj)
@@ -283,6 +304,7 @@ classdef MainGUI < handle
                 uimenu(cm,'Text','Run','Callback',@(~,~) obj.runComponent(compName,true));
                 uimenu(cm,'Text','Reset','Callback',@(~,~) obj.resetComponent(compName));
                 uimenu(cm,'Text','Reload Results','Callback',@(~,~) obj.reloadResults(compName));
+                uimenu(cm,'Text','Run to here','Callback',@(~,~) obj.runTo(compName));
                 uimenu(cm,'Text','Show Help','Callback',@(~,~) showDocumentation(obj.ProjectRunner.Project.Pipeline.GetComponent(compName)));
         end
         
@@ -325,11 +347,13 @@ classdef MainGUI < handle
             obj.resumeGUI(obj);
         end
         
-        function runComponent(obj,compName,updateView)
+        function success=runComponent(obj,compName,updateView)
             if(~exist('updateView','var'))
                 updateView=false;
             end
+            success=1;
             if(~obj.checkResolvedDependencies())
+                success=0;
                 return;
             end
             vo=obj.componentNodes(compName);
@@ -340,6 +364,7 @@ classdef MainGUI < handle
             catch e
                 vo.TooltipString=e.message;
                 errordlg(e.message);
+                success=0;
             end
             if(updateView)
                 obj.updateTreeView();

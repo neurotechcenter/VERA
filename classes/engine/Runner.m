@@ -149,6 +149,10 @@ classdef Runner < handle
                 outComp=obj.Project.Pipeline.GetProcessingComponentNames();
         end
         
+        function execSequence=GetProcessingSequence(obj,compName)
+            execSequence=obj.Project.Pipeline.GetProcessingSequence(compName);
+        end
+        
         
         function RunComponent(obj,compName)
             %RunComponent - Executes a component by calling its Process
@@ -298,12 +302,14 @@ classdef Runner < handle
             end
         end
         
+        
         function updateComponentStatus(obj)
             %updateComponentStatus - Update all Component Status
             %Descriptors
             for k=obj.Components
                 compRdy=true;
-                [~,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,k{1});
+                req_comps=obj.Project.Pipeline.GetProcessingSequence(k{1});
+                %[~,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,k{1});
                 for i=1:length(req_comps)
                     if(~strcmp(obj.GetComponentStatus(req_comps{i}),'Completed'))
                         compRdy=false;
