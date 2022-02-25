@@ -5,6 +5,7 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
     properties
         SurfaceIdentifier
         ElectrodeLocationIdentifier
+        Prefix
     end
     
     methods
@@ -13,6 +14,7 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
             %   Detailed explanation goes here
             obj.SurfaceIdentifier ='Surface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
+            obj.Prefix='';
         end
         
         function  Publish(obj)
@@ -38,7 +40,7 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
                         old_data_label=out.GetAnnotation(i_loc,'Label');
                         old_data_label_id=out.GetAnnotation(i_loc,'LabelId');
                         old_data(end+1)=dist;
-                        old_data_label{end+1}=surf.AnnotationLabel(find([surf.AnnotationLabel.Identifier] == annotationIds(i))).Name;
+                        old_data_label{end+1}=[obj.Prefix surf.AnnotationLabel(find([surf.AnnotationLabel.Identifier] == annotationIds(i))).Name];
                         old_data_label_id(end+1)=annotationIds(i);
                         out.SetAnnotation(i_loc,'Distance',old_data);
                         out.SetAnnotation(i_loc,'Label',old_data_label); 

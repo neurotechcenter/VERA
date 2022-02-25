@@ -7,6 +7,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
         ElectrodeLocationIdentifier
         LabelIds
         LabelNames
+        Prefix
     end
     properties (Access = protected)
         internalIds
@@ -21,6 +22,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             obj.ignoreList{end+1}='internalIds';
             obj.ignoreList{end+1}='LabelNames';
+            obj.Prefix='';
         end
         
         function  Publish(obj)
@@ -46,7 +48,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                     obj.internalLabels={};
                      for i=1:length(obj.internalIds)
                          if(any(code == obj.internalIds(i)))
-                            obj.internalLabels{i}=strtrim(lut(code == obj.internalIds(i),:));
+                            obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
                          else
                              obj.internalLabels{i}='unknown';
                          end
