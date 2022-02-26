@@ -48,7 +48,11 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                     obj.internalLabels={};
                      for i=1:length(obj.internalIds)
                          if(any(code == obj.internalIds(i)))
+                            if(strcmpi(strtrim(lut(code == obj.internalIds(i),:)),'UNKNOWN'))
+                                obj.internalLabels{i}='unknown'; %no need to add prefix for unknown, also normalize way it is written as label
+                            else
                             obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
+                            end
                          else
                              obj.internalLabels{i}='unknown';
                          end
