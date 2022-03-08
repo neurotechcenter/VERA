@@ -1,11 +1,12 @@
 classdef FreesurferModelGeneration < AComponent
-    %FreesurferModelGeneration Run Freesurfer segmentation 
+    %FreesurferModelGeneration Run Freesurfer segmentation within VERA
     
     properties
         MRIIdentifier %Input MRI Data Identifier
         SurfaceIdentifier %Output Surface Data Identifier
         SphereIdentifier %Output Sphere Surface Volume Identifier (will start with L_ and R_ )
         AnnotationType
+        SegmentationPathIdentifier
     end
      properties (Dependent, Access = protected)
         LeftSphereIdentifier
@@ -19,6 +20,7 @@ classdef FreesurferModelGeneration < AComponent
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
             obj.AnnotationType='aparc';
+            obj.SegmentationPathIdentifier='SegmentationPath';
         end
         
         function value=get.LeftSphereIdentifier(obj)
@@ -33,6 +35,7 @@ classdef FreesurferModelGeneration < AComponent
             obj.AddOutput(obj.SurfaceIdentifier,'Surface');
             obj.AddOutput(obj.LeftSphereIdentifier,'Surface');
             obj.AddOutput(obj.RightSphereIdentifier,'Surface');
+            obj.AddOutput(obj.SegmentationPathIdentifier,'PathInformation');
         end
         function Initialize(obj)
             path=obj.GetDependency('Freesurfer');
@@ -49,7 +52,7 @@ classdef FreesurferModelGeneration < AComponent
             
         end
         
-        function [surf,lsphere,rsphere] = Process(obj,mri)
+        function [surf,lsphere,rsphere,pathInfo] = Process(obj,mri)
                  segmentationFolder=obj.ComponentPath;
                  mri_path=GetFullPath(mri.Path);
                 freesurferPath=obj.GetDependency('Freesurfer');
@@ -97,7 +100,8 @@ classdef FreesurferModelGeneration < AComponent
                 rsphere.Model=rsphere_model.Model;
                 rsphere.Annotation=rsphere_model.Annotation;
                 rsphere.AnnotationLabel=rsphere_model.AnnotationLabel;
-                
+                pathInfo=obj.CreateOutput(obj.SegmentationPathIdentifier);
+                pathInfo.Path=segmentationPath;
 
         end
     end

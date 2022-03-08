@@ -295,7 +295,7 @@ classdef Runner < handle
                     obj.ComponentResultPath(k{1})=path;
                     obj.CurrentPipelineData(k{1})=res(k{1});
                 catch e
-                    warning(['Could not load result from Component ' complRes(k{1})]);
+                    warning(['Could not load result from Component ' complRes(k{1}) ' Reason: ' getReport(e)]);
                     obj.resetDownstreamCompletionStatus(complRes(k{1}));
                 end
 

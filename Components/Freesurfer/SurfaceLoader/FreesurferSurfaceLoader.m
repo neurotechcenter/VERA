@@ -1,5 +1,5 @@
 classdef FreesurferSurfaceLoader < AComponent
-    %FreesurferSurfaceLoader Input Component: Loads Information from Freesurfer segmentation
+    %FreesurferSurfaceLoader Loads Information from existing Freesurfer segmentation
     
     properties
         SurfaceIdentifier

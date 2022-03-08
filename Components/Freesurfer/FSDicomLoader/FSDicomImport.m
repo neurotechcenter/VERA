@@ -1,6 +1,7 @@
 classdef FSDicomImport < AComponent
-    %FSDICOMEXPORT Summary of this class goes here
-    %   Detailed explanation goes here
+    %FSDicomImport - Import imaging using freesurfers mri-convert. 
+    %In addition to using DICOM it can also be used to import data from
+    %Freesurfers mgz format
     
     properties
         Identifier

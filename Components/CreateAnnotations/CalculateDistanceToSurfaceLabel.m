@@ -1,6 +1,7 @@
 classdef CalculateDistanceToSurfaceLabel < AComponent
-    %CALCULATECLOSESTSURFACELABEL Summary of this class goes here
-    %   Detailed explanation goes here
+    %CALCULATECLOSESTSURFACELABEL Calculates the distance from an electrode
+    %to every available Label defined on a Surface.
+    %
     
     properties
         SurfaceIdentifier
@@ -31,8 +32,10 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
             [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surf);
             annotationIds=[surf.AnnotationLabel.Identifier];
+            f = waitbar(0,'Calculating Distance from Electrode to Labels');
             for i=1:length(annotationIds)
                  vert=surf.Model.vert(surf.Annotation == annotationIds(i),:);
+                 waitbar(i/length(annotationIds),f);
                  if(~isempty(vert))
                      for i_loc=1:size(out.Location,1)
                         [~,dist]=findNearestNeighbors(pointCloud(vert),out.Location(i_loc,:),1);
@@ -50,6 +53,7 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
                      end
                  end
             end
+            close(f);
         end
 
     end

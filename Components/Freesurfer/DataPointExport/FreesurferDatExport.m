@@ -1,5 +1,6 @@
 classdef FreesurferDatExport < AComponent
-    %MATOUTPUT Creates a .mat file as Output of VERA
+    %FreesurferDatExport Exports electrode locations to Freesurfer pointset
+    %format
     properties
         ElectrodeLocationIdentifier
         ElectrodeDefinitionIdentifier

@@ -1,6 +1,6 @@
 classdef EstimatePositionFromTrajectory < AComponent
-    %ESTIMATEPOSITIONFROMTRAJECTORY Summary of this class goes here
-    %   Detailed explanation goes here
+    %EstimatePositionFromTrajectory Tries to estimate the electrode
+    %locations based on planned trajectories
     
     properties
 

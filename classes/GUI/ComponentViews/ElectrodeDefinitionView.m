@@ -3,6 +3,7 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
     %
     properties (Access = public)
         History
+        ElectrodeDefinitionIdentifier
     end
     properties (Access = protected)
         gridDefinitionTable
@@ -25,10 +26,10 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
              obj.buttonGrid.Widths=[-1,-1];
              obj.buttonGrid.Heights=[-1];
              addlistener(obj.gridDefinitionTable,'Data','PostSet',@(~,~)obj.compUpdate);
-             
+             obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
              obj.Heights=[-1,20];
              obj.Widths=[-1];
-             
+             obj.disableChanges();
              try
                 uix.set( obj, varargin{:} )
              catch e
@@ -42,19 +43,39 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
     
     methods(Access = protected)
         function dataUpdate(obj)
-            
+            obj.componentChanged();
+        end
+        
+        function enableChanges(obj)
+            set(obj.gridDefinitionTable,'Enable','active');
+            set(obj.deleteButton,'Visible','on');
+            set(obj.addButton,'Visible','on');
+        end
+        
+        function disableChanges(obj)
+            set(obj.gridDefinitionTable,'Enable','inactive');
+                        set(obj.deleteButton,'Visible','off');
+            set(obj.addButton,'Visible','off');
         end
         
         function componentChanged(obj,a,b)
             comp=obj.GetComponent();
             tbl={};
+            elDef=[];
             if(~isempty(comp))
-                for ie=1:length(comp.ElectrodeDefinition)
-                    elDef=comp.ElectrodeDefinition(ie);
-                    tbl(end+1,:)={false,elDef.Type,elDef.Name,elDef.NElectrodes,elDef.Spacing,elDef.Volume};
+                obj.enableChanges();
+                elDef=comp.ElectrodeDefinition;
+            else
+                obj.disableChanges();
+                if(obj.AvailableData.isKey(obj.ElectrodeDefinitionIdentifier))
+                    elDef=obj.AvailableData(obj.ElectrodeDefinitionIdentifier).Definition;
                 end
-                obj.gridDefinitionTable.Data=tbl;
+
             end
+            for ie=1:length(elDef)
+                tbl(end+1,:)={false,elDef(ie).Type,elDef(ie).Name,elDef(ie).NElectrodes,elDef(ie).Spacing,elDef(ie).Volume};
+            end
+            obj.gridDefinitionTable.Data=tbl;
             if(isprop(comp,'History'))
                 comp.History={};
             end

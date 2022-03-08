@@ -10,6 +10,8 @@ h=annotation(grd,'textbox','Interpreter','latex','string','','BackgroundColor','
 %%create configured component info:
 outstring=["\textbf{ "+ string(class(comp))+  "} "];
 outstring=[outstring "\newline "];
+outstring=[outstring help('comp')];
+if(~isempty(comp.Inputs))
 outstring=[outstring "Input Configuration: \\ "];
 outstring=[outstring "\begin{tabular}{c | c} "];
 outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
@@ -18,30 +20,32 @@ for i=1:length((comp.Inputs))
     outstring(end)=outstring(end)+ comp.Inputs{i} + " & " + comp.inputMap(comp.Inputs{i}) + "\\";
 end
 outstring(end)=outstring(end)+ "\end{tabular}";
-
+end
 
 % --- Optional Inputs
-outstring=[outstring "\newline "];
-outstring=[outstring "Optional Input Configuration: \\ "];
-outstring=[outstring "\begin{tabular}{c | c} "];
-outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
+if(~isempty(comp.OptionalInputs))
+    outstring=[outstring "\newline "];
+    outstring=[outstring "Optional Input Configuration: \\ "];
+    outstring=[outstring "\begin{tabular}{c | c} "];
+    outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
 
-for i=1:length((comp.OptionalInputs))
-    outstring(end)=outstring(end)+ comp.OptionalInputs{i} + " & " + comp.optionalinputMap(comp.OptionalInputs{i}) + "\\";
+    for i=1:length((comp.OptionalInputs))
+        outstring(end)=outstring(end)+ comp.OptionalInputs{i} + " & " + comp.optionalinputMap(comp.OptionalInputs{i}) + "\\";
+    end
+    outstring(end)=outstring(end)+ "\end{tabular}";
 end
-outstring(end)=outstring(end)+ "\end{tabular}";
-
 % --- Outputs
-outstring=[outstring "\newline "];
-outstring=[outstring "Output Configuration: \\ "];
-outstring=[outstring "\begin{tabular}{c | c} "];
-outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
+if(~isempty(comp.Outputs))
+    outstring=[outstring "\newline "];
+    outstring=[outstring "Output Configuration: \\ "];
+    outstring=[outstring "\begin{tabular}{c | c} "];
+    outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
 
-for i=1:length((comp.Outputs))
-    outstring(end)=outstring(end)+ comp.Outputs{i} + " & " + comp.outputMap(comp.Outputs{i}) + "\\";
+    for i=1:length((comp.Outputs))
+        outstring(end)=outstring(end)+ comp.Outputs{i} + " & " + comp.outputMap(comp.Outputs{i}) + "\\";
+    end
+    outstring(end)=outstring(end)+ "\end{tabular}";
 end
-outstring(end)=outstring(end)+ "\end{tabular}";
-
 % ----- add user description for component ---- 
 
 

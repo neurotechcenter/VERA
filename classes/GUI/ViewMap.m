@@ -60,7 +60,7 @@ classdef ViewMap < handle
             %See also AView, IComponentView
             comp='';
             isCompV=false;
-            if(isObjectTypeOf(obj.Views(view),'IComponentView'))
+            if(isObjectTypeOf(obj.Views(view),'IComponentView') && ~isempty(obj.Views(view).Component))
                 isCompV=true;
                 comp=obj.Views(view).Component;
             end

@@ -1,6 +1,6 @@
 classdef CalculateDistanceToVolumeLabel < AComponent
-    %CALCULATECLOSESTSURFACELABEL Summary of this class goes here
-    %   Detailed explanation goes here
+    %CalculateDistanceToVolumeLabel - Calculates the distance between the
+    %electrode locations and all defined labels of the volume
     
     properties
         VolumeIdentifier
@@ -70,9 +70,11 @@ classdef CalculateDistanceToVolumeLabel < AComponent
 
         function out=Process(obj,vol,elLocs)
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
+            f = waitbar(0,'Calculating Distance from Electrode to Labels');
             for i=1:length(obj.internalIds)
                 binaryVol=zeros(size(vol.Image.img));
                 binaryVol(vol.Image.img == obj.internalIds(i))=true;
+                waitbar(i/length(obj.internalIds),f);
                 if(any(any(any(binaryVol)))) %only check if exists
                      [x,y,z]=meshgrid(1:size(binaryVol,2),1:size(binaryVol,1),1:size(binaryVol,3));
                      [~,vert]=isosurface(x,y,z,binaryVol); 
@@ -100,7 +102,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                      end
                 end
             end
-
+        close(f);
         end
     end
 end

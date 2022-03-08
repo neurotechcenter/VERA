@@ -22,8 +22,6 @@ classdef ObjectFactory
                 if(isObjectTypeOf(vobj,'IComponentView'))
                   if(isfield(xmlNode.Attributes,'Component'))
                         vobj.Component=xmlNode.Attributes.Component;
-                  else
-                        error('View is a ComponentView, it requires a Component attribute!');
                   end
                 end
                 if(nargin > 1 && ~isempty(xmlNode)) %deserialize

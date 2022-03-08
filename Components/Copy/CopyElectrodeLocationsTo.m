@@ -1,6 +1,6 @@
 classdef CopyElectrodeLocationsTo < AComponent
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    %CopyElectrodeLocationsTo Creates a copy of electrode locations taking
+    %to account the connected ElectrodeDefinitions
     
     properties
         ElectrodeLocationIdentifier

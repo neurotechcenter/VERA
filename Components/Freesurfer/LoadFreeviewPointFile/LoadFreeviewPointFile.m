@@ -1,6 +1,6 @@
 classdef LoadFreeviewPointFile < AComponent
-    %LOADFREEVIEWPOINTFILE Summary of this class goes here
-    %   Detailed explanation goes here
+    %LoadFreeviewPointFile Load Freesurfer formatted pointset files as
+    %electrode locations
     
     properties
         ElectrodeLocationIdentifier

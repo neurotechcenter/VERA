@@ -29,6 +29,10 @@ classdef IComponentView < handle
         
         function comp=GetComponent(obj)
             %GetComponent - returns the Component associated with the View
+            if(isempty(obj.Component))
+                comp=[];
+                return;
+            end
             if(~isempty(obj.comp))
                 comp=obj.comp;
             else

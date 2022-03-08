@@ -8,6 +8,8 @@ classdef IFileLoader < handle
     
     methods (Abstract)
         LoadFromFile(obj,path);
+        %LoadFrom File - path to file which should be loaded through
+        %interface
     end
 end
 

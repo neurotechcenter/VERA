@@ -1,5 +1,6 @@
 classdef ApplyMask < AComponent
-    %ApplyMask Component applies a Mask to a Volume
+    %ApplyMask Apply a predefined Mask to an image - requires reslicing of
+    %the image!
     
     properties
         InputIdentifier

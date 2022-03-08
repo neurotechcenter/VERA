@@ -1,4 +1,5 @@
 classdef TransformationMatrix < AData
+%TransformationMatrix - Data object for 4x4 transformation matrices
 
     
     properties

@@ -1,6 +1,6 @@
 classdef ElectrodeTransformation < AComponent
-    %PROJECTELECTRODE Summary of this class goes here
-    %   Detailed explanation goes here
+    %ElectrodeTransformation Projects electrode locations based on the
+    %supplied transformation matrix
     
     properties
         ElectrodeLocationIdentifier

@@ -1,5 +1,5 @@
 classdef Copy < AComponent
-
+% Copy - Creates a new data based on existing Data
     
     properties
         CopyFromIdentifier char % Data identifier

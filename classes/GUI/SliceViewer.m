@@ -1,4 +1,3 @@
-
 classdef SliceViewer < uix.Grid
     %SliceViewer View for Volume Data
     %Allows the view of different Volumes on top of each other and moving

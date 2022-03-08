@@ -3,9 +3,9 @@ classdef PointSet < AData
     %   Detailed explanation goes here
     
     properties
-        Location
-        Label
-        Annotation
+        Location %Location as a nx3 vector
+        Label %Cell array of labels associated with location
+        Annotation % Annotation for each location to add auxiliary information
     end
     
     methods
@@ -15,6 +15,8 @@ classdef PointSet < AData
             obj.Label={};
         end
         function SetLabel(obj,identifier, label)
+            %SetLabel - removes all existing labels and replaces it with
+            %the specified label 
             for i=1:length(identifier)
                 if(iscell(label))
                     obj.Label{identifier(i)}=label;
@@ -24,6 +26,10 @@ classdef PointSet < AData
             end
         end
         function AddLabel(obj,identifier, label)
+            %Adds a new Label for location - duplicates will be removed
+            %automatically
+            % identifier - index of the location
+            % Label to add
             for i=1:length(identifier)
                 if(~any(strcmp(obj.Label{identifier(i)},label))) %avoid duplicate labels
                     obj.Label{identifier(i)}{end+1}=label;
@@ -38,6 +44,7 @@ classdef PointSet < AData
             
         end
         function annot=GetAnnotation(obj, identifier, label)
+            
             if(length(obj.Annotation) >= identifier && isfield(obj.Annotation(identifier),label))
                 annot=obj.Annotation(identifier).(label);
             else
@@ -48,8 +55,10 @@ classdef PointSet < AData
     
     methods (Access = protected)
         function deSerializationDone(obj,docNode)
+            % override of deSerialization to make sure that older projects
+            % which didnt include Labels will load properly
             fileprops=fieldnames(docNode);
-            if(~any(strcmp('Label',fileprops))) %make sure Label gets filled correctly if the property wasnt serialized .. important for backwards compatability
+            if(~any(strcmp('Label',fileprops)))
                 obj.Label(1:size(obj.Location,1))={''};
             end
         end

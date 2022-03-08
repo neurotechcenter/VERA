@@ -13,16 +13,25 @@ classdef ElectrodeLocation < PointSet
         
 
         function RemoveWithIdentifier(obj, identifier)
+            % RemoveWithIdentifier - Remove Locations based on the
+            % Identifier
             obj.Location(obj.DefinitionIdentifier == identifier,:)=[];
             obj.DefinitionIdentifier(obj.DefinitionIdentifier == identifier)=[];
             obj.Label(obj.DefinitionIdentifier == identifier)=[];
         end
 
         function elLocs=GetWithIdentifier(obj,identifier)
+            % GetWithIdentifier - Return all locations for a specific
+            % Electrode Definition Identifier
             elLocs=obj.Location(obj.DefinitionIdentifier==identifier,:);
         end
         
         function AddWithIdentifier(obj,identifier,location)
+            % AddWithIdentifier - Adds in new locations with a specific
+            % identifier - Identifier to connect an electrode location to a
+            % specific electrode definition
+            % location - all locations corresponding to the identifier as
+            % (n x3 ) vector
             dim=size(location);
             if(dim(1)== 3 && dim(2)~= 3)
                 location=location';

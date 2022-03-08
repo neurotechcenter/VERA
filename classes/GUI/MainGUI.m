@@ -161,13 +161,12 @@ classdef MainGUI < handle
                     obj.createTreeView();
                     obj.createViews(pplFile,prj);
                     obj.updateTreeView();
-                    
-                    
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                    obj.fileMenuContent.CloseProject.Enable='on';
+                    obj.configureAll();
+                    obj.resumeGUI(obj);
                 end
-                 obj.fileMenuContent.CloseProject.Enable='on';
-                 obj.configureAll();
-                 obj.resumeGUI(obj);
+
             catch e
                 warning(getReport(e,'extended'));
             end

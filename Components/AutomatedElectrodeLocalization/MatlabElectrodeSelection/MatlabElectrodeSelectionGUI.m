@@ -60,7 +60,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 e.throwAsCaller()
             end
             cm = uicontextmenu(gcf);
-            uimenu(cm,'Text','Find All','Callback', @(~,~) obj.findConnectedElectrodes());
+            uimenu(cm,'Text','Find all connected locations','Callback', @(~,~) obj.findConnectedElectrodes());
             obj.trajMenu=uimenu(cm,'Text','Auto Detect Trajectory','Callback', @(~,~) obj.findAllElectrodes(),'Enable','off');
             uimenu(cm,'Text','Remove All','Callback', @(~,~) obj.removeElectrodes());
             obj.uiListView.UIContextMenu=cm;
@@ -201,36 +201,25 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             a = v1 - v2;
             for ii=1:size(centroids) 
                 b = centroids(ii,:) - v2;
-                d(ii) = norm(cross(a,b)) / norm(a);
+                c = v1 -centroids(ii,:);
+                angle_av2=atan2(norm(cross(a,b)),dot(a,b));
+                angle_av1=atan2(norm(cross(c,a)),dot(c,a));
+                if(angle_av1 < pi/2 && angle_av2 < pi/2)
+                    d(ii) = norm(cross(a,b)) / norm(a); %shortest distance to trajectory
+                else
+                    d(ii)=min(pdist([b;v2]),pdist([c;v2])); %shortest direct distance to anker point
+                end
             end
           
             [dist,I]=sort(d);
             I=I(dist < obj.elDefinition.Definition(elDefIdx).Spacing);
             closest_centroid=centroids(I,:);
-            
-            %resort to distance from outer alignment point - this avoids
-            Y = pdist([v1;closest_centroid]);
-            D=squareform(Y);
             found_els=closest_centroid;
-            if(~isempty(D))
-                [dist,I]=sort(D(1,2:end));
-                closest_centroid=closest_centroid(I,:);
-                I=I(dist < pdist([v1;v2]));
-                found_els=closest_centroid(I,:);
-                del_mask=[];
-                for i=1:size(found_els,1)
-                    pIdx=obj.findPrevSelectedPoint(pointCloud(obj.elLocations.Location),found_els(i,:));
-                    if(~isempty(pIdx))
-                        del_mask(end+1)=i;
-                    end
-                end
-                found_els(del_mask,:)=[];
-            end
             
             obj.elLocations.RemoveWithIdentifier(elDefIdx);
             obj.elLocations.AddWithIdentifier(elDefIdx,found_els);
             if(size(found_els,1) > 0)
-             obj.findConnectedElectrodes(false);
+             obj.findConnectedElectrodes(true);
             end
         end
                 
@@ -250,6 +239,8 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             o.TolX=0.01;
             o.PlotFcns=[];
             o.OutputFcn=[];
+            o.Display='final';
+            
             
             centroids=obj.getRASCentroids();
             %remove centroids already used
@@ -265,7 +256,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             occIdx(occIdx == 0)=[];
             centroids(occIdx,:)=[];
             %bNames=1:size(centroids,1);
-            gvar=0.3;
+
             gdist=obj.elDefinition.Definition(elDefIdx).Spacing;
             found_locs=cell(size(locs,1),1);
             numElFound=zeros(size(locs,1),1);
@@ -288,7 +279,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                    % poss=findStripNeighbour(pIdx,locs(iel,:),lcentroids,bNames,gvar_best,gdist);
                     func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
-                gvar_best=fminbnd(func,0.0,0.3,o);
+                gvar_best=fminbnd(func,0.0,1,o);
                 disp(gvar_best);
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
                    poss=findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);

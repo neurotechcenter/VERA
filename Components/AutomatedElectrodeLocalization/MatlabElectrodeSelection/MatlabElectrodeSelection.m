@@ -1,6 +1,6 @@
 classdef MatlabElectrodeSelection < AComponent
     %MatlabElectrodeSelection This Component allows manual and
-    %(semi)automated localization of electrode grids, fully implemented in
+    %(semi)automated localization of electrode grids, strips and depth electrodes fully implemented in
     %Matlab
 
     
@@ -38,6 +38,10 @@ classdef MatlabElectrodeSelection < AComponent
         end
         
         function Initialize(obj)
+            %check if appropriate toolboxes are installed!
+            if(~exist('regionprops3','file'))
+                error('MatlabElectrodeSelection requires the Image Processing Toolbox to be installed! ');
+            end          
         end
         
         function out=Process(obj,ct,def,varargin)
