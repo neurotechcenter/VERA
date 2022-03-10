@@ -40,9 +40,6 @@ classdef FreesurferHippocampalSegmentation < AComponent
                 segmentationPath=optInp.Path;
             else
                 segmentationPath=uigetdir([],'Please select Freesurfer Segmentation');
-                if(isempty(segmentationPath) ||  segmentationPath == 0)
-                    error('No path selected!');
-                end
             end
             LfileName=fullfile(segmentationPath,'mri','lh.hippoAmygLabels-T1.v21.mgz');
             RfileName=fullfile(segmentationPath,'mri','rh.hippoAmygLabels-T1.v21.mgz');
@@ -70,16 +67,14 @@ classdef FreesurferHippocampalSegmentation < AComponent
                 end
             end
             if(~exist(LfileName,'file') || ~exist(RfileName,'file'))
-                error('Error - no output files generated after running segmentation!');
+                error('Error - no output files generated after running !');
             end
             nii_path=createTempNifti(LfileName,obj.GetDependency('TempPath'),freesurferPath);
             lHC=obj.CreateOutput(['L' obj.VolumeIdentifier]);
             lHC.LoadFromFile(nii_path);
-            delete(nii_path);
             nii_path=createTempNifti(RfileName,obj.GetDependency('TempPath'),freesurferPath);
             rHC=obj.CreateOutput(['R' obj.VolumeIdentifier]);
-            rHC.LoadFromFile(nii_path);   
-            delete(nii_path);
+            rHC.LoadFromFile(nii_path);            
         end
         
 

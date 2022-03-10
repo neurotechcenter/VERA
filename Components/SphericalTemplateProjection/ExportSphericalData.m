@@ -1,6 +1,5 @@
 classdef ExportSphericalData < AComponent
-    %EXPORTSPHERICALDATA Summary of this class goes here
-    %   Detailed explanation goes here
+    %ExportSphericalData Save spherical data as .mat file
     
     properties
         SurfaceIdentifier

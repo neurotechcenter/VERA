@@ -1,5 +1,6 @@
 classdef LabelVolume2Surface < AComponent
-
+%LabelVolume2Surface - Creates a 3D model surface from a Volume, assuming
+%that the Volume is a based on labels
     
     properties
         VolumeIdentifier

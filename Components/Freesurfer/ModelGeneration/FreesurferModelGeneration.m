@@ -101,7 +101,8 @@ classdef FreesurferModelGeneration < AComponent
                 rsphere.Annotation=rsphere_model.Annotation;
                 rsphere.AnnotationLabel=rsphere_model.AnnotationLabel;
                 pathInfo=obj.CreateOutput(obj.SegmentationPathIdentifier);
-                pathInfo.Path=segmentationPath;
+                [~,b]=fileparts(obj.ComponentPath);
+                pathInfo.Path=fullfile('./',b,'Segmentation');
 
         end
     end

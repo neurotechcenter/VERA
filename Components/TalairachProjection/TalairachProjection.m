@@ -1,5 +1,6 @@
 classdef TalairachProjection < AComponent
-    %TalairachProjection Projects a Surface into Talairach Coordinates
+    %TalairachProjection Projects a Surface into Talairach Coordinates,
+    %requires manual selection of AC, PC and mid-sag
     
     properties
         MRIIdentifier

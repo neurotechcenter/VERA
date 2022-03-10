@@ -1,8 +1,5 @@
 classdef DBSLeadDetection < AComponent
-    %FileLoader - Component loads data from a file with a file selector
-    %Generic component that allows to select a file which will than be
-    %passed to the AData object that implements IFileLoader
-    %See also AData, IFileLoader
+    %DBSLeadDetection - Finds location of DBS locations using PaCER
 
     properties
         CTIdentifier

@@ -217,11 +217,13 @@ classdef MainGUI < handle
         end
         
         function configureAll(obj)
-            for ic=1:length(obj.ProjectRunner.Components)
-                    obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
+            if(obj.checkResolvedDependencies())
+                for ic=1:length(obj.ProjectRunner.Components)
+                        obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
+                end
+                obj.updateTreeView();
+                obj.resumeGUI(obj);
             end
-            obj.updateTreeView();
-            obj.resumeGUI(obj);
         end
         
         function runAll(obj)
@@ -337,7 +339,7 @@ classdef MainGUI < handle
                 vo.TooltipString='';
             catch e
                  vo.TooltipString=e.message;
-                errordlg(e.message);
+                errordlg(['Could not be configured: ' e.message],'Configure Failed','replace');
             end
             if(updateView)
                 obj.updateTreeView();
@@ -424,7 +426,7 @@ classdef MainGUI < handle
            end
            if(~isempty(missingDep))
                res=false;
-               errordlg('Unresolved Project dependencies! Go to Configuration->Settings to resolve Issues!');
+               errordlg('Unresolved Project dependencies! Go to Configuration->Settings to resolve Issues!','Unresolved Dependencies','replace');
            else
                res=true;
            end

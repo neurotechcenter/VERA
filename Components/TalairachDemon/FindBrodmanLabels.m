@@ -1,6 +1,7 @@
 classdef FindBrodmanLabels < AComponent
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    %FindBrodmanLabels Uses TalairachDemon to find the associated
+    %Brodman area for an electrode. Requires the electrodes to be projected
+    %into talairach space
     
     properties
         TalairachLocationIdentifier

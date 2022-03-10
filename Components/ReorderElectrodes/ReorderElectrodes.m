@@ -1,6 +1,6 @@
 classdef ReorderElectrodes < AComponent
     %ReorderElectrodes Reorder electrodes so that order matches channel
-    %locations in intracranial recordings
+    %locations in intracranial recording channel locations. 
     
     properties
         ElectrodeLocationIdentifier

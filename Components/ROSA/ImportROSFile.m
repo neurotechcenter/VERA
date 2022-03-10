@@ -1,7 +1,5 @@
 classdef ImportROSFile < AComponent
-    %ImportROSFile Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %ImportROSFile Import trajectory planning information from ROSA robot. 
     properties
         TrajectoryIdentifier
         ElectrodeDefinitionIdentifier

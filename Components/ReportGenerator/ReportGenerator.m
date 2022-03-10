@@ -1,6 +1,5 @@
 classdef ReportGenerator < AComponent
-    %ELECTRODEPROJECTION Summary of this class goes here
-    %   Detailed explanation goes here
+    %ReportGenerator Generates a project for the Neurotechcenter ReportGenerator
     
    properties
         ImageIdentifier
