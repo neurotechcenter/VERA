@@ -221,13 +221,24 @@ classdef Pipeline < handle
             end
         end
         
-        function AddOptionalInput(obj,cobj,Identifier,inpType)
+        function AddOptionalInput(obj,cobj,Identifier,inpType, mustUseIfAvailable)
             %AddOptionalInput - Adds an optional input for the current component to the
             %pipeline
             %   This method can only be called by a Component
             %   See also AComponent
-                cobj.OptionalInputs{end+1}=Identifier;
-                cobj.optionalinputMap(Identifier)=inpType;
+            
+
+            if(obj.availableData.isKey(Identifier) ...
+                && isObjectTypeOf(inpType,'AData') ...
+                && strcmp(obj.availableData(Identifier),inpType))
+                if(mustUseIfAvailable)
+                    cobj.Inputs{end+1}=Identifier;
+                    cobj.inputMap(Identifier)=inpType;
+                else
+                    cobj.OptionalInputs{end+1}=Identifier;
+                    cobj.optionalinputMap(Identifier)=inpType;
+                end
+            end
         end
         
         function AddOutput(obj,cobj,Identifier,outputType)

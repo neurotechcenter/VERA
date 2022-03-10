@@ -14,7 +14,7 @@ classdef FreesurferHippocampalSegmentation < AComponent
         end
         
         function Publish(obj)
-            obj.AddOptionalInput(obj.SegmentationPathIdentifier,'PathInformation');
+            obj.AddOptionalInput(obj.SegmentationPathIdentifier,'PathInformation',true);
             obj.AddOutput(['L' obj.VolumeIdentifier],'Volume');
             obj.AddOutput(['R' obj.VolumeIdentifier],'Volume');
 

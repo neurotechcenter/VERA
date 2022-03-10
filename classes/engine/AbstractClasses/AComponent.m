@@ -135,7 +135,7 @@ classdef (Abstract) AComponent < Serializable
             DependencyHandler.Instance.PostDepencenyRequest(name,type);
         end
         
-        function AddOptionalInput(obj,Identifier,inpDataTypeName)
+        function AddOptionalInput(obj,Identifier,inpDataTypeName,mustUseIfAvailable)
             % AddOptionalInput add an optional input to this component
             % In the Publish method, optional inputs can be defined
             % If the input exists it will be added as an argument to the
@@ -144,12 +144,17 @@ classdef (Abstract) AComponent < Serializable
             % output by another component
             % inpDataTypeName - Name of the data type - has to be a subtype
             % of AData
+            % mustUseIfAvailable - Decide wether the input must be used if
+            % it is avialable
             % See also AComponent.Publish, AComponent.Process, AData,
             % ElectrodeDefinition, IFileLoader, Surface, Volume
             if(isempty(obj.Pipeline))
                 error('Component has to be part of a Pipeline, Pipeline is only available during Publish phase');
             end
-            obj.Pipeline.AddOptionalInput(obj,Identifier,inpDataTypeName);
+            if(nargin < 4)
+                mustUseIfAvailable=false;
+            end
+            obj.Pipeline.AddOptionalInput(obj,Identifier,inpDataTypeName,mustUseIfAvailable);
         end
         
         function AddInput(obj,Identifier,inpDataTypeName)
@@ -166,7 +171,6 @@ classdef (Abstract) AComponent < Serializable
             if(isempty(obj.Pipeline))
                 error('Component has to be part of a Pipeline, Pipeline is only available during Publish phase');
             end
-            
             obj.Pipeline.AddInput(obj,Identifier,inpDataTypeName);
 
         end
