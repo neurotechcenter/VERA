@@ -43,7 +43,7 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
              out=obj.CreateOutput(obj.Identifier);
              if(isempty(obj.ElectrodeDefinition))
                 obj.ElectrodeDefinition=obj.internalDefinitions;
-                h=figure;
+                h=figure('Name',obj.Name);
                 elView=ElectrodeDefinitionView('Parent',h);
                 elView.SetComponent(obj);
                 uiwait(h);

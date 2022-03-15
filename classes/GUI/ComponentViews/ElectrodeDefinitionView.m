@@ -29,6 +29,7 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
              obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
              obj.Heights=[-1,20];
              obj.Widths=[-1];
+             
              obj.disableChanges();
              try
                 uix.set( obj, varargin{:} )
@@ -47,7 +48,7 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
         end
         
         function enableChanges(obj)
-            set(obj.gridDefinitionTable,'Enable','active');
+            set(obj.gridDefinitionTable,'Enable','on');
             set(obj.deleteButton,'Visible','on');
             set(obj.addButton,'Visible','on');
         end

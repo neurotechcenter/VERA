@@ -29,26 +29,22 @@ classdef IComponentView < handle
         
         function comp=GetComponent(obj)
             %GetComponent - returns the Component associated with the View
-            if(isempty(obj.Component))
-                comp=[];
-                return;
+            comp=[];
+            if(~isempty(obj.Component))
+                if(~isempty(obj.Pipeline))
+                    comp=obj.Pipeline.GetComponent(obj.Component);
+                end
             end
             if(~isempty(obj.comp))
                 comp=obj.comp;
             else
-                if(~isempty(obj.Pipeline))
-                    comp=obj.Pipeline.GetComponent(obj.Component);
-                else
-                    error('No Pipeline associated with this View!');
-                end
+
             end
         end
     end
-    methods (Access = protected)
+    methods (Abstract,Access = protected)
         
-        function componentChanged(obj,a,b)
-            %componentChanged - Method is called whenever Components change
-        end
+        componentChanged(obj,a,b);
 
     end
 end
