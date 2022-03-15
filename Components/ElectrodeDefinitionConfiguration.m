@@ -48,15 +48,17 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
                 elView.SetComponent(obj);
                 uiwait(h);
              end
-             field = fieldnames(obj.ElectrodeDefinition);
-             for i=1:length(obj.ElectrodeDefinition)
-                 for f=1:length(field)
-                     if(isempty(obj.ElectrodeDefinition(i).(field{f})))
-                         error([field{f} ' is missing values!']);
+             if(~isempty(obj.ElectrodeDefinition))
+                 field = fieldnames(obj.ElectrodeDefinition);
+                 for i=1:length(obj.ElectrodeDefinition)
+                     for f=1:length(field)
+                         if(isempty(obj.ElectrodeDefinition(i).(field{f})))
+                             error([field{f} ' is missing values!']);
+                         end
                      end
                  end
+                 out.Definition=obj.ElectrodeDefinition;
              end
-             out.Definition=obj.ElectrodeDefinition;
         end
     end
 end
