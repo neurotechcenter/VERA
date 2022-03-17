@@ -45,13 +45,16 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                 
                 flexb.Widths=[-0.3 -0.7];
                 selV.Heights=[-0.9,-0.1];
-                
-                uicontrol(controlsBox,'Style','pushbutton','String','Re-sort Indices','callback',@(~,~)obj.resort());
+                buttonBox=uix.Grid('Parent',controlsBox);
+                uicontrol(buttonBox,'Style','pushbutton','String','Auto-Sort','callback',@(~,~)obj.autosort());
+                uicontrol(buttonBox,'Style','pushbutton','String','Re-sort Indices','callback',@(~,~)obj.resort());
+                buttonBox.Widths=[-1 -1];
+                buttonBox.Heights=[-1];   
                 btngrp=uibuttongroup('Parent',controlsBox,'SelectionChangedFcn',@(~,~)obj.selectionChanged());
                 obj.btnClinical=uicontrol(btngrp,'Style','radiobutton','String','Clinical Numbering Scheme','Max',true,'Min',false,'Value',true,'Position',[0 0 150 50]);
                 uicontrol(btngrp,'Style','radiobutton','String','Research Numbering Scheme','Position',[150 0 250 50]);
                 controlsBox.Widths=[-1];
-                controlsBox.Heights=[-0.9 -0.1 -0.1];                
+                controlsBox.Heights=[-0.9 -0.05 -0.1];                
                 
             try
                 uix.set( obj, varargin{:} )
@@ -79,6 +82,7 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
             obj.eDefinitions=eDef;
             obj.eLocations=eLoc;
             obj.elSelection.String={eDef.Definition.Name};
+            obj.selectionChanged();
         end
         
         
@@ -166,6 +170,16 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
              obj.elSelection.String={obj.eDefinitions.Definition.Name};
              obj.elSelection.Value=unique(max(obj.elSelection.Value-1,1));
              obj.selectionChanged();
+        end
+        
+        function autosort(obj)
+            vals=obj.elSelection.Value;
+            for i=1:length(vals)
+                elLoc=obj.eLocations.Location(obj.eLocations.DefinitionIdentifier == vals(i),:);
+                [~,I]=sort(vecnorm(elLoc'));
+                obj.eLocations.Location(obj.eLocations.DefinitionIdentifier == vals(i),:)=elLoc(I,:);
+            end
+            obj.selectionChanged();
         end
         
         function resort(obj)

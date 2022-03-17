@@ -84,8 +84,8 @@ classdef Model3DView < AView & uix.Grid
                             
                             if(obj.AvailableData.isKey(elIdentifiers{i_elId}))
                                 elPos=obj.AvailableData(elIdentifiers{i_elId});
-                                if(~isempty(elPos))
-                                    for i=unique(elPos.DefinitionIdentifier)',
+                                if(~isempty(elPos) && ~isempty(elPos.DefinitionIdentifier))
+                                    for i=unique(elPos.DefinitionIdentifier)'
                                         plotBallsOnVolume(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
                                         if(obj.AvailableData.isKey(elDefIdentifiers{i_elId}))
                                             elDef=obj.AvailableData(elDefIdentifiers{i_elId});
