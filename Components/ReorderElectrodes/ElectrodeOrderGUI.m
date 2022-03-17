@@ -134,13 +134,30 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                  newPos2=pos2-length(pos1);
                  eLocs1=obj.eLocations.Location(pos1,:);
                  eLocs2=obj.eLocations.Location(pos2,:);
+
+                 labelPos1=obj.eLocations.Label(pos1);
+                 labelPos2=obj.eLocations.Label(pos2);
+                 
                  obj.eLocations.Location(newPos1,:)=eLocs1;
                  obj.eLocations.DefinitionIdentifier(newPos1)=vals(iv)+1;
+                 
+                 obj.eLocations.Label(newPos1)=labelPos1;
+                 
                  obj.eLocations.Location(newPos2,:)=eLocs2;
                  obj.eLocations.DefinitionIdentifier(newPos2)=(vals(iv));
+                  
+                 obj.eLocations.Label(newPos2)=labelPos2;                
+                 
                  def1=obj.eDefinitions.Definition(vals(iv));
                  obj.eDefinitions.Definition(vals(iv))=obj.eDefinitions.Definition(vals(iv)+1);
                  obj.eDefinitions.Definition(vals(iv)+1)=def1;
+                 
+                 if(~isempty(fieldnames(obj.eLocations.Annotation)))
+                     annotPos1=obj.eLocations.Annotation(pos1);
+                     annotPos2=obj.eLocations.Annotation(pos2);
+                     obj.eLocations.Annotation(newPos1)=annotPos1;
+                     obj.eLocations.Annotation(newPos2)=annotPos2;
+                 end
              end
              obj.elSelection.String={obj.eDefinitions.Definition.Name};
              obj.elSelection.Value=unique(min(obj.elSelection.Value+1,length(obj.eDefinitions.Definition)));
@@ -159,13 +176,30 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
                  newPos2=pos2+length(pos1);
                  eLocs1=obj.eLocations.Location(pos1,:);
                  eLocs2=obj.eLocations.Location(pos2,:);
+
+                 labelPos1=obj.eLocations.Label(pos1);
+                 labelPos2=obj.eLocations.Label(pos2);
+                 
                  obj.eLocations.Location(newPos1,:)=eLocs1;
                  obj.eLocations.DefinitionIdentifier(newPos1)=vals(iv)-1;
+                 
+                 obj.eLocations.Label(newPos1)=labelPos1;
+                 
                  obj.eLocations.Location(newPos2,:)=eLocs2;
                  obj.eLocations.DefinitionIdentifier(newPos2)=(vals(iv));
+                  
+                 obj.eLocations.Label(newPos2)=labelPos2;                
+                 
                  def1=obj.eDefinitions.Definition(vals(iv));
                  obj.eDefinitions.Definition(vals(iv))=obj.eDefinitions.Definition(vals(iv)-1);
                  obj.eDefinitions.Definition(vals(iv)-1)=def1;
+                 
+                 if(~isempty(fieldnames(obj.eLocations.Annotation)))
+                     annotPos1=obj.eLocations.Annotation(pos1);
+                     annotPos2=obj.eLocations.Annotation(pos2);
+                     obj.eLocations.Annotation(newPos1)=annotPos1;
+                     obj.eLocations.Annotation(newPos2)=annotPos2;
+                 end
              end
              obj.elSelection.String={obj.eDefinitions.Definition.Name};
              obj.elSelection.Value=unique(max(obj.elSelection.Value-1,1));
@@ -177,7 +211,10 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
             for i=1:length(vals)
                 elLoc=obj.eLocations.Location(obj.eLocations.DefinitionIdentifier == vals(i),:);
                 [~,I]=sort(vecnorm(elLoc'));
-                obj.eLocations.Location(obj.eLocations.DefinitionIdentifier == vals(i),:)=elLoc(I,:);
+                orig_idx=find(obj.eLocations.DefinitionIdentifier == vals(i));
+                
+                obj.eLocations.ResortElectrodes(orig_idx(I));
+
             end
             obj.selectionChanged();
         end
@@ -237,7 +274,9 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
 %                 start=find(obj.eLocations.DefinitionIdentifier == obj.elSelection.Value,1)-1;
 %                 obj.eLocations.Location(start+sortI,:)=elLoc;
 %                 obj.selectionChanged();
-                obj.eLocations.Location(obj.eLocations.DefinitionIdentifier == obj.elSelection.Value,:)=elLoc(sortMap,:);
+                origIdx=find(obj.eLocations.DefinitionIdentifier == obj.elSelection.Value);    
+                obj.eLocations.ResortElectrodes(origIdx(sortMap));
+%                obj.eLocations.Location(obj.eLocations.DefinitionIdentifier == obj.elSelection.Value,:)=elLoc(sortMap,:);
                 obj.selectionChanged();
             end
         end

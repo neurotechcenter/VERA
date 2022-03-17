@@ -25,6 +25,27 @@ classdef PointSet < AData
                 end
             end
         end
+        
+        function ResortElectrodes(obj,newLocs)
+
+            oldLocs=sort(newLocs);
+            
+            obj.Label(oldLocs)=obj.Label(newLocs);
+            obj.Location(oldLocs,:)=obj.Location(newLocs,:);
+           
+            if(~isempty((fieldnames(obj.Annotation))))
+                obj.Annotation(oldLocs)=obj.Annotation(newLocs);
+            end
+        end
+        
+        function DeleteAnnotations(obj,identifier)
+            buffLabel=obj.Label(obj.Annotation);
+            for i=1:length(buffLabel)
+                for id=1:length(identifier)
+                    obj.Annotation(identifier(id)).(buffLabel{i})=[];
+                end
+            end
+        end
         function AddLabel(obj,identifier, label)
             %Adds a new Label for location - duplicates will be removed
             %automatically

@@ -18,6 +18,7 @@ classdef ElectrodeLocation < PointSet
             obj.Location(obj.DefinitionIdentifier == identifier,:)=[];
             obj.DefinitionIdentifier(obj.DefinitionIdentifier == identifier)=[];
             obj.Label(obj.DefinitionIdentifier == identifier)=[];
+            obj.DeleteAnnotations(find(obj.DefinitionIdentifier == identifier));
         end
 
         function elLocs=GetWithIdentifier(obj,identifier)
