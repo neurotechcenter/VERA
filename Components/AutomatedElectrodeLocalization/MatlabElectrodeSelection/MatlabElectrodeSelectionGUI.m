@@ -279,7 +279,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                    % poss=findStripNeighbour(pIdx,locs(iel,:),lcentroids,bNames,gvar_best,gdist);
                     func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
-                gvar_best=fminbnd(func,0.0,1,o);
+                gvar_best=fminbnd(func,0.0,0.3,o);
                 disp(gvar_best);
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
                    poss=findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);

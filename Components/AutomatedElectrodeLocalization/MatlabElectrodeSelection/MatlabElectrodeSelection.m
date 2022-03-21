@@ -47,6 +47,10 @@ classdef MatlabElectrodeSelection < AComponent
         function out=Process(obj,ct,def,varargin)
             if(isempty(obj.Data))
                 obj.Data=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
+            else %we need to check obj.Data for consistency, lets see if all the definitions still exist....
+                if(max(obj.Data.DefinitionIdentifier) > length(def.Definition)) 
+                    obj.Data=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
+                end
             end
             
             out=obj.Data;

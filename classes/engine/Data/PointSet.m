@@ -39,7 +39,7 @@ classdef PointSet < AData
         end
         
         function DeleteAnnotations(obj,identifier)
-            buffLabel=obj.Label(obj.Annotation);
+            buffLabel=fieldnames(obj.Annotation(identifier));
             for i=1:length(buffLabel)
                 for id=1:length(identifier)
                     obj.Annotation(identifier(id)).(buffLabel{i})=[];
