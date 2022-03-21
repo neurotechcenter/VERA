@@ -43,20 +43,22 @@ classdef ElectrodeLocationTableView < AView & uix.Grid
                 eDef=obj.AvailableData(obj.ElectrodeDefinitionIdentifier);
            end
             tbl={};
-           for i=1:size(elLocs.Location,1)
-               def_name=eDef.Definition(elLocs.DefinitionIdentifier(i)).Name;
-               chidx=find(find(elLocs.DefinitionIdentifier == elLocs.DefinitionIdentifier(i)) == i);
-               labels='';
-               for ii=1:length(elLocs.Label{i})
-                   if(ii == 1)
-                       labels=elLocs.Label{i}{ii};
-                   else
-                   labels=[labels ', ' elLocs.Label{i}{ii}];
+            if(~isempty(elLocs))
+               for i=1:size(elLocs.Location,1)
+                   def_name=eDef.Definition(elLocs.DefinitionIdentifier(i)).Name;
+                   chidx=find(find(elLocs.DefinitionIdentifier == elLocs.DefinitionIdentifier(i)) == i);
+                   labels='';
+                   for ii=1:length(elLocs.Label{i})
+                       if(ii == 1)
+                           labels=elLocs.Label{i}{ii};
+                       else
+                       labels=[labels ', ' elLocs.Label{i}{ii}];
+                       end
                    end
+                   tbl(i,:)={i,[def_name num2str(chidx)],elLocs.Location(i,1),elLocs.Location(i,2),elLocs.Location(i,3),labels};
+
                end
-               tbl(i,:)={i,[def_name num2str(chidx)],elLocs.Location(i,1),elLocs.Location(i,2),elLocs.Location(i,3),labels};
-              
-           end
+            end
            obj.gridDefinitionTable.Data=tbl;
         end
    end

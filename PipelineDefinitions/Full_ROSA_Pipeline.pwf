@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="Full ROSA Pipeline">
+
+
+    <Component Type="FileLoader">
+        <Identifier>"CT"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+    </Component>
+
+    <Component Type="FileLoader">
+        <Identifier>"MRI"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+    </Component>
+
+    <Component Type="FSDicomImport">
+        <Name>"Load ASEG"</Name>
+        <Identifier>"ASEG"</Identifier>
+    </Component>
+
+    <Component Type="ImportROSFile"/>
+
+    <Component Type="FreesurferSurfaceLoader"/>
+
+    <Component Type="FreesurferHippocampalSegmentation"/>
+
+
+    <Component Type="MoveRASOrigin"/>
+
+    <Component Type="Coregistration"/>
+
+    <Component Type="Coregistration">
+	<Name>"Coregister ROSA Trajectories"</Name>
+        <CTIdentifier>"ROSAVolume"</CTIdentifier>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+    </Component>
+
+    <Component Type="ElectrodeTransformation">
+        <TIdentifier>"T_ROSA"</TIdentifier>
+        <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
+    </Component>
+
+    <Component Type="MatlabElectrodeSelection"/>
+
+    <Component Type="FreesurferElectrodeLocalization"/>
+
+    <Component Type="ReorderElectrodes"/>
+
+    <Component Type="CalculateDistanceToSurfaceLabel">
+        <Name>"Distance to Surface"</Name>
+    </Component>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to ASEG"</Name>
+    </Component>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Left Hippocampus"</Name>
+        <VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Right Hippocampus"</Name>
+        <VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="ReplaceLabels">
+        <Name>"Cleanup Electrode Labels"</Name>
+    </Component>
+
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat"</Name>
+    </Component>
+
+    <Component Type="ReportGenerator">
+	<Name>"Report Generator MRI"</Name>
+    	<ImageIdentifier>"MRI"</ImageIdentifier>
+    </Component>
+  
+	<View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Locations"</Name>
+    </View>
+    <View Type="Model3DView">
+	<Name>"3D View"</Name>
+    </View>
+
+    <View Type="SliceViewerView">
+    	<Name>"Slice Viewer"</Name>
+    </View>
+
+
+</PipelineDefinition>

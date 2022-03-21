@@ -78,10 +78,6 @@ classdef ImportROSFile < AComponent
                     end
                 end
             end
-            
-            if(isempty(ras_projected.displays))
-                error('ROSA files seem to be missing, no imaging data available to create reference frame for trajectories');
-            end
             %% save trajectories in RAS coordinate system
             % All trajectories are in the coregistration space, so all we need to do is
             % transform the trajectories into RAS space by applying rot2ras

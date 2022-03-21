@@ -40,7 +40,7 @@ classdef FreesurferHippocampalSegmentation < AComponent
                 segmentationPath=optInp.Path;
             else
                 segmentationPath=uigetdir([],'Please select Freesurfer Segmentation');
-                if(isempty(segmentationPath) ||  segmentationPath == 0)
+                if(isempty(segmentationPath))
                     error('No path selected!');
                 end
             end
