@@ -114,7 +114,7 @@ classdef (Abstract) AComponent < Serializable
     
     methods(Access = protected)
         
-        function path=GetTempPath(~)
+        function path=GetTempPath(obj)
             % GetTempPath - returns the Temp Path defined in the
             % Dependencies
             path=obj.GetDependency('TempPath');
