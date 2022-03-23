@@ -20,13 +20,20 @@ classdef ReportGenerator < AComponent
             obj.AddInput(obj.SurfaceIdentifier,'Surface');
             obj.AddInput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
             obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
+            obj.RequestDependency('ReportGenerator','folder');
         end
         function Initialize(obj)
+            addpath(obj.GetDependency('ReportGenerator'));
             
         end
         
         function [] = Process(obj,image,surf,elDef,eLocs)
-            path=uigetdir([],'Select output path, generates a ReportGenerator Project');
+            tempPath=obj.GetTempPath();
+            [~,randName]=fileparts(tempname);
+            delPath=fullfile(tempPath,randName);
+            path=fullfile(delPath,'Report');
+            
+            %path=uigetdir([],'Select output path, generates a ReportGenerator Project');
             cortex=surf.Model;
             ix=1;
             cmapstruct=struct('basecol',[0.7 0.7 0.7],'fading',1,'enablecolormap',1,'enablecolorbar',1,'color_bar_ticks',4,'cmap',jet(64),...
@@ -71,7 +78,15 @@ classdef ReportGenerator < AComponent
                 fclose(fileID);
 
 
-            end     
+             end
+            outpptxpath=runGeneratorExternal(path);
+            if(~isempty(outpptxpath) && exist(outpptxpath,'file'))
+                [resdir,resfile]=uiputfile('*.pptx');
+                copyfile(outpptxpath,fullfile(resdir,resfile));
+            else
+                error('No report generated!');
+            end
+            rmdir(delPath,'s');
         end
     end
 end
