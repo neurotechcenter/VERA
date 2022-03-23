@@ -89,12 +89,12 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             obj.ImageAlphas=alphas;
             clims=obj.GetColorLimits();
             obj.supressUpdate=true;
-            obj.slMin.Min=clims(1);
-            obj.slMin.Max=clims(2);
-            obj.slMin.Value=clims(1);
-            obj.slMax.Min=clims(1);
-            obj.slMax.Max=clims(2);
-            obj.slMax.Value=clims(2);
+            obj.slMin.Min=min(clims);
+            obj.slMin.Max=max(clims);
+            obj.slMin.Value=min(clims);
+            obj.slMax.Min=min(clims);
+            obj.slMax.Max=max(clims);
+            obj.slMax.Value=max(clims);
             obj.supressUpdate=false;
 
 

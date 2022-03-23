@@ -230,7 +230,7 @@ classdef SliceViewer < uix.Grid
             end
             if(obj.slider.Value ~=obj.Slice)
                 if(obj.Slice > obj.slider.Max)
-                obj.slider.Value=obj.slider.Max;  
+                    obj.slider.Value=obj.slider.Max;  
                 elseif(obj.Slice < obj.slider.Min)
                     obj.slider.Value=obj.slider.Min;  
                 else
