@@ -10,7 +10,7 @@ if(ismac || isunix)
     inPath ''' ''' ...
     nii_path ''''],'-echo');
 else
-    subsyspath=obj.GetDependency('UbuntuSubsystemPath');
+    subsyspath=DependencyHandler.Instance.GetDependency('UbuntuSubsystemPath');
     w_convert_script_path=convertToUbuntuSubsystemPath(convert_script_path,subsyspath);
     w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
     w_dicom_path=convertToUbuntuSubsystemPath(inPath,subsyspath);
