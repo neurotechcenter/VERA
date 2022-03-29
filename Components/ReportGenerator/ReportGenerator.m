@@ -82,7 +82,7 @@ classdef ReportGenerator < AComponent
             outpptxpath=runGeneratorExternal(path);
             if(~isempty(outpptxpath) && exist(outpptxpath,'file'))
                 [resfile,resdir]=uiputfile([fileparts(outpptxpath) '.pptx']);
-                copyfile(outpptxpath,fullfile(resdir,resfile));
+                copyfile(outpptxpath,fullfile(resdir,resfile),'f');
             else
                 error('No report generated!');
             end
