@@ -150,7 +150,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             o.TolX=0.01;
             o.PlotFcns=[];
             o.OutputFcn=[];
-            min_res=fminbnd(@(x) obj.testTreshold(Nelecs,x),obj.slMinThresh.Max*0.8,obj.slMinThresh.Max,o);
+            min_res=fminbnd(@(x) obj.testTreshold(Nelecs,x),obj.slMinThresh.Min,obj.slMinThresh.Max,o);
             obj.testTreshold(Nelecs,min_res);
         end
         
