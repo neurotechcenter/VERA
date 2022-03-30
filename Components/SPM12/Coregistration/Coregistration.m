@@ -52,7 +52,7 @@ classdef Coregistration < AComponent
             
         end
         
-        function [ct,T] = Process(obj,mri,ct)
+        function [ctOut,T] = Process(obj,mri,ct)
             [a,b,c]=fileparts(mri.Path);
             pref_mri=fullfile(a,['r' b c]);
             
@@ -60,7 +60,14 @@ classdef Coregistration < AComponent
             pref_ct=fullfile(a,['r' b c]);
             
             copyfile(mri.Path,pref_mri);
-            copyfile(ct.Path,pref_ct);
+            V=spm_vol(ct.Path);
+            
+           % func_img = spm_read_vols(V);
+          %  func_img=func_img+(rand(size(func_img)) > 0.5);
+            new_nii = spm_create_vol(V);
+            new_nii.fname = pref_ct;
+            new_img = spm_write_vol(new_nii, ct.Image.img); %spm12 seems to have issues with some nifti images; this way we can make sure that the CT is correect
+            %copyfile(ct.Path,pref_ct);
             mrihandle = spm_vol(pref_mri);
             cthandle = spm_vol(pref_ct);
 
@@ -88,6 +95,7 @@ classdef Coregistration < AComponent
 
             x = spm_coreg(job.ref, job.source, job.eoptions);
 
+
             M = spm_matrix(x);
             PO = job.source;
             MM = zeros(4,4,numel(PO));
@@ -99,8 +107,8 @@ classdef Coregistration < AComponent
             T=obj.CreateOutput(obj.TIdentifier);
             T.T(:,:,1)=inv(job.source.mat);
             T.T(:,:,2)=M\MM(:,:,1);
-            ct=obj.CreateOutput(obj.CTIdentifier);
-            ct.LoadFromFile(pref_ct);
+            ctOut=obj.CreateOutput(obj.CTIdentifier);
+            ctOut.LoadFromFile(pref_ct);
             
             
         end
