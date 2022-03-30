@@ -35,9 +35,11 @@ classdef FreesurferHippocampalSegmentation < AComponent
             end
         end
         
-        function [lHC,rHC]=Process(obj,~,optInp)
+        function [lHC,rHC]=Process(obj,optInp)
             if(nargin > 1) %segmentation path exists
                 segmentationPath=optInp.Path;
+                comPath=fileparts(obj.ComponentPath);
+                segmentationPath=fullfile(comPath,segmentationPath); %create full path
             else
                 segmentationPath=uigetdir([],'Please select Freesurfer Segmentation');
                 if(isempty(segmentationPath))
@@ -46,6 +48,7 @@ classdef FreesurferHippocampalSegmentation < AComponent
             end
             LfileName=fullfile(segmentationPath,'mri','lh.hippoAmygLabels-T1.v21.mgz');
             RfileName=fullfile(segmentationPath,'mri','rh.hippoAmygLabels-T1.v21.mgz');
+
             freesurferPath=obj.GetDependency('Freesurfer');
             if(~exist(LfileName,'file') || ~exist(RfileName,'file'))
                 
@@ -59,7 +62,7 @@ classdef FreesurferHippocampalSegmentation < AComponent
                     systemWSL(['chmod +x ''' wsl_recon_script ''''],'-echo');
                     shellcmd=['''' wsl_recon_script ''' ''' w_freesurferPath ''' ''' ...
                     wsl_segm_path ''' ' ...
-                    '' subj_name ''''];
+                    '''' subj_name ''''];
                     systemWSL(shellcmd,'-echo');
                 else
                     system(['chmod +x ''' recon_script ''''],'-echo');
