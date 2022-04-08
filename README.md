@@ -3,8 +3,6 @@
 
 VERA was specifically built to solve this problem. The framework allows other tools to be integrated into existing pipelines without changing the localization pipeline.
 
-VERA was specifically built to solve this problem. The framework allows other tools to be integrated into existing pipelines without changing the localization pipeline.
-
 # Quick Guide
 ## Installation & Startup
 VERA can be used by any MatLab distribution later than Matlab 2016b. Download the repository into an empty directory and run *startup_VERA.m*
