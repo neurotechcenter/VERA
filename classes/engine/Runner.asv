@@ -162,7 +162,6 @@ classdef Runner < handle
             % Component
             % See also AComponent, AData, Pipeline
             compValid=true;
-            localPipeline=containers.Map();
             obj.checkCompName(compName);
              if(strcmp(obj.GetComponentStatus(compName),'Completed'))
                     obj.ConfigureComponent(compName);
@@ -175,8 +174,6 @@ classdef Runner < handle
                 if(~strcmp(obj.GetComponentStatus(req_comps{i}),'Completed'))
                     compValid=false;
                     errStr=[errStr ' ' req_comps{i}];
-                else
-                    localPipeline=[localPipeline; obj.Project.LoadComponentData(req_comps{i})];
                 end
             end
             if(~compValid)
@@ -185,15 +182,15 @@ classdef Runner < handle
             if(~strcmp(obj.GetComponentStatus(compName),'Ready') && ~strcmp(obj.GetComponentStatus(compName),'Completed'))
                 error('Current component needs to be configured first!');
             end
-                
+
             
             [inp, outp,optInp]=obj.Project.Pipeline.InterfaceInformation(compName);
             inpData=cell(numel(inp),1);
             outpData=cell(numel(outp),1);
             optinpData={};
             for i=1:length(inp)
-                if(localPipeline.isKey(inp{i}))
-                    inpData{i}=localPipeline(inp{i});
+                if(obj.CurrentPipelineData.isKey(inp{i}))
+                    inpData{i}=obj.CurrentPipelineData(inp{i});
                 else
                     warning('Requested Component Input is not available!');
                 end
