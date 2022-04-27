@@ -12,7 +12,7 @@ for i=1:length(electrodeDefinition.Label)
         [labels,removedLabel]=removeLabel(electrodeDefinitionsOut.Label{i},replaceLabels{l});
         electrodeDefinitionsOut.Label{i}=labels;
         curr_radius=labelRadius(l);
-        if(any(removedLabel))
+        if(any(removedLabel) || isempty(electrodeDefinitionsOut.Label{i}))
             [d,I]=sort(electrodeDefinitionsOut.Annotation(i).Distance);
             labels={electrodeDefinitionsOut.Annotation(i).Label{I}};
             for ll=1:length(replaceLabels)
