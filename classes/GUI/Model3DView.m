@@ -25,7 +25,7 @@ classdef Model3DView < AView & uix.Grid
             set(tmp_Grid,'BackgroundColor','k');
             set(obj,'BackgroundColor','k');
             obj.cSlider=uicontrol('Parent',obj,'Style','slider','Min',0,'Max',1,'Value',1);
-            addlistener(obj.cSlider, 'Value', 'PreSet',@obj.changeAlpha);
+            addlistener(obj.cSlider, 'Value', 'PostSet',@obj.changeAlpha);
             obj.Widths=[-1];
             obj.Heights=[-1, 15];
              try

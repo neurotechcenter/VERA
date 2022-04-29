@@ -113,6 +113,12 @@ classdef (Abstract) AComponent < Serializable
     end
     
     methods(Access = protected)
+
+        function deSerializationDone(obj,~)
+            if(contains(obj.Name,{'/','\','*',',',':',';'}))
+                error('A Component name cannot contain any of the following characters: \ / , : ; * ');
+            end
+        end
         
         function path=GetTempPath(obj)
             % GetTempPath - returns the Temp Path defined in the

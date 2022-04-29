@@ -71,7 +71,7 @@ classdef SliceViewer < uix.Grid
 
     end
     methods (Access = protected)
-        
+
         function alphaChanged(obj,~,~)
 
            if(~isempty(obj.imageObjs) && ~obj.silentChange)
