@@ -14,9 +14,9 @@
 
      
 
-    <Component Type="ImportROSFile"/>
+    <Component Type="ElectrodeDefinitionConfiguration"/>
 
-    <Component Type="FreesurferSurfaceLoader"/>
+    <Component Type="FreesurferModelGeneration"/>
 
     <Component Type="LoadFreesurferSegmentationVolume">
       <Name>"Load FS Segmentation"</Name>
@@ -33,23 +33,13 @@
 
     <Component Type="Coregistration"/>
 
-    <Component Type="Coregistration">
-	<Name>"Coregister ROSA Trajectories"</Name>
-        <CTIdentifier>"ROSAVolume"</CTIdentifier>
-        <TIdentifier>"T_ROSA"</TIdentifier>
-    </Component>
-
-    <Component Type="ElectrodeTransformation">
-        <TIdentifier>"T_ROSA"</TIdentifier>
-        <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
-    </Component>
-
     <Component Type="MatlabElectrodeSelection"/>
 
     <Component Type="FreesurferElectrodeLocalization"/>
 
     <Component Type="ReorderElectrodes"/>
 
+    <Component Type="ElectrodeProjection"/>
 	
 	<Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Left Hippocampus"</Name>

@@ -14,7 +14,8 @@
 
      
 
-    <Component Type="ImportROSFile"/>
+ 	<Component Type="ElectrodeDefinitionConfiguration">
+    </Component>    
 
     <Component Type="FreesurferSurfaceLoader"/>
 
@@ -32,17 +33,6 @@
     <Component Type="MoveRASOrigin"/>
 
     <Component Type="Coregistration"/>
-
-    <Component Type="Coregistration">
-	<Name>"Coregister ROSA Trajectories"</Name>
-        <CTIdentifier>"ROSAVolume"</CTIdentifier>
-        <TIdentifier>"T_ROSA"</TIdentifier>
-    </Component>
-
-    <Component Type="ElectrodeTransformation">
-        <TIdentifier>"T_ROSA"</TIdentifier>
-        <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
-    </Component>
 
     <Component Type="MatlabElectrodeSelection"/>
 
