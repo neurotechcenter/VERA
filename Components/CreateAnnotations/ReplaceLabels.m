@@ -30,7 +30,8 @@ classdef ReplaceLabels < AComponent
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
             locsStruct.Label=elLocs.Label;%create struct to avoid handle issues
             locsStruct.Annotation=elLocs.Annotation;
-            out.Label=cleanupLabels(locsStruct,obj.ReplaceableLabels,obj.ReplacementRadius).Label;
+            cleanedLabels=cleanupLabels(locsStruct,obj.ReplaceableLabels,obj.ReplacementRadius);
+            out.Label=cleanedLabels.Label;
         end
     end
 end
