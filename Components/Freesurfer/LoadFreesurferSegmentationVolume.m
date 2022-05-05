@@ -39,7 +39,7 @@ classdef LoadFreesurferSegmentationVolume < AComponent
         
         function out = Process(obj,path)
                 if(nargin > 1) %segmentation path exists
-                    segmentationPath=optInp.Path;
+                    segmentationPath=path.Path;
                     comPath=fileparts(obj.ComponentPath);
                     mgz_path=fullfile(comPath,segmentationPath,'mri',[obj.FSVolume '.mgz']); %create full path
                 else
