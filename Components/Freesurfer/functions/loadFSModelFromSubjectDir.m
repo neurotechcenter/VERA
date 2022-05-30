@@ -3,6 +3,9 @@ function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segme
 xfrm_matrix_path=[fileparts(fileparts(mfilename('fullpath'))) '/scripts/get_xfrm_matrices.sh'];
 xfrm_matrix_out_path=fileoutPath;
 mri_path=fullfile(segmentationPath,'mri/orig.mgz');
+if(~exist(mri_path,"file"))
+    error('Could not find orig.mgz in the Freesurfer segmentation folder! Please check if you selected the correct folder!');
+end
 if(ismac || isunix)
     system(['chmod +x ''' xfrm_matrix_path ''''],'-echo');
     system([xfrm_matrix_path ' ''' freesurferPath ''' ''' ...
