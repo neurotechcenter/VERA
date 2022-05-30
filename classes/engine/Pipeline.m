@@ -199,7 +199,8 @@ classdef Pipeline < handle
             end
             g = digraph(s,t,w_idx);
             if(~isempty(g.Edges))
-                g.Edges.Name=widx(g.Edges.Weight)'; 
+                tmp=widx(g.Edges.Weight);
+                g.Edges.Name=tmp(:); 
             end
             obj.DependencyGraph=g;
         end

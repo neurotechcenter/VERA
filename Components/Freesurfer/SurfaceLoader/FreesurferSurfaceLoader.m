@@ -5,6 +5,7 @@ classdef FreesurferSurfaceLoader < AComponent
         SurfaceIdentifier
         SphereIdentifier
         AnnotationType
+        SegmentationPathIdentifier
     end
     
     properties (Dependent, Access = protected)
@@ -24,11 +25,13 @@ classdef FreesurferSurfaceLoader < AComponent
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
             obj.AnnotationType='aparc';
+            obj.SegmentationPathIdentifier='SegmentationPath';
         end
         function Publish(obj)
             obj.AddOutput(obj.SurfaceIdentifier,'Surface');
             obj.AddOutput(obj.LeftSphereIdentifier,'Surface');
             obj.AddOutput(obj.RightSphereIdentifier,'Surface');
+            obj.AddOptionalInput(obj.SegmentationPathIdentifier,'PathInformation',true);
             obj.RequestDependency('Freesurfer','folder');
             if(ispc)
                 obj.RequestDependency('UbuntuSubsystemPath','folder');
@@ -47,8 +50,19 @@ classdef FreesurferSurfaceLoader < AComponent
             end
         end
         
-        function [surf,lsphere,rsphere] = Process(obj)
-            [segmentationPath]=uigetdir([],['Please select ' obj.SurfaceIdentifier]);
+        function [surf,lsphere,rsphere] = Process(obj,optInp)
+
+            if(nargin > 1) %segmentation path exists
+                segmentationPath=optInp.Path;
+                comPath=fileparts(obj.ComponentPath);
+                segmentationPath=fullfile(comPath,segmentationPath); %create full path
+            else
+                segmentationPath=uigetdir([],'Please select Freesurfer Segmentation');
+                if(isempty(segmentationPath))
+                    error('No path selected!');
+                end
+            end
+
             freesurferPath=obj.GetDependency('Freesurfer');
             [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType);
             surf=obj.CreateOutput(obj.SurfaceIdentifier);

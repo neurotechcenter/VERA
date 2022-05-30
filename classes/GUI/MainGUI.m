@@ -139,7 +139,7 @@ classdef MainGUI < handle
                 obj.fileMenuContent.CloseProject.Enable='on';
             end
             catch e
-                warning(e.message);
+                warning(getReport(e));
             end
             obj.resumeGUI(obj);
              
