@@ -50,7 +50,7 @@ classdef FreesurferHippocampalSegmentation < AComponent
             RfileName=fullfile(segmentationPath,'mri','rh.hippoAmygLabels-T1.v21.mgz');
 
             freesurferPath=obj.GetDependency('Freesurfer');
-            if(~exist(LfileName,'file') || ~exist(`,'file'))
+            if(~exist(LfileName,'file') || ~exist(RfileName,'file'))
                 
                 recon_script=fullfile(fileparts(fileparts(mfilename('fullpath'))),'/scripts/recon-hippocampus.sh');
                 [segmentationPath,subj_name]=fileparts(segmentationPath);
