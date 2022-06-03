@@ -1,0 +1,64 @@
+classdef ManualVolumeAlignment < AComponent
+    %TalairachProjection Projects a Surface into Talairach Coordinates,
+    %requires manual selection of AC, PC and mid-sag
+    
+    properties
+        VolumeIdentifier
+        TIdentifier
+        AC
+        PC
+        MidSag
+    end
+    
+    methods
+        function obj = TalairachProjection()
+            %UNTITLED Construct an instance of this class
+            %   Detailed explanation goes here
+            obj.AC=[];
+            obj.PC=[];
+            obj.MidSag=[];
+            obj.MidSag=[];
+            obj.MRIIdentifier='MRI';
+            obj.TIdentifier='T';
+            obj.AdditionalSurfaceIdentifiers={};
+            
+        end
+        
+        function Publish(obj)
+            obj.AddInput(obj.MRIIdentifier,'Volume');
+            obj.AddInput(obj.SurfaceIdentifier,'Surface');
+            obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation')
+            obj.AddOutput(obj.SurfaceOutIdentifier,'Surface');
+            obj.AddOutput(obj.ElectrodeLocationOutIdentifier,'ElectrodeLocation')
+            for i=1:length(obj.AdditionalSurfaceIdentifiers)
+                obj.AddInput(obj.AdditionalSurfaceIdentifiers{i},'Surface');
+                obj.AddOutput(obj.AdditionalSurfaceOutIdentifiers{i},'Surface');
+            end
+        end
+        
+        function Initialize(obj)
+            validatestring(obj.ProjectionType,{'talairach','mni','none'});
+        end
+        
+        function varargout=Process(obj,mri,surf,eLocs,varargin)
+            
+            f=figure;
+            AlignmentGUI('Parent',f,'Images',{mri.GetRasSlicedVolume()},'AlignmentParent',obj);
+            uiwait(f);
+            varargout{2}=obj.CreateOutput(obj.SurfaceOutIdentifier);
+            varargout{2}.Annotation=surf.Annotation;
+            varargout{2}.AnnotationLabel=surf.AnnotationLabel;
+            varargout{2}.TriId=surf.TriId;
+            varargout{2}.VertId=surf.VertId;
+            
+            varargout{1}=obj.CreateOutput(obj.ElectrodeLocationOutIdentifier);
+            varargout{1}.DefinitionIdentifier=eLocs.DefinitionIdentifier;
+            model.vert=zeros(0,3);
+
+            [~,~,~,T]=projectToStandard(model,eLocs.Location,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],'none');
+
+            
+        end
+    end
+end
+

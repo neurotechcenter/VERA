@@ -1,4 +1,4 @@
-function [brain,projectedElectrodes,alignment_coords] = projectToStandard(brain,electrodes,alignment_coords,projectionTarget)
+function [brain,projectedElectrodes,alignment_coords,alignment_T] = projectToStandard(brain,electrodes,alignment_coords,projectionTarget)
 %PROJECTTOSTANDARD Summary of this function goes here
 %   Detailed explanation goes here
 %  alignment_coords (x,y,z,ac,pc,mid_sag)
@@ -46,7 +46,7 @@ delta_ac_pc   = pc_dat - ac_dat;
 ac_dat   = (translate_xyz * ac_dat')';
 pc_dat   = (translate_xyz * pc_dat')';
 mid_sag_dat = (translate_xyz * mid_sag_dat')';
-
+alignment_T=translate_xyz;
 
 
 % rotation around x-axis to set PC z-coordinate to 0
@@ -55,7 +55,7 @@ rot_x = atan(delta_ac_pc(3)  / delta_ac_pc(2));
 ac_dat = (rotate_x * ac_dat')';
 pc_dat   = (rotate_x * pc_dat')';
 mid_sag_dat = (rotate_x * mid_sag_dat')';
-
+alignment_T=alignment_T*rotate_x;
 % rotation around z-axis to set PC x-coordinate to 0
 delta_ac_pc   = pc_dat -ac_dat;
 rot_z = atan(delta_ac_pc(1)  / delta_ac_pc(2));
@@ -86,7 +86,7 @@ mid_sag_dat = (rotate_y * mid_sag_dat')';
 trans_ACPC = rotate_y * rotate_z * rotate_x * translate_xyz;
 projected=(trans_ACPC * toProject')';
 projectedElectrodes=(trans_ACPC * projectedElectrodes')';
-
+alignment_T=trans_ACPC;
 % 
 % buffbrain.vert=projected;
 % figure,viewBrain(buffbrain),title('After rotation'); %%%%%%%%%plot

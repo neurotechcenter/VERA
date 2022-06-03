@@ -69,8 +69,9 @@ classdef MatOutput < AComponent
                  p=elocs.Location(ie,:);
                 [~,vId]=min((surf.Model.vert(:,1)-p(1)).^2 + (surf.Model.vert(:,2)-p(2)).^2 + (surf.Model.vert(:,3)-p(3)).^2);
                 labelId(ie)=surf.Annotation(vId);
-                
-                labelName(labelId(ie))= ['' surf.AnnotationLabel(([surf.AnnotationLabel.Identifier] == labelId(ie))).Name];
+                if(~isempty(surf.AnnotationLabel))
+                    labelName(labelId(ie))= ['' surf.AnnotationLabel(([surf.AnnotationLabel.Identifier] == labelId(ie))).Name];
+                end
              end
         end
         

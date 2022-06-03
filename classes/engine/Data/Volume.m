@@ -37,6 +37,13 @@ classdef Volume < AData & IFileLoader
             obj.ignoreList{end+1}='Image';
             obj.RasVolume=[];
         end
+
+        function AddTransformation(obj,T)
+            new_T=T*([obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]);
+            obj.Image.hdr.hist.srow_x=new_T(1,:);
+            obj.Image.hdr.hist.srow_y=new_T(2,:);
+            obj.Image.hdr.hist.srow_z=new_T(3,:);
+        end
         
         function coordOut=Vox2Ras(obj,coordIn)
             %Vox2Ras transforms coordinates from Voxel space into RAS sapce
@@ -103,7 +110,7 @@ classdef Volume < AData & IFileLoader
             mkdir(tpath);
             try
             [spath,~,ext]=fileparts(path);
-            if(any(strcmpi(ext,{'.dcm','.dicom',''})))
+            if(any(strcmpi(ext,{'.dcm','.dicom','','.IMA'})))
                 dicm2nii(spath,tpath,0);
                 path=dir(fullfile(tpath,'*.nii'));
                 if(numel(path) > 1 )
