@@ -8,6 +8,7 @@ classdef LabelVolume2Surface < AComponent
         LabelIds
         LabelNames
         Smoothing
+        LoadLUTFile
     end
 
     properties (Access = protected)
@@ -21,9 +22,10 @@ classdef LabelVolume2Surface < AComponent
             obj.SurfaceIdentifier='';
             obj.LabelIds=[];
             obj.LabelNames={};
-                       obj.ignoreList{end+1}='internalIds';
+            obj.ignoreList{end+1}='internalIds';
            obj.ignoreList{end+1}='LabelNames';
            obj.Smoothing=[];
+           obj.LoadLUTFile="false";
         end
         
         function  Publish(obj)
@@ -35,28 +37,35 @@ classdef LabelVolume2Surface < AComponent
 
         end
 
+
         function Initialize(obj)
+            if(strcmp(obj.LoadLUTFile,'true'))
+                return;
+            end
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
                     path=obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
                     warning('Label configuration configuration incorrect, trying Freesurfer LUT');
-                    lut_path=fullfile(path,'FreeSurferColorLUT.txt');
-                    [code,lut]=read_fscolorlut(lut_path);
+                    [code, lut]=loadLUTFile(lut_path);
                    if(isempty(obj.LabelIds))
                        obj.internalIds=code;
                    else
                       obj.internalIds= obj.LabelIds;
                    end
                     obj.internalLabels={};
+                    
                      for i=1:length(obj.internalIds)
                          if(any(code == obj.internalIds(i)))
-                            obj.internalLabels{i}=strtrim(lut(code == obj.internalIds(i),:));
+                            if(strcmpi(strtrim(lut(code == obj.internalIds(i),:)),'UNKNOWN'))
+                                obj.internalLabels{i}='unknown'; %no need to add prefix for unknown, also normalize way it is written as label
+                            else
+                            obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
+                            end
                          else
                              obj.internalLabels{i}='unknown';
                          end
                      end
-                    
                 catch
                     error("Each label needs a Name! - make sure LabelNames is set correctly");
                 end
@@ -68,6 +77,10 @@ classdef LabelVolume2Surface < AComponent
         end
 
         function surf=Process(obj,vol)
+             if(strcmp(obj.LoadLUTFile,'true'))
+                [file,path]=uigetfile('*.txt','Select LUT');
+                [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
+             end
             surf=obj.CreateOutput(obj.SurfaceIdentifier);
 
             tri_tot=[];

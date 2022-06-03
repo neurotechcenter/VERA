@@ -8,6 +8,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
         LabelIds
         LabelNames
         Prefix
+        LoadLUTFile
     end
     properties (Access = protected)
         internalIds
@@ -23,6 +24,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
             obj.ignoreList{end+1}='internalIds';
             obj.ignoreList{end+1}='LabelNames';
             obj.Prefix='';
+             obj.LoadLUTFile="false";
         end
         
         function  Publish(obj)
@@ -33,13 +35,16 @@ classdef CalculateDistanceToVolumeLabel < AComponent
         end
 
         function Initialize(obj)
+            if(strcmp(obj.LoadLUTFile,'true'))
+               return;
+            end
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
                     path=obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
                     warning('Label configuration configuration incorrect, trying Freesurfer LUT');
                     lut_path=fullfile(path,'FreeSurferColorLUT.txt');
-                    [code,lut]=read_fscolorlut(lut_path);
+                    [code, lut]=loadLUTFile(lut_path);
                    if(isempty(obj.LabelIds))
                        obj.internalIds=code;
                    else
@@ -58,7 +63,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                          end
                      end
                     
-                catch
+                catch e
                     error("Each label needs a Name! - make sure LabelNames is set correctly");
                 end
                 
@@ -69,6 +74,10 @@ classdef CalculateDistanceToVolumeLabel < AComponent
         end
 
         function out=Process(obj,vol,elLocs)
+             if(strcmp(obj.LoadLUTFile,'true'))
+                [file,path]=uigetfile('*.txt','Select LUT');
+                [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
+             end
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
             f = waitbar(0,'Calculating Distance from Electrode to Labels');
             for i=1:length(obj.internalIds)
