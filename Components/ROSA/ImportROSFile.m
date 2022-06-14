@@ -105,7 +105,7 @@ classdef ImportROSFile < AComponent
                 trajectories.Location(end+1,:)=ras_projected.Trajectories(ii).start;
                 trajectories.DefinitionIdentifier(end+1)=ii;
                 trajectories.Location(end+1,:)=ras_projected.Trajectories(ii).end;
-                [definitions.Definition(ii).NElectrodes,definitions.Definition(ii).Spacing]=obj.calculateNumContacts([ras_projected.Trajectories(ii).start; ras_projected.Trajectories(ii).end]);
+               % [definitions.Definition(ii).NElectrodes,definitions.Definition(ii).Spacing]=obj.calculateNumContacts([ras_projected.Trajectories(ii).start; ras_projected.Trajectories(ii).end]);
             end
              
             volume.LoadFromFile(ras_projected.displays{1});
@@ -132,37 +132,37 @@ classdef ImportROSFile < AComponent
                 end
             end
         end
-        
-        function [numC,spacing]=calculateNumContacts(obj,traj)
-            shankLength=pdist(traj)-3;
-            spacing = 3.5; % mm
-            if(and(shankLength-3>=0,shankLength-3<=0))
-                numC = 0;
-            elseif(and(shankLength-3>=1,shankLength-3<=12.5))
-                numC = 4;
-            elseif(and(shankLength-3>=12.6,shankLength-3<=19.5))
-                numC = 6;
-            elseif(and(shankLength-3>=19.6,shankLength-3<=26.5))
-                numC = 8;
-            elseif(and(shankLength-3>=26.6,shankLength-3<=33.5))
-                numC = 10;
-            elseif(and(shankLength-3>=33.6,shankLength-3<=40.5))
-                numC = 12;
-            elseif(and(shankLength-3>=40.6,shankLength-3<=47.5))
-                numC = 14;
-            elseif(and(shankLength-3>=47.6,shankLength-3<=54.5))
-                numC = 16; 
-            elseif(and(shankLength-3>=54.6,shankLength-3<=61.5))
-                numC = 16; 
-                spacing = 3.97; % mm
-            elseif shankLength-3>=61.6
-                numC = 16; 
-                spacing = 4.43; % mm
-            else
-                error('unexpected trajectory length');
-            end
-    
-        end
+%         
+%         function [numC,spacing]=calculateNumContacts(obj,traj)
+%             shankLength=pdist(traj)-3;
+%             spacing = 3.5; % mm
+%             if(and(shankLength-3>=0,shankLength-3<=0))
+%                 numC = 0;
+%             elseif(and(shankLength-3>=1,shankLength-3<=12.5))
+%                 numC = 4;
+%             elseif(and(shankLength-3>=12.6,shankLength-3<=19.5))
+%                 numC = 6;
+%             elseif(and(shankLength-3>=19.6,shankLength-3<=26.5))
+%                 numC = 8;
+%             elseif(and(shankLength-3>=26.6,shankLength-3<=33.5))
+%                 numC = 10;
+%             elseif(and(shankLength-3>=33.6,shankLength-3<=40.5))
+%                 numC = 12;
+%             elseif(and(shankLength-3>=40.6,shankLength-3<=47.5))
+%                 numC = 14;
+%             elseif(and(shankLength-3>=47.6,shankLength-3<=54.5))
+%                 numC = 16; 
+%             elseif(and(shankLength-3>=54.6,shankLength-3<=61.5))
+%                 numC = 16; 
+%                 spacing = 3.97; % mm
+%             elseif shankLength-3>=61.6
+%                 numC = 16; 
+%                 spacing = 4.43; % mm
+%             else
+%                 error('unexpected trajectory length');
+%             end
+%     
+%         end
 
     
     
