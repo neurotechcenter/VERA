@@ -30,12 +30,13 @@ classdef EstimatePositionFromTrajectory < AComponent
         function eLocs=Process(obj,traj,eDef)
             eLocs=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
             for idx=1:length(eDef.Definition)
-                trajectory_length=pdist(traj.GetWithIdentifier(idx));
+                curr_traj=traj.GetWithIdentifier(idx);
+                trajectory_length=pdist(curr_traj);
                 trajectories=zeros(eDef.Definition(idx).NElectrodes,3);
                 for idx_contact = 1:eDef.Definition(idx).NElectrodes
-                    trajectories(idx_contact,:) =   traj.Location(2,:) ... % origin
-                                                              + ((traj.Location(1,:) - traj.Location(2,:)) ./ trajectory_length) * 1 ... % mm, center of first electrode
-                                                              + ((traj.Location(1,:) - traj.Location(2,:)) ./ trajectory_length) * (idx_contact-1) * eDef.Definition(idx).Spacing; 
+                    trajectories(idx_contact,:) =   curr_traj(2,:) ... % origin
+                                                              + ((curr_traj(1,:) - curr_traj(2,:)) ./ trajectory_length) * 1 ... % mm, center of first electrode
+                                                              + ((curr_traj(1,:) - curr_traj(2,:)) ./ trajectory_length) * (idx_contact-1) * eDef.Definition(idx).Spacing; 
                 end
                 eLocs.AddWithIdentifier(idx,trajectories);
             end

@@ -131,6 +131,17 @@ classdef ImportROSFile < AComponent
                     error('unknown ElectrodeDefinitionView history command');
                 end
             end
+
+             if(~isempty(obj.ElectrodeDefinition))
+                 field = fieldnames(trajectories.Definition);
+                 for i=1:length(trajectories.Definition)
+                     for f=1:length(field)
+                         if(isempty(trajectories.Definition(i).(field{f})))
+                             error([field{f} ' is missing values!']);
+                         end
+                     end
+                 end
+             end
         end
 %         
 %         function [numC,spacing]=calculateNumContacts(obj,traj)

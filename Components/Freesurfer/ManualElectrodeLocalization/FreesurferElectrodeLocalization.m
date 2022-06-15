@@ -162,7 +162,7 @@ classdef FreesurferElectrodeLocalization < AComponent
                     error(['Expected ' num2str(elDef.Definition(i).NElectrodes) ' for ' elDef.Definition(i).Type ' ' elDef.Definition(i).Name ' but total count was ' num2str(length(el))])
                 end
                 electrodes.Location=[electrodes.Location ;el];
-                electrodes.DefinitionIdentifier=[electrodes.DefinitionIdentifier; i*ones(length(el),1)];
+                electrodes.DefinitionIdentifier=[electrodes.DefinitionIdentifier; i*ones(size(el,1),1)];
                 
             end
             
