@@ -54,7 +54,7 @@ classdef (Abstract) AFSSubsegmentation < AComponent
                 end
             end
             LfileName=fullfile(segmentationPath,'mri',obj.LVolumeName);
-            RfileName=fullfile(segmentationPath,'mri',obk.RVolumeName);
+            RfileName=fullfile(segmentationPath,'mri',obj.RVolumeName);
 
             freesurferPath=obj.GetDependency('Freesurfer');
             if(~exist(LfileName,'file') || ~exist(RfileName,'file'))

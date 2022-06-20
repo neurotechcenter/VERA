@@ -91,6 +91,8 @@ classdef MainGUI < handle
             obj.fileMenuContent.CloseProject.Enable='off';
             obj.removeTempPath();
             obj.pipelineTree.Root.Name='Project';
+            delete(obj.componentMenu);
+            obj.componentMenu=[];
         end
         
         function start_dir=getProjectDefaultPath(~)
@@ -141,6 +143,8 @@ classdef MainGUI < handle
             catch e
                 warning(getReport(e));
             end
+            delete(obj.componentMenu);
+            obj.componentMenu=[];
             obj.resumeGUI(obj);
              
         end
@@ -170,6 +174,8 @@ classdef MainGUI < handle
             catch e
                 warning(getReport(e,'extended'));
             end
+            delete(obj.componentMenu);
+            obj.componentMenu=[];
             obj.resumeGUI(obj);
         end
         
@@ -377,8 +383,9 @@ classdef MainGUI < handle
         
         function treeClick(obj,a,b)
             if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData) && b.SelectionType == 'normal')
-                context=b.Nodes.UIContextMenu;
+                %context=b.Nodes.UIContextMenu;
                 delete(obj.componentMenu);
+                obj.componentMenu=[];
                 if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
                     obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
                     obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
