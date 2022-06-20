@@ -76,7 +76,11 @@ classdef Serializable < handle
                         data.Deserialize(par{1});
                         obj.(fileprops{i})=data;
                     else
+                        try
                         obj.(fileprops{i})=jsondecode(par{1}.Text);
+                        catch
+                            error(['Error trying to parse content of Element: ' fileprops{i} '. Could not decode '  par{1}.Text]);
+                        end
                     end
 %                 elseif(obj.allowDynamicProps)
 %                     addprop(obj,fileprops{i});
