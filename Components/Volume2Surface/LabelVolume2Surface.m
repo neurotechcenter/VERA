@@ -9,6 +9,7 @@ classdef LabelVolume2Surface < AComponent
         LabelNames
         Smoothing
         LoadLUTFile
+        Prefix
     end
 
     properties (Access = protected)
@@ -26,6 +27,7 @@ classdef LabelVolume2Surface < AComponent
            obj.ignoreList{end+1}='LabelNames';
            obj.Smoothing=[];
            obj.LoadLUTFile="false";
+           obj.Prefix='';
         end
         
         function  Publish(obj)
@@ -47,6 +49,7 @@ classdef LabelVolume2Surface < AComponent
                     path=obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
                     warning('Label configuration configuration incorrect, trying Freesurfer LUT');
+                    lut_path=fullfile(path,'FreeSurferColorLUT.txt');
                     [code, lut]=loadLUTFile(lut_path);
                    if(isempty(obj.LabelIds))
                        obj.internalIds=code;
@@ -66,7 +69,7 @@ classdef LabelVolume2Surface < AComponent
                              obj.internalLabels{i}='unknown';
                          end
                      end
-                catch
+                catch e
                     error("Each label needs a Name! - make sure LabelNames is set correctly");
                 end
                 
