@@ -133,10 +133,10 @@ classdef ImportROSFile < AComponent
             end
 
              if(~isempty(obj.ElectrodeDefinition))
-                 field = fieldnames(trajectories.Definition);
-                 for i=1:length(trajectories.Definition)
+                 field = fieldnames(obj.ElectrodeDefinition.Definition);
+                 for i=1:length(obj.ElectrodeDefinition.Definition)
                      for f=1:length(field)
-                         if(isempty(trajectories.Definition(i).(field{f})))
+                         if(isempty(obj.ElectrodeDefinition.Definition(i).(field{f})))
                              error([field{f} ' is missing values!']);
                          end
                      end
