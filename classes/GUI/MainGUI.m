@@ -17,21 +17,19 @@ classdef MainGUI < handle
         configMenu
         fileMenuContent
         configMenuContent
-        suspendAnnotation=[];
-        suspendBox=[];
-        suspensionParent=[];
         viewTabs containers.Map
         componentNodes containers.Map
         componentMenu
+        ProgressBarTool
 
     end
     
     methods
         function obj = MainGUI()
+            
             DependencyHandler.Purge();
             warning off;
-            
-            obj.window=figure('Name','VERA', ...
+            obj.window = figure('Name','VERA', ...
             'NumberTitle', 'off', ...
             'MenuBar', 'none', ...
             'Toolbar', 'none', ...
@@ -42,9 +40,6 @@ classdef MainGUI < handle
             end
             obj.viewTabs=containers.Map();
             obj.hBox=uix.HBoxFlex('Parent',obj.window);
-            obj.suspendBox=uix.HBox('Parent',obj.window,'Background','w','units','normalized','Position',[0.2 0.3 0.6 0.4],'Visible','off');
-            obj.suspendAnnotation=annotation(obj.suspendBox,'TextBox','string','','BackgroundColor','none','FontSize',15,...
-                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','Center','VerticalAlignment','middle','LineWidth',4);
             obj.pipelineTree=uiw.widget.Tree('Parent',obj.hBox,'MouseClickedCallback',@obj.treeClick);
             obj.mainView=uitabgroup('Parent',obj.hBox);
             obj.hBox.Widths=[200 -1];
@@ -68,6 +63,8 @@ classdef MainGUI < handle
             obj.treeNodes.Processing=uiw.widget.TreeNode('Name','Processing','Parent',obj.pipelineTree.Root);
             obj.treeNodes.Output=uiw.widget.TreeNode('Name','Output','Parent',obj.pipelineTree.Root);
             warning on;
+            obj.ProgressBarTool=UnifiedProgressBar(obj.window);
+
 
         end
         
@@ -75,17 +72,22 @@ classdef MainGUI < handle
     
     methods (Access = protected)
         function closeProject(obj)
+
             delete(obj.Views);
             delete(obj.ProjectRunner);
             delete(obj.treeNodes.Input.Children);
             delete(obj.treeNodes.Processing.Children);
             delete(obj.treeNodes.Output.Children);
+            
             for v=values(obj.componentNodes)
                 delete(v{1});
+  
             end
+            %obj.ProgressBarTool.ShowProgressBar(obj,30);
             obj.componentNodes=containers.Map();
             for v=values(obj.viewTabs)
                 delete(v{1});
+
             end
             obj.viewTabs=containers.Map();
             obj.fileMenuContent.CloseProject.Enable='off';
@@ -93,6 +95,7 @@ classdef MainGUI < handle
             obj.pipelineTree.Root.Name='Project';
             delete(obj.componentMenu);
             obj.componentMenu=[];
+
         end
         
         function start_dir=getProjectDefaultPath(~)
@@ -113,7 +116,9 @@ classdef MainGUI < handle
         function createNewProject(obj)
 
             folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
-            obj.suspendGUIWithMessage(obj,'Creating Project...');
+            obj.ProgressBarTool.suspendGUIWithMessage('Creating Project...');
+    
+            obj.ProgressBarTool.ShowProgressBar(obj,0);
             try
             if(folder ~= 0)
                 obj.setProjectDefaultPath(folder);
@@ -126,7 +131,7 @@ classdef MainGUI < handle
                     if(tf ~= 0)
                         pplineFile=fullfile(avail_pipelFiles(idx).folder,avail_pipelFiles(idx).name);
                     else
-                        obj.resumeGUI(obj);
+                        obj.ProgressBarTool.resumeGUI();
                         return;
                     end
                 end
@@ -145,7 +150,7 @@ classdef MainGUI < handle
             end
             delete(obj.componentMenu);
             obj.componentMenu=[];
-            obj.resumeGUI(obj);
+            obj.ProgressBarTool.resumeGUI();
              
         end
        % function saveProject(obj,~,~)
@@ -154,7 +159,8 @@ classdef MainGUI < handle
         %end
         function openProject(obj,~,~)
             folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
-            obj.suspendGUIWithMessage(obj,'Opening Project...');
+            
+            obj.ProgressBarTool.suspendGUIWithMessage('Opening Project...');
             try
                 if(folder ~= 0)
                     obj.setProjectDefaultPath(folder);
@@ -168,7 +174,7 @@ classdef MainGUI < handle
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                     obj.fileMenuContent.CloseProject.Enable='on';
                     obj.configureAll();
-                    obj.resumeGUI(obj);
+                    obj.ProgressBarTool.resumeGUI();
                 end
 
             catch e
@@ -176,11 +182,13 @@ classdef MainGUI < handle
             end
             delete(obj.componentMenu);
             obj.componentMenu=[];
-            obj.resumeGUI(obj);
+            obj.ProgressBarTool.resumeGUI();
         end
         
         function updateTreeView(obj)
+            obj.ProgressBarTool.ShowProgressBar(0,'Update Treeview');
             for v=values(obj.componentNodes)
+                obj.ProgressBarTool.IncreaseProgressBar(1/length(obj.componentNodes));
                 cName=v{1}.UserData;
                 switch (obj.ProjectRunner.GetComponentStatus(cName))
                     case 'Invalid'
@@ -228,7 +236,7 @@ classdef MainGUI < handle
                         obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
                 end
                 obj.updateTreeView();
-                obj.resumeGUI(obj);
+                obj.ProgressBarTool.resumeGUI();
             end
         end
         
@@ -272,10 +280,11 @@ classdef MainGUI < handle
         function createTreeView(obj)
             delete(obj.componentMenu);
             if(~isempty(obj.ProjectRunner))
-
+                obj.ProgressBarTool.ShowProgressBar(0.1,'Initializing Tree');
                 delete(obj.treeNodes.Input.Children);
                 delete(obj.treeNodes.Processing.Children);
                 delete(obj.treeNodes.Output.Children);
+                
                 for v=values(obj.componentNodes)
                     delete(v{1});
                 end
@@ -285,14 +294,17 @@ classdef MainGUI < handle
                     v=uiw.widget.TreeNode('Name',k{1},'Parent',obj.treeNodes.Input,'UserData',k{1},'UIContextMenu',obj.buildContextMenu(k{1}));
                     obj.componentNodes(k{1})=v;
                 end
+                 obj.ProgressBarTool.ShowProgressBar(0.30);
                 for k=obj.ProjectRunner.GetProcessingComponentNames()
                     v=uiw.widget.TreeNode('Name',k{1},'Parent',obj.treeNodes.Processing,'UserData',k{1},'UIContextMenu',obj.buildContextMenu(k{1}));
                     obj.componentNodes(k{1})=v;
                 end
+                obj.ProgressBarTool.ShowProgressBar(0.70);
                 for k=obj.ProjectRunner.GetOutputComponentNames()
                     v=uiw.widget.TreeNode('Name',k{1},'Parent',obj.treeNodes.Output,'UserData',k{1},'UIContextMenu',obj.buildContextMenu(k{1}));
                     obj.componentNodes(k{1})=v;
                 end
+                obj.ProgressBarTool.ShowProgressBar(1);
             end
 
         end
@@ -317,19 +329,19 @@ classdef MainGUI < handle
         end
         
         function reloadResults(obj,compName)
-            obj.suspendGUIWithMessage(obj,['Reloading Results ' compName]);
+            obj.ProgressBarTool.suspendGUIWithMessage(['Reloading Results ' compName]);
             obj.ProjectRunner.ReloadResults(compName);
             obj.updateTreeView();
             obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-            obj.resumeGUI(obj);
+            obj.ProgressBarTool.resumeGUI();
         end
         
         function resetComponent(obj,compName)
-            obj.suspendGUIWithMessage(obj,['Resetting Component ' compName]);
+            obj.ProgressBarTool.suspendGUIWithMessage(['Resetting Component ' compName]);
             obj.ProjectRunner.ResetComponent(compName);
             obj.updateTreeView();
             obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-            obj.resumeGUI(obj);
+            obj.ProgressBarTool.resumeGUI();
         end
 
         function configureComponent(obj,compName,updateView)
@@ -341,7 +353,7 @@ classdef MainGUI < handle
             end
             vo=obj.componentNodes(compName);
             try
-                obj.suspendGUIWithMessage(obj,{'Running configuration for ' compName});
+                obj.ProgressBarTool.suspendGUIWithMessage({'Running configuration for ' compName});
                 obj.ProjectRunner.ConfigureComponent(compName);
                 vo.TooltipString='';
             catch e
@@ -352,7 +364,7 @@ classdef MainGUI < handle
                 obj.updateTreeView();
                 obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
             end
-            obj.resumeGUI(obj);
+            obj.ProgressBarTool.resumeGUI();
         end
         
         function success=runComponent(obj,compName,updateView)
@@ -366,7 +378,8 @@ classdef MainGUI < handle
             end
             vo=obj.componentNodes(compName);
             try
-                obj.suspendGUIWithMessage(obj,{'Running component ' compName});
+                obj.ProgressBarTool.suspendGUIWithMessage({'Running component ' compName});
+
                 obj.ProjectRunner.RunComponent(compName);
                 vo.TooltipString='';
             catch e
@@ -378,7 +391,7 @@ classdef MainGUI < handle
                 obj.updateTreeView();
                 obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
             end
-            obj.resumeGUI(obj);
+            obj.ProgressBarTool.resumeGUI();
         end
         
         function treeClick(obj,a,b)
@@ -413,6 +426,7 @@ classdef MainGUI < handle
            delete(obj.mainView.Children);
            obj.Views=ViewMap.LoadViewsFromPipelineFile(pipeline,prj);
            delete(obj.mainView.Children);
+           obj.ProgressBarTool.ShowProgressBar(0,'Creating Views');
            for v=keys(obj.Views.Views)
                 t=uitab(obj.mainView,'Title',v{1});
                 set(obj.Views.Views(v{1}),'Parent',t);
@@ -422,13 +436,14 @@ classdef MainGUI < handle
                     set(obj.Views.Views(v{1}),'Parent',t);
                 end
                 obj.viewTabs(v{1})=t;
+                obj.ProgressBarTool.IncreaseProgressBar(1/length(keys(obj.Views.Views)));
            end
         end
         
         function res=checkResolvedDependencies(obj)
             missingDep={};
            for k=keys(DependencyHandler.Instance.RequestLibrary)
-               if(~DependencyHandler.Instance.ResolvedLibrary.isKey(k{1}))
+               if(~DependencyHandler.Instance.ResolvedLibrary.isKey(k{1}) && ~strcmp(DependencyHandler.Instance.GetDependencyType(k{1}),'internal'))
                    missingDep{end+1}=k{1};
                end
            end
@@ -453,30 +468,5 @@ classdef MainGUI < handle
 
     end
     
-    methods (Access = public)
-        
-        function suspendGUIWithMessage(obj,parent,msg)
-            if(~isempty(obj.suspendAnnotation) && (strcmp(obj.suspendBox.Visible,'off') || (obj.suspensionParent==parent)))
-                obj.suspensionParent=parent;
-                 obj.suspendAnnotation.String=msg;
-                obj.suspendBox.Visible='on';
-               % uistack(obj.suspendAnnotation,'top');
-               % enableDisableFig(obj.window,'off');
-                
-               drawnow;
-            end
-                %figure('units','pixels','position',[obj.window.Position(1)-obj.window.Position(3)/2 obj.window.Position(2)+obj.window.Position(4)/2 400 100],'windowstyle','modal');
-                %uicontrol('style','text','string',msg,'units','pixels','position',[50 10 200 50]);
-             
-        end
-        
-        function resumeGUI(obj,parent)
-            if(~isempty(obj.suspendBox) && ~isempty(obj.suspensionParent) &&(obj.suspensionParent==parent))
-                obj.suspensionParent=[];
-                obj.suspendBox.Visible='off';
-%                enableDisableFig(obj.window,'on');
-            end
-        end
-    end
 end
 
