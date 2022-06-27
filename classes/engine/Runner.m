@@ -154,14 +154,20 @@ classdef Runner < handle
         end
         
         
-        function RunComponent(obj,compName)
+        function RunComponent(obj,compName,silent)
             %RunComponent - Executes a component by calling its Process
             %function
             % Method will check if the Component can be run as well as load
             % and store all the necessary input and output data for the
             % Component
             % See also AComponent, AData, Pipeline
+            if(~exist('silent','var'))
+                silent=false;
+            end
             compValid=true;
+            if(~silent)
+                h=waitbar(0,'Validating Pipeline...');
+            end
             localPipeline=containers.Map();
             obj.checkCompName(compName);
              if(strcmp(obj.GetComponentStatus(compName),'Completed'))
@@ -171,6 +177,9 @@ classdef Runner < handle
              end
             [~,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,compName);
             errStr=[];
+            if(~silent)
+                h=waitbar(0.3,'Gathering Input Data...');
+            end
             for i=1:length(req_comps)
                 if(~strcmp(obj.GetComponentStatus(req_comps{i}),'Completed'))
                     compValid=false;
@@ -178,6 +187,7 @@ classdef Runner < handle
                 else
                     localPipeline=[localPipeline; obj.Project.LoadComponentData(req_comps{i})];
                 end
+                h=waitbar(i/length(req_comps),h);
             end
             if(~compValid)
                 error([compName 'requires the Output(s) from ' errStr ' first!']);
@@ -186,11 +196,12 @@ classdef Runner < handle
                 error('Current component needs to be configured first!');
             end
                 
-            
+            if(~silent) h=waitbar(0.7,'Gathering Input Data...'); end
             [inp, outp,optInp]=obj.Project.Pipeline.InterfaceInformation(compName);
             inpData=cell(numel(inp),1);
             outpData=cell(numel(outp),1);
             optinpData={};
+            
             for i=1:length(inp)
                 if(localPipeline.isKey(inp{i}))
                     inpData{i}=localPipeline(inp{i});
@@ -206,10 +217,12 @@ classdef Runner < handle
                 end
             end
             
-
+           if ~silent h=waitbar(1,'Running...');
+           close(h);
+           end
             try
                 o=obj.Project.Pipeline.GetComponent(compName);
-
+                
                 [outpData{:}]=o.Process(inpData{:},optinpData{:});
                 obj.SetComponentStatus(compName,'Completed');
                 savepaths=obj.Project.SaveComponentData(compName,outpData{:});%the result paths are accumulative
@@ -265,6 +278,7 @@ classdef Runner < handle
         function resetDownstreamCompletionStatus(obj,compName)
            %resetDownstreamCompletionStatus - Resets the Completion status
            %of a component and updates the pipeline
+           
             if(strcmp(obj.GetComponentStatus(compName),'Completed'))
                 obj.SetComponentStatus(compName,'Configured');
                 [~,targComps]=outedges(obj.Project.Pipeline.DependencyGraph,compName);
