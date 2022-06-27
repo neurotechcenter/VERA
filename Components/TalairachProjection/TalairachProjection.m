@@ -28,7 +28,7 @@ classdef TalairachProjection < AComponent
             obj.SurfaceIdentifier='Surface';
             obj.SurfaceOutIdentifier='TalairachSurface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
-            obj.ElectrodeLocationOutIdentifier='TailairachElectrodeLocation';
+            obj.ElectrodeLocationOutIdentifier='TalairachElectrodeLocation';
             obj.ProjectionType='Talairach';
             obj.AdditionalSurfaceIdentifiers={};
             

@@ -10,7 +10,7 @@ classdef FindBrodmanLabels < AComponent
     
     methods
         function obj = FindBrodmanLabels()
-            obj.TalairachLocationIdentifier='TailairachElectrodeLocation';
+            obj.TalairachLocationIdentifier='TalairachElectrodeLocation';
             obj.LocationTypeIdentifier='ElectrodeLocation';
         end
         
