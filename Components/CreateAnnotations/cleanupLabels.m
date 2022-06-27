@@ -18,14 +18,14 @@ for i=1:length(electrodeDefinition.Label)
             for ll=1:length(replaceLabels)
                 [labels,removedLabel]=removeLabel(labels,replaceLabels{ll});
                 
-                if(any(removedLabel) & (d(removedLabel) < labelRadius(ll)))
+                if(any(removedLabel) && any(d(removedLabel) < labelRadius(ll)))
                     curr_radius=curr_radius+max(d(removedLabel));
                 end
                 d=d(~removedLabel);
             end
             [labels,removedLabel]=removeLabel(labels,'Unknown');
             d=d(~removedLabel);
-            if(any(d < curr_radius))
+            if(any(d <= curr_radius))
                 electrodeDefinitionsOut.Label{i}=labels(1);
             else %keep original label
                 electrodeDefinitionsOut.Label{i}=electrodeDefinition.Label{i};
