@@ -37,7 +37,7 @@ classdef UnifiedProgressBar < handle
             else
                 DependencyHandler.Instance.CreateAndSetDependency('unifiedProgressbar',obj,'internal');
             end
-            if(~isempty(obj.suspendAnnotation) && (strcmp(obj.suspendBox.Visible,'off')) && ~compareStrings(obj.suspendAnnotation.String,msg) )
+            if(~isempty(obj.suspendAnnotation) && (strcmp(obj.suspendBox.Visible,'off') || compareStrings(obj.suspendAnnotation.String,msg)))
                  obj.suspendAnnotation.String=msg;
                 obj.suspendBox.Visible='on';
                 drawnow;

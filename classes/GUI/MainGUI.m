@@ -344,9 +344,11 @@ classdef MainGUI < handle
         function resetComponent(obj,compName)
             obj.ProgressBarTool.suspendGUIWithMessage(['Resetting Component ' compName]);
             obj.ProjectRunner.ResetComponent(compName);
-            obj.updateTreeView();
-            obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+            %obj.updateTreeView();
+            %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+            obj.configureComponent(compName,true);
             obj.ProgressBarTool.resumeGUI();
+            
         end
 
         function configureComponent(obj,compName,updateView)
