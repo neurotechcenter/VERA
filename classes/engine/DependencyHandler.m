@@ -109,7 +109,10 @@ classdef DependencyHandler < handle
             obj.ResolvedLibrary(name)=resolvedDep;
         end
         
-        
+        function type= GetDependencyType(obj,name)
+            % Returns the dependenct type
+            type=obj.RequestLibrary(name);
+        end
         
         function RegisterDependencyChange(obj,depO,func)
             % RegisterDependencyChange - register the function of an object
@@ -145,6 +148,7 @@ classdef DependencyHandler < handle
                 end
             end
         end
+
         
         function SaveDependencyFile(obj,path)
             % SaveDependencyFile serialize the dependencies

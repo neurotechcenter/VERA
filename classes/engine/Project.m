@@ -165,16 +165,20 @@ classdef Project < handle
             
         end
         
-        function [prj,pplineFile]=OpenProjectFromPath(projPath)
+        function [prj,pplineFile]=OpenProjectFromPath(projPath,silent)
             %OpenProjectFromPath - Open an existing project from Path
             %projPath - Path to project folder
             %returns: Project object
+            if(~exist('silent','var'))
+                silent=false;
+            end
             if(~exist(fullfile(projPath,'temp'),'dir'))
                 mkdir(fullfile(projPath,'temp'));
             end
             DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',projPath,'internal');
             DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(projPath,'temp'),'internal');
             pplineFile=fullfile(projPath,'pipeline.pwf');
+            pbar=waitbar(0,'Initializing project...');
             [esc,projName] = fileparts(projPath);
             ppline=Pipeline.CreateFromPipelineDefinition(pplineFile);
             prj=Project();
@@ -182,6 +186,7 @@ classdef Project < handle
             prj.ProjectName=projName;
             prj.Pipeline=ppline;
             prj.createProjectFolderStructure();
+            i=1;
             for c=ppline.Components
                 cobj=ppline.GetComponent(c{1});
                 cpath=prj.GetComponentPath(c{1});
@@ -194,8 +199,10 @@ classdef Project < handle
                         cobj.Deserialize(xmlstrct.ComponentInformation{1}.Component{1});
                     end
                 end
+                i=i+1;
+                pbar=waitbar(i/length(ppline.Components),pbar);
             end
-
+            close(pbar);
             
             end
         end

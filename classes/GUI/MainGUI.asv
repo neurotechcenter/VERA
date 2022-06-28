@@ -236,7 +236,7 @@ classdef MainGUI < handle
             if(obj.checkResolvedDependencies())
                 for ic=1:length(obj.ProjectRunner.Components)
                         obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
-                        obj.ProgressBarTool.ShowProgressBar(ic/length(obj.ProjectRunner.Components),'Configuring... ');
+                        obj.ProgressBarTool.IncreaseProgressBar(ic/length(obj.ProjectRunner.Components),'Configuring... ');
                 end
                 obj.updateTreeView();
                 obj.ProgressBarTool.resumeGUI();
@@ -260,9 +260,8 @@ classdef MainGUI < handle
         function success=runTo(obj,component)
             comps_to_run=obj.ProjectRunner.GetProcessingSequence(component);
             success=1;
-            obj.ProgressBarTool.ShowProgressBar(0,['Running ' component ' Dependents']);
+            obj.ProgressBarTool.ShowProgressBar(0,['Running ' num2str(length(comps_to_run))  ' Components']);
             for i=1:length(comps_to_run)
-                obj.ProgressBarTool.ShowProgressBar(i/length(comps_to_run),['Running ' component ' Dependents']);
                 obj.runTo(comps_to_run{i});
                 if(~strcmp(obj.ProjectRunner.GetComponentStatus(comps_to_run{i}),'Completed'))
                     success=obj.runComponent(comps_to_run{i});
@@ -344,11 +343,9 @@ classdef MainGUI < handle
         function resetComponent(obj,compName)
             obj.ProgressBarTool.suspendGUIWithMessage(['Resetting Component ' compName]);
             obj.ProjectRunner.ResetComponent(compName);
-            %obj.updateTreeView();
-            %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-            obj.configureComponent(compName,true);
+            obj.updateTreeView();
+            obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
             obj.ProgressBarTool.resumeGUI();
-            
         end
 
         function configureComponent(obj,compName,updateView)
@@ -370,9 +367,8 @@ classdef MainGUI < handle
             if(updateView)
                 obj.updateTreeView();
                 obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-                obj.ProgressBarTool.resumeGUI();
             end
-            
+            obj.ProgressBarTool.resumeGUI();
         end
         
         function success=runComponent(obj,compName,updateView)

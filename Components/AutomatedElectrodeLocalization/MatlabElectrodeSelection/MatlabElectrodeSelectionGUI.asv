@@ -202,7 +202,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         
         function findAllElectrodes(obj)
             elDefIdx=obj.uiListView.Value;
-           % disp(['Running fully automated Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
+            disp(['Running fully automated Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
             linep=obj.trajectories.Location((obj.trajectories.DefinitionIdentifier == elDefIdx),:);
             centroids=obj.getRASCentroids();
             
@@ -292,7 +292,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                     func=@(x)(numel(TraverseTree(findStripNeighbour(pIdx(end),locs(iel,:),lcentroids,bNames,x,gdist,false),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
                 end
                 gvar_best=fminbnd(func,0.0,0.3,o);
-                %disp(gvar_best);
+                disp(gvar_best);
                 if(strcmp(obj.elDefinition.Definition(elDefIdx).Type,'Grid'))
                    poss=findNeighbour(pIdx(end),locs(iel,:),lcentroids,90,bNames,gvar_best,gdist,true);
                    % func=@(x)(numel(TraverseTree(findNeighbour(pIdx,locs(iel,:),lcentroids,90,bNames,x,gdist,true),['A','B']))-obj.elDefinition.Definition(elDefIdx).NElectrodes).^2;
@@ -391,9 +391,9 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %w_shed(~V)=0;
             %toc
             obj.progressBar.ShowProgressBar(30,'Segmenting...');
-            %tic
+            tic
             obj.volProps=regionprops3(bwconncomp(V,26),'Volume','Centroid','BoundingBox');
-            %toc
+            toc
             obj.progressBar.ShowProgressBar(60,'Plotting Segments...');
             tic
             hold(obj.ax3D,'on');

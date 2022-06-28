@@ -51,6 +51,7 @@ classdef Model3DView < AView & uix.Grid
         end
         
         function updateView(obj)
+           
             if(~obj.AvailableData.isKey(obj.SurfaceIdentifier))
                 cla(obj.axModel);
                 obj.vSurf=[];
@@ -58,12 +59,14 @@ classdef Model3DView < AView & uix.Grid
             end
             surface=obj.AvailableData(obj.SurfaceIdentifier);
             hold(obj.axModel,'off');
-            
+               
               if(~isempty(surface))
+                    
                     if(~isempty(surface.Model) && isempty(surface.Annotation))
                         obj.vSurf=plot3DModel(obj.axModel,surface.Model);
                        % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3) ,'Parent',obj.axModel,settings{:});
                     elseif(~isempty(surface.Model) && ~isempty(surface.Annotation))
+                        pbar=waitbar(0,'Creating 3D Model...');
                         [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface);
                         obj.vSurf=plot3DModel(obj.axModel,surface.Model,annotation_remap);
                        % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3),annotation_remap ,'Parent',obj.axModel,settings{:});
@@ -80,8 +83,9 @@ classdef Model3DView < AView & uix.Grid
                         if(~iscell(obj.ElectrodeDefinitionIdentifier))
                             elDefIdentifiers={obj.ElectrodeDefinitionIdentifier};
                         end
+                        waitbar(0.3,pbar);
                         for i_elId=1:length(elIdentifiers)
-                            
+                            waitbar(0.3+0.7*(i_elId/length(elIdentifiers)),pbar);
                             if(obj.AvailableData.isKey(elIdentifiers{i_elId}))
                                 elPos=obj.AvailableData(elIdentifiers{i_elId});
                                 if(~isempty(elPos) && ~isempty(elPos.DefinitionIdentifier))
@@ -104,6 +108,7 @@ classdef Model3DView < AView & uix.Grid
                        
                         cb=colorbar(obj.axModel,'Ticks',name_id+0.5,'TickLabels',names,'FontSize',12,'location','east');
                         set(cb,'TickLabelInterpreter','none')
+                        close(pbar);
                     end
                     alpha(obj.vSurf,obj.cSlider.Value);
                     
@@ -121,7 +126,7 @@ classdef Model3DView < AView & uix.Grid
                      set(obj.axModel,'XColor', 'none','YColor','none','ZColor','none')                    
              else
                  delete(obj.axModel.Children);
-             end
+              end
         end
     end
 
