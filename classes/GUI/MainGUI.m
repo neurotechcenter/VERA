@@ -170,10 +170,10 @@ classdef MainGUI < handle
                     obj.ProjectRunner=Runner.CreateFromProject(prj);
                     obj.createTreeView();
                     obj.createViews(pplFile,prj);
-                    obj.updateTreeView();
-                    obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-                    obj.fileMenuContent.CloseProject.Enable='on';
                     obj.configureAll();
+                    %obj.updateTreeView();
+                    %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                    obj.fileMenuContent.CloseProject.Enable='on';
                     obj.ProgressBarTool.resumeGUI();
                 end
 
