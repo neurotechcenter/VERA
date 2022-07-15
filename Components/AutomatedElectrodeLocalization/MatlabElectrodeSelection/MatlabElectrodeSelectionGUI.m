@@ -34,6 +34,8 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         optimalShankTreshold
         shankMenu
         progressBar
+        ReducedModel
+        ReducedT
     end
     
     methods
@@ -68,7 +70,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             cameratoolbar(gcf,'NoReset');
             removeToolbarExplorationButtons(gcf);
             menu=uimenu(obj.Parent,'Label','Localization');
-            obj.optimalShankTreshold=uimenu(menu,'Label','Determine optimal Threshold','Enable','off','Callback',@(~,~) obj.determineThreshold());
+            obj.optimalShankTreshold=uimenu(menu,'Label','Determine optimal Threshold','Enable','on','Callback',@(~,~) obj.determineThreshold());
             obj.shankMenu=uimenu(menu,'Label','Run Automated Trajectory Detection','Enable','off','Callback',@(~,~) obj.runFullShankDetection());
 
             %set(gcf, 'WindowButtonDownFcn', {@(a,b)obj.callbackClickA3DPoint(a,b)}); 
@@ -83,6 +85,10 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 obj.axSurf=plot3DModel(obj.ax3D,obj.brainSurf.Model);
                 alpha(obj.axSurf,obj.slBrainAlpha.Value);
                 set(obj.axSurf,'HitTest','off');
+                obj.ReducedModel.faces = obj.brainSurf.Model.tri;
+                obj.ReducedModel.vertices = obj.brainSurf.Model.vert;
+                obj.ReducedModel=reducepatch(obj.ReducedModel,0.05);
+                obj.ReducedT=(delaunayn(obj.ReducedModel.vertices));
             end
         end
         
@@ -119,7 +125,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.updateView();
             set(obj.trajMenu,'Enable','on');
             set(obj.shankMenu,'Enable','on');
-            set(obj.optimalShankTreshold,'Enable','on');
+       
            
         end
         
@@ -170,8 +176,13 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
         function metric=testTreshold(obj,NElecs, thresh)
             obj.slMinThresh.Value=thresh;
             obj.updateView();
-            obj.runFullShankDetection();
-            metric=(NElecs-size(obj.elLocations.Location,1)).^2;
+            if(~isempty(obj.trajectories))
+                obj.runFullShankDetection();
+                metric=(NElecs-size(obj.elLocations.Location,1)).^2;
+            else
+                metric=(NElecs-size(obj.getRASCentroids(),1)).^2;
+            end
+            
         end
         
         function updateListView(obj)
@@ -401,21 +412,30 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %[f,v]=isosurface(V,0);
             % v=[v ones(size(v,1),1)]*A';
             %p = patch(obj.ax3D,'Faces',f,'Vertices',v(:,1:3),'FaceAlpha',0.1,'EdgeColor','none');
-            if(~isempty(obj.brainSurf))
-                max_lim=max(obj.brainSurf.Model.vert);
-                min_lim=min(obj.brainSurf.Model.vert);
-            else
-                max_lim=[inf inf inf];
-                min_lim=[-inf -inf -inf];
-            end
+            %convhull(obj.brainSurf.Model.vert,'Simplify',true);
+
             [x,y,z]=sphere;
             to_remove=[];
+            if(~isempty(obj.brainSurf))
+                k=dsearchn(obj.ReducedModel.vertices,obj.ReducedT,obj.Volume.Vox2Ras(obj.volProps.Centroid(:,1:3)),-1);
+            else
+                k=ones(size(bj.volProps.Centroid,1),1);
+            end
             for i=1:size(obj.volProps.BoundingBox,1)
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 
                 
                 patch_center=obj.Volume.Vox2Ras(obj.volProps.Centroid(i,1:3))';
-                if(all(patch_center < max_lim) &&  all(patch_center > min_lim))
+                if(~isempty(obj.brainSurf))
+                    %k=dsearchn(Mf.vertices,T,patch_center,-1);
+                    
+                    if(k(i) == -1)
+                        patch_center=[];
+                    end
+                else
+
+                end
+                if(~isempty(patch_center))
                     end_idx=length(obj.elPatches)+1;
                     hold(obj.ax3D,'on');
                     obj.elPatches{end_idx}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',end_idx,'EdgeColor','none','FaceAlpha',1,'FaceLighting','none'); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
