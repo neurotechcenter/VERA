@@ -417,7 +417,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             [x,y,z]=sphere;
             to_remove=[];
             if(~isempty(obj.brainSurf))
-                k=dsearchn(obj.ReducedModel.vertices,obj.ReducedT,obj.Volume.Vox2Ras(obj.volProps.Centroid(:,1:3)),-1);
+                [k,d]=dsearchn(obj.ReducedModel.vertices,obj.ReducedT,obj.Volume.Vox2Ras(obj.volProps.Centroid(:,1:3)),-1);
             else
                 k=ones(size(bj.volProps.Centroid,1),1);
             end
@@ -429,7 +429,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 if(~isempty(obj.brainSurf))
                     %k=dsearchn(Mf.vertices,T,patch_center,-1);
                     
-                    if(k(i) == -1)
+                    if(k(i) == -1 && d(i) > 10)
                         patch_center=[];
                     end
                 else

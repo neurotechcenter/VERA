@@ -211,10 +211,14 @@ classdef Runner < handle
             end
             
             for i=1:length(optInp)
-                if(obj.CurrentPipelineData.isKey(optInp{i}))
+                optDataComp=obj.Project.Pipeline.FindUpstreamData(compName,optInp{i});
+                if(strcmp(obj.GetComponentStatus(optDataComp),'Completed'))
+                    data=obj.Project.LoadComponentData(optDataComp);
                     optinpData{end+1}=optInp{i};
-                    optinpData{end+1}=obj.CurrentPipelineData(optInp{i});
+                    optinpData{end+1}=data(optInp{i});
                 end
+
+
             end
             
            if ~silent h=waitbar(1,'Running...');
