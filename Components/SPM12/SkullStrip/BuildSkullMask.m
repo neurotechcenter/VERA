@@ -65,7 +65,7 @@ classdef BuildSkullMask < AComponent
             matlabbatch{1}.spm.spatial.preproc.warp.write = [0 0];            
             spm('defaults', 'FMRI');
             spm_jobman('run', matlabbatch, []);
-            spm_warp
+          
             
             matlabbatch={};
             matlabbatch{1}.spm.util.imcalc.input = {

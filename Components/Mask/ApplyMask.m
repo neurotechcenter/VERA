@@ -27,7 +27,9 @@ classdef ApplyMask < AComponent
              %reslice mask to fit the input volume
              resl_mask=fullfile(obj.GetDependency('TempPath'),'resliced_mask.nii');
              reslice_nii(mask.Path,resl_mask,vol.Image.hdr.dime.pixdim(2));
-             vol.LoadFromFile(resl_mask);
+             vol_mask=fullfile(obj.GetDependency('TempPath'),'vol_resliced_mask.nii');
+             reslice_nii(vol.Path,vol_mask,vol.Image.hdr.dime.pixdim(2));
+             vol.LoadFromFile(vol_mask);
              out=obj.CreateOutput(obj.OutputIdentifier);
              out.LoadFromFile(resl_mask);
              vol.Image.img=vol.Image.img-min(min(min(vol.Image.img)));
