@@ -11,7 +11,8 @@ try
             if(~isempty(nameid))
                 h_int.ShowProgressBar(x,varargin{nameid+1});
             else
-                h_int.ShowProgressBar(x);
+                
+                h_int.ShowProgressBar(x,whichbar.UserData);
             end
         else
             nameid=find(strcmp(varargin,'Name'), 1);
@@ -21,7 +22,8 @@ try
                 name=varargin{nameid+1};
             end
             h_int.ShowProgressBar(x,name);
-            h=figure('Visible','off'); %create fake handle...
+            h=figure('Visible','off','DeleteFcn',@(x,y)figDelete(h_int,x,y)); %create fake handle...
+            h.UserData=name;
         end
         
        
@@ -30,6 +32,10 @@ catch e
         f=getoriginalFunHandle();
         h=f(x,whichbar, varargin{:});
 end
+end
+
+function figDelete(h_int,~,~,~)
+    if(isvalid(h_int) && h_int.supercede) h_int.resumeGUI(); end
 end
 
 function fun=getoriginalFunHandle()
