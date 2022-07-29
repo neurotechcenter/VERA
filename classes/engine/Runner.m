@@ -185,7 +185,15 @@ classdef Runner < handle
                     compValid=false;
                     errStr=[errStr ' ' req_comps{i}];
                 else
-                    localPipeline=[localPipeline; obj.Project.LoadComponentData(req_comps{i})];
+                    newmap=obj.Project.LoadComponentData(req_comps{i});
+                    %only add items to map that dont exist, otherwise older
+                    %data might override newer data
+                    for k=keys(newmap)
+                        if(~any(strcmp(keys(localPipeline),k{1})))
+                            localPipeline(k{1})=newmap(k{1});
+                        end
+                    end
+
                 end
                 h=waitbar(i/length(req_comps),h);
             end
