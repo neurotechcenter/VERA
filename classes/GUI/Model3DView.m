@@ -19,7 +19,7 @@ classdef Model3DView < AView & uix.Grid
             obj.SurfaceIdentifier='Surface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
-            opengl hardware;
+            %opengl hardware;
             tmp_Grid=uix.Grid('Parent',obj);
             obj.axModel=axes('Parent',uicontainer('Parent',tmp_Grid),'Units','normalized','Color','k','ActivePositionProperty', 'Position');
             set(tmp_Grid,'BackgroundColor','k');
