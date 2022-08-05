@@ -12,7 +12,15 @@ classdef ElectrodeDefinition < AData
     
     methods
         function obj = ElectrodeDefinition()
-            obj.Definition=struct('Type',[],'Name',[],'NElectrodes',[],'Spacing',[],'Volume',[]);
+            obj.Definition=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{});
+        end
+
+        function defIdx=AddDefinition(obj,type,name,N,spacing,vol)
+            if(~any(strcmp(type,obj.ElectrodeTypes)))
+                error('Adding non-existing type');
+            end
+            obj.Definition(end+1)=struct('Type',type,'Name',name,'NElectrodes',N,'Spacing',spacing,'Volume',vol);
+            defIdx=length(obj.Definition);
         end
         
         function grps=GetGroupedDefinitions(obj)

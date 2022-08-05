@@ -106,7 +106,12 @@ classdef Volume < AData & IFileLoader
             % If multiple images are found in the dicom, it will show a
             % selection dialog
             % See also IFileLoader
+            try
             tpath=fullfile(obj.GetDependency('TempPath'),'dicom_convert');
+            catch
+                tpath='temp';
+            end
+
             mkdir(tpath);
             try
             [spath,~,ext]=fileparts(path);
