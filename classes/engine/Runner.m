@@ -175,11 +175,13 @@ classdef Runner < handle
                     obj.resetDownstreamCompletionStatus(compName);
                     obj.updateComponentStatus();
              end
-            [~,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,compName);
+            [ids,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,compName);
             errStr=[];
             if(~silent)
                 h=waitbar(0.3,'Gathering Input Data...');
             end
+            [ids,I]=sort(ids,'descend'); %reorder to make sure the most up2date data is used first
+            req_comps=req_comps(I);
             for i=1:length(req_comps)
                 if(~strcmp(obj.GetComponentStatus(req_comps{i}),'Completed'))
                     compValid=false;
