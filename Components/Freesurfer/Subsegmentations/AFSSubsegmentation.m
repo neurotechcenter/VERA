@@ -53,11 +53,11 @@ classdef (Abstract) AFSSubsegmentation < AComponent
                     error('No path selected!');
                 end
             end
-            LfileName=fullfile(segmentationPath,'mri',obj.LVolumeName);
-            RfileName=fullfile(segmentationPath,'mri',obj.RVolumeName);
+            LfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.LVolumeName));
+            RfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.RVolumeName));
 
             freesurferPath=obj.GetDependency('Freesurfer');
-            if(~exist(LfileName,'file') || ~exist(RfileName,'file'))
+            if(isempty(LfileName) || isempty(RfileName))
                 
                 recon_script=fullfile(fileparts(fileparts(mfilename('fullpath'))),'scripts',obj.ShellScriptName);
                 [segmentationPath,subj_name]=fileparts(segmentationPath);
@@ -79,24 +79,46 @@ classdef (Abstract) AFSSubsegmentation < AComponent
                     system(shellcmd,'-echo');
                 end
             end
-            if(~exist(LfileName,'file') || ~exist(RfileName,'file'))
+            LfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.LVolumeName));
+            RfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.RVolumeName));
+            if(isempty(LfileName) || isempty(RfileName))
                 error('Error - no output files generated after running segmentation!');
             end
             if(strcmp(obj.LVolumeName,obj.RVolumeName))
-                nii_path=createTempNifti(LfileName,obj.GetDependency('TempPath'),freesurferPath);
+                nii_path=createTempNifti(fullfile(LfileName.folder,LfileName.name),obj.GetDependency('TempPath'),freesurferPath);
                 varargout{1}=obj.CreateOutput(obj.VolumeIdentifier);
                 varargout{1}.LoadFromFile(nii_path);
                 delete(nii_path);
             else
-                nii_path=createTempNifti(LfileName,obj.GetDependency('TempPath'),freesurferPath);
+                nii_path=createTempNifti(fullfile(LfileName.folder,LfileName.name),obj.GetDependency('TempPath'),freesurferPath);
                 varargout{1}=obj.CreateOutput(['L' obj.VolumeIdentifier]);
                 varargout{1}.LoadFromFile(nii_path);
                 delete(nii_path);
-                nii_path=createTempNifti(RfileName,obj.GetDependency('TempPath'),freesurferPath);
+                nii_path=createTempNifti(fullfile(RfileName.folder,RfileName.name),obj.GetDependency('TempPath'),freesurferPath);
                 varargout{2}=obj.CreateOutput(['R' obj.VolumeIdentifier]);
                 varargout{2}.LoadFromFile(nii_path);   
                 delete(nii_path);
             end
+        end
+
+        function dirout=resolveFileNamedir(obj,fpath)
+            
+            if(contains(fpath,'?'))
+                [~,name,ext]=fileparts(fpath);
+                fname_search=strrep(fpath,'?','*');
+                dirout=dir(fname_search);
+                delList=[];
+                for i=1:length(dirout)
+                    if(length(dirout(i).name) ~= length(name)+length(ext))
+                        delList(end+1)=i;
+                    end
+                end
+                dirout(delList)=[];
+                
+            else
+                dirout=dir(fpath);
+            end
+
         end
     end
 end

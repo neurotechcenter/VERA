@@ -5,8 +5,8 @@ classdef FreesurferHippocampalSegmentation < AFSSubsegmentation
 
     properties (Access=protected)
         ShellScriptName ='recon-hippocampus.sh'
-        LVolumeName ='lh.hippoAmygLabels-T1.v21.mgz' %Volume of left hemisphere segmentation
-        RVolumeName ='rh.hippoAmygLabels-T1.v21.mgz'%Volume of right hemisphere segmentation, if both have the same name it is assumed to be single volume
+        LVolumeName ='lh.hippoAmygLabels-T1.v2?.mgz' %Volume of left hemisphere segmentation
+        RVolumeName ='rh.hippoAmygLabels-T1.v2?.mgz'%Volume of right hemisphere segmentation, if both have the same name it is assumed to be single volume
     end
     
     methods

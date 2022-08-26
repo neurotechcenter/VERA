@@ -3,8 +3,8 @@ classdef FreesurferThalamusSegmentation < AFSSubsegmentation
     %   Detailed explanation goes here
     properties (Access=protected)
         ShellScriptName ='recon-thalamus.sh'
-        LVolumeName ='ThalamicNuclei.v12.T1.mgz' %Volume of left hemisphere segmentation
-        RVolumeName ='ThalamicNuclei.v12.T1.mgz'%Volume of right hemisphere segmentation, if both have the same name it is assumed to be single volume
+        LVolumeName ='ThalamicNuclei.v1?.T1.mgz' %Volume of left hemisphere segmentation
+        RVolumeName ='ThalamicNuclei.v1?.T1.mgz'%Volume of right hemisphere segmentation, if both have the same name it is assumed to be single volume
     end
 
     
