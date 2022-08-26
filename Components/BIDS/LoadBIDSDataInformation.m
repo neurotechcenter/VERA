@@ -60,9 +60,10 @@ classdef LoadBIDSDataInformation < AComponent
                 else
                     continue;
                 end
-                N=length(def_idx);
+                
                 locs=[electrodeInfo.x(def_idx) electrodeInfo.y(def_idx) electrodeInfo.z(def_idx)];
                 locs(any(isnan(locs),2),:)=[];
+                N=size(locs,1);
                 spacing=mean(diag(pdist2(locs(1:end-1,:),locs(2:end,:))));
                 idx=eldef.AddDefinition(type,name,N,spacing,30);
                 ellocs.AddWithIdentifier(idx,locs);

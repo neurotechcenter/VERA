@@ -48,12 +48,15 @@ classdef ElectrodeLocationTableView < AView & uix.Grid
                    def_name=eDef.Definition(elLocs.DefinitionIdentifier(i)).Name;
                    chidx=find(find(elLocs.DefinitionIdentifier == elLocs.DefinitionIdentifier(i)) == i);
                    labels='';
-                   for ii=1:length(elLocs.Label{i})
-                       if(ii == 1)
-                           labels=elLocs.Label{i}{ii};
-                       else
-                       labels=[labels ', ' elLocs.Label{i}{ii}];
+                   try
+                       for ii=1:length(elLocs.Label{i})
+                           if(ii == 1)
+                               labels=elLocs.Label{i}{ii};
+                           else
+                           labels=[labels ', ' elLocs.Label{i}{ii}];
+                           end
                        end
+                   catch
                    end
                    tbl(i,:)={i,[def_name num2str(chidx)],elLocs.Location(i,1),elLocs.Location(i,2),elLocs.Location(i,3),labels};
 

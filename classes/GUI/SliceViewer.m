@@ -97,7 +97,7 @@ classdef SliceViewer < uix.Grid
             x=1:size(obj.Images{imgIdx}.Image.img,1);
             y=1:size(obj.Images{imgIdx}.Image.img,2);
             z=1:size(obj.Images{imgIdx}.Image.img,3);
-             XYZ=cell(3,1);
+            XYZ=cell(3,1);
             [XYZ{:}]=obj.Images{imgIdx}.GetRasAxis();
           
             X=XYZ{obj.ViewAxis(1)};

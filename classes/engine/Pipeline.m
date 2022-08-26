@@ -60,10 +60,9 @@ classdef Pipeline < handle
             %FindUpstreamData = find the fist upstream (i.e, component
             %earlier in the pipeline) relative to downstreamCompName that
             %produces data with the ID dataName
-            obj.availableDataPerStage;
             
             compIdx=find(cellfun(@(x)strcmp(x,downstreamCompName),obj.Components));
-            compIdx=find(cellfun(@(x) any(strcmp(dataName,obj.componentMap(x).Outputs)),obj.Components(1:compIdx)),1,'last');
+            compIdx=find(cellfun(@(x) any(strcmp(dataName,obj.componentMap(x).Outputs)),obj.Components(1:compIdx-1)),1,'last');
             compName=obj.Components{compIdx};  
         end
         
