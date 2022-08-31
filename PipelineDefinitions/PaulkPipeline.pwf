@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="ROSA Pipeline with Segmentation">
+
+
+
+
+    <Component Type="LoadBIDSDataInformationPaulk">
+    </Component>
+
+    <Component Type="Copy">
+        <Name>"ElectrodeLocations for MNI"</Name>
+        <CopyFromIdentifier>"ElectrodeLocation"</CopyFromIdentifier>
+        <CopyToIdentifier>"MNIElectrodeLocation"</CopyToIdentifier>
+        <IdentifierType>"ElectrodeLocation"</IdentifierType>
+    </Component>
+
+    <Component Type="FreesurferModelGeneration"/>
+
+    <Component Type="LoadFreesurferSegmentationVolume">
+      <Name>"Load FS Segmentation"</Name>
+      <FSVolume>"aparc+aseg"</FSVolume>
+    </Component>
+
+    <Component Type="FreesurferHippocampalSegmentation">
+    <Name>"Load Hippocampal subsegmentations"</Name>
+        <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
+    </Component>
+
+	
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Left Hippocampus"</Name>
+		<VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+	</Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Right Hippocampus"</Name>
+		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+	</Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+		<Name>"Distance to ASEG"</Name>
+		<VolumeIdentifier>"ASEG"</VolumeIdentifier>
+	</Component>
+
+    <Component Type="CalculateDistanceToSurfaceLabel"/>	
+
+    <Component Type="ReplaceLabels"/>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat"</Name>
+    </Component>
+
+
+    <Component Type="Copy">
+        <Name>"Surface for MNI"</Name>
+        <CopyFromIdentifier>"Surface"</CopyFromIdentifier>
+        <CopyToIdentifier>"SubjectMNISurface"</CopyToIdentifier>
+        <IdentifierType>"Surface"</IdentifierType>
+    </Component>
+
+    <Component Type="ReportGenerator">
+	<Name>"Report Generator MRI"</Name>
+    	<ImageIdentifier>"MRI"</ImageIdentifier>
+    </Component>
+
+ <Component Type="ImportFreesurferSegmentation">
+      <Name>"Import MNI Freesurfer Template"</Name>
+      <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+    </Component>
+    
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Load MNI Segmentation"</Name>
+        <SurfaceIdentifier>"MNISurface"</SurfaceIdentifier>
+        <SphereIdentifier>"MNISphere"</SphereIdentifier>
+        <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+    </Component>
+
+    <Component Type="LoadFreesurferSegmentationVolume">
+      <Name>"Load MNI Brain"</Name>
+     <VolumeIdentifier>"MNI"</VolumeIdentifier>
+     <FSVolume>"brain"</FSVolume>
+     <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+    </Component>
+
+     <Component Type="LoadFreesurferSegmentationVolume">
+      <Name>"Load Stripped Brain"</Name>
+     <VolumeIdentifier>"MRI_stripped"</VolumeIdentifier>
+     <FSVolume>"brain"</FSVolume>
+    </Component>
+
+    <Component Type="ANTCoregistration">
+        <Name>"Project into MNI"</Name>
+        <ReferenceIdentifier>"MNI"</ReferenceIdentifier>
+        <SurfaceIdentifier>"SubjectMNISurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+        <CoregistrationIdentifier>"MRI_stripped"</CoregistrationIdentifier>
+    </Component>
+
+    <Component Type="LoadFreesurferSegmentationVolume">
+      <Name>"Load MNI FS Segmentation"</Name>
+      <FSVolume>"aparc+aseg"</FSVolume>
+      <VolumeIdentifier>"MNIASEG"</VolumeIdentifier>
+      <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+    </Component>
+
+    <Component Type="FreesurferHippocampalSegmentation">
+    <Name>"Load MNI Hippocampal subsegmentations"</Name>
+        <VolumeIdentifier>"MNIHippocampus"</VolumeIdentifier>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+        <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+    </Component>
+
+	
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Left MNI Hippocampus"</Name>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+		<VolumeIdentifier>"RMNIHippocampus"</VolumeIdentifier>
+	</Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Right MNI Hippocampus"</Name>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+		<VolumeIdentifier>"LMNIHippocampus"</VolumeIdentifier>
+	</Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+		<Name>"Distance to MNI ASEG"</Name>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+		<VolumeIdentifier>"MNIASEG"</VolumeIdentifier>
+	</Component>
+
+    <Component Type="ReplaceLabels">
+        <Name> "Cleanup MNI Labels" </Name>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+        <SurfaceIdentifier>"MNISurface"</SurfaceIdentifier>
+        <Name>"Create MNI brain.mat"</Name>
+    </Component>
+
+
+  
+	
+    <View Type="Model3DView">
+	<Name>"3D View"</Name>
+    </View>
+
+     <View Type="Model3DView">
+	<Name>"3D View MNI"</Name>
+    <SurfaceIdentifier>"MNISurface"</SurfaceIdentifier>
+    <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+     <View Type="Model3DView">
+	<Name>"3D View Subject in MNI"</Name>
+    <SurfaceIdentifier>"SubjectMNISurface"</SurfaceIdentifier>
+    <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="SliceViewerView">
+    	<Name>"Slice Viewer"</Name>
+    </View>
+
+    <View Type="ElectrodeLocationTableView"/>
+    <View Type="ElectrodeLocationTableView">
+        <Name>"MNI Electrode Location Table"</Name>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+
+</PipelineDefinition>

@@ -1,5 +1,6 @@
-classdef LoadBIDSDataInformation < AComponent
-    %Loading information for https://doi.org/10.1016/j.brs.2022.02.017
+classdef LoadBIDSDataInformationPaulk < AComponent
+    %LOADBIDSDATAINFORMATION Summary of this class goes here
+    %   Detailed explanation goes here
     
     properties
         MRIIdentifier
@@ -8,8 +9,8 @@ classdef LoadBIDSDataInformation < AComponent
     end
     
     methods
-        function obj = LoadBIDSDataInformation()
-           obj.Name='Load BIDS Dataset';
+        function obj = LoadBIDSDataInformationPaulk()
+           obj.Name='LoadPaulkDataset';
            obj.MRIIdentifier='MRI';
            obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
            obj.ElectrodeLocationIdentifier='ElectrodeLocation';
@@ -40,28 +41,19 @@ classdef LoadBIDSDataInformation < AComponent
                 error('Subject selection aborted');
             end
             curr_subj=available_subj{idx};
-            subj_channels=bids.query(BIDS, 'data','sub',curr_subj,'task','ccep','suffix','channels');
-            subj_electrodes=bids.query(BIDS, 'data','sub',curr_subj,'suffix','electrodes');
-            channelinfo=bids.util.tsvread(subj_channels{1});
-            electrodeInfo=bids.util.tsvread(subj_electrodes{1});
+            electrodeInfo=readtable(fullfile(BIDS.pth,'derivatives','epochs',['sub-' curr_subj],'ieeg',['sub-' curr_subj '_task-ccepcoreg_space-T1w_electrodes.tsv']), 'FileType', 'text', 'Delimiter', '\t');
 
             %estimate channel definitions
-            [definitions,~,ic] = unique(regexprep(channelinfo.name,'\d+$',''));
+            names=cellfun(@(x) (strsplit(x,'''')),electrodeInfo.name,'UniformOutput',false);
+            
+            [definitions,~,ic] = unique(cellfun(@(x)x{1},names,'UniformOutput',false));
             eldef=obj.CreateOutput(obj.ElectrodeDefinitionIdentifier);
             ellocs=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
             for i=1:length(definitions)
                 name=definitions{i};
                 def_idx=find(ic == i);
-                if(all(strcmp(channelinfo.type(def_idx),'ECOG')))
-                    type='Grid';
-                elseif(all(strcmp(channelinfo.type(def_idx),'SEEG')))
-                    type='Depth';
-                else
-                    continue;
-                end
-                
-                locs=[electrodeInfo.x(def_idx) electrodeInfo.y(def_idx) electrodeInfo.z(def_idx)];
-                locs(any(isnan(locs),2),:)=[];
+                type='Depth';
+                locs=[electrodeInfo.x(def_idx) electrodeInfo.y(def_idx) electrodeInfo.z(def_idx)]*1e3;
                 N=size(locs,1);
                 spacing=mean(diag(pdist2(locs(1:end-1,:),locs(2:end,:))));
                 idx=eldef.AddDefinition(type,name,N,spacing,30);
@@ -70,7 +62,7 @@ classdef LoadBIDSDataInformation < AComponent
             end
 
             %load T1 mri
-            mri_paths=dir(fullfile(BIDS.pth,'derivatives','*',['sub-' curr_subj],'*.nii'));
+            mri_paths=dir(fullfile(BIDS.pth,['sub-' curr_subj],'anat',['sub-' curr_subj '_T1w.nii']));
             if(~isempty(mri_paths))
                 mri_path=fullfile(mri_paths.folder,mri_paths.name);
             else
