@@ -403,27 +403,44 @@ classdef MainGUI < handle
         end
         
         function treeClick(obj,a,b)
-            if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData) && b.SelectionType == 'normal')
-                %context=b.Nodes.UIContextMenu;
-                delete(obj.componentMenu);
-                obj.componentMenu=[];
-                if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
-                    obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
-                    obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
+            if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData))
+                switch b.SelectionType
+                    case 'normal'
+                        %context=b.Nodes.UIContextMenu;
+                            delete(obj.componentMenu);
+                            obj.componentMenu=[];
+                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
+                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
+                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
+                            end
+                    case 'open'
+                            delete(obj.componentMenu);
+                            obj.componentMenu=[];
+                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
+                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
+                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
+                            end
+                            obj.runComponent(b.Nodes.Name,true);
+
+                    otherwise
+                        return;
+
                 end
-                %update Views
-                vs=keys(obj.viewTabs);
-                for i=1:length(vs)
-                    [res,comp]=obj.Views.IsComponentView(vs{i});
-                    if(res)
-                        vobj=obj.viewTabs(vs{i});
-                        if(strcmp(comp,b.Nodes.UserData))
-                            vobj.Parent=obj.mainView;
-                        else
-                            vobj.Parent=[];
-                        end
-                    end
-                end
+            
+%                 %update Views
+%                 vs=keys(obj.viewTabs);
+%                 for i=1:length(vs)
+%                     [res,comp]=obj.Views.IsComponentView(vs{i});
+%                     if(res)
+%                         vobj=obj.viewTabs(vs{i});
+%                         if(strcmp(comp,b.Nodes.UserData))
+%                             vobj.Parent=obj.mainView;
+%                         else
+%                             vobj.Parent=[];
+%                         end
+%                     end
+%                 end
+  
             end
         end           
         
