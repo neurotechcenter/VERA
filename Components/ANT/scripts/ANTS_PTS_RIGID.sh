@@ -1,6 +1,5 @@
 #!/bin/tcsh
 set ANTSPATH=$argv[1]
-set PATH=${ANTSPATH}:$PATH
 
 set pointset = $argv[2]
 set patid = reg_out

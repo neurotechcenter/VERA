@@ -41,6 +41,9 @@ classdef ANTCoregistration < AComponent
                 error('Invalid Registration algorithm selected; Choose from: Rigid, Affine or SyN');
             end
 
+            if(ispc)
+                error ('ANT has not been implemented for Windows machines (yet)');
+            end
         end
 
         function varargout=Process(obj,refVol,coregVol,surf,varargin)
@@ -81,22 +84,22 @@ classdef ANTCoregistration < AComponent
                 coreg_path_wsl=convertToUbuntuSubsystemPath(coreg_path,subsyspath);
                 tmpPath_wsl=convertToUbuntuSubsystemPath(tmpPath,subsyspath);
 
-                systemWSL(['chmod +x ''' ant_script_image_wsl ''''],'-echo');
+                system(['chmod +x ''' ant_script_image_wsl ''''],'-echo');
                 shellcmd=[ant_script_image_wsl ...
                 ' ''' ant_path_wsl '''' ...
                 ' ''' ref_path_wsl '''' ...
                 ' ''' coreg_path_wsl '''' ...
                 ' ''' tmpPath_wsl  '''' ...
                 ' ''' num2str(coregType) ''''];
-                systemWSL(shellcmd,'-echo');
+                system(shellcmd,'-echo');
 
 
-                systemWSL(['chmod +x ''' ant_script_rigid_wsl ''''],'-echo');
+                system(['chmod +x ''' ant_script_rigid_wsl ''''],'-echo');
                 shellcmd=[ant_script_rigid_wsl ...
                 ' ''' ant_path_wsl '''' ...
                 ' ''' tmpPathcsv_wsl '''' ...
                 ' ''' tmpPath_wsl  '''' ];
-                systemWSL(shellcmd,'-echo');
+                system(shellcmd,'-echo');
 
                 if(~exist(fullfile(tmpPath,'reg_out_rigid.csv'),'file'))
                     error('No Rigid/affine point transformation created!');
@@ -105,12 +108,12 @@ classdef ANTCoregistration < AComponent
                 
                 if(coregType >2) %we first need to transform points into LPS and than back
                     writetable(V,tmpPathcsv);
-                    systemWSL(['chmod +x ''' ant_script_SyN_wsl ''''],'-echo');
-                    shellcmd=[ant_script_SyN_wsl ...
-                    ' ''' ant_path_wsl '''' ...
-                    ' ''' tmpPathcsv_wsl '''' ...
-                    ' ''' tmpPath_wsl  '''' ];
-                    systemWSL(shellcmd,'-echo');  
+                    system(['chmod +x ''' ant_script_SyN ''''],'-echo');
+                    shellcmd=[ant_script_SyN ...
+                    ' ''' ant_path '''' ...
+                    ' ''' tmpPathcsv '''' ...
+                    ' ''' tmpPath  '''' ];
+                    system(shellcmd,'-echo');  
                     if(~exist(fullfile(tmpPath,'reg_out_syn.csv'),'file'))
                         error('No syn point transformation created!');
                     end
