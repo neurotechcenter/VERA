@@ -215,6 +215,9 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             elDefIdx=obj.uiListView.Value;
            % disp(['Running fully automated Detection on: ' obj.elDefinition.Definition(elDefIdx).Type ' ' obj.elDefinition.Definition(elDefIdx).Name]);
             linep=obj.trajectories.Location((obj.trajectories.DefinitionIdentifier == elDefIdx),:);
+            if(isempty(linep))
+                return; %skip if no trajectory is available
+            end
             centroids=obj.getRASCentroids();
             
             centroid_dist=nan(size(centroids,1),1);
