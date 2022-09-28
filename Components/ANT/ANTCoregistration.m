@@ -68,13 +68,17 @@ classdef ANTCoregistration < AComponent
             ant_path=obj.GetDependency('ANT');
             tmpPath=obj.GetTempPath();
             tmpPathcsv=fullfile(tmpPath,'pointset.csv');
-            
-            T = array2table(csvM);
-            T.Properties.VariableNames = {'x','y','z','t'};
-            T.x=-T.x;
-            T.y=-T.y;
-            
+            if(~isempty(csvM))
+                T = array2table(csvM);
+                T.Properties.VariableNames = {'x','y','z','t'};
+                T.x=-T.x;
+                T.y=-T.y;
+                
+            else
+                T=table([],[],[],[],'VariableNames',{'x','y','z','t'});
+            end
             writetable(T,tmpPathcsv);
+            
             ref_path=GetFullPath(refVol.Path);
             coreg_path=GetFullPath(coregVol.Path);
             ant_script_image=fullfile(fileparts((mfilename('fullpath'))),'/scripts/ANTS_IMAGE.sh');
