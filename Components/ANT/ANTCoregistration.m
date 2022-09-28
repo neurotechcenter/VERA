@@ -40,6 +40,9 @@ classdef ANTCoregistration < AComponent
 
         function Initialize(obj)
             ant_dep=obj.GetDependency('ANT');
+            if(~exist(fullfile(ant_dep,'antsRegistration'),'file'))
+                error('Could not file the correct ANT executables within the specified ANT folder, please make sure you select the bin folder containing antsRegistration!')
+            end
             if(~any(strcmp(obj.Type,obj.RegistrationAlgorithms)))
                 error('Invalid Registration algorithm selected; Choose from: Rigid, Affine or SyN');
             end
