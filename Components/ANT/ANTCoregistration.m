@@ -75,8 +75,7 @@ classdef ANTCoregistration < AComponent
                 T.y=-T.y;
                 
             else
-                T=table([],[],[],[],'VariableNames',{'x','y','z','t'});
-                V=T;
+                T=table(1, 1, 1, 1,'VariableNames',{'x','y','z','t'});
             end
             writetable(T,tmpPathcsv);
             
@@ -114,12 +113,11 @@ classdef ANTCoregistration < AComponent
                 ' ''' tmpPathcsv_wsl '''' ...
                 ' ''' tmpPath_wsl  '''' ];
                 systemWSL(shellcmd,'-echo');
-                if(~isempty(csvM))
-                    if(~exist(fullfile(tmpPath,'reg_out_rigid.csv'),'file'))
-                        error('No Rigid/affine point transformation created!');
-                    end
-                    V=readtable(fullfile(tmpPath,'reg_out_rigid.csv'));
+
+                if(~exist(fullfile(tmpPath,'reg_out_rigid.csv'),'file'))
+                    error('No Rigid/affine point transformation created!');
                 end
+                V=readtable(fullfile(tmpPath,'reg_out_rigid.csv'));
                 
                 if(coregType >2) %we first need to transform points into LPS and than back
                     writetable(V,tmpPathcsv);
@@ -129,12 +127,10 @@ classdef ANTCoregistration < AComponent
                     ' ''' tmpPathcsv_wsl '''' ...
                     ' ''' tmpPath_wsl  '''' ];
                     systemWSL(shellcmd,'-echo');  
-                    if(~isempty(csvM))
-                        if(~exist(fullfile(tmpPath,'reg_out_syn.csv'),'file'))
-                            error('No syn point transformation created!');
-                        end
-                        V=readtable(fullfile(tmpPath,'reg_out_syn.csv'));
+                    if(~exist(fullfile(tmpPath,'reg_out_syn.csv'),'file'))
+                        error('No syn point transformation created!');
                     end
+                    V=readtable(fullfile(tmpPath,'reg_out_syn.csv'));
                 end
                 V.x=-V.x;
                 V.y=-V.y;
@@ -155,12 +151,11 @@ classdef ANTCoregistration < AComponent
                 ' ''' tmpPathcsv '''' ...
                 ' ''' tmpPath  '''' ];
                 system(shellcmd,'-echo');
-                if(~isempty(csvM))
-                    if(~exist(fullfile(tmpPath,'reg_out_rigid.csv'),'file'))
-                        error('No Rigid/affine point transformation created!');
-                    end
-                    V=readtable(fullfile(tmpPath,'reg_out_rigid.csv'));
+
+                if(~exist(fullfile(tmpPath,'reg_out_rigid.csv'),'file'))
+                    error('No Rigid/affine point transformation created!');
                 end
+                V=readtable(fullfile(tmpPath,'reg_out_rigid.csv'));
                 
                 if(coregType >2) %we first need to transform points into LPS and than back
                     writetable(V,tmpPathcsv);
@@ -170,12 +165,10 @@ classdef ANTCoregistration < AComponent
                     ' ''' tmpPathcsv '''' ...
                     ' ''' tmpPath  '''' ];
                     system(shellcmd,'-echo');  
-                    if(~isempty(csvM))
-                        if(~exist(fullfile(tmpPath,'reg_out_syn.csv'),'file'))
-                            error('No syn point transformation created!');
-                        end
-                        V=readtable(fullfile(tmpPath,'reg_out_syn.csv'));
+                    if(~exist(fullfile(tmpPath,'reg_out_syn.csv'),'file'))
+                        error('No syn point transformation created!');
                     end
+                    V=readtable(fullfile(tmpPath,'reg_out_syn.csv'));
                 end
                 V.x=-V.x;
                 V.y=-V.y;
