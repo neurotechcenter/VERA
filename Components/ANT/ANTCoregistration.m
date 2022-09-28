@@ -18,16 +18,19 @@ classdef ANTCoregistration < AComponent
             obj.ReferenceIdentifier='MNI';
             obj.CoregistrationIdentifier='MRI';
             obj.Type='SyN';
-            obj.ElectrodeLocationIdentifier='ElectrodeLocation';
-            obj.SurfaceIdentifier='Surface';
+            obj.ElectrodeLocationIdentifier='';
+            obj.SurfaceIdentifier='';
         end
         
         function Publish(obj)
             obj.AddInput(obj.ReferenceIdentifier,'Volume');
             obj.AddInput(obj.CoregistrationIdentifier,'Volume');
-            obj.AddInput(obj.SurfaceIdentifier,'Surface');
+            
             obj.AddOutput(obj.CoregistrationIdentifier,'Volume');
-            obj.AddOutput(obj.SurfaceIdentifier,'Surface');
+            if(~isempty(obj.SurfaceIdentifier))
+                obj.AddInput(obj.SurfaceIdentifier,'Surface');
+                obj.AddOutput(obj.SurfaceIdentifier,'Surface');
+            end
             if(~isempty(obj.ElectrodeLocationIdentifier))
                 obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
                 obj.AddOutput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
@@ -43,13 +46,22 @@ classdef ANTCoregistration < AComponent
 
         end
 
-        function varargout=Process(obj,refVol,coregVol,surf,varargin)
-            csvM=surf.Model.vert;
-            if(~isempty(varargin))
-                elLocs=varargin{1};
-                csvM=[csvM; elLocs.Location];
-                %write elLocs to csv
+        function varargout=Process(obj,refVol,coregVol,addin1,addin2)
+            csvM=[];
+            hasSurf=~isempty(obj.SurfaceIdentifier);
+            hasElLocs=~isempty(obj.ElectrodeLocationIdentifier);
+            if(hasSurf)
+                surf=addin1;
+                csvM=surf.Model.vert;
+                if hasElLocs
+                    elLocs=addin2;
+                    csvM=[csvM; elLocs.Location];
+                end
+            elseif hasElLocs
+                elLocs=addin1;
+                csvM=elLocs.Location;
             end
+            
             %add T and comment to match csv specs
             csvM=[csvM zeros(size(csvM,1),1)];
 
@@ -164,19 +176,27 @@ classdef ANTCoregistration < AComponent
             coregVol=obj.CreateOutput(obj.CoregistrationIdentifier);
             coregVol.LoadFromFile(fullfile(tmpPath,'reg_out_111_ants.nii'));
 
-            surfOut=obj.CreateOutput(obj.SurfaceIdentifier,surf);
-
-            
-
-            surfOut.Model.vert=V(1:size(surfOut.Model.vert,1),1:3);
             varargout{1}=coregVol;
-            varargout{2}=surfOut;
+
+            if(hasSurf)
+                surfOut=obj.CreateOutput(obj.SurfaceIdentifier,surf);
+                surfOut.Model.vert=V(1:size(surfOut.Model.vert,1),1:3);
+                varargout{2}=surfOut;
+            end
+            
+            
             
 
-            if(~isempty(varargin))
-                elOut=obj.CreateOutput(obj.ElectrodeLocationIdentifier,varargin{1});
-                elOut.Location=V(size(surfOut.Model.vert,1)+1:end,1:3);
-                varargout{3}=elOut;
+            if(hasElLocs)
+                elOut=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
+                if(hasSurf)
+                    elOut.Location=V(size(surfOut.Model.vert,1)+1:end,1:3);
+                    varargout{3}=elOut;
+                else
+                    elOut.Location=V(1:end,1:3);
+                    varargout{2}=elOut;
+                end
+                
                  %surfOut=obj.CreateOutput(obj.SurfaceIdentifier);
             end
             

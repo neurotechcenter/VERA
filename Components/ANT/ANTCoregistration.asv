@@ -18,16 +18,19 @@ classdef ANTCoregistration < AComponent
             obj.ReferenceIdentifier='MNI';
             obj.CoregistrationIdentifier='MRI';
             obj.Type='SyN';
-            obj.ElectrodeLocationIdentifier='ElectrodeLocation';
+            obj.ElectrodeLocationIdentifier='';
             obj.SurfaceIdentifier='Surface';
         end
         
         function Publish(obj)
             obj.AddInput(obj.ReferenceIdentifier,'Volume');
             obj.AddInput(obj.CoregistrationIdentifier,'Volume');
-            obj.AddInput(obj.SurfaceIdentifier,'Surface');
+            
             obj.AddOutput(obj.CoregistrationIdentifier,'Volume');
-            obj.AddOutput(obj.SurfaceIdentifier,'Surface');
+            if(~isempty(obj.SurfaceIdentifier))
+                obj.AddInput(obj.SurfaceIdentifier,'Surface');
+                obj.AddOutput(obj.SurfaceIdentifier,'Surface');
+            end
             if(~isempty(obj.ElectrodeLocationIdentifier))
                 obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
                 obj.AddOutput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
@@ -41,18 +44,24 @@ classdef ANTCoregistration < AComponent
                 error('Invalid Registration algorithm selected; Choose from: Rigid, Affine or SyN');
             end
 
-            if(ispc)
-                error ('ANT has not been implemented for Windows machines (yet)');
-            end
         end
 
-        function varargout=Process(obj,refVol,coregVol,surf,varargin)
-            csvM=surf.Model.vert;
-            if(~isempty(varargin))
-                elLocs=varargin{1};
-                csvM=[csvM; elLocs.Location];
-                %write elLocs to csv
+        function varargout=Process(obj,refVol,coregVol,addin1,addin2)
+            csvM=[];
+            hasSurf=0;
+            hasElLocs
+            if(~isempty(obj.SurfaceIdentifier))
+                surf=addin1;
+                csvM=surf.Model.vert;
+                if(~isempty(obj.ElectrodeLocationIdentifier))
+                    elLocs=addin2;
+                    csvM=[csvM; elLocs.Location];
+                end
+            elseif ~isempty(obj.ElectrodeLocationIdentifier)
+                elLocs=addin1;
+                csvM=elLocs.Location;
             end
+            
             %add T and comment to match csv specs
             csvM=[csvM zeros(size(csvM,1),1)];
 
@@ -84,22 +93,22 @@ classdef ANTCoregistration < AComponent
                 coreg_path_wsl=convertToUbuntuSubsystemPath(coreg_path,subsyspath);
                 tmpPath_wsl=convertToUbuntuSubsystemPath(tmpPath,subsyspath);
 
-                system(['chmod +x ''' ant_script_image_wsl ''''],'-echo');
+                systemWSL(['chmod +x ''' ant_script_image_wsl ''''],'-echo');
                 shellcmd=[ant_script_image_wsl ...
                 ' ''' ant_path_wsl '''' ...
                 ' ''' ref_path_wsl '''' ...
                 ' ''' coreg_path_wsl '''' ...
                 ' ''' tmpPath_wsl  '''' ...
                 ' ''' num2str(coregType) ''''];
-                system(shellcmd,'-echo');
+                systemWSL(shellcmd,'-echo');
 
 
-                system(['chmod +x ''' ant_script_rigid_wsl ''''],'-echo');
+                systemWSL(['chmod +x ''' ant_script_rigid_wsl ''''],'-echo');
                 shellcmd=[ant_script_rigid_wsl ...
                 ' ''' ant_path_wsl '''' ...
                 ' ''' tmpPathcsv_wsl '''' ...
                 ' ''' tmpPath_wsl  '''' ];
-                system(shellcmd,'-echo');
+                systemWSL(shellcmd,'-echo');
 
                 if(~exist(fullfile(tmpPath,'reg_out_rigid.csv'),'file'))
                     error('No Rigid/affine point transformation created!');
@@ -108,12 +117,12 @@ classdef ANTCoregistration < AComponent
                 
                 if(coregType >2) %we first need to transform points into LPS and than back
                     writetable(V,tmpPathcsv);
-                    system(['chmod +x ''' ant_script_SyN ''''],'-echo');
-                    shellcmd=[ant_script_SyN ...
-                    ' ''' ant_path '''' ...
-                    ' ''' tmpPathcsv '''' ...
-                    ' ''' tmpPath  '''' ];
-                    system(shellcmd,'-echo');  
+                    systemWSL(['chmod +x ''' ant_script_SyN_wsl ''''],'-echo');
+                    shellcmd=[ant_script_SyN_wsl ...
+                    ' ''' ant_path_wsl '''' ...
+                    ' ''' tmpPathcsv_wsl '''' ...
+                    ' ''' tmpPath_wsl  '''' ];
+                    systemWSL(shellcmd,'-echo');  
                     if(~exist(fullfile(tmpPath,'reg_out_syn.csv'),'file'))
                         error('No syn point transformation created!');
                     end
