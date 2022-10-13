@@ -1,6 +1,9 @@
 function [nii_path] = createTempNifti(inPath,tempPath,freesurferPath)
 %CREATETEMPNIFTI Summary of this function goes here
 %   Detailed explanation goes here
+inPath=strrep(inPath,'\','/'); %normalize paths
+tempPath=strrep(tempPath,'\','/');
+freesurferPath=strrep(freesurferPath,'\','/');
 [~,temp_name]=fileparts(tempname);
 nii_path=fullfile(tempPath,[temp_name '.nii']);
 convert_script_path=fullfile(fileparts(fileparts(mfilename('fullpath'))),'scripts','convert_to_nii.sh');
