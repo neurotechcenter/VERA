@@ -162,11 +162,11 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.progressBar.suspendGUIWithMessage('Determining optimal threshold...');
             Nelecs=sum([obj.elDefinition.Definition.NElectrodes]);
 
-            o.Display='off';
-            o.TolX=0.01;
+            o.Display='final';
+            o.TolX=(obj.slMinThresh.Max-obj.slMinThresh.Min)*0.01;
             o.PlotFcns=[];
             o.OutputFcn=[];
-            min_tresh=obj.slMinThresh.Min+(obj.slMinThresh.Max-obj.slMinThresh.Min)*0.8;
+            min_tresh=obj.slMinThresh.Min+(obj.slMinThresh.Max-obj.slMinThresh.Min)*0.2;
             min_res=fminbnd(@(x) obj.testTreshold(Nelecs,x),min_tresh,obj.slMinThresh.Max,o);
             obj.testTreshold(Nelecs,min_res);
 
