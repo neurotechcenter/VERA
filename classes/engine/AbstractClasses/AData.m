@@ -18,7 +18,7 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
             % Load - Load Data from path
             % path - Path to the serialization xml
             %See also Serializable
-            xmlstrct=xml2struct(path);
+            xmlstrct=xml2struct(obj.normalizeSlashes(path));
             if(isfield(xmlstrct,'DataInformation'))
                 obj.Deserialize(xmlstrct.DataInformation{1}.(obj.nodeName){1});
             else
@@ -32,7 +32,7 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
             %Save - serialize and save to xml 
             % path - path to save to, file name is determined by Identifier
             %See also Serializable
-            xmlPath=obj.buildXmlPath(path);
+            xmlPath=obj.buildXmlPath(obj.normalizeSlashes(path));
             docNode = com.mathworks.xml.XMLUtils.createDocument('DataInformation');
             c=obj.Serialize(docNode);
             doc = docNode.getDocumentElement;
@@ -45,7 +45,7 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
         function path=buildXmlPath(obj,path)
             %buildXmlPath - creates a valid path to save with correct name
             %path - folder path
-                path=fullfile(path,[obj.Name '.xml']);
+                path=fullfile(obj.normalizeSlashes(path),[obj.Name '.xml']);
         end
         
         
@@ -70,7 +70,7 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
             %pathOut - Path relative to either ProjectPath (if dependency
             %is available) or relative to m file
             if(isFile)
-                [a,b,c]=fileparts(pathIn);
+                [a,b,c]=fileparts(obj.normalizeSlashes(pathIn));
             else
                 a=pathIn;
             end
@@ -87,7 +87,8 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
         function pathout=makeFullPath(obj,pathIn)
             %makeFullPath - convert relative path to full path
             %pathIn - relative path to be resolved
-            %pathout - full path 
+            %pathout - full path
+            pathIn=obj.normalizeSlashes(pathIn);
             if(~startsWith(strtrim(pathIn),{'..\','.\','../','./'})) %path is already absolute
                 pathout=pathIn;
                 return;
@@ -97,6 +98,10 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
             else
                 pathout=fullfile(cd,pathIn);
             end
+        end
+
+        function path=normalizeSlashes(~,path)
+            path=strrep(path,'\','/');
         end
             
     end
