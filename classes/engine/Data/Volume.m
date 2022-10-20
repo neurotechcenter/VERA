@@ -120,10 +120,10 @@ classdef Volume < AData & IFileLoader
                 path=dir(fullfile(tpath,'*.nii'));
                 if(numel(path) > 1 )
                     warning('Dicom contains multiple Image Containers!');
-                    sel_name=cellfun(@(x)x.name,path,'UniformOutput',false);
+                    sel_name={path.name};
                     [idx,tf]=listdlg('PromptString','Please Select the correct Dicom for import','SelectionMode','single','ListString',sel_name);
                     if(tf ~= 0)
-                        path=path{idx};
+                        path=path(idx);
                     else
                         error('No Dicom selected!');
                     end
