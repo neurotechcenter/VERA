@@ -263,8 +263,8 @@ classdef MainGUI < handle
             obj.ProgressBarTool.ShowProgressBar(0,['Running ' component ' Dependents']);
             for i=1:length(comps_to_run)
                 obj.ProgressBarTool.ShowProgressBar(i/length(comps_to_run),['Running ' component ' Dependents']);
-                obj.runTo(comps_to_run{i});
-                if(~strcmp(obj.ProjectRunner.GetComponentStatus(comps_to_run{i}),'Completed'))
+                other_run_success=obj.runTo(comps_to_run{i});
+                if(strcmp(obj.ProjectRunner.GetComponentStatus(comps_to_run{i}),'Ready'))
                     success=obj.runComponent(comps_to_run{i});
                     if(success == 0)
                         obj.updateTreeView();
@@ -274,7 +274,7 @@ classdef MainGUI < handle
                 end
             end
             if(success == 1)
-                if(~strcmp(obj.ProjectRunner.GetComponentStatus(component),'Completed'))
+                if(strcmp(obj.ProjectRunner.GetComponentStatus(component),'Ready'))
                     obj.runComponent(component,true);
                 end
             end
