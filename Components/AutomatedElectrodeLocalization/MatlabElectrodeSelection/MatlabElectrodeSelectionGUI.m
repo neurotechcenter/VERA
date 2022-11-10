@@ -162,15 +162,30 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             obj.progressBar.suspendGUIWithMessage('Determining optimal threshold...');
             Nelecs=sum([obj.elDefinition.Definition.NElectrodes]);
 
-            o.Display='final';
-            o.TolX=(obj.slMinThresh.Max-obj.slMinThresh.Min)*0.01;
+            o.Display='iter';
+
             o.PlotFcns=[];
             o.OutputFcn=[];
-            min_tresh=obj.slMinThresh.Min+(obj.slMinThresh.Max-obj.slMinThresh.Min)*0.2;
+        
+            min_tresh=obj.slMinThresh.Min;%+(obj.slMinThresh.Max-obj.slMinThresh.Min)*0.2;
+            %min_res=fmincon(@(x) obj.testTreshold(Nelecs,x),obj.slMinThresh.Min,[],[],[],[],min_tresh,obj.slMinThresh.Max,[],o);
             min_res=fminbnd(@(x) obj.testTreshold(Nelecs,x),min_tresh,obj.slMinThresh.Max,o);
+            %min_res=obj.findMinimum(@(x) obj.testTreshold(Nelecs,x),min_tresh,obj.slMinThresh.Max,45);
             obj.testTreshold(Nelecs,min_res);
 
             obj.progressBar.resumeGUI();
+        end
+
+        function minRes=findMinimum(obj,fun,Xmin,Xmax,N_steps)
+            steps=linspace(Xmin,Xmax,N_steps);
+            res=inf(N_steps,1);
+            for i=1:length(steps)
+                res(i)=fun(steps(i));
+                
+            end
+            [~,I]=min(res);
+            minRes=steps(I);
+            figure,plot(steps,res);
         end
         
         function metric=testTreshold(obj,NElecs, thresh)
@@ -182,7 +197,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             else
                 metric=(NElecs-size(obj.getRASCentroids(),1)).^2;
             end
-            
+            disp([num2str(thresh) ': ' num2str(metric)]);
         end
         
         function updateListView(obj)
@@ -419,39 +434,46 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
 
             [x,y,z]=sphere;
             to_remove=[];
-            if(~isempty(obj.brainSurf))
+            if(~isempty(obj.brainSurf) && ~isempty(obj.volProps.Centroid))
                 [k,d]=dsearchn(obj.ReducedModel.vertices,obj.ReducedT,reshape(obj.Volume.Vox2Ras(obj.volProps.Centroid(:,1:3)),[],3),-1);
             else
-                k=ones(size(bj.volProps.Centroid,1),1);
+                k=ones(size(obj.volProps.Centroid,1),1);
             end
+            rem_centroids=[];
             for i=1:size(obj.volProps.BoundingBox,1)
                 %obj.elPatches{i}=plotEllipse(obj.ax3D,obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3)),obj.volProps.BoundingBox(i,4:6)/2);
                 
                 
-                patch_center=obj.Volume.Vox2Ras(obj.volProps.Centroid(i,1:3))';
+                
                 if(~isempty(obj.brainSurf))
                     %k=dsearchn(Mf.vertices,T,patch_center,-1);
                     
-                    if(k(i) == -1 && d(i) > 10)
+                    if(k(i) == -1 && d(i) > 1.5)
                         patch_center=[];
+                        rem_centroids(end+1)=i;
                     end
-                else
-
                 end
-                if(~isempty(patch_center))
+            end
+            obj.volProps(rem_centroids,:)=[];
+            if size(obj.volProps.BoundingBox,1) > 1000
+                warning('Only first 1000 segments displayed');
+                obj.volProps(1001:end,:)=[];
+
+            end
+            for i=1:size(obj.volProps.BoundingBox,1)
+    
+                    patch_center=obj.Volume.Vox2Ras(obj.volProps.Centroid(i,1:3))';
                     end_idx=length(obj.elPatches)+1;
                     hold(obj.ax3D,'on');
+
                     obj.elPatches{end_idx}=surf(obj.ax3D,x+patch_center(1),y+patch_center(2),z+patch_center(3),'ButtonDownFcn',@obj.callbackClickA3DPoint,'UserData',end_idx,'EdgeColor','none','FaceAlpha',1,'FaceLighting','none'); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
                     %scatter3(obj.ax3D,patch_center(1),patch_center(2),patch_center(3),60,'+','LineWidth',2); %plotcube(obj.ax3D,obj.volProps.BoundingBox(i,4:6).*obj.Volume.Image.hdr.dime.pixdim(2:4),obj.Volume.Vox2Ras(obj.volProps.BoundingBox(i,1:3))',1,[1 0 0],@obj.callbackClickA3DPoint,i);
 
                     material(obj.elPatches{end_idx},'dull');
                     set(obj.elPatches{end_idx},'clipping','off');
-                else
-                    to_remove(end+1)=i;
-                end
+
        
             end
-            obj.volProps(to_remove,:)=[];
             toc
             hold(obj.ax3D,'off');
             obj.colorPatches();
@@ -496,6 +518,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                     end
                 end
             end
+    
             
             if(obj.uiListView.Value > 0)
                 elMask=obj.elLocations.DefinitionIdentifier == obj.uiListView.Value;
@@ -503,6 +526,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                 
                 
                 for i=1:size(locs,1) %check if loc is close enough to a patch
+
                     pIdx=obj.findPrevSelectedPoint(pointCloud(rasCentroids),locs(i,:));
                     if(~isempty(pIdx))
                         patches=obj.elPatches{pIdx};
@@ -510,7 +534,11 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
                             patches(ip).FaceColor=[0 1 0];
                         end
                     else
-                        warning('No Location found that is close enough');
+                        disp('No Location found that is close enough');
+                        hold(obj.ax3D,'on');
+                        [x,y,z]=sphere;
+                        surf(obj.ax3D,x+locs(i,1),y+locs(i,2),z+locs(i,3),'EdgeColor','none','FaceAlpha',1,'FaceLighting','none','FaceColor',[1 1 0]);
+                        hold(obj.ax3D,'off');
                     end
                 end
             end
@@ -520,7 +548,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             if(~exist('locs','var'))
                 locs=obj.volProps.Centroid;
             end
-            rasCentroids=zeros(size(locs));
+            rasCentroids=zeros(size(locs,1),3);
             for i=1:size(locs,1)
                 rasCentroids(i,:)=obj.Volume.Vox2Ras(locs(i,:));
             end
