@@ -68,6 +68,33 @@ classdef Surface < AData & IFileLoader
             savepath=Save@AData(obj,path);
             obj.Path=buffPath;
         end
+
+        function surfaceOut=GetSubSurfaceById(obj,id,searchComplex)
+            surfaceOut=copy(obj);
+            surfaceOut.Path='';
+            surfaceOut.Model.vert=surfaceOut.Model.vert(surfaceOut.VertId == id,:);
+            CCold=find(surfaceOut.VertId == id);
+            CCnew=1:size(CCold,1);
+
+
+            newtri=surfaceOut.Model.tri(surfaceOut.TriId == id,:);
+            if(searchComplex)
+                surfaceOut.Model.tri=newtri;
+               
+                to_replace=unique(newtri);
+                for i=1:size(to_replace,1)
+                    surfaceOut.Model.tri(to_replace(i) == surfaceOut.Model.tri)=CCnew(CCold == to_replace(i));
+                end
+            else
+                newtri=newtri-(min(newtri(:))-1);
+                surfaceOut.Model.tri=newtri;
+            end
+           % indices = ismember(to_replace, CCold);
+
+            surfaceOut.Annotation=surfaceOut.Annotation(surfaceOut.VertId == id);
+            surfaceOut.VertId=surfaceOut.VertId(surfaceOut.VertId == id);
+            surfaceOut.TriId=surfaceOut.TriId(surfaceOut.TriId == id);
+        end
         
          function value=get.TriId(obj)
              if(~isempty(obj.Model) && isfield(obj.Model,'triId'))

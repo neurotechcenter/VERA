@@ -24,7 +24,11 @@ classdef Model3DView < AView & uix.Grid
             obj.axModel=axes('Parent',uicontainer('Parent',tmp_Grid),'Units','normalized','Color','k','ActivePositionProperty', 'Position');
             set(tmp_Grid,'BackgroundColor','k');
             set(obj,'BackgroundColor','k');
-            obj.cSlider=uicontrol('Parent',obj,'Style','slider','Min',0,'Max',1,'Value',1);
+            sliderGrid=uix.Grid('Parent',obj);
+            uicontrol('Parent',sliderGrid,'Style','text','String','Opacity');
+            obj.cSlider=uicontrol('Parent',sliderGrid,'Style','slider','Min',0,'Max',1,'Value',1);
+            sliderGrid.Widths=[60,-1];
+            sliderGrid.Heights=[15];
             addlistener(obj.cSlider, 'Value', 'PostSet',@obj.changeAlpha);
             obj.Widths=[-1];
             obj.Heights=[-1, 15];

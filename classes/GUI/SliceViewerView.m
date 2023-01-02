@@ -30,7 +30,7 @@ classdef SliceViewerView < SliceViewerXYZ & AView
             
             vGridC.Heights=[20,20];
             obj.settingsGrid=uix.VBox('Parent',vGrid);
-            vGrid.Heights=[-1,-1];
+            vGrid.Heights=[60,-1];
             %addlistener(evtobj,'Component','PostSet',@PropListener.handlePropEvents);
              try
                 uix.set( obj, varargin{:} )
@@ -101,13 +101,19 @@ classdef SliceViewerView < SliceViewerXYZ & AView
         end
         
         function panel=createViewPanel(obj,parent,name,idx)
-            boxp=uix.Panel('Parent',parent,'Title',name);
-            panel=uix.HBox('Parent',boxp);
+            vb=uix.VBox('Parent',parent);
+            boxp=uix.Panel('Parent',vb,'Title',name);
+            panel=uix.VBox('Parent',boxp);
+            hpanel=uix.HBox('Parent',panel);
 
-            uicontrol('Parent',panel,'Style','text','String','Opacity');
-            opSlider=uicontrol('Parent',panel,'Style','slider','Min',0,'Max',1,'Value',1,'UserData',idx);
+            uicontrol('Parent',hpanel,'Style','text','String','Opacity');
+            opSlider=uicontrol('Parent',hpanel,'Style','slider','Min',0,'Max',1,'Value',1,'UserData',idx);
             addlistener(opSlider, 'Value', 'PostSet',@(a,b)obj.sliderChanged(a,b,idx));
-            panel.Widths=[80,-80];
+            hpanel.Widths=[80,-80];
+            %panel.Heights=[40];
+            
+            panel.Heights=[20];
+            vb.Heights=[40];
         end
         
         function sliderChanged(obj,source,b,idx)

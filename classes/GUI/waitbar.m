@@ -28,7 +28,7 @@ try
         
        
 catch e
-        disp(e.message);
+       % disp(e.message);
         f=getoriginalFunHandle();
         h=f(x,whichbar, varargin{:});
 end

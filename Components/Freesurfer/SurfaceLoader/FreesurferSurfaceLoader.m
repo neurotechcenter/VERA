@@ -6,6 +6,8 @@ classdef FreesurferSurfaceLoader < AComponent
         SphereIdentifier
         AnnotationType
         SegmentationPathIdentifier
+        SurfaceType
+        LoadSphere
     end
     
     properties (Dependent, Access = protected)
@@ -24,13 +26,17 @@ classdef FreesurferSurfaceLoader < AComponent
         function obj = FreesurferSurfaceLoader()
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='Sphere';
+            obj.SurfaceType='pial';
             obj.AnnotationType='aparc';
             obj.SegmentationPathIdentifier='SegmentationPath';
+            obj.LoadSphere=1;
         end
         function Publish(obj)
             obj.AddOutput(obj.SurfaceIdentifier,'Surface');
-            obj.AddOutput(obj.LeftSphereIdentifier,'Surface');
-            obj.AddOutput(obj.RightSphereIdentifier,'Surface');
+            if(obj.LoadSphere)
+                obj.AddOutput(obj.LeftSphereIdentifier,'Surface');
+                obj.AddOutput(obj.RightSphereIdentifier,'Surface');
+            end
             obj.AddOptionalInput(obj.SegmentationPathIdentifier,'PathInformation',true);
             obj.RequestDependency('Freesurfer','folder');
             if(ispc)
@@ -50,7 +56,7 @@ classdef FreesurferSurfaceLoader < AComponent
             end
         end
         
-        function [surf,lsphere,rsphere] = Process(obj,optInp)
+        function varargout = Process(obj,optInp)
 
             if(nargin > 1) %segmentation path exists
                 segmentationPath=optInp.Path;
@@ -64,23 +70,36 @@ classdef FreesurferSurfaceLoader < AComponent
             end
 
             freesurferPath=obj.GetDependency('Freesurfer');
-            [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType);
-            surf=obj.CreateOutput(obj.SurfaceIdentifier);
-            surf.Model=surf_model.Model;
-            surf.Annotation=surf_model.Annotation;
-            surf.AnnotationLabel=surf_model.AnnotationLabel;
-
-
-            lsphere=obj.CreateOutput(obj.LeftSphereIdentifier);
-            lsphere.Model=lsphere_model.Model;
-            lsphere.Annotation=lsphere_model.Annotation;
-            lsphere.AnnotationLabel=lsphere_model.AnnotationLabel;
-
-
-            rsphere=obj.CreateOutput(obj.RightSphereIdentifier);
-            rsphere.Model=rsphere_model.Model;
-            rsphere.Annotation=rsphere_model.Annotation;
-            rsphere.AnnotationLabel=rsphere_model.AnnotationLabel;
+            if(obj.LoadSphere)
+                [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType,obj.SurfaceType);
+                surf=obj.CreateOutput(obj.SurfaceIdentifier);
+                surf.Model=surf_model.Model;
+                surf.Annotation=surf_model.Annotation;
+                surf.AnnotationLabel=surf_model.AnnotationLabel;
+                
+    
+                lsphere=obj.CreateOutput(obj.LeftSphereIdentifier);
+                lsphere.Model=lsphere_model.Model;
+                lsphere.Annotation=lsphere_model.Annotation;
+                lsphere.AnnotationLabel=lsphere_model.AnnotationLabel;
+    
+    
+                rsphere=obj.CreateOutput(obj.RightSphereIdentifier);
+                rsphere.Model=rsphere_model.Model;
+                rsphere.Annotation=rsphere_model.Annotation;
+                rsphere.AnnotationLabel=rsphere_model.AnnotationLabel;
+                varargout{1}=surf;
+                varargout{2}=lsphere;
+                varargout{3}=rsphere;
+            else
+                surf_model=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType,obj.SurfaceType);
+                surf=obj.CreateOutput(obj.SurfaceIdentifier);
+                surf.Model=surf_model.Model;
+                surf.Annotation=surf_model.Annotation;
+                surf.AnnotationLabel=surf_model.AnnotationLabel;
+                varargout{1}=surf;
+    
+            end
 
         end
     end

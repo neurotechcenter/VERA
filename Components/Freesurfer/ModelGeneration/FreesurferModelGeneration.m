@@ -7,6 +7,7 @@ classdef FreesurferModelGeneration < AComponent
         SphereIdentifier %Output Sphere Surface Volume Identifier (will start with L_ and R_ )
         AnnotationType
         SegmentationPathIdentifier
+        SurfaceType
     end
      properties (Dependent, Access = protected)
         LeftSphereIdentifier
@@ -21,6 +22,7 @@ classdef FreesurferModelGeneration < AComponent
             obj.SphereIdentifier='Sphere';
             obj.AnnotationType='aparc';
             obj.SegmentationPathIdentifier='SegmentationPath';
+            obj.SurfaceType='pial';
         end
         
         function value=get.LeftSphereIdentifier(obj)
@@ -83,7 +85,7 @@ classdef FreesurferModelGeneration < AComponent
                     end
                 end
                 
-                [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType);
+                [surf_model,lsphere_model,rsphere_model]=loadFSModelFromSubjectDir(freesurferPath,segmentationPath,GetFullPath(obj.ComponentPath),obj.AnnotationType,obj.SurfaceType);
                 surf=obj.CreateOutput(obj.SurfaceIdentifier);
                 surf.Model=surf_model.Model;
                 surf.Annotation=surf_model.Annotation;

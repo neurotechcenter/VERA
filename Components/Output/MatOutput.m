@@ -45,15 +45,7 @@ classdef MatOutput < AComponent
             electrodeDefinition.Definition=eDef.Definition;
             electrodeDefinition.Annotation=eLocs.Annotation;
             electrodeDefinition.Label=eLocs.Label;
-            electrodeNames=cell(size(eLocs.DefinitionIdentifier,1),1);
-            idx=1;
-            order=unique(eLocs.DefinitionIdentifier,'stable');
-            for i=1:length(order)
-                for ii=1:eDef.Definition(order(i)).NElectrodes
-                    electrodeNames{idx}=[eDef.Definition(order(i)).Name num2str(ii)];
-                    idx=idx+1;
-                end
-            end
+            electrodeNames=eLocs.GetElectrodeNames(eDef);
             electrodeDefinition.DefinitionIdentifier=eLocs.DefinitionIdentifier;
             tala=struct('electrodes',eLocs.Location,'activations',zeros(size(eLocs.Location,1),1),'trielectrodes',eLocs.Location);
             vcontribs = [];

@@ -10,6 +10,21 @@ classdef ElectrodeLocation < PointSet
         function obj = ElectrodeLocation()
             obj.DefinitionIdentifier=zeros(1,0,'uint32');
         end
+
+        function electrodeNames= GetElectrodeNames(obj,eDef)
+            if(~isObjectTypeOf(eDef,'ElectrodeDefinition'))
+                error("Input is expected to be of type ElectrodeDefinition");
+            end
+            electrodeNames=cell(size(obj.DefinitionIdentifier,1),1);
+            idx=1;
+            order=unique(obj.DefinitionIdentifier,'stable');
+            for i=1:length(order)
+                for ii=1:eDef.Definition(order(i)).NElectrodes
+                    electrodeNames{idx}=[eDef.Definition(order(i)).Name num2str(ii)];
+                    idx=idx+1;
+                end
+            end
+        end
         
 
         function RemoveWithIdentifier(obj, identifier)
