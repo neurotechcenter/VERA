@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Adamek"
+  given-names: "Markus"
+  orcid: "https://orcid.org/0000-0001-8519-9212"
+- family-names: "Swift"
+  given-names: "James, Robert"
+  orcid: "https://orcid.org/0000-0002-3482-4388"
+- family-names: "Brunner"
+  given-names: "Peter"
+  orcid: "https://orcid.org/0000-0002-2588-2754"
+title: "VERA - A Versatile Electrode Localization Framework"
+version: 1.0.0
+doi: 10.5281/zenodo.7486842
+date-released: 2022-12-27
+url: "https://github.com/neurotechcenter/VERA"

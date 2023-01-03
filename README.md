@@ -1,4 +1,4 @@
-# VERA
+# VERA [![DOI](https://zenodo.org/badge/265023008.svg)](https://zenodo.org/badge/latestdoi/265023008)
 ***V***ersatile ***E***lectrode Localization F***ra***mework was built to simplify electrode localization in ECoG and sEEG. As more and more invasive electrophysiological techniques become available, so do algorithms to make localization as accurate and seamless as possible. Unfortunately, a lot of these methods come with their own tool, making it difficult to compare approaches or unify data structures.
 
 VERA was specifically built to solve this problem. The framework allows other tools to be integrated into existing pipelines without changing the localization pipeline.
