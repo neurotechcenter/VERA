@@ -11,25 +11,40 @@ classdef inflatablescatter3 < inflatableobject
         function obj = inflatablescatter3(varargin)
             %   inflatablescatter3 Creates a new scatter3 plot with the
             %   ability to morph between two point clouds
-            % Call as:
+            % Usage:
             %   inflatablescatter3(xyz2,x,y,z,...)
             %   xyz2 - Nx3 matrix of the point cloud which will be morphed
             %   x,y,z ... Nx1 matrix of points
             %
             %   or
+            %
             %   inflatablescatter3(o,x,y,z,...)
-            %   o - inflatable object to which scatter 3 will be linked
+            %   o - inflatable object to which scatter 3 will be linked,
             %   x,y,z - x,y,z coordinate of the scatter data, for morphing
             %   closest point in xyz1 of o will be used to determine
             %   morphing trajectory
+            %   or
+            %
+            %   inflatablescatter3(o,xyz2,x,y,z,...)
+            %   o - inflatable object to which scatter 3 will be linked,
+            %   xyz2 - inflated coordiates
+            %   x,y,z - x,y,z coordinate of the scatter data for morphing
+            %   (uninflated coordinates)
             % See also scatter3
             if(isa(varargin{1},'inflatableobject'))
                 sconstructorvars{1}=varargin{1};
-                xyz1=[varargin{2}(:) varargin{3}(:) varargin{4}(:)];
+                if(size(varargin{2},2) == 3)
+                    xyz2=varargin{2};
+                    xyz1=[varargin{3}(:) varargin{4}(:) varargin{5}(:)];
+                    start=3;
+                else
+                    xyz1=[varargin{2}(:) varargin{3}(:) varargin{4}(:)];
+                    [~,I]=minDistance(xyz1,varargin{1}.xyz1);
+                    xyz2=varargin{1}.xyz2(I,:);
+                    start=2;
+                end
                 sconstructorvars{2}=xyz1;
-                [~,I]=minDistance(xyz1,varargin{1}.xyz1);
-                sconstructorvars{3}=varargin{1}.xyz2(I,:);
-                start=2;
+                sconstructorvars{3}=xyz2;
             else
                 sconstructorvars{1}=[varargin{2}(:) varargin{3}(:) varargin{4}(:)];
                 sconstructorvars{2}=varargin{1};
@@ -42,13 +57,7 @@ classdef inflatablescatter3 < inflatableobject
             
             obj.hScatter=scatter3(varargin{start:end});
 
-            allprops = properties(obj.hScatter);
-            %forward all patch properties to inflatable patch class
-            for i=1:numel(allprops)
-                p = addprop(obj,allprops{i});
-                p.SetMethod=@(x,y)set(obj.hPatch,allprops{i},y); 
-                p.GetMethod=@(x)get(obj.hScatter,allprops{i}); 
-            end
+            obj.forwardNestProperties(obj.hScatter);
         end
     end
 

@@ -38,13 +38,8 @@ classdef inflatablepatch < inflatableobject
                 end
                 obj@inflatableobject(sconstructorvars{:});
                 obj.hPatch=patch('faces',T,'vertices',obj.xyz1,varargin{start:end});
-                allprops = properties(obj.hPatch);
-                %forward all patch properties to inflatable patch class
-                for i=1:numel(allprops)
-                    p = addprop(obj,allprops{i});
-                    p.SetMethod=@(x,y)set(obj.hPatch,allprops{i},y); 
-                    p.GetMethod=@(x)get(obj.hPatch,allprops{i}); 
-                end
+                obj.forwardNestProperties(obj.hPatch);
+
             end
             
         end

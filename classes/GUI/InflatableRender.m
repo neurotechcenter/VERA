@@ -58,11 +58,20 @@ classdef InflatableRender < handle & uix.Grid
                 hold(obj.axModel,'on');
                 d=minDistance(val,obj.vSurf.xyz1);
                 val=val(d < obj.InclusionRadius,:);
-                obj.vElectrodeSurface=inflatablescatter3(obj.vSurf,val(:,1), ...
-                val(:,2), ...
-                val(:,3),80,'filled','Parent',obj.axModel,'MarkerEdgeColor','k');%,'ButtonDownFcn',@obj.showDataTip);
+                if(isempty(val))
+                    return;
+                end
+                names=names(d < obj.InclusionRadius);
+                obj.vElectrodeSurface=inflatablescatter3(obj.vSurf, ...
+                val(:,1),val(:,2), val(:,3), ...
+                80,'filled','Parent',obj.axModel,'MarkerEdgeColor','k');%,'ButtonDownFcn',@obj.showDataTip);
+                for i=1:length(names)
+                    inflatabletext(obj.vElectrodeSurface,...
+                    val(i,1),val(i,2), val(i,3),...
+                    names{i},'Interpreter','none','Parent',obj.axModel,'FontSize',14,'Color','w');
+                end
                 hold(obj.axModel,'off');
-                obj.vElectrodeSurface.DataTipTemplate.DataTipRows(2:end)=[];
+                obj.vElectrodeSurface.DataTipTemplate.DataTipRows(2:end)=[]; % TODO - fix bug causing datatip to not work before 3D model was rotated
                 obj.vElectrodeSurface.DataTipTemplate.DataTipRows(1) = dataTipTextRow('',names);
                 obj.vElectrodeSurface.DataTipTemplate.Interpreter='none';
             else

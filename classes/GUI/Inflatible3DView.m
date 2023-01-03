@@ -57,7 +57,7 @@ classdef Inflatible3DView < AView & uix.Grid
                 %figure,plot3DModel(gca,surface.GetSubSurfaceById(2).Model);
                 obj.leftInflatableRender.SetSurfaces(surface.GetSubSurfaceById(1,false),obj.AvailableData(obj.LeftSphereIdentifier));
                 obj.rightInflatableRender.SetSurfaces(surface.GetSubSurfaceById(2,false),obj.AvailableData(obj.RightSphereIdentifier));
-            end
+            
             if(isKey(obj.AvailableData,obj.ElectrodeLocationIdentifier))
                 eloc=obj.AvailableData(obj.ElectrodeLocationIdentifier);
                 if(isKey(obj.AvailableData,obj.ElectrodeDefinitionIdentifier))
@@ -70,9 +70,10 @@ classdef Inflatible3DView < AView & uix.Grid
                 obj.leftInflatableRender.InclusionRadius=obj.InclusionRadius;
                 obj.rightInflatableRender.InclusionRadius=obj.InclusionRadius;
                 for idx=unique(eloc.DefinitionIdentifier)'
-                    obj.leftInflatableRender.AddElectrodeLocations(eloc.Location(eloc.DefinitionIdentifier == idx,:),elNames(eloc.DefinitionIdentifier == idx,:));
-                    obj.rightInflatableRender.AddElectrodeLocations(eloc.Location(eloc.DefinitionIdentifier == idx,:),elNames(eloc.DefinitionIdentifier == idx,:));
+                    obj.leftInflatableRender.AddElectrodeLocations(eloc.Location(eloc.DefinitionIdentifier == idx,:),num2cell(num2str((1:sum(eloc.DefinitionIdentifier == idx))'),2));
+                    obj.rightInflatableRender.AddElectrodeLocations(eloc.Location(eloc.DefinitionIdentifier == idx,:),num2cell(num2str((1:sum(eloc.DefinitionIdentifier == idx))'),2));
                 end
+            end
             end
         end
     end
