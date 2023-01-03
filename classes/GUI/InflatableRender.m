@@ -90,6 +90,7 @@ classdef InflatableRender < handle & uix.Grid
 
 
         function SetSurfaces(obj,surface, inflated_surface)
+            hold(obj.axModel,'off');
             [annotation_remap,cmap,name] = createColormapFromAnnotations(surface);
             obj.vSurf=inflatablesurf(surface.Model.tri,surface.Model.vert,inflated_surface.Model.vert,annotation_remap, ...
                             'CDataMapping', 'direct',...
@@ -97,6 +98,7 @@ classdef InflatableRender < handle & uix.Grid
                             'FaceLighting','gouraud',...
                             'BackFaceLighting','unlit','AmbientStrength',1,'Parent',obj.axModel);
             colormap(obj.axModel,cmap);
+            obj.updateInflation();
 
 
         end

@@ -39,6 +39,7 @@ classdef inflatablepatch < inflatableobject
                 obj@inflatableobject(sconstructorvars{:});
                 obj.hPatch=patch('faces',T,'vertices',obj.xyz1,varargin{start:end});
                 obj.forwardNestProperties(obj.hPatch);
+                obj.updateInflation();
 
             end
             

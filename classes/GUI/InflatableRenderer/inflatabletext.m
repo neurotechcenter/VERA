@@ -57,6 +57,7 @@ classdef inflatabletext < inflatableobject
             obj@inflatableobject(sconstructorvars{:});
             obj.hText=text(varargin{start:end});
             obj.forwardNestProperties(obj.hText);
+            obj.updateInflation();
         
         end
         

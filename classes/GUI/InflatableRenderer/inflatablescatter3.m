@@ -58,6 +58,7 @@ classdef inflatablescatter3 < inflatableobject
             obj.hScatter=scatter3(varargin{start:end});
 
             obj.forwardNestProperties(obj.hScatter);
+            obj.updateInflation();
         end
     end
 
