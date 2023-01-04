@@ -61,7 +61,7 @@ classdef InflatableRender < handle & uix.Grid
                 if(isempty(val))
                     return;
                 end
-                names=names(d < obj.InclusionRadius);
+                names=names(d <= obj.InclusionRadius);
                 obj.vElectrodeSurface=inflatablescatter3(obj.vSurf, ...
                 val(:,1),val(:,2), val(:,3), ...
                 80,'filled','Parent',obj.axModel,'MarkerEdgeColor','k');%,'ButtonDownFcn',@obj.showDataTip);

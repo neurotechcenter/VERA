@@ -1,7 +1,17 @@
 classdef inflatablepatch < inflatableobject
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
+            %inflatablepatch - Patchobject which can be moved between two
+            %point clouds XYZ1 and XYZ2
+            %   Usage:
+            %   inflatablepatch(T,XYZ1,XYZ2,....)
+            %   T - connectivity matrix
+            %   XYZ1 - Pointcloud 1
+            %   XYZ2 - Pointcloud 2  
+            %   or
+            %   inflatablepatch(inflatablepatchobj,T,XYZ1,XYZ2,....)
+            %   inflatablepatchobj - binds the inflatablepatchobjs together
+            %   T - connectivity matrix
+            %   XYZ1 - Pointcloud 1
+            %   XYZ2 - Pointcloud 2  
 
 
     properties (Access = protected)

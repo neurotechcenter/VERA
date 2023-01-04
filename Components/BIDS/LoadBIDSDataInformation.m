@@ -64,7 +64,7 @@ classdef LoadBIDSDataInformation < AComponent
                 locs(any(isnan(locs),2),:)=[];
                 N=size(locs,1);
                 spacing=mean(diag(pdist2(locs(1:end-1,:),locs(2:end,:))));
-                idx=eldef.AddDefinition(type,name,N,spacing,30);
+                idx=eldef.AddDefinition(type,name,N,spacing,3);
                 ellocs.AddWithIdentifier(idx,locs);
 
             end

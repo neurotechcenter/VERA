@@ -8,6 +8,7 @@ classdef Inflatible3DView < AView & uix.Grid
         ElectrodeLocationIdentifier
         ElectrodeDefinitionIdentifier
         InclusionRadius
+        InclusionLabels
     end
 
     properties (Dependent, Access = protected)
@@ -23,10 +24,11 @@ classdef Inflatible3DView < AView & uix.Grid
     methods
         function obj = Inflatible3DView(varargin)
             obj.SurfaceIdentifier='Surface';
-            obj.SphereIdentifier='Sphere';
+            obj.SphereIdentifier='InflatedSurface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
             obj.ElectrodeDefinitionIdentifier='ElectrodeDefinition';
             obj.InclusionRadius=6;
+            obj.InclusionLabels={'*'};
            % obj.axModel=axes('Parent',obj,'Units','normalized','Color','k','ActivePositionProperty', 'Position');
             obj.leftInflatableRender=InflatableRender('Parent',uicontainer('Parent',obj),'ShowColorBars',false);
             obj.rightInflatableRender=InflatableRender('Parent',uicontainer('Parent',obj));
@@ -51,26 +53,56 @@ classdef Inflatible3DView < AView & uix.Grid
 
     methods(Access = protected)
         function dataUpdate(obj)
-            if(isKey(obj.AvailableData,obj.SurfaceIdentifier) && isKey(obj.AvailableData,obj.LeftSphereIdentifier))
-                surface=obj.AvailableData(obj.SurfaceIdentifier);
-                %figure,plot3DModel(gca,surface.GetSubSurfaceById(1).Model);
-                %figure,plot3DModel(gca,surface.GetSubSurfaceById(2).Model);
-                obj.leftInflatableRender.SetSurfaces(surface.GetSubSurfaceById(1),obj.AvailableData(obj.LeftSphereIdentifier));
-                obj.rightInflatableRender.SetSurfaces(surface.GetSubSurfaceById(2),obj.AvailableData(obj.RightSphereIdentifier));
+            if(~isKey(obj.AvailableData,obj.SurfaceIdentifier) || ~isKey(obj.AvailableData,obj.LeftSphereIdentifier))
+                return;
             end
-            if(isKey(obj.AvailableData,obj.ElectrodeLocationIdentifier))
-                eloc=obj.AvailableData(obj.ElectrodeLocationIdentifier);
-                if(isKey(obj.AvailableData,obj.ElectrodeLocationIdentifier))
-                else
-                    elNames={};
-                end
-                obj.leftInflatableRender.InclusionRadius=obj.InclusionRadius;
-                obj.rightInflatableRender.InclusionRadius=obj.InclusionRadius;
+            surface=obj.AvailableData(obj.SurfaceIdentifier);
+            %figure,plot3DModel(gca,surface.GetSubSurfaceById(1).Model);
+            %figure,plot3DModel(gca,surface.GetSubSurfaceById(2).Model);
+            obj.leftInflatableRender.SetSurfaces(surface.GetSubSurfaceById(1,false),obj.AvailableData(obj.LeftSphereIdentifier));
+            obj.rightInflatableRender.SetSurfaces(surface.GetSubSurfaceById(2,false),obj.AvailableData(obj.RightSphereIdentifier));
+            
+            if(~isKey(obj.AvailableData,obj.ElectrodeLocationIdentifier))
+                return;
+            end
 
-                obj.leftInflatableRender.SetElectrodeLocations(eloc.Location,elNames);
-                obj.rightInflatableRender.SElectrodeLocations(eloc.Location,elNames);
+            eloc=obj.AvailableData(obj.ElectrodeLocationIdentifier);
+%             if(isKey(obj.AvailableData,obj.ElectrodeDefinitionIdentifier))
+%                 eDef=obj.AvailableData(obj.ElectrodeDefinitionIdentifier);
+%                 elNames=eloc.GetElectrodeNames(eDef);
+%             else
+%                 elNames={};
+%             end
+
+
+            obj.leftInflatableRender.InclusionRadius=obj.InclusionRadius;
+            obj.rightInflatableRender.InclusionRadius=obj.InclusionRadius;
+            for idx=unique(eloc.DefinitionIdentifier)'
+                elocs=eloc.Location(eloc.DefinitionIdentifier == idx,:);
+                elocnames=num2cell(num2str((1:sum(eloc.DefinitionIdentifier == idx))'),2); % simple numbering
+                obj.AddLabeledElectrodes(elocs,labels,elocnames);
             end
         end
+
+        function AddLabeledElectrodes(obj,elocs,labels,elocnames)
+                if(size(obj.InclusionLabels,2) > 2)
+                    error('InclusionLabels must be a Nx1 or Nx2 cell array');
+                end
+                if(size(obj.InclusionLabels,2)== 2) %if Inclusion labels is Nx2, we have individual label restriction for each hemispheres 
+
+                else
+                    mask=ones(size(elocs,1),1,'logical' == 2);
+                    for ich=1:size(elocs,1)
+                        mask(ich)=any(~cellfun(@isempty,(regexp(labels{ich}, regexptranslate('wildcard', obj.InclusionLabels),'match'))));
+                    end
+                    elocs=elocs(mask,:);
+                    elocnames=elocnames(mask);
+                    obj.leftInflatableRender.AddElectrodeLocations(elocs,elocnames);
+                    obj.leftInflatableRender.AddElectrodeLocations(elocs,elocnames);
+                end
+
+        end
+    
     end
 
 

@@ -1,6 +1,26 @@
 classdef inflatablescatter3 < inflatableobject
-    %INFLATABLESCATTER3 Creates a scatter object which can be morphed between two
-    %   point clouds
+            %   inflatablescatter3 Creates a new scatter3 plot with the
+            %   ability to morph between two point clouds
+            % Usage:
+            %   inflatablescatter3(xyz2,x,y,z,...)
+            %   xyz2 - Nx3 matrix of the point cloud which will be morphed
+            %   x,y,z ... Nx1 matrix of points
+            %
+            %   or
+            %
+            %   inflatablescatter3(o,x,y,z,...)
+            %   o - inflatable object to which scatter 3 will be linked,
+            %   x,y,z - x,y,z coordinate of the scatter data, for morphing
+            %   closest point in xyz1 of o will be used to determine
+            %   morphing trajectory
+            %   or
+            %
+            %   inflatablescatter3(o,xyz2,x,y,z,...)
+            %   o - inflatable object to which scatter 3 will be linked,
+            %   xyz2 - inflated coordiates
+            %   x,y,z - x,y,z coordinate of the scatter data for morphing
+            %   (uninflated coordinates)
+            % See also scatter3
     
 
     properties (SetAccess = protected)
