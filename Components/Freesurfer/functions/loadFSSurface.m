@@ -14,8 +14,8 @@ if(ispc)
     pathToLhPial=resolveWSLSymlink(fullfile(segmentationPath,['surf/lh.' surfacetype fallbackSuffix]),subsyspath);
     pathToRhPial=resolveWSLSymlink(fullfile(segmentationPath,['surf/rh.' surfacetype fallbackSuffix]),subsyspath);
 else
-    pathToLhPial=resolveSymlink(fullfile(segmentationPath,['surf/lh.' pialfile fallbackSuffix]));
-    pathToRhPial=resolveSymlink(fullfile(segmentationPath,['surf/rh.' pialfile fallbackSuffix]));
+    pathToLhPial=resolveSymlink(fullfile(segmentationPath,['surf/lh.' surfacetype fallbackSuffix]));
+    pathToRhPial=resolveSymlink(fullfile(segmentationPath,['surf/rh.' surfacetype fallbackSuffix]));
 end
 
     [lh.vert, lh.tri] = read_surf(pathToLhPial);
