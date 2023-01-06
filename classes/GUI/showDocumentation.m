@@ -8,18 +8,18 @@ h=annotation(grd,'textbox','Interpreter','latex','string','','BackgroundColor','
 
 
 %%create configured component info:
-outstring=["\textbf{ "+ string(class(comp))+  "} "];
+outstring="\textbf{"+ string(class(comp))+  "} ";
 outstring=[outstring "\newline "];
 outstring=[outstring help('comp')];
 if(~isempty(comp.Inputs))
-outstring=[outstring "Input Configuration: \\ "];
-outstring=[outstring "\begin{tabular}{c | c} "];
-outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
-
-for i=1:length((comp.Inputs))
-    outstring(end)=outstring(end)+ comp.Inputs{i} + " & " + comp.inputMap(comp.Inputs{i}) + "\\";
-end
-outstring(end)=outstring(end)+ "\end{tabular}";
+    outstring=[outstring "Input Configuration: \\ "];
+    outstring=[outstring "\begin{tabular}{c | c} "];
+    outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
+    
+    for i=1:length((comp.Inputs))
+        outstring(end)=outstring(end)+ strrep(comp.Inputs{i},'_','\_') + " & " + strrep(comp.inputMap(comp.Inputs{i}),'_','\_') + " \\ ";
+    end
+    outstring(end)=outstring(end)+ " \end{tabular}";
 end
 
 % --- Optional Inputs
@@ -30,9 +30,9 @@ if(~isempty(comp.OptionalInputs))
     outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
 
     for i=1:length((comp.OptionalInputs))
-        outstring(end)=outstring(end)+ comp.OptionalInputs{i} + " & " + comp.optionalinputMap(comp.OptionalInputs{i}) + "\\";
+        outstring(end)=outstring(end)+ strrep(comp.OptionalInputs{i},'_','\_') + " & " + strrep(comp.optionalinputMap(comp.OptionalInputs{i}),'_','\_') + "\\";
     end
-    outstring(end)=outstring(end)+ "\end{tabular}";
+    outstring(end)=outstring(end)+ " \end{tabular}";
 end
 % --- Outputs
 if(~isempty(comp.Outputs))
@@ -42,12 +42,14 @@ if(~isempty(comp.Outputs))
     outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
 
     for i=1:length((comp.Outputs))
-        outstring(end)=outstring(end)+ comp.Outputs{i} + " & " + comp.outputMap(comp.Outputs{i}) + "\\";
+        outstring(end)=outstring(end)+ strrep(comp.Outputs{i},'_','\_') + " & " + strrep(comp.outputMap(comp.Outputs{i}),'_','\_') + "\\";
     end
-    outstring(end)=outstring(end)+ "\end{tabular}";
+    outstring(end)=outstring(end)+ " \end{tabular}";
 end
 % ----- add user description for component ---- 
 
 
 h.String = outstring;
 end
+
+
