@@ -21,18 +21,16 @@ classdef Serializable < handle
             obj.nodeName=class(obj);
             obj.ignoreList= {};
         end
-        
-        function c = Serialize(obj,docNode)
-            % Serialize - Adds a the object to the docNode of an xml object
-            % docNode - xml node under which you would like to serialize the object 
-            c=docNode.createElement(obj.nodeName);
-            c.setAttribute('Type',class(obj))
-            
+
+        function p=GetSerializableProperties(obj,protectedList)
+            if(~exist('protectedList','var'))
+                protectedList=[];
+            end
             m=metaclass(obj);
             p={m.PropertyList.Name};
             removeIdx=[];
             for i=1:numel(m.PropertyList) %remove all items which do not have public set/get accessors and are not in the acStorage list
-             if(~any(strcmp(obj.acStorage,m.PropertyList(i).Name)) && (iscell(m.PropertyList(i).GetAccess) ||...
+             if(~any(strcmp(protectedList,m.PropertyList(i).Name)) && (iscell(m.PropertyList(i).GetAccess) ||...
                 iscell(m.PropertyList(i).SetAccess)||...
                 ~strcmp(m.PropertyList(i).GetAccess,'public') ||...
                 ~strcmp(m.PropertyList(i).SetAccess,'public')))
@@ -41,6 +39,15 @@ classdef Serializable < handle
             end
             p(removeIdx)=[];
             p=setdiff(p,obj.ignoreList);
+        end
+        
+        function c = Serialize(obj,docNode)
+            % Serialize - Adds a the object to the docNode of an xml object
+            % docNode - xml node under which you would like to serialize the object 
+            c=docNode.createElement(obj.nodeName);
+            c.setAttribute('Type',class(obj))
+            
+            p=obj.GetSerializableProperties(obj.acStorage);
             for i=1:numel(p)
                 if(~isempty(obj.(p{i})))
                     if(~isa(obj.(p{i}),'char') && isObjectTypeOf(obj.(p{i}),'Serializable'))
