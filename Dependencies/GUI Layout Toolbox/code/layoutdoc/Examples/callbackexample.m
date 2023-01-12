@@ -1,6 +1,6 @@
 function callbackexample()
 
-% Copyright 2009-2013 The MathWorks, Inc.
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 % Create application data
 colorNames = {

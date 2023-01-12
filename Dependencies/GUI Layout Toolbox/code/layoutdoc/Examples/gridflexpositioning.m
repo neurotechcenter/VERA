@@ -1,4 +1,4 @@
-% Copyright 2009-2013 The MathWorks Ltd.
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 f = figure(); 
 

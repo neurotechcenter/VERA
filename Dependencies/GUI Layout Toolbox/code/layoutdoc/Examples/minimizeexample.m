@@ -1,7 +1,7 @@
 function minimizeexample()
 %MINIMIZEEXAMPLE: An example of using the panelbox minimize/maximize
 
-%   Copyright 2010-2013 The MathWorks Ltd.
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 width = 200;
 pheightmin = 20;

@@ -2,8 +2,8 @@
 % This example shows how to use layouts within other layouts to achieve
 % more complex user interface designs with the right mix of variable and
 % fixed sized components.
-%
-% Copyright 2009-2014 The MathWorks Ltd.
+
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 %% Open the window
 % Open a new figure window and remove the toolbar and menus

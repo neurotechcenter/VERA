@@ -3,8 +3,8 @@
 % layouts. The layouts take into account the "ActivePositionProperty" in
 % order to determine whether to set the "Position" or "OuterPosition"
 % (default) property of the axes.
-%
-% Copyright 2009-2013 The MathWorks, Inc.
+
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 %% Open the window
 % Open a new figure window and remove the toolbar and menus

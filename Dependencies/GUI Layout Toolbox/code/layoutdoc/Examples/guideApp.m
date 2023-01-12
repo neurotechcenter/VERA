@@ -20,7 +20,7 @@ function varargout = guideApp(varargin)
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-%   Copyright 2009-2013 The MathWorks Ltd.
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 % Edit the above text to modify the response to help guideApp
 

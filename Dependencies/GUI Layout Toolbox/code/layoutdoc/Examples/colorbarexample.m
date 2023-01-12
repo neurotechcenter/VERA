@@ -2,8 +2,8 @@
 % This example demonstrates how to correctly layout axes that have
 % associated legends or colorbars by grouping them together using a
 % uicontainer.
-%
-% Copyright 2014 The MathWorks, Inc.
+
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 %% Open the window
 % Open a new figure window and remove the toolbar and menus

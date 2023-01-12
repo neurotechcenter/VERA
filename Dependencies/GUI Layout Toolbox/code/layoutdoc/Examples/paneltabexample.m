@@ -2,8 +2,8 @@
 % This example shows how to use tabs within a layout. It also shows how to
 % use the TabPanel Callback property to update other GUI elements when the
 % visible tab is changed.
-%
-% Copyright 2009-2013 The MathWorks, Inc.
+
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 %% Open the window
 % Open a new figure window and remove the toolbar and menus

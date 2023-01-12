@@ -3,8 +3,8 @@
 %   This example opens a simple user-interface with a panel full of
 %   buttons. We can then show/hide the entire panel in one go. Note
 %   that the previous state of the buttons is preserved. 
-%
-%   Copyright 2009-2013 The MathWorks, Inc.
+
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 %% Open a window and add a panel
 fig = figure( 'Name', 'Visible example', ...

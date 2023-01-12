@@ -1,7 +1,7 @@
 function dockexample()
 %DOCKEXAMPLE: An example of using the panelbox dock/undock functionality
 
-%   Copyright 2009-2013 The MathWorks Ltd.
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 % Create the window and main layout
 fig = figure( 'Name', 'Dockable GUI example', ...'

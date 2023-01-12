@@ -9,7 +9,7 @@ function demoBrowser()
 %
 %   See also: <a href="matlab:doc Layouts">Layouts</a>
 
-%   Copyright 2010-2013 The MathWorks, Inc.
+%  Copyright 2009-2020 The MathWorks, Inc.
 
 % Data is shared between all child functions by declaring the variables
 % here (they become global to the function). We keep things tidy by putting
