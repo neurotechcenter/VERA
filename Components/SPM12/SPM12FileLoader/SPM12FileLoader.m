@@ -1,13 +1,12 @@
 classdef SPM12FileLoader < FileLoader
-    %SPM12FILELOADER Summary of this class goes here
-    %   Detailed explanation goes here
+    %SPM12FILELOADER Load DICOM using the SPM12 Converter
     
     properties
         tempFolder
     end
     
     methods
-        function obj = SPM12FileLoader(inputArg1,inputArg2)
+        function obj = SPM12FileLoader()
             %SPM12FILELOADER Construct an instance of this class
             %   Detailed explanation goes here
             obj.tempFolder='niftiConversion';

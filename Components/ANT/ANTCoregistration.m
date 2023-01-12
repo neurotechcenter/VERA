@@ -1,6 +1,8 @@
 classdef ANTCoregistration < AComponent
-    %ANTCOREGISTRATION Summary of this class goes here
-    %   Detailed explanation goes here
+    %ANTCOREGISTRATION This component uses ANTs (https://github.com/ANTsX/ANTs)
+    % to perform rigid, Affine, or nonlinear coregistration
+    % Type specified which coregistration will be perfomed:
+    % acceptable values are Rigid, Affine, Syn
     
     properties
         ReferenceIdentifier

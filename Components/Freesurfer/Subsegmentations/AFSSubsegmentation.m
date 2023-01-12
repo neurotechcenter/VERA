@@ -1,6 +1,6 @@
 classdef (Abstract) AFSSubsegmentation < AComponent
-    %A Summary of this class goes here
-    %   Detailed explanation goes here
+    %AFSSubsegmentation Abstract Class to generate and load
+    % Freesurfer subsegmentations
     
     properties
         VolumeIdentifier

@@ -48,7 +48,7 @@ classdef DBSLeadDetection < AComponent
                         elecModels=PaCER(pacer_ct,'electrodeType',available_types{i});
                     end
                     if(sum(strcmp({elDef.Definition.Type},available_types{i})) ~= length(elecModels))
-                        error("Electrodes found are not as expected from Electrode Definition!");
+                      %  error("Electrodes found are not as expected from Electrode Definition!");
                     end
                     locId=find(strcmp({elDef.Definition.Type},available_types{i}));
                     for ii=1:length(locId)

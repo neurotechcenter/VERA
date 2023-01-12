@@ -1,6 +1,5 @@
 classdef PointSelector3D < AComponent
-    %POINTSELECTOR3D Summary of this class goes here
-    %   Detailed explanation goes here
+    %POINTSELECTOR3D Allows manual definition of points
     
     properties
         PointDefinitionIdentifier

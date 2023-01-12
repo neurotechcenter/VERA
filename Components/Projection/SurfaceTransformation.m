@@ -1,6 +1,5 @@
 classdef SurfaceTransformation < AComponent
-    %SURFACETRANSFORMATION Summary of this class goes here
-    %   Detailed explanation goes here
+    %SURFACETRANSFORMATION Apply Transform matrix to surface vertex coordinates 
     
     properties
         SurfaceIdentifier

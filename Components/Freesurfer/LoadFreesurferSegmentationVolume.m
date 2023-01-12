@@ -1,4 +1,7 @@
 classdef LoadFreesurferSegmentationVolume < AComponent
+    %LoadFreesurferSegmentationVolume Load a segmentation volume from 
+    %a Freesurfer segmentation
+    %
 
     properties
         FSVolume

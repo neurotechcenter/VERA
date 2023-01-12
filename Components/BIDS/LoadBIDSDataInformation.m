@@ -1,5 +1,6 @@
 classdef LoadBIDSDataInformation < AComponent
-    %Loading information for https://doi.org/10.1016/j.brs.2022.02.017
+    %Loading MRI, ElectrodeLocations and ElectrodeDefinitions from
+    % BIDS data
     
     properties
         MRIIdentifier

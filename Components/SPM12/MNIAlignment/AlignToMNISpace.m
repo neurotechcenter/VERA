@@ -1,5 +1,5 @@
 classdef AlignToMNISpace < AComponent
-    %ALIGNTOMNISPACE Summary of this class goes here
+    %ALIGNTOMNISPACE Alignment to MNI Coordinate
     %   based on: https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/spm_anat_normalization-rev.html
     
     properties

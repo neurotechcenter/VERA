@@ -1,5 +1,6 @@
 classdef FreesurferHemisphereLoader < AComponent
-    %FreesurferSurfaceLoader Loads Information from existing Freesurfer segmentation
+    %FreesurferSurfaceLoader Loads surfaces as individual hemispheres
+    % from existing Freesurfer segmentation
     
     properties
         SurfaceIdentifier

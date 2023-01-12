@@ -1,5 +1,6 @@
 classdef FreesurferSurfaceLoader < AComponent
-    %FreesurferSurfaceLoader Loads Information from existing Freesurfer segmentation
+    %FreesurferSurfaceLoader combines pial into a single surface combining
+    %both hemispheres and loads spherical maps
     
     properties
         SurfaceIdentifier
