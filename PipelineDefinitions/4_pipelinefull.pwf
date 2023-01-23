@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="4 pipeline full">
+
+
+    <Component Type="FileLoader">
+        <Identifier>"CT"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+    </Component>
+
+    <Component Type="FileLoader">
+        <Identifier>"MRI"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+    </Component>
+
+    <Component Type="FreesurferSurfaceLoader"/>
+
+    <Component Type="LoadFreesurferSegmentationVolume">
+        <Name>"Load FS Segmentation"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
+    </Component>
+
+    <Component Type="FreesurferHippocampalSegmentation">
+        <Name>"Load Hippocampal subsegmentations"</Name>
+        <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="ImportROSFile"/>
+
+
+
+
+    <Component Type="MoveRASOrigin"/>
+
+    <Component Type="Coregistration"/>
+
+    <Component Type="Coregistration">
+	    <Name>"Coregister ROSA Volume"</Name>
+        <CTIdentifier>"ROSAVolume"</CTIdentifier>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+    </Component>
+
+    <Component Type="ElectrodeTransformation">
+        <Name>"Transform ROSA Electrodes"</Name>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+        <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
+    </Component>
+
+    <Component Type="MatlabElectrodeSelection"/>
+
+    <Component Type="FreesurferElectrodeLocalization"/>
+
+    <Component Type="ReorderElectrodes"/>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to FS segmentation labels"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+    </Component>
+	
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Left Hippocampus"</Name>
+		<VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+	</Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Right Hippocampus"</Name>
+		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+	</Component>
+
+    <Component Type="CalculateDistanceToSurfaceLabel"> 
+        <Name>"Distance to Surface"</Name>
+    </Component>
+
+    <Component Type="ReplaceLabels">
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Right-Cerebral-White-Matter","unknown","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Left-Cerebral-Cortex","Right-Cerebral-Cortex","ctx-lh-insula","ctx-rh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[3,0,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace unknown labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0]</ReplacementRadius>
+    </Component>
+
+    
+
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat"</Name>
+    </Component>
+
+    <Component Type="FreesurferDatExport">
+        <Name>"Write Freesurfer PointSet files"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
+    </Component>
+
+    <Component Type="ReportGenerator">
+	    <Name>"Report Generator MRI"</Name>
+    	<ImageIdentifier>"MRI"</ImageIdentifier>
+    </Component>
+
+
+
+
+    <Component Type="LoadFSMNIProjection"/>
+
+
+    <Component Type="ElectrodeTransformation">
+        <Name>"Project Electrodes to MNI"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <TIdentifier>"T_MNI"</TIdentifier>
+    </Component>
+
+    <Component Type="SurfaceTransformation">
+        <Name>"Project Surface to MNI"</Name>
+        <TIdentifier>"T_MNI"</TIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create MNI brain.mat"</Name>
+    </Component>
+
+
+
+
+    <View Type="Model3DView">
+	   <Name>"3D View"</Name>
+    </View>
+
+    <View Type="SliceViewerView">
+    	<Name>"Slice Viewer"</Name>
+    </View>
+
+    <View Type="ElectrodeLocationTableView"/>
+
+    <View Type="ElectrodeDefinitionView"/>
+
+
+</PipelineDefinition>
