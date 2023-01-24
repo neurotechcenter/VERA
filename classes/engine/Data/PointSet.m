@@ -1,11 +1,12 @@
 classdef PointSet < AData
-    %LOCATION Summary of this class goes here
-    %   Detailed explanation goes here
+    %PointSet - generic data object for 3D points including labels and
+    %annotations 
+    %See also AData
     
     properties
         Location %Location as a nx3 vector
         Label %Cell array of labels associated with location
-        Annotation % Annotation for each location to add auxiliary information
+        Annotation % Annotation for each location to add auxiliary information, Annotations are added as field to the struct
     end
     
     methods
@@ -27,7 +28,8 @@ classdef PointSet < AData
         end
         
         function ResortElectrodes(obj,newLocs)
-
+            %ResortElectrodes   - resort the electrode locations together
+            %with Labels and Annotations
             oldLocs=sort(newLocs);
             
             obj.Label(oldLocs)=obj.Label(newLocs);
@@ -39,6 +41,8 @@ classdef PointSet < AData
         end
         
         function DeleteAnnotations(obj,identifier)
+            % DeleteAnnotations - delete annotation based on the name of
+            % the struct
             buffLabel=fieldnames(obj.Annotation(identifier));
             for i=1:length(buffLabel)
                 for id=1:length(identifier)
@@ -46,6 +50,8 @@ classdef PointSet < AData
                 end
             end
         end
+
+
         function AddLabel(obj,identifier, label)
             %Adds a new Label for location - duplicates will be removed
             %automatically
@@ -57,15 +63,30 @@ classdef PointSet < AData
                 end
             end
         end
+
+
         function SetAnnotation(obj, identifier, label, value)
+            %SetAnnotation - creates a new annotation, if annotation
+            %already exists, use DeleteAnnotations first
+            %see Also DeleteAnnotations
+            % identifier - identifier of the electrode
+            % annotation struct
+            % label - name of the annotation
+            % value - value for the annotation
             if(isfield(obj.Annotation,identifier) &&  ~isempty(obj.Annotation(identifier).(label)))
                 error(['Annotation ' label ' is already set for Electrode ' num2str(identifier) '!']);
             end
             obj.Annotation(identifier).(label)=value;
             
         end
+
         function annot=GetAnnotation(obj, identifier, label)
-            
+            %GetAnnotation returns the value for a specific electrode
+            % identifier - point for which the annotation should be
+            % retrieved
+            % label - the specific annotation value
+            % returns:
+            % empty if no annotation was found
             if(length(obj.Annotation) >= identifier && isfield(obj.Annotation(identifier),label))
                 annot=obj.Annotation(identifier).(label);
             else

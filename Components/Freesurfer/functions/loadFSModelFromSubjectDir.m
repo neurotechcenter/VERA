@@ -1,4 +1,14 @@
 function [surf,lsphere,rsphere] = loadFSModelFromSubjectDir(freesurferPath,segmentationPath,fileoutPath,annotation,pialfile)
+    %loadFSModelFromSubjectDir load model from Freesurfer subject directory
+    % freesurferPath - path to Freesurfer directory
+    % segmentationPath - path to subject freesurfer segmentation
+    % fileoutPath - path to temp directory for intermediate data files
+    % annotation - type of annotation that should be loaded
+    % pialfile - pial file which should be loaded for the subject
+    % Output:
+    %   surf - surface, combined left and right hemisphere
+    %   lsphere - sphere for left hemisphere
+    %   rsphere - sphere for right hemisphere
     if(~exist('pialfile','var'))
         pialfile='pial';
     end

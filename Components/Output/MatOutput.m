@@ -27,6 +27,10 @@ classdef MatOutput < AComponent
         
         function []= Process(obj, eLocs,eDef,surf)
             
+            [file,path]=uiputfile('*.mat');
+            if isequal(file,0) || isequal(path,0)
+                error('Selection aborted');
+            end
             cortex=surf.Model;
             ix=1;
             cmapstruct=struct('basecol',[0.7 0.7 0.7],'fading',1,'enablecolormap',1,'enablecolorbar',1,'color_bar_ticks',4,'cmap',jet(64),...
@@ -49,7 +53,7 @@ classdef MatOutput < AComponent
             electrodeDefinition.DefinitionIdentifier=eLocs.DefinitionIdentifier;
             tala=struct('electrodes',eLocs.Location,'activations',zeros(size(eLocs.Location,1),1),'trielectrodes',eLocs.Location);
             vcontribs = [];
-            [file,path]=uiputfile('*.mat');
+            
             SecondaryLabel=eLocs.Label;
             save(fullfile(path,file),'cortex','ix','tala','viewstruct','electrodeNames','cmapstruct','vcontribs','electrodeDefinition','electrodeLabels','LabelName','annotation','SecondaryLabel');
         end

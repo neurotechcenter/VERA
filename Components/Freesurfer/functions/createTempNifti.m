@@ -1,6 +1,13 @@
 function [nii_path] = createTempNifti(inPath,tempPath,freesurferPath)
-%CREATETEMPNIFTI Summary of this function goes here
-%   Detailed explanation goes here
+%createTempNifti create a temporary nifti file using Freesurfers
+%mri_convert
+%  inpath - path of the file wanting to convert
+%  tempPath - path to temporary folder
+%  freesurferPath - path to freesurfer
+%  Output:
+%   path to temporary nifti file
+
+
 inPath=strrep(inPath,'\','/'); %normalize paths
 tempPath=strrep(tempPath,'\','/');
 freesurferPath=strrep(freesurferPath,'\','/');

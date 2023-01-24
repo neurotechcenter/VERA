@@ -9,6 +9,7 @@ classdef ViewMap < handle
     
     methods(Static)
          function vmap=LoadViewsFromPipelineFile(file,project)
+             %LoadViewsFromPipelineFile Create views from a pipelien file
             vmap=ViewMap(project);
             poss_p=xml2struct(file);
             if(isfield(poss_p,'PipelineDefinition') && ...

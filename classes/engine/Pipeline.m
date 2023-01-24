@@ -149,12 +149,12 @@ classdef Pipeline < handle
                 obj.localOutputList =containers.Map();
                 c.Publish();
                 names=keys(obj.componentMap);
+                % check if name is Unique
                 if(~isempty(obj.componentMap) && ...
                         any(strcmp(names,c.Name)))
-                    %c.Name=createUniqueName(c.Name,names);
                     error(['Duplicate of Component with Name ' c.Name  ' found. Component names have to be unique']);
-                   % warning('Component names have to be unique!');
                 end
+
                 obj.componentMap(c.Name)=c;
                 obj.Components{end+1}=c.Name;
                 
@@ -202,6 +202,8 @@ classdef Pipeline < handle
                     end
                 end
             end
+
+            %make graph
             widx=unique(w);
             w_idx=zeros(size(w));
             for i=1:length(w)

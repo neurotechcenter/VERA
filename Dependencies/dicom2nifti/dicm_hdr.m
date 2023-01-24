@@ -129,7 +129,7 @@ if nargin==3 && isstruct(fname) % wrapper
 end
 
 if nargin<3, iFrames = []; end
-p.iFrames = iFrames;
+p.iFrames = iFrames(:)';
 fid = fopen(fname, 'r', 'l');
 if fid<0, info = ['File not exists: ' fname]; return; end
 closeFile = onCleanup(@() fclose(fid)); % auto close when done or error
@@ -364,7 +364,7 @@ swap = p.be && group~=2;
 hasVR = p.expl || group==2;
 if hasVR, vr = char(b8(i+(0:1))); i = i+2; end % 2-byte VR
 
-[n, nvr] = val_len(vr, b8(i+(0:5)), hasVR, swap); i = i + nvr;
+[n, nvr] = val_len(vr, b8(i:min(end,i+5)), hasVR, swap); i = i + nvr;
 if n==0, return; end % empty val
 
 % Look up item name in dictionary
@@ -760,14 +760,14 @@ s.NumberOfEchoes = par_attr(ch, 'Max. number of echoes');
 a = par_attr(ch, 'Patient position', 0);
 if isempty(a), a = par_attr(ch, 'Patient Position', 0); end
 if ~isempty(a)
-    if numel(a)>4, s.PatientPosition = a(regexp(a, '\<.')); 
+    if numel(a)>4, s.PatientPosition = a(regexp(a, '\<.'));
     else, s.PatientPosition = a; 
     end
 end
 s.MRAcquisitionType = par_attr(ch, 'Scan mode', 0);
-s.ScanningSequence = par_attr(ch, 'Technique', 0); % ScanningTechnique
+s.SequenceName = par_attr(ch, 'Technique', 0); % ScanningTechnique
 typ = par_attr(ch, 'Series Type', 0); typ(isspace(typ)) = '';
-s.ImageType = ['PhilipsPAR\' typ '\' s.ScanningSequence];
+s.ImageType = ['PhilipsPAR\' typ '\' s.SequenceName];
 s.RepetitionTime = par_attr(ch, 'Repetition time');
 s.WaterFatShift = par_attr(ch, 'Water Fat shift');
 s.EPIFactor = par_attr(ch, 'EPI factor');
@@ -791,18 +791,19 @@ iColumn = cumsum([1 iColumn]); % col start ind for corresponding colLabel
 keyInLabel = @(key)strcmpi(colLabel, key);
 colIndex = @(key)iColumn(keyInLabel(key));
 
-i1 = regexp(str(i2:end), '\n\s*\d+', 'once') + i2;
-n = iColumn(end)-1; % number of items each row, 41 for V4
-para = sscanf(str(i1:end), '%g'); % read all numbers
-nFrame = floor(numel(para) / n); 
-para = reshape(para(1:n*nFrame), n, nFrame)'; % whole table now
+i1 = regexp(str(i2:end), '\n\s*\d+', 'once') + i2 + 1;
+i2 = regexp(str(i1:end), '\n\s*#', 'once') + i1 - 1;
+para = eval(['[' str(i1:i2) ']']); % read all numbers
+nFrame = size(para, 1); 
+if size(para,2) ~= iColumn(end)-1
+    warning('dicm_hdr:badPAR', 'Inconsistent table columns to the definition');
+end
 
 % SortFrames solves XYTZ, unusual slice order, incomplete volume etc
 keys = {'dynamic scan number' 'gradient orientation number' 'echo number' ...
     'cardiac phase number' 'image_type_mr' 'label type' 'scanning sequence'};
 ic = []; for i = 1:numel(keys), ic = [ic colIndex(keys{i})]; end %#ok
-sort_frames = dicm2nii('', 'sort_frames', 'func_handle');
-sl = [para(:, colIndex('slice number')) para(:, colIndex('diffusion_b_factor'))];
+sl = para(:, [colIndex('slice number') colIndex('diffusion_b_factor')]);
 [ind_sort, nSL] = sort_frames(sl, para(:, ic));
 a = par_val('index in REC file', 1:nFrame); % always 0:nFrame-1 ?
 a(a+1) = 1:nFrame; % [~, a] = sort(a);
@@ -1017,7 +1018,7 @@ if ~isempty(i)
     s.AcquisitionDateTime = datestr(dat, 'yyyymmdd');
 end
 i = strfind(hist, 'Sequence:') + 9;
-if ~isempty(i), s.ScanningSequence = strtok(hist(i:end), ' '); end
+if ~isempty(i), s.SequenceName = strtok(hist(i:end), ' '); end
 i = strfind(hist, 'Studyid:') + 8;
 if ~isempty(i), s.StudyID = strtok(hist(i:end), ' '); end
 % i = strfind(hist, 'Dimensions:') + 11;
@@ -1381,9 +1382,9 @@ s.NumberOfEchoes = xml_attr(ch1, 'Max No Echoes', 1);
 s.LocationsInAcquisition = xml_attr(ch1, 'Max No Slices', 1);
 s.PatientPosition = xml_attr(ch1, 'Patient Position');
 s.MRAcquisitionType = xml_attr(ch1, 'Scan Mode');
-s.ScanningSequence = xml_attr(ch1, 'Technique'); % ScanningTechnique
+s.SequenceName = xml_attr(ch1, 'Technique'); % ScanningTechnique
 typ = xml_attr(ch1, 'Series Data Type'); typ(isspace(typ)) = '';
-s.ImageType = ['PhilipsXML\' typ '\' s.ScanningSequence];
+s.ImageType = ['PhilipsXML\' typ '\' s.SequenceName];
 s.RepetitionTime = xml_attr(ch1, 'Repetition Times?', 1);
 if numel(s.RepetitionTime)>1, s.RepetitionTime = s.RepetitionTime(1); end
 s.WaterFatShift = xml_attr(ch1, 'Water Fat Shift', 1);
@@ -1402,7 +1403,6 @@ for i = 1:numel(keys)
     [aa, ~, a] = unique(xml_raw(ch, keys{i}, i<5));
     if numel(aa)>1, id = [id a]; end %#ok
 end
-sort_frames = dicm2nii('', 'sort_frames', 'func_handle');
 sl = xml_raw(ch, 'Slice'); 
 if isDTI, sl(:,2) = xml_raw(ch, 'Diffusion B Factor'); end
 [ind_sort, nSL] = sort_frames(sl, id);
@@ -1545,4 +1545,50 @@ s.PixelData.Bytes = s.Rows * s.Columns * nFrame * s.BitsAllocated / 8;
         elseif nargin<4, val = val{1};
         end
     end
+end
+
+%% Get sorting index for multi-frame and PAR/XML
+function [ind, nSL] = sort_frames(sl, ic)
+% sl is for slice index, and has B_value as 2nd column for DTI.
+% ic contains other possible identifiers which will be converted into index. 
+% The ic column order is important. 
+nSL = max(sl(:, 1));
+nFrame = size(sl, 1);
+if nSL==nFrame, ind = 1:nSL; ind(sl(:,1)) = ind; return; end % single vol
+nVol = floor(nFrame / nSL);
+badVol = nVol*nSL < nFrame; % incomplete volume
+ic(isnan(ic)) = 0;
+id = zeros(size(ic));
+for i = 1:size(ic,2)
+    [~, ~, id(:,i)] = unique(ic(:,i)); % entries to index
+end
+n = max(id); id = id(:, n>1); n = n(n>1);
+i = find(n == nVol+badVol, 1);
+if ~isempty(i) % most fMRI/DTI
+    id = id(:, i); % use a single column for sorting
+elseif ~badVol && numel(n)>1
+    [j, i] = find(tril(n' * n, -1) == nVol, 1); % need to ignore diag
+    if ~isempty(i)
+        id = id(:, [i j]); % 2 columns make nVol        
+    elseif numel(n)>2
+        i = find(cumprod(n) == nVol, 1);
+        if ~isempty(i), id = id(:, 1:i); end % first i columns make nVol
+    end
+end
+[~, ind] = sortrows([sl id]); % this sort idea is from julienbesle
+if badVol % only seen in Philips
+    try lastV = id(ind,1) > nVol; catch, lastV = []; end
+    if sum(lastV) == nFrame-nSL*nVol
+        ind(lastV) = []; % remove incomplete volume
+    else % suppose extra later slices are from bad volume
+        for i = 1:nSL
+            a = ind==i;
+            if sum(a) <= nVol, continue; end % shoule be ==
+            ind(find(a, 1, 'last')) = []; % remove last extra one
+            if numel(ind) == nSL*nVol, break; end
+        end
+    end
+end
+ind = reshape(ind, [], nSL)'; % XYTZ to XYZT
+ind = ind(:)';
 end

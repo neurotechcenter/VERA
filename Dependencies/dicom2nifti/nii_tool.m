@@ -264,6 +264,7 @@ function varargout = nii_tool(cmd, varargin)
 % 180104 check_gzip: add /usr/local/bin to PATH for unix if needed.
 % 180119 use jsystem for better speed.
 % 180710 bug fix for cal_max/cal_min in 'update'.
+% 210302 take care of unicode char in hdr (Thx Yong).
 
 persistent C para; % C columns: name, length, format, value, offset
 if isempty(C)
@@ -328,7 +329,7 @@ elseif strcmpi(cmd, 'save')
     % Deal with NIfTI version and sizeof_hdr
     niiVer = para.version;
     if isfield(nii.hdr, 'version'), niiVer = nii.hdr.version; end
-    if niiVer==1 && any(nii.hdr.dim(2:end) > 32767), niiVer = 2; end
+    if niiVer<2 && any(nii.hdr.dim(2:end) > 32767), niiVer = 2; end
 
     if niiVer == 1
         nii.hdr.sizeof_hdr = 348; % in case it was loaded from other version
@@ -420,6 +421,12 @@ elseif strcmpi(cmd, 'save')
         else % niiVer=2 omit some fields, also take care of other cases
             val = C0{i,4};
         end
+        fmt0 = C0{i,3};
+        if strcmp(C0{i,3}, 'char') && ~isempty(val)
+            if ~ischar(val), val = char(val); end % avoid val=[] error etc
+            val = unicode2native(val); % may have more bytes than numel(val)
+            fmt0 = 'uint8';
+        end
         n = numel(val);
         len = C0{i,2};
         if n>len
@@ -427,7 +434,7 @@ elseif strcmpi(cmd, 'save')
         elseif n<len
             val(n+1:len) = 0; % pad 0, normally for char
         end
-        fwrite(fid, val, C0{i,3});
+        fwrite(fid, val, fmt0);
     end
     
     % Write nii ext: extension is in hdr
@@ -437,7 +444,14 @@ elseif strcmpi(cmd, 'save')
         fwrite(fid, nii.ext(i).edata, 'uint8');
     end
     
-    if ~isNii
+    if isNii
+        n = nii.hdr.vox_offset - ftell(fid);
+        if n<0 % seen n=-1 for unknown reason
+            fseek(fid, n, 'cof');
+        elseif n>0
+            fwrite(fid, zeros(n,1), 'uint8');
+        end
+    else
         fclose(fid); % done with .hdr
         fid = fopen(strcat(fname, '.img'), 'W');
     end
@@ -676,11 +690,11 @@ if niiVer == 1
     C = {
     % name              len  format     value           offset
     'sizeof_hdr'        1   'int32'     348             0
-    'data_type'         10  'char*1'    ''              4
-    'db_name'           18  'char*1'    ''              14
+    'data_type'         10  'char'      ''              4
+    'db_name'           18  'char'      ''              14
     'extents'           1   'int32'     16384           32
     'session_error'     1   'int16'     0               36
-    'regular'           1   'char*1'    'r'             38
+    'regular'           1   'char'      'r'             38
     'dim_info'          1   'uint8'     0               39
     'dim'               8   'int16'     ones(1,8)       40
     'intent_p1'         1   'single'    0               56
@@ -703,8 +717,8 @@ if niiVer == 1
     'toffset'           1   'single'    0               136
     'glmax'             1   'int32'     0               140
     'glmin'             1   'int32'     0               144
-    'descrip'           80  'char*1'    ''              148
-    'aux_file'          24  'char*1'    ''              228
+    'descrip'           80  'char'      ''              148
+    'aux_file'          24  'char'      ''              228
     'qform_code'        1   'int16'     0               252
     'sform_code'        1   'int16'     0               254
     'quatern_b'         1   'single'    0               256
@@ -716,15 +730,15 @@ if niiVer == 1
     'srow_x'            4   'single'    [1 0 0 0]       280
     'srow_y'            4   'single'    [0 1 0 0]       296
     'srow_z'            4   'single'    [0 0 1 0]       312
-    'intent_name'       16  'char*1'    ''              328
-    'magic'             4   'char*1'    'n+1'           344
+    'intent_name'       16  'char'      ''              328
+    'magic'             4   'char'      'n+1'           344
     'extension'         4   'uint8'     [0 0 0 0]       348
     };
 
 elseif niiVer == 2
     C = {
     'sizeof_hdr'        1   'int32'     540             0
-    'magic'             8   'char*1'    'n+2'           4
+    'magic'             8   'char'      'n+2'           4
     'datatype'          1   'int16'     0               12
     'bitpix'            1   'int16'     0               14
     'dim'               8   'int64'     ones(1,8)       16
@@ -741,8 +755,8 @@ elseif niiVer == 2
     'toffset'           1   'double'    0               216
     'slice_start'       1   'int64'     0               224
     'slice_end'         1   'int64'     0               232
-    'descrip'           80  'char*1'    ''              240
-    'aux_file'          24  'char*1'    ''              320
+    'descrip'           80  'char'      ''              240
+    'aux_file'          24  'char'      ''              320
     'qform_code'        1   'int32'     0               344
     'sform_code'        1   'int32'     0               348
     'quatern_b'         1   'double'    0               352
@@ -757,9 +771,9 @@ elseif niiVer == 2
     'slice_code'        1   'int32'     0               496
     'xyzt_units'        1   'int32'     0               500
     'intent_code'       1   'int32'     0               504
-    'intent_name'       16  'char*1'    ''              508
+    'intent_name'       16  'char'      ''              508
     'dim_info'          1   'uint8'     0               524
-    'unused_str'        15  'char*1'    ''              525
+    'unused_str'        15  'char'      ''              525
     'extension'         4   'uint8'     [0 0 0 0]       540
     };
 else
@@ -783,9 +797,9 @@ D = {
     'uint32'    768     32      1
     'int64'     1024    64      1
     'uint64'    1280    64      1
-%     'float128'  1536    128     1 % long double, for 22nd century?
+%   'float128'  1536    128     1 % long double, for 22nd century?
     'double'    1792    128     2 % complex
-%     'float128'  2048    256     2 % long double complex
+%   'float128'  2048    256     2 % long double complex
     'uint8'     2304    32      4 % RGBA
     };
 
@@ -962,8 +976,8 @@ for i = 1:size(C,1)
         else, a = b(C{i,5} + (1:C{i,2})); % last item extension is in bytes
         end
     end
-    if strcmp(C{i,3}, 'char*1')
-        a = deblank(char(a));
+    if strcmp(C{i,3}, 'char')
+        a = deblank(native2unicode(a));
     else
         a = cast_swap(a, C{i,3}, swap);
         a = double(a);

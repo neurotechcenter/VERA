@@ -1,9 +1,23 @@
 classdef ElectrodeDefinition < AData
     %ElectrodeDefinition - Data object for Electrode Definitons
-    %   
+    % Class used to interact with ElectrodeDefinition Data
+    % Electrode Definitions define what type of electrode is used and its
+    % geometric properties
+    %
+    % Properties:
+    %   Definition
+    %   The definition struct contains the following fields:
+    %   Type - Type of electrodes: available types: 'Micro','Grid','Strip','Depth','DBS','Medtronic 3387','Medtronic 3389','Boston Vercise Directional'
+    %   Name - Name of the electrode
+    %   NElectrodes - The number of channels the electrode has 
+    %   Spacing - Number in mm for center to center spacing between
+    %   electrodes
+    %   Volume - Volume of the contact in mm^3
+    %
+    % see also AData
     
     properties
-        Definition
+        Definition %Electrode definition struct
     end
 
     properties(Constant)
@@ -12,10 +26,17 @@ classdef ElectrodeDefinition < AData
     
     methods
         function obj = ElectrodeDefinition()
+            %ElectrodeDefinition Constructor
             obj.Definition=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{});
         end
 
         function defIdx=AddDefinition(obj,type,name,N,spacing,vol)
+            %AddDefinition - Adds a new definition to the definition struct
+            % type - type of electrodes as defined by ElectrodeTypes
+            % name - name of the electrode definition
+            % N - number of recording electrodes
+            % spacing - inter-electrode spacing (center to center)
+            % vol - electrode volume in mm^3
             if(~any(strcmp(type,obj.ElectrodeTypes)))
                 error('Adding non-existing type');
             end

@@ -28,6 +28,7 @@ classdef MainGUI < handle
         function obj = MainGUI()
             
             DependencyHandler.Purge();
+            obj.componentNodes = containers.Map();
             warning off;
             obj.window = figure('Name','VERA', ...
             'NumberTitle', 'off', ...
@@ -48,8 +49,6 @@ classdef MainGUI < handle
             obj.fileMenu=uimenu(obj.window,'Label','File');
             obj.fileMenuContent.NewProject=uimenu(obj.fileMenu,'Label','New Project','MenuSelectedFcn',@(~,~,~)obj.createNewProject);
             obj.fileMenuContent.OpenProject=uimenu(obj.fileMenu,'Label','Open Project','MenuSelectedFcn',@obj.openProject);
-           % obj.fileMenuContent.SaveProject=uimenu(obj.fileMenu,'Label','Save Project','Enable','off','MenuSelectedFcn',@obj.saveProject);
-           % obj.fileMenuContent.SaveProjectAs=uimenu(obj.fileMenu,'Label','Save Project as','Enable','off');
             obj.fileMenuContent.CloseProject=uimenu(obj.fileMenu,'Label','Close Project','Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
             
             obj.configMenu=uimenu(obj.window,'Label','Configuration');
@@ -72,7 +71,8 @@ classdef MainGUI < handle
     
     methods (Access = protected)
         function closeProject(obj)
-
+            %closeProject close project call delete all references save
+            %everything cleanup
             delete(obj.Views);
             delete(obj.ProjectRunner);
             delete(obj.treeNodes.Input.Children);
@@ -99,6 +99,8 @@ classdef MainGUI < handle
         end
         
         function start_dir=getProjectDefaultPath(~)
+            %getProjectDefaultPath - get the default directory path, either
+            %if no default specified, create one
             if(DependencyHandler.Instance.IsDependency('ProjectDefaultPath'))
                 start_dir=DependencyHandler.Instance.GetDependency('ProjectDefaultPath');
             else
@@ -114,7 +116,7 @@ classdef MainGUI < handle
         
         
         function createNewProject(obj)
-
+            %createNewProject callback from createNewProject menu path
             folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
             obj.ProgressBarTool.suspendGUIWithMessage('Creating Project...');
     
@@ -153,11 +155,9 @@ classdef MainGUI < handle
             obj.ProgressBarTool.resumeGUI();
              
         end
-       % function saveProject(obj,~,~)
-       
 
-        %end
         function openProject(obj,~,~)
+            %openProject - callback from openProject menu button
             folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
             
             obj.ProgressBarTool.suspendGUIWithMessage('Opening Project...');
@@ -186,6 +186,7 @@ classdef MainGUI < handle
         end
         
         function updateTreeView(obj)
+            %updateTreeView - updates the Component pipeline view
             obj.ProgressBarTool.ShowProgressBar(0,'Updating Views');
             for v=values(obj.componentNodes)
                 obj.ProgressBarTool.IncreaseProgressBar(1/length(obj.componentNodes));
@@ -206,6 +207,8 @@ classdef MainGUI < handle
         end
         
         function removeTempPath(obj)
+            %removeTempPath - removing the temp path from the dependency
+            %handler and delete the temp folder with all its contents
             if(any(strcmp(keys(DependencyHandler.Instance.ResolvedLibrary),'TempPath')))
                 tdir=DependencyHandler.Instance.GetDependency('TempPath');
                 if(isempty(tdir))
@@ -222,6 +225,7 @@ classdef MainGUI < handle
         end
         
         function onClose(obj,hob,~)
+            %onClose - close project callback
             obj.removeTempPath();
             DependencyHandler.Instance.SaveDependencyFile('settings.xml');
             delete(obj.Views);
@@ -232,6 +236,8 @@ classdef MainGUI < handle
         end
         
         function configureAll(obj)
+            %configureAll - configure all button callback
+            % configures all 
             obj.ProgressBarTool.ShowProgressBar(0,'Configuring... ');
             if(obj.checkResolvedDependencies())
                 for ic=1:length(obj.ProjectRunner.Components)
@@ -244,6 +250,9 @@ classdef MainGUI < handle
         end
         
         function runAll(obj)
+            %runAll button callback
+            %run through all components and check which one to best run
+            %next
             k=obj.ProjectRunner.GetNextReadyComponent();
             while(~isempty(k))
                 obj.runComponent(k,false); %update view if last component
@@ -258,6 +267,8 @@ classdef MainGUI < handle
         end
         
         function success=runTo(obj,component)
+            %callback for rightclick - run to
+            %determines the required components for a 
             comps_to_run=obj.ProjectRunner.GetProcessingSequence(component);
             success=1;
             obj.ProgressBarTool.ShowProgressBar(0,['Running ' component ' Dependents']);
@@ -283,6 +294,7 @@ classdef MainGUI < handle
 
         
         function createTreeView(obj)
+            %createTreeView - delete the Treeview and create a new Tree
             delete(obj.componentMenu);
             if(~isempty(obj.ProjectRunner))
                 obj.ProgressBarTool.ShowProgressBar(0.1,'Initializing Tree');

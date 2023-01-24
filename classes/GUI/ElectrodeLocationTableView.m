@@ -1,6 +1,11 @@
 classdef ElectrodeLocationTableView < AView & uix.Grid
-    %ELECTRODELOCATIONTABLEVIEW Summary of this class goes here
-    %   Detailed explanation goes here
+    %ELECTRODELOCATIONTABLEVIEW Table to show electrode locations including
+    %names and labels
+    % 
+    % <View Type="ElectrodeLocationTableView"/>
+    %
+    %
+    % See aslo AView
     
     properties
         ElectrodeLocationIdentifier %Identifier for the Electrode Location to be shown
@@ -30,18 +35,24 @@ classdef ElectrodeLocationTableView < AView & uix.Grid
 
    methods(Access = protected)
         function dataUpdate(obj)
-            elLocs=[];
-            eDef=[];
-            obj.gridDefinitionTable.Data={};
+           elLocs=[];
+           eDef=[];
+           obj.gridDefinitionTable.Data={};
+
+           %check if ElectrodeLocation data exists
            if(isKey(obj.AvailableData,obj.ElectrodeLocationIdentifier))
                 elLocs=obj.AvailableData(obj.ElectrodeLocationIdentifier);
                 if(~isObjectTypeOf(elLocs,'ElectrodeLocation'))
                     return;
                 end
            end
+           
+           %check if ElectrodeDefinition data exists
            if(isKey(obj.AvailableData,obj.ElectrodeDefinitionIdentifier))
                 eDef=obj.AvailableData(obj.ElectrodeDefinitionIdentifier);
            end
+
+            %create table for view
             tbl={};
             if(~isempty(elLocs))
                for i=1:size(elLocs.Location,1)

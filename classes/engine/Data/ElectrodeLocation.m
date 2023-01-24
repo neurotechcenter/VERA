@@ -1,6 +1,6 @@
 classdef ElectrodeLocation < PointSet
-    %ElectrodeLocation Electrode Location in 3D Space 
-    %
+    %ElectrodeLocation Electrode Location in 3D Space
+    % See also PointSet
     
     properties
         DefinitionIdentifier %Identifier connecting the location to the Electrode Definiton
@@ -12,6 +12,10 @@ classdef ElectrodeLocation < PointSet
         end
 
         function electrodeNames= GetElectrodeNames(obj,eDef)
+            %GetElectrodeNames - returns the names of the electrodes based
+            %on provided electrode Definition
+            % eDef - ElectrodeDefiniton object
+            % see also ElectrodeDefinition
             if(~isObjectTypeOf(eDef,'ElectrodeDefinition'))
                 error("Input is expected to be of type ElectrodeDefinition");
             end

@@ -1,4 +1,5 @@
 function [code,lut]=loadLUTFile(lutfile)
+%loadLUTFile - load Freesurfer LUT file 
 
     try
     [code,lut]=read_fscolorlut(lutfile);

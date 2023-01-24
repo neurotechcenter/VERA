@@ -1,12 +1,11 @@
 function  showDocumentation(comp)
-%SHOWDOCUMENTATION Summary of this function goes here
-%   Detailed explanation goes here
+%SHOWDOCUMENTATION Creates a figure which displays all information from an
+%AComponent class
+%see also AComponent
 f=figure('Color','white','Name',class(comp));
-grd=uix.Grid('Parent',f);
-sc=uix.ScrollingPanel('Parent',grd);
+grd=uix.VBox('Parent',f);
 
-h=annotation(sc,'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
-                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w');
+
 
 
 %%create configured component info:
@@ -14,30 +13,41 @@ outstring="\textbf{"+ string(class(comp))+  "} ";
 outstring=[outstring "\newline "];
 outstring=[outstring help('comp')];
 
+annotation(uix.ScrollingPanel('Parent',grd),'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
+                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w', ...
+                'String',outstring);
+
 %% create Properties table
 
-outstring=[outstring "\textbf{Properties:} \\ "];
+default_templateclass=feval( class(comp) ); 
+outstring= "\textbf{Properties:} \\ ";
 
-p=comp.GetSerializableProperties();
+ p=comp.GetSerializableProperties();
 outstring=[outstring "\begin{tabular}{c || c | c } "];
 outstring(end)=outstring(end)+ "Name & Current Value & Default Value \\ \hline \hline ";
-default_templateclass=feval( class(comp) ); %creates a new empty class object to get default values
+% default_templateclass=feval( class(comp) ); %creates a new empty class object to get default values
 
 for i=1:numel(p)
     if(~isa(comp.(p{i}),'char') && isObjectTypeOf(comp.(p{i}),'Serializable'))
-        outstring(end)=outstring(end)+ strrep(p{i},'_','\_') ...
+        outstring(end)=outstring(end)+ makeStringLatexComplient(p{i}) ...
         + " & " + makeStringLatexComplient(class(comp)) + " & " + makeStringLatexComplient(class(comp.(p{i}))) + " \\ ";
     else
-        outstring(end)=outstring(end)+ strrep(p{i},'_','\_') ...
+        outstring(end)=outstring(end)+ makeStringLatexComplient(p{i}) ...
         + " & " + makeStringLatexComplient(jsonencode(comp.(p{i})))+ " & " + makeStringLatexComplient(jsonencode(default_templateclass.(p{i}))) + " \\ ";
     end
 end
 outstring(end)=outstring(end)+ " \end{tabular}";
 
+
+annotation(uix.ScrollingPanel('Parent',grd),'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
+                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w', ...
+                'String',outstring);
+
+
 % --- Inputs
 
 if(~isempty(comp.Inputs))
-    outstring=[outstring "\textbf{Input Configuration:} \\ "];
+    outstring="\textbf{Input Configuration:} \\ ";
     outstring=[outstring "\begin{tabular}{c | c} "];
     outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
     
@@ -45,11 +55,14 @@ if(~isempty(comp.Inputs))
         outstring(end)=outstring(end)+ makeStringLatexComplient(comp.Inputs{i}) + " & " + makeStringLatexComplient(comp.inputMap(comp.Inputs{i})) + " \\ ";
     end
     outstring(end)=outstring(end)+ " \end{tabular}";
+annotation(uix.ScrollingPanel('Parent',grd),'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
+                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w', ...
+                'String',outstring);
 end
 
 % --- Optional Inputs
 if(~isempty(comp.OptionalInputs))
-    outstring=[outstring "\newline "];
+    outstring= "\newline ";
     outstring=[outstring "\textbf{Optional Input Configuration:} \\ "];
     outstring=[outstring "\begin{tabular}{c | c} "];
     outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
@@ -58,13 +71,16 @@ if(~isempty(comp.OptionalInputs))
         outstring(end)=outstring(end)+ makeStringLatexComplient(comp.OptionalInputs{i}) + " & " + makeStringLatexComplient(comp.optionalinputMap(comp.OptionalInputs{i})) + "\\";
     end
     outstring(end)=outstring(end)+ " \end{tabular}";
+annotation(uix.ScrollingPanel('Parent',grd),'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
+                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w', ...
+                'String',outstring);
 end
 
 
 
 % --- Outputs
 if(~isempty(comp.Outputs))
-    outstring=[outstring "\newline "];
+    outstring= "\newline ";
     outstring=[outstring "\textbf{Output Configuration:} \\ "];
     outstring=[outstring "\begin{tabular}{c | c} "];
     outstring(end)=outstring(end)+ "Name & Type \\ \hline \hline ";
@@ -73,25 +89,17 @@ if(~isempty(comp.Outputs))
         outstring(end)=outstring(end)+ makeStringLatexComplient(comp.Outputs{i}) + " & " + makeStringLatexComplient(comp.outputMap(comp.Outputs{i})) + "\\";
     end
     outstring(end)=outstring(end)+ " \end{tabular}";
+annotation(uix.ScrollingPanel('Parent',grd),'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
+                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w', ...
+                'String',outstring);
 end
-% ----- add user description for component ---- 
 
 
-h.String = outstring;
+
 end
 
 
 function str=makeStringLatexComplient(str)
         str=strrep(str,'_','\_');
-        if(length(str) > 80)
-            %str=strrep(str,',',',\\');
-            str="!!...too long...!!";
-        end
-        %str=strrep(str,'"',"''");
-        %str=strrep(str,'[','');
-        %str=strrep(str,']','');
-        %str=strrep(str,',','');
-        %str=strrep(str,'-','');
-        %str=strrep(str,'"','');
 end
 

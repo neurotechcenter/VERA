@@ -1,6 +1,6 @@
 classdef LoadFSMNIProjection < AComponent
-    %FREESURFERMNIPROJECTION
-    % Load transformation matrix for FS MNI305
+    %LoadFSMNIProjection - Load transformation matrix for FS MNI305
+    % from a Freesurfer project
     
     properties
        SegmentationPathIdentifier

@@ -39,6 +39,9 @@ classdef Volume < AData & IFileLoader
         end
 
         function AddTransformation(obj,T)
+            %AddTransformation - multiplies the transformation matrix T
+            %into the existing transformation matrix within the Nifti 
+            % T - transformation matrix
             new_T=T*([obj.Image.hdr.hist.srow_x;obj.Image.hdr.hist.srow_y;obj.Image.hdr.hist.srow_z;0 0 0 1]);
             obj.Image.hdr.hist.srow_x=new_T(1,:);
             obj.Image.hdr.hist.srow_y=new_T(2,:);
@@ -68,8 +71,20 @@ classdef Volume < AData & IFileLoader
         end
         
         function V=GetRasSlicedVolume(obj,voxelSize,forceReslice)
+            %GetRasSlicedVolume - returns a new Volume which is resliced
+            %for orthogonal RAS projection
+            % voxelSize - voxel size (1x3 vector for x,y,z) after reslicing, default is [1 1 1];
+            % forceReslice - if the original volume does not require
+            % slicing based on voxel size and original orientation, no
+            % reslicing would be performed unless forceReslice is true
+            % returns: new Volume 
             if(nargin < 2)
                 voxelSize=[1 1 1];
+            else
+                if(isempty(voxelSize))
+                    voxelSize=[1 1 1];
+                end
+
             end
             if(nargin < 3)
                 forceReslice=false;
@@ -157,6 +172,7 @@ classdef Volume < AData & IFileLoader
                 end
             end
         end
+
         
         function SaveNiiToPath(obj,path)
             if(isfield(obj.Image,'untouch') && obj.Image.untouch == 1)
@@ -165,6 +181,8 @@ classdef Volume < AData & IFileLoader
                 save_nii(obj.Image,path);
             end           
         end
+        
+
         function savepath=Save(obj,path)
             if(~isempty(obj.Image))
                 obj.Path=fullfile(path,[obj.Name '.nii']);

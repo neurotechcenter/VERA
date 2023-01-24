@@ -1,8 +1,8 @@
 classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
     %ElectrodeDefinitionView - View associated with the Electrode Definition
-    %
+    % see also AView, IComponentView
     properties (Access = public)
-        History
+        History % history of changes made in the view
         ElectrodeDefinitionIdentifier
     end
     properties (Access = protected)

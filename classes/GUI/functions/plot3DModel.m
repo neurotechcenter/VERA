@@ -10,7 +10,7 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
         annotation=ones(size(model.vert,1),1);
     end
     surf=trisurf(model.tri, model.vert(:, 1), model.vert(:, 2), model.vert(:, 3),annotation ,'Parent',...
-        ax,'CDataMapping', 'direct','linestyle', 'none','FaceLighting','gouraud','BackFaceLighting','unlit','AmbientStrength',1,varargin{:});
+        ax,'linestyle', 'none','FaceLighting','gouraud','BackFaceLighting','unlit','AmbientStrength',1,varargin{:});
     light(ax,'Position',[1 0 0],'Style','local');
     %light(obj.axModel,'Position',[-1 0 0]);
    % camlight(obj.axModel,'headlight');

@@ -1,5 +1,5 @@
 function elecmatrix = importelectrodes(electrodesFileName)
-% This function reads electrode coordinates out of a .dat file as
+% importelectrodes - This function reads electrode coordinates out of a .dat file as
 % produced by saving a point set in Freesurfer.
 % Coordinates are loaded into electrodes.coordinates
 % originFileName is an old and unneeded argument

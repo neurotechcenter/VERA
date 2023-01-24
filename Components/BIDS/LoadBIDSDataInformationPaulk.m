@@ -1,6 +1,5 @@
 classdef LoadBIDSDataInformationPaulk < AComponent
-    %LOADBIDSDATAINFORMATION Summary of this class goes here
-    %   Detailed explanation goes here
+    %LoadBIDSDataInformationPaulk Load data from BIDS dataset
     
     properties
         MRIIdentifier

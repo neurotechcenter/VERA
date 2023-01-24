@@ -25,6 +25,9 @@ classdef Surface < AData & IFileLoader
         end
 
         function LoadFromFile(obj,path)
+            %LoadFromFile - Loads a gift formated file from the selected
+            %path and sets the object accordingly
+            % path - path to gifti file
                 buffG=gifti(path);
                 obj.Model.vert=double(buffG.vertices);
                 obj.Model.tri=buffG.faces;
@@ -35,6 +38,7 @@ classdef Surface < AData & IFileLoader
 
                 end
         end
+
         function Load(obj,path)
             % Load - override of load for Surface
             % The surface will be stored as a gifti accompanied by an xml
@@ -70,6 +74,16 @@ classdef Surface < AData & IFileLoader
         end
 
         function surfaceOut=GetSubSurfaceById(obj,id,searchComplex)
+            %GetSubSurfaceById - creates a new surface object which only
+            %contains the faces and vertices for a specific id
+            %This can be used to split the left and right hemisphere or
+            %retrieve the surface of a subsegmentatation surface
+            % id - id of the subsurface as specified within VertId and
+            % TriId
+            % searchComplex - slow search to find all triangulations, only
+            % required when the underlying surface data isnt comprised of
+            % concatenated surfaces.
+            % returns: A new surface object
             surfaceOut=copy(obj);
             surfaceOut.Path='';
             surfaceOut.Model.vert=surfaceOut.Model.vert(surfaceOut.VertId == id,:);

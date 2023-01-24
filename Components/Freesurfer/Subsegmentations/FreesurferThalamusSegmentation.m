@@ -1,6 +1,6 @@
 classdef FreesurferThalamusSegmentation < AFSSubsegmentation
-    %FREESURFERTHALAMUSSEGMENTATION Summary of this class goes here
-    %   Detailed explanation goes here
+    %FreesurferThalamusSegmentation Load Freesurfers Thalamus Segmentation
+    % 
     properties (Access=protected)
         ShellScriptName ='recon-thalamus.sh'
         LVolumeName ='ThalamicNuclei.v1?.T1.mgz' %Volume of left hemisphere segmentation

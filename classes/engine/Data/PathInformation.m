@@ -2,11 +2,12 @@ classdef PathInformation < AData
     %PathInformation Data object to share paths between components
     
     properties
-        Path
+        Path % path information
     end
     
     methods
         function obj = PathInformation()
+            % PathInformation - Constructor
             obj.Path='';
         end
 

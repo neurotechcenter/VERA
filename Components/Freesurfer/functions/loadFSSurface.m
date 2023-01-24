@@ -1,5 +1,5 @@
 function [lh,rh] = loadFSSurface(surfacetype,segmentationPath,subsyspath)
-
+%loadFSSurface - load freesurfer surface
 %freesurfer 7 works with symlinks which cannot be resolved
 %under windows so we need to get the correct target
 fallbackSuffix='';

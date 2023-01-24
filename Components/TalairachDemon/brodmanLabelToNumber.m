@@ -1,6 +1,8 @@
 function [num] = brodmanLabelToNumber(label)
-%BRODMANLABELSTONUMBER Summary of this function goes here
-%   Detailed explanation goes here
+%brodmanLabelToNumber - converts the label to a number
+%label - String in the form of Brodman area %n
+%Output
+% numerical for brodman label
 if(strcmp(label,'Unknown'))
     num=0;
 else
