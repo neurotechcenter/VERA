@@ -91,6 +91,8 @@ return
 
 function  path_cell = pathparts(path_str)
 
+fsp='/';
+
 path_str = [fsp path_str fsp];
 path_cell = {};
 
