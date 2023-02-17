@@ -72,16 +72,17 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
             if(isFile)
                 [a,b,c]=fileparts(obj.normalizeSlashes(pathIn));
             else
-                a=pathIn;
+                a=obj.normalizeSlashes(pathIn);
             end
             if(obj.IsDependency('ProjectPath'))
-                pathOut=relativepath(a,obj.GetDependency('ProjectPath'));
+                pathOut=relativepath(a,obj.normalizeSlashes(obj.GetDependency('ProjectPath')));
             else
                 pathOut=relativepath(a);
             end
             if(isFile)
                 pathOut=fullfile(pathOut,[b c]);
             end
+            pathOut=obj.normalizeSlashes(pathOut);
         end
         
         function pathout=makeFullPath(obj,pathIn)
