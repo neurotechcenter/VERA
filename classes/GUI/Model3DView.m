@@ -109,9 +109,9 @@ classdef Model3DView < AView & uix.Grid
 								end
 							end
                         end
-                       
-                        cb=colorbar(obj.axModel,'Ticks',name_id+0.5,'TickLabels',names,'FontSize',12,'location','east');
-                        set(cb,'TickLabelInterpreter','none')
+                       cb=colorbar(obj.axModel,'FontSize',12,'location','east','TickLabelInterpreter','none','Ticks',1:length(name_id)); 
+                       cb=colorbar(obj.axModel,'Ticks',linspace(1.5,length(name_id)+0.5,length(name_id)+1),'Limits',[min(name_id) max(name_id)],'TickLabels',names,'FontSize',12,'location','east','TickLabelInterpreter','none');
+                       % set(cb,'TickLabelInterpreter','none')
                         close(pbar);
                     end
                     alpha(obj.vSurf,obj.cSlider.Value);
