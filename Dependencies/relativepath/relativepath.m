@@ -22,7 +22,7 @@ function  rel_path = relativepath( tgt_path, act_path )
 %   See also:  ABSOLUTEPATH PATH
 
 %   Jochen Lenz
-
+fsp='/';
 
 % 2nd parameter is optional:
 if  nargin < 2
@@ -33,11 +33,11 @@ end
 rel_path = '';
 
 % Make sure strings end by a filesep character:
-if  length(act_path) == 0   |   ~isequal(act_path(end),filesep)
-   act_path = [act_path filesep];
+if  length(act_path) == 0   |   ~isequal(act_path(end),fsp)
+   act_path = [act_path fsp];
 end
-if  length(tgt_path) == 0   |   ~isequal(tgt_path(end),filesep)
-   tgt_path = [tgt_path filesep];
+if  length(tgt_path) == 0   |   ~isequal(tgt_path(end),fsp)
+   tgt_path = [tgt_path fsp];
 end
 
 % Convert to all lowercase: %removed to lowercase
@@ -70,19 +70,19 @@ end
 
 % As much levels down ('..\') as levels are remaining in "act_path":
 for  i = 1 : length(act_path_cell)
-   rel_path = ['..' filesep rel_path];
+   rel_path = ['..' fsp rel_path];
 end
 
 % Relative directory levels to target directory:
 for  i = 1 : length(tgt_path_cell)
-   rel_path = [rel_path tgt_path_cell{i} filesep];
+   rel_path = [rel_path tgt_path_cell{i} fsp];
 end
 
 % Start with '.' or '..' :
 if  isempty(rel_path)
-   rel_path = ['.' filesep];
+   rel_path = ['.' fsp];
 elseif  ~isequal(rel_path(1),'.')
-   rel_path = ['.' filesep rel_path];
+   rel_path = ['.' fsp rel_path];
 end
 
 return
@@ -91,10 +91,10 @@ return
 
 function  path_cell = pathparts(path_str)
 
-path_str = [filesep path_str filesep];
+path_str = [fsp path_str fsp];
 path_cell = {};
 
-sep_pos = findstr( path_str, filesep );
+sep_pos = findstr( path_str, fsp );
 for i = 1 : length(sep_pos)-1
    path_cell{i} = path_str( sep_pos(i)+1 : sep_pos(i+1)-1 );
 end
