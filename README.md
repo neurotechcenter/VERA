@@ -5,7 +5,7 @@ VERA was specifically built to solve this problem. The framework allows other to
 
 # Quick Guide
 ## Installation & Startup
-VERA can be used by any MatLab distribution later than Matlab 2016b. Download the repository into an empty directory and run *startup_VERA.m*
+VERA can be used by any MatLab distribution later than Matlab 2018b. Download the repository into an empty directory and run *startup_VERA.m*
 
 # WIKI
 
