@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="4 pipeline full">
+<PipelineDefinition Name="4_pipelineFull">
 
 
     <Component Type="FileLoader">

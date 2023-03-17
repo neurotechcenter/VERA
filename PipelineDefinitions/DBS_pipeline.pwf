@@ -16,6 +16,12 @@
 
     <Component Type="FreesurferSurfaceLoader"/>
 
+    <Component Type="LoadFreesurferSegmentationVolume">
+        <Name>"Load FS Segmentation"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
+    </Component>
+
+
 
     <Component Type="MoveRASOrigin"/>
 
@@ -23,7 +29,36 @@
 
     <Component Type="DBSLeadDetection"/>
 
-    <Component Type="AlterElectrodeLabels"/>
+    <Component Type="MatlabElectrodeSelection"/>
+    
+    <Component Type="FreesurferElectrodeLocalization"/>
+    
+    <Component Type="ElectrodeProjection"/>
+    
+    <Component Type="ReorderElectrodes"/>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to FS segmentation labels"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="CalculateDistanceToSurfaceLabel"> 
+        <Name>"Distance to Surface"</Name>
+    </Component>
+
+    <Component Type="ReplaceLabels">
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Right-Cerebral-White-Matter","unknown","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Left-Cerebral-Cortex","Right-Cerebral-Cortex","ctx-lh-insula","ctx-rh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[3,0,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace unknown labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0]</ReplacementRadius>
+    </Component>
+
 
     <Component Type="MatOutput">
         <Name>"Create brain.mat"</Name>
@@ -33,6 +68,8 @@
 	<Name>"Report Generator MRI"</Name>
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
+
+
   
     <View Type="Model3DView">
 	<Name>"3D View"</Name>
@@ -41,6 +78,10 @@
     <View Type="SliceViewerView">
     	<Name>"Slice Viewer"</Name>
     </View>
+    
+    <View Type="ElectrodeLocationTableView"/>
+
+    <View Type="ElectrodeDefinitionView"/>
 
 
 </PipelineDefinition>

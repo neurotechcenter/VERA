@@ -42,12 +42,12 @@
     <Component Type="ElectrodeProjection"/>
 	
 	<Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to Left Hippocampus"</Name>
+        <Name>"Distance to Right Hippocampus"</Name>
 		<VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
 	</Component>
 
 	<Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to Right Hippocampus"</Name>
+        <Name>"Distance to Left Hippocampus"</Name>
 		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
 	</Component>
 
