@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="Create Freesurfer Model Pipeline">
+
+    <Component Type="FileLoader">
+        <Identifier>"MRI"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+    </Component>
+
+    <Component Type="FreesurferModelGeneration">
+        <Name>"Generate Freesurfer Model"</Name>
+    </Component>
+
+    <Component Type="FreesurferHippocampalSegmentation">
+        <Name>"Generate Hippocampal Subsegmentation"</Name>
+    </Component>
+
+    
+
+    <View Type="Model3DView">
+	    <Name>"3D View"</Name>
+    </View>
+
+    <View Type="SliceViewerView">
+    	<Name>"Slice View"</Name>
+    </View>
+
+</PipelineDefinition>
