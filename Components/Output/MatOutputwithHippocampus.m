@@ -54,8 +54,8 @@ classdef MatOutputwithHippocampus < AComponent
             viewstruct.enableaxis                    = 0;
             viewstruct.lightingtype                  = 'gouraud';
             [electrodeLabels,LabelName]              = obj.findLabels(eLocs,surf1);
-            cortex_annotation.Annotation             = surf1.Annotation;
-            cortex_annotation.AnnotationLabel        = surf1.AnnotationLabel;
+            annotation.Annotation                    = surf1.Annotation;
+            annotation.AnnotationLabel               = surf1.AnnotationLabel;
             LHippocampus_annotation.Annotation       = surf2.Annotation;
             LHippocampus_annotation.AnnotationLabel  = surf2.AnnotationLabel;
             RHippocampus_annotation.Annotation       = surf3.Annotation;
@@ -70,7 +70,7 @@ classdef MatOutputwithHippocampus < AComponent
             SecondaryLabel                           = eLocs.Label;
 
             save(fullfile(path,file),'cortex','LHippocampus','RHippocampus','ix','tala','viewstruct','electrodeNames','cmapstruct','vcontribs',...
-                'electrodeDefinition','electrodeLabels','LabelName','cortex_annotation','LHippocampus_annotation','RHippocampus_annotation','SecondaryLabel');
+                'electrodeDefinition','electrodeLabels','LabelName','annotation','LHippocampus_annotation','RHippocampus_annotation','SecondaryLabel');
         end
         
         function [labelId,labelName]=findLabels(~,elocs,surf)
