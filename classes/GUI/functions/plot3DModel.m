@@ -6,17 +6,29 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
 %annotation - Annotations for each vertex
 %varargin - additional settings to be passed to trisurf
 %See also Surface, trisurf
+    %%% Added by James
+    if ~isempty(varargin)
+        if strcmp(varargin{1},'LightOn') && varargin{2} == 1
+            LightOn = 1;
+        else
+            LightOn = 0;
+        end
+    else
+        LightOn = 1;
+    end
+    %%%
+
     if(~exist('annotation','var'))
         annotation=ones(size(model.vert,1),1);
     end
     surf=trisurf(model.tri, model.vert(:, 1), model.vert(:, 2), model.vert(:, 3),annotation ,'Parent',...
-        ax,'linestyle', 'none','FaceLighting','gouraud','BackFaceLighting','unlit','AmbientStrength',1,varargin{:});
-    light(ax,'Position',[1 0 0],'Style','local');
-    %light(obj.axModel,'Position',[-1 0 0]);
-   % camlight(obj.axModel,'headlight');
+        ax,'linestyle', 'none','FaceLighting','gouraud','BackFaceLighting','unlit','AmbientStrength',1); % James removed varargin to deal with lighting... was ,varargin){:}
     material(ax,'dull');
-    set(ax,'AmbientLightColor',[1 1 1]);
-    camlight(ax,'headlight');
+    if LightOn
+        light(ax,'Position',[1 0 0],'Style','local');
+        set(ax,'AmbientLightColor',[1 1 1]);
+        camlight(ax,'headlight');
+    end
     set(ax,'xtick',[]);
     set(ax,'ytick',[]);
     axis(ax,'equal');
