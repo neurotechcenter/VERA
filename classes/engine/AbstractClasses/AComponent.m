@@ -182,7 +182,7 @@ classdef (Abstract) AComponent < Serializable
         end
         
         function AddOutput(obj,Identifier,outpDataTypeName)
-            % AddInput add an output to this component
+            % AddOutput add an output to this component
             % In the Publish method, outputs can be defined
             % Outputs can be used as Inputs for other components
             % Identifier - Name associated with the data, can be retrieved

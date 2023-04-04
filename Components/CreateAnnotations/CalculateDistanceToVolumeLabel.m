@@ -24,7 +24,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
             obj.ignoreList{end+1}='internalIds';
             obj.ignoreList{end+1}='LabelNames';
             obj.Prefix='';
-             obj.LoadLUTFile="false";
+            obj.LoadLUTFile="false";
         end
         
         function  Publish(obj)
@@ -42,7 +42,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                 try
                     path=obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
-                    warning('Label configuration configuration incorrect, trying Freesurfer LUT');
+                    warning('No labels provided or label configuration configuration incorrect, trying Freesurfer LUT');
                     lut_path=fullfile(path,'FreeSurferColorLUT.txt');
                     [code, lut]=loadLUTFile(lut_path);
                    if(isempty(obj.LabelIds))
@@ -56,7 +56,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                             if(strcmpi(strtrim(lut(code == obj.internalIds(i),:)),'UNKNOWN'))
                                 obj.internalLabels{i}='unknown'; %no need to add prefix for unknown, also normalize way it is written as label
                             else
-                            obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
+                                obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
                             end
                          else
                              obj.internalLabels{i}='unknown';

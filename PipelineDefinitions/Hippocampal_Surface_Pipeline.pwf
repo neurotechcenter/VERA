@@ -34,7 +34,7 @@
     <Component Type="Coregistration"/>
 
     <Component Type="Coregistration">
-	<Name>"Coregister ROSA Trajectories"</Name>
+	    <Name>"Coregister ROSA Trajectories"</Name>
         <CTIdentifier>"ROSAVolume"</CTIdentifier>
         <TIdentifier>"T_ROSA"</TIdentifier>
     </Component>
@@ -107,7 +107,7 @@
     </Component>
 
     <Component Type="FreesurferDatExport">
-      <Name>"Write Freesurfer PointSet files"</Name>
+        <Name>"Write Freesurfer PointSet files"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
     </Component>
@@ -129,19 +129,47 @@
     </Component>
 
     <Component Type="SurfaceTransformation">
-        <Name>"Project Surface to MNI"</Name>
+        <Name>"Project Cortex to MNI"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <TIdentifier>"T_MNI"</TIdentifier>
+    </Component>
+
+    <Component Type="SurfaceTransformation">
+        <Name>"Project Left Hippocampus to MNI"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <TIdentifier>"T_MNI"</TIdentifier>
+    </Component>
+
+    <Component Type="SurfaceTransformation">
+        <Name>"Project Right Hippocampus to MNI"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
         <TIdentifier>"T_MNI"</TIdentifier>
     </Component>
     
-    <Component Type="MatOutput">
-        <Name>"Create MNI brain.mat"</Name>
+    <Component Type="MatOutputwithHippocampus">
+        <Name>"Create MNI brain.mat with Hippocampus"</Name>
+        <SurfaceIdentifier1>"Surface"</SurfaceIdentifier1>
+        <SurfaceIdentifier2>"LHippocampusSurface"</SurfaceIdentifier2>
+        <SurfaceIdentifier3>"RHippocampusSurface"</SurfaceIdentifier3>
     </Component>
 
 
 
 
     <View Type="Model3DView">
-	<Name>"3D View"</Name>
+	    <Name>"3D View"</Name>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Left Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Right Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
     <View Type="SliceViewerView">

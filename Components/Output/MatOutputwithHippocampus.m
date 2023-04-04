@@ -19,11 +19,11 @@ classdef MatOutputwithHippocampus < AComponent
         end
         
         function Publish(obj)
-            obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
-            obj.AddInput(obj.ElectrodeDefinitionIdentifier,'ElectrodeDefinition');
-            obj.AddInput(obj.SurfaceIdentifier1,'Surface');
-            obj.AddInput(obj.SurfaceIdentifier2,'Surface');
-            obj.AddInput(obj.SurfaceIdentifier3,'Surface');
+            obj.AddInput(obj.ElectrodeLocationIdentifier,   'ElectrodeLocation');
+            obj.AddInput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition');
+            obj.AddInput(obj.SurfaceIdentifier1,            'Surface');
+            obj.AddInput(obj.SurfaceIdentifier2,            'Surface');
+            obj.AddInput(obj.SurfaceIdentifier3,            'Surface');
             
         end
         

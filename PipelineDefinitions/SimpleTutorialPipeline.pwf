@@ -2,8 +2,8 @@
 <PipelineDefinition Name="Simple Tutorial Pipeline">
 
     <Component Type="ElectrodeDefinitionConfiguration">
-	<Identifier>"ElectrodeDefinition"</Identifier>
-	<Name>"Electrode Definition"</Name>
+	    <Identifier>"ElectrodeDefinition"</Identifier>
+	    <Name>"Electrode Definition"</Name>
     </Component>
 
     <Component Type="FileLoader">
@@ -18,6 +18,8 @@
 
     <Component Type="FreesurferSurfaceLoader" />
 
+
+
     
     <Component Type="MoveRASOrigin"/>
 
@@ -31,27 +33,29 @@
 
 
 	
+
     <Component Type="MatOutput">
         <Name>"Create brain.mat"</Name>
     </Component>
 
     <Component Type="ReportGenerator">
-	<Name>"Report Generator MRI"</Name>
+	    <Name>"Report Generator MRI"</Name>
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
 
   
+
+
     <View Type="ElectrodeDefinitionView">
     	<Name>"Electrode Definition"</Name>
     </View>
 
-
     <View Type="Model3DView">
-	<Name>"3D View"</Name>
+	    <Name>"3D View"</Name>
     </View>
 
     <View Type="SliceViewerView">
-    	<Name>"Slice Viewer"</Name>
+    	<Name>"Slice View"</Name>
     </View>
 
 </PipelineDefinition>
