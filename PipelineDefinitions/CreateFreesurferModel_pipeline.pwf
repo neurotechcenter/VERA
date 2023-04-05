@@ -8,6 +8,7 @@
 
     <Component Type="FreesurferModelGeneration">
         <Name>"Generate Freesurfer Model"</Name>
+		<AnnotationType>"aparc"</AnnotationType>
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">

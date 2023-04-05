@@ -113,7 +113,7 @@
     </Component>
 
     <Component Type="ReportGenerator">
-	<Name>"Report Generator MRI"</Name>
+	    <Name>"Report Generator MRI"</Name>
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
 
