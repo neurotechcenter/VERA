@@ -33,7 +33,7 @@
     <Component Type="Coregistration"/>
 
     <Component Type="Coregistration">
-	    <Name>"Coregister ROSA Trajectories"</Name>
+	    <Name>"Coregister ROSA MRI"</Name>
         <CTIdentifier>"ROSAVolume"</CTIdentifier>
         <TIdentifier>"T_ROSA"</TIdentifier>
     </Component>
