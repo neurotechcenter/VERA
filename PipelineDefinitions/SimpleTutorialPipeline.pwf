@@ -2,34 +2,48 @@
 <PipelineDefinition Name="Simple Tutorial Pipeline">
 
     <Component Type="ElectrodeDefinitionConfiguration">
+        <Name>"Electrode Definition"</Name>
 	    <Identifier>"ElectrodeDefinition"</Identifier>
-	    <Name>"Electrode Definition"</Name>
     </Component>
 
     <Component Type="FileLoader">
+        <Name>"CT Loader"</Name>
         <Identifier>"CT"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
     <Component Type="FileLoader">
+        <Name>"MRI Loader"</Name>
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
-    <Component Type="FreesurferSurfaceLoader" />
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Load Freesurfer Surface"</Name>
+    </Component>
 
 
 
     
-    <Component Type="MoveRASOrigin"/>
+    <Component Type="MoveRASOrigin">
+        <Name>"Move RAS Origin"</Name>
+    </Component>
 
-    <Component Type="Coregistration"/>
+    <Component Type="Coregistration">
+        <Name>"Coregister CT to MRI"</Name>
+    </Component>
 
-    <Component Type="MatlabElectrodeSelection"/>
+    <Component Type="MatlabElectrodeSelection">
+        <Name>"MATLAB Electrode Selection"</Name>
+    </Component>
 
-    <Component Type="FreesurferElectrodeLocalization"/>
+    <Component Type="FreesurferElectrodeLocalization">
+        <Name>"Freesurfer Electrode Localization"</Name>
+    </Component>
 
-    <Component Type="ReorderElectrodes"/>
+    <Component Type="ReorderElectrodes">
+        <Name>"Reorder Electrodes"</Name>
+    </Component>
 
 
 	

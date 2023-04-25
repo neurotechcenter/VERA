@@ -2,10 +2,27 @@ function [electrodeDefinitionsOut] = cleanupLabels(electrodeDefinition,replaceLa
 %CLEANUPLABELS removes 'Unknown' and adds the closest surface label to
 %electrodes marked as cerebral cortex
 
-if(length(replaceLabels) ~= length(labelRadius))
+if(length(replaceLabels) ~= length(labelRadius)) && ~isempty(replaceLabels)
     error('Size of replaceLabels and labelRadius must be equal');
 end
+
+%%%% James added to allow for replacing empty labels (similar to unknown)
+if isempty(replaceLabels)
+    replaceLabels = {' '};
+end
+for i = 1:length(replaceLabels)
+    if isempty(replaceLabels{i})
+        replaceLabels{i} = {' '};
+    end
+end
 electrodeDefinitionsOut=(electrodeDefinition);
+for i = 1:length(electrodeDefinitionsOut.Label)
+    if isempty(electrodeDefinitionsOut.Label{i})
+        electrodeDefinitionsOut.Label{i} = ' ';
+    end
+end
+%%%%
+
 for i=1:length(electrodeDefinition.Label)
     
     for l=1:length(replaceLabels)
@@ -19,13 +36,13 @@ for i=1:length(electrodeDefinition.Label)
                 [labels,removedLabel]=removeLabel(labels,replaceLabels{ll});
                 
                 if(any(removedLabel) && any(d(removedLabel) < labelRadius(ll)))
-                    curr_radius=curr_radius+max(d(removedLabel));
+                    curr_radius=curr_radius+min(d(removedLabel)); % James: was max()
                 end
                 d=d(~removedLabel);
             end
-            [labels,removedLabel]=removeLabel(labels,'Unknown');
+            [labels,removedLabel]=removeLabel(labels,'unknown');
             d=d(~removedLabel);
-            if(any(d <= curr_radius))
+            if any(d <= curr_radius)
                 electrodeDefinitionsOut.Label{i}=labels(1);
             else %keep original label
                 electrodeDefinitionsOut.Label{i}=electrodeDefinition.Label{i};

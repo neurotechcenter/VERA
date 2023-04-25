@@ -22,7 +22,7 @@ classdef ReplaceLabels < AComponent
             obj.AddOutput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation');
         end
         function Initialize(obj)
-            if(length(obj.ReplaceableLabels) ~= length(obj.ReplacementRadius))
+            if(length(obj.ReplaceableLabels) ~= length(obj.ReplacementRadius)) && ~isempty(obj.ReplaceableLabels)
                 error('Entries for ReplaceableRadius and Replacement Radius must be the same length!');
             end
         end

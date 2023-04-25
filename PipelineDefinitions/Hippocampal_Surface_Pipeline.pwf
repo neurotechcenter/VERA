@@ -16,13 +16,17 @@
 
     <Component Type="FreesurferSurfaceLoader"/>
 
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Import Freesurfer Segmentation Folder"</Name>
+    </Component>
+
     <Component Type="LoadFreesurferSegmentationVolume">
-        <Name>"Load FS Segmentation"</Name>
+        <Name>"Load Freesurfer Segmentation Volume"</Name>
         <FSVolume>"aparc+aseg"</FSVolume>
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">
-        <Name>"Load Hippocampal subsegmentations"</Name>
+        <Name>"Load/Generate Hippocampal Subsegmentation"</Name>
         <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
     </Component>
 
@@ -50,8 +54,12 @@
 
     <Component Type="ReorderElectrodes"/>
 
+    <Component Type="CalculateDistanceToSurfaceLabel"> 
+        <Name>"Distance to Surface Labels"</Name>
+    </Component>
+
     <Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to FS segmentation labels"</Name>
+        <Name>"Distance to Volume Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
     </Component>
 
@@ -65,21 +73,18 @@
         <VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
     </Component>
 
-    <Component Type="CalculateDistanceToSurfaceLabel"> 
-        <Name>"Distance to Surface"</Name>
-    </Component>
-
     <Component Type="ReplaceLabels">
+        <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["Right-Cerebral-White-Matter","unknown","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Left-Cerebral-Cortex","Right-Cerebral-Cortex","ctx-lh-insula","ctx-rh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[3,0,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplaceableLabels>["unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[1,3,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
-        <Name>"Replace unknown labels"</Name>
+        <Name>"Replace Unknown Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ReplaceableLabels>["unknown"]</ReplaceableLabels>
-        <ReplacementRadius>[0]</ReplacementRadius>
+        <ReplacementRadius>[1]</ReplacementRadius>
     </Component>
 
     <Component Type="LabelVolume2Surface">
@@ -107,7 +112,7 @@
     </Component>
 
     <Component Type="FreesurferDatExport">
-        <Name>"Write Freesurfer PointSet files"</Name>
+        <Name>"Write Freesurfer PointSet Files"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
     </Component>
@@ -176,9 +181,14 @@
     	<Name>"Slice View"</Name>
     </View>
     
-    <View Type="ElectrodeLocationTableView"/>
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
 
-    <View Type="ElectrodeDefinitionView"/>
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
+    </View>
+
 
 
 

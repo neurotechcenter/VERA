@@ -21,7 +21,7 @@ classdef (Abstract) AComponent < Serializable
     %   Example: Set the Name Property in the TestComponent to Test 
     %
     %   <Component Type="TestComponent">
-    %       <Name>"Test"</Test>
+    %       <Name>"Test"</Name>
     %   </Component>
     %
     %   For more complex datatypes the Element value is formatted as json.

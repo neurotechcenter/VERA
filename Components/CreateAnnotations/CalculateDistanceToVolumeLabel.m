@@ -96,8 +96,11 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                         old_data_label_id=out.GetAnnotation(i_loc,'LabelId');
 
                         voxLoc=round(vol.Ras2Vox(out.Location(i_loc,:)));
-                        if((voxLoc(1) <= size(binaryVol,1)) && (voxLoc(2) <= size(binaryVol,2)) && (voxLoc(3) <= size(binaryVol,3)) && all(voxLoc >= 1))
-                            if(binaryVol(voxLoc(1),voxLoc(2),voxLoc(3)))
+                        if((voxLoc(1) <= size(binaryVol,1)) &&... % if inside of brain?
+                                (voxLoc(2) <= size(binaryVol,2)) &&...
+                                (voxLoc(3) <= size(binaryVol,3)) &&...
+                                all(voxLoc >= 1))
+                            if(binaryVol(voxLoc(1),voxLoc(2),voxLoc(3))) % if inside of given brain area?
                                 out.AddLabel(i_loc,obj.internalLabels{i});
                                 dist=0; %distance set to 0 if inside
                             end

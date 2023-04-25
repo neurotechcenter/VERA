@@ -48,7 +48,7 @@ classdef LabelVolume2Surface < AComponent
                 try
                     path=obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
-                    warning('Label configuration configuration incorrect, trying Freesurfer LUT');
+                    warning('Label configuration configuration not found or incorrect, trying Freesurfer LUT');
                     lut_path=fullfile(path,'FreeSurferColorLUT.txt');
                     [code, lut]=loadLUTFile(lut_path);
                    if(isempty(obj.LabelIds))
@@ -63,7 +63,7 @@ classdef LabelVolume2Surface < AComponent
                             if(strcmpi(strtrim(lut(code == obj.internalIds(i),:)),'UNKNOWN'))
                                 obj.internalLabels{i}='unknown'; %no need to add prefix for unknown, also normalize way it is written as label
                             else
-                            obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
+                                obj.internalLabels{i}=[obj.Prefix strtrim(lut(code == obj.internalIds(i),:))];
                             end
                          else
                              obj.internalLabels{i}='unknown';
