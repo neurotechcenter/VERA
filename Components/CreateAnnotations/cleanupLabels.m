@@ -43,7 +43,7 @@ for i=1:length(electrodeDefinition.Label)
             [labels,removedLabel]=removeLabel(labels,'unknown');
             d=d(~removedLabel);
             if any(d <= curr_radius)
-                electrodeDefinitionsOut.Label{i}=labels(1);
+                electrodeDefinitionsOut.Label{i}=labels(1); % not just 1...
             else %keep original label
                 electrodeDefinitionsOut.Label{i}=electrodeDefinition.Label{i};
             end

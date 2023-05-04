@@ -26,7 +26,7 @@
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">
-        <Name>"Load/Generate Hippocampal Subsegmentation"</Name>
+        <Name>"Load or Generate Hippocampal Subsegmentation"</Name>
         <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
     </Component>
 
@@ -77,14 +77,14 @@
         <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ReplaceableLabels>["unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[1,3,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplacementRadius>[0,3,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
         <Name>"Replace Unknown Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ReplaceableLabels>["unknown"]</ReplaceableLabels>
-        <ReplacementRadius>[1]</ReplacementRadius>
+        <ReplacementRadius>[0]</ReplacementRadius>
     </Component>
 
     <Component Type="LabelVolume2Surface">

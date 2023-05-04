@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="Full ROSA Pipeline">
+<PipelineDefinition Name="Complex Tutorial Pipeline">
 
     <Component Type="FileLoader">
         <Name>"CT Loader"</Name>
@@ -14,15 +14,15 @@
     </Component>
 
     <Component Type="ImportROSFile">
-        <Name>"Import ROSA File"</Name>
+        <Name>"Load ROSA File"</Name>
+    </Component>
+
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Load Freesurfer Segmentation Folder"</Name>
     </Component>
 
     <Component Type="FreesurferSurfaceLoader">
         <Name>"Load Freesurfer Surface"</Name>
-    </Component>
-
-    <Component Type="ImportFreesurferSegmentation">
-        <Name>"Import Freesurfer Segmentation Folder"</Name>
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">
@@ -31,7 +31,7 @@
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">
-        <Name>"Load/Generate Hippocampal Subsegmentation"</Name>
+        <Name>"Load or Generate Hippocampal Subsegmentation"</Name>
         <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
     </Component>
 
@@ -70,10 +70,6 @@
         <Name>"Reorder Electrodes"</Name>
     </Component>
 
-    <Component Type="CalculateDistanceToSurfaceLabel">
-        <Name>"Distance to Surface Labels"</Name>
-    </Component>
-
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Volume Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
@@ -93,14 +89,14 @@
         <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ReplaceableLabels>["unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[1,3,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplacementRadius>[0,3,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
         <Name>"Replace Unknown Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ReplaceableLabels>["unknown"]</ReplaceableLabels>
-        <ReplacementRadius>[1]</ReplacementRadius>
+        <ReplacementRadius>[0]</ReplacementRadius>
     </Component>
 
 
