@@ -18,6 +18,10 @@
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Load Freesurfer Segmentation Folder"</Name>
+    </Component>
+
     <Component Type="FreesurferSurfaceLoader">
         <Name>"Load Freesurfer Surface"</Name>
     </Component>

@@ -16,10 +16,16 @@
 		<Identifier>"ElectrodeDefinition"</Identifier>
     </Component>    
 
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Load Freesurfer Segmentation Folder"</Name>
+    </Component>
+
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Load Freesurfer Surface"</Name>
+    </Component>
 
 
 
-    <Component Type="FreesurferSurfaceLoader"/>
 
     <Component Type="MoveRASOrigin"/>
 

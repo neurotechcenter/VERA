@@ -17,12 +17,12 @@
         <Name>"Import ROSA File"</Name>
     </Component>
 
-    <Component Type="FreesurferSurfaceLoader">
-        <Name>"Load Freesurfer Surface"</Name>
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Load Freesurfer Segmentation Folder"</Name>
     </Component>
 
-    <Component Type="ImportFreesurferSegmentation">
-        <Name>"Import Freesurfer Segmentation Folder"</Name>
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Load Freesurfer Surface"</Name>
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">

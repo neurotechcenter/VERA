@@ -14,11 +14,11 @@
 
     <Component Type="ImportROSFile"/>
 
-    <Component Type="FreesurferSurfaceLoader"/>
-
     <Component Type="ImportFreesurferSegmentation">
         <Name>"Import Freesurfer Segmentation Folder"</Name>
     </Component>
+
+    <Component Type="FreesurferSurfaceLoader"/>
 
     <Component Type="LoadFreesurferSegmentationVolume">
         <Name>"Load Freesurfer Segmentation Volume"</Name>

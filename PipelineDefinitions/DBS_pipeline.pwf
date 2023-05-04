@@ -13,10 +13,12 @@
 
     <Component Type="ElectrodeDefinitionConfiguration"/>
 
-    <Component Type="FreesurferSurfaceLoader"/>
-
     <Component Type="ImportFreesurferSegmentation">
-        <Name>"Import Freesurfer Segmentation Folder"</Name>
+        <Name>"Load Freesurfer Segmentation Folder"</Name>
+    </Component>
+
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Load Freesurfer Surface"</Name>
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">
