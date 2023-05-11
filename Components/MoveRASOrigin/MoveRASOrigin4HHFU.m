@@ -1,4 +1,4 @@
-classdef MoveRASOrigin < AComponent
+classdef MoveRASOrigin4HHFU < AComponent
     %MoveRASOrigin Moves the origin of RAS into the Center of the Volume
     %pixels
    properties
@@ -6,7 +6,7 @@ classdef MoveRASOrigin < AComponent
     end
     
     methods
-        function obj = MoveRASOrigin()
+        function obj = MoveRASOrigin4HHFU()
             obj.Identifier='CT';
         end
         function Publish(obj)
