@@ -23,10 +23,10 @@ classdef MoveRASOrigin < AComponent
                 vol.Image.hdr.hist.srow_x(4)=-vol.Image.hdr.dime.pixdim(2)*img_size(1);
                 vol.Image.hdr.hist.srow_y(4)=-vol.Image.hdr.dime.pixdim(3)*img_size(2);
                 vol.Image.hdr.hist.srow_z(4)=-vol.Image.hdr.dime.pixdim(4)*img_size(3);
-%             elseif(vol.Image.hdr.dime.pixdim(1) == -1) % James added this when testing HHFU001 (delete this elseif if anything breaks)
-%                 vol.Image.hdr.hist.srow_x(4)=vol.Image.hdr.dime.pixdim(2)*img_size(1);
-%                 vol.Image.hdr.hist.srow_y(4)=-vol.Image.hdr.dime.pixdim(3)*img_size(2);
-%                 vol.Image.hdr.hist.srow_z(4)=-vol.Image.hdr.dime.pixdim(4)*img_size(3);
+            elseif(vol.Image.hdr.dime.pixdim(1) == -1) % James added this when testing HHFU001 (delete this elseif if anything breaks)
+                vol.Image.hdr.hist.srow_x(4)=vol.Image.hdr.dime.pixdim(2)*img_size(1);
+                vol.Image.hdr.hist.srow_y(4)=-vol.Image.hdr.dime.pixdim(3)*img_size(2);
+                vol.Image.hdr.hist.srow_z(4)=-vol.Image.hdr.dime.pixdim(4)*img_size(3);
             else % the original else
                 vol.Image.hdr.hist.srow_x(4)=-vol.Image.hdr.dime.pixdim(2)*img_size(1);
                 vol.Image.hdr.hist.srow_y(4)=vol.Image.hdr.dime.pixdim(3)*img_size(2);
