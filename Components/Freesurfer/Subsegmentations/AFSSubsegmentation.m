@@ -47,6 +47,7 @@ classdef (Abstract) AFSSubsegmentation < AComponent
                 segmentationPath=optInp.Path;
                 comPath=fileparts(obj.ComponentPath);
                 segmentationPath=fullfile(comPath,segmentationPath); %create full path
+                segmentationFolder = [];
             else
                 segmentationPath=uigetdir([],'Please select Freesurfer Segmentation');
                 if(isempty(segmentationPath))
@@ -60,7 +61,7 @@ classdef (Abstract) AFSSubsegmentation < AComponent
             if(isempty(LfileName) || isempty(RfileName))
                 
                 recon_script=fullfile(fileparts(fileparts(mfilename('fullpath'))),'scripts',obj.ShellScriptName);
-                [segmentationPath,subj_name]=fileparts(segmentationPath);
+                [segmentationPath,segmentationFolder]=fileparts(segmentationPath);
                 if(ispc)
                     subsyspath=obj.GetDependency('UbuntuSubsystemPath');
                     wsl_segm_path=convertToUbuntuSubsystemPath(segmentationPath,subsyspath);
@@ -69,18 +70,17 @@ classdef (Abstract) AFSSubsegmentation < AComponent
                     systemWSL(['chmod +x ''' wsl_recon_script ''''],'-echo');
                     shellcmd=['''' wsl_recon_script ''' ''' w_freesurferPath ''' ''' ...
                     wsl_segm_path ''' ' ...
-                    '''' subj_name ''''];
+                    '''' segmentationFolder ''''];
                     systemWSL(shellcmd,'-echo');
                 else
                     system(['chmod +x ''' recon_script ''''],'-echo');
                     shellcmd=['''' recon_script ''' ''' freesurferPath ''' ''' ...
-                    segmentationPath ''' ' ...
-                    '''' subj_name ''''];
+                    segmentationPath ''' ''' segmentationFolder ''''];
                     system(shellcmd,'-echo');
                 end
             end
-            LfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.LVolumeName));
-            RfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.RVolumeName));
+            LfileName=obj.resolveFileNamedir(fullfile(segmentationPath,segmentationFolder,'mri',obj.LVolumeName));% Modified by James to add segmentationFolder to path
+            RfileName=obj.resolveFileNamedir(fullfile(segmentationPath,segmentationFolder,'mri',obj.RVolumeName));
             if(isempty(LfileName) || isempty(RfileName))
                 error('Error - no output files generated after running segmentation!');
             end
