@@ -19,6 +19,19 @@ javaaddpath('Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.ja
 import uiextras.jTree.*;
 warning on
 
+if ~any(any(contains(struct2cell(ver), 'Image Processing Toolbox')))
+    error('Please check if the Image Processing Toolbox is installed!');
+end
+if ~any(any(contains(struct2cell(ver), 'MATLAB Report Generator')))
+    error('Please check if the MATLAB Report Generator is installed!');
+end
+if ~any(any(contains(struct2cell(ver), 'Statistics and Machine Learning Toolbox')))
+    error('Please check if the Statistics and Machine Learning Toolbox is installed!');
+end
+if ~any(any(contains(struct2cell(ver), 'Computer Vision Toolbox')))
+    error('Please check if the Computer Vision Toolbox is installed!');
+end
+
 %startup GUI
 guihandle=MainGUI();
 addToolbarExplorationButtons(guihandle);
