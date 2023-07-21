@@ -66,7 +66,8 @@ classdef Coregistration < AComponent
           %  func_img=func_img+(rand(size(func_img)) > 0.5);
             new_nii = spm_create_vol(V);
             new_nii.fname = pref_ct;
-            new_img = spm_write_vol(new_nii, ct.Image.img); %spm12 seems to have issues with some nifti images; this way we can make sure that the CT is correect
+            new_img = spm_write_vol(new_nii, ct.Image.img); 
+            %spm12 seems to have issues with some nifti images; this way we can make sure that the CT is correct
             %copyfile(ct.Path,pref_ct);
             mrihandle = spm_vol(pref_mri);
             cthandle = spm_vol(pref_ct);
