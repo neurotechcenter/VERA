@@ -5,7 +5,7 @@
 close all;
 clearvars;
 clc;
-restoredefaultpath;
+%restoredefaultpath;
 
 
 %add all paths
