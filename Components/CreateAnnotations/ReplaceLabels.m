@@ -13,8 +13,8 @@ classdef ReplaceLabels < AComponent
     methods
         function obj = ReplaceLabels()
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
-            obj.ReplaceableLabels={'Right-Cerebral-White-Matter','unknown','Left-Cerebral-White-Matter','Right-Hippocampus','Left-Hippocampus','Right-Amygdala','Left-Amygdala','Left-Cerebral-Cortex','Right-Cerebral-Cortex'};
-            obj.ReplacementRadius=[3,0,3,1,1,1,1,10,10];
+            obj.ReplaceableLabels={'unknown','Right-Cerebral-White-Matter','Left-Cerebral-White-Matter','Right-Hippocampus','Left-Hippocampus','Right-Amygdala','Left-Amygdala','Right-Cerebral-Cortex','Left-Cerebral-Cortex'};
+            obj.ReplacementRadius=[0,3,3,1,1,1,1,10,10];
         end
         
         function Publish(obj)

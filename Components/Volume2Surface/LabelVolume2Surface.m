@@ -99,7 +99,10 @@ classdef LabelVolume2Surface < AComponent
                     if(~isempty(obj.Smoothing))
                         binaryVol=smooth3(binaryVol,'box',obj.Smoothing);
                     end
-                    [tri,vert]=isosurface(x,y,z,binaryVol);
+                    [tri,vert]=isosurface(x,y,z,binaryVol,0.1);
+                    % if isempty(vert) % James set the last input, isovalue. Not sure what is the appropriate value here
+                    %     [tri,vert]=isosurface(x,y,z,binaryVol,0.4); 
+                    % end
                     tri=tri + size(vert_tot, 1);
                     vert=[vert(:,2) vert(:,1) vert(:,3)];
                     vert_tot=[vert_tot;vert];
