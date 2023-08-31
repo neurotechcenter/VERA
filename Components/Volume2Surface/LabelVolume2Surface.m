@@ -99,14 +99,27 @@ classdef LabelVolume2Surface < AComponent
                     if(~isempty(obj.Smoothing))
                         binaryVol=smooth3(binaryVol,'box',obj.Smoothing);
                     end
-                    [tri,vert]=isosurface(x,y,z,binaryVol,0.1);
-                    % if isempty(vert) % James set the last input, isovalue. Not sure what is the appropriate value here
-                    %     [tri,vert]=isosurface(x,y,z,binaryVol,0.4); 
+
+                    [tri,vert]=isosurface(x,y,z,binaryVol,0.1); % James set the last input, isovalue. Not sure what is the appropriate value here
+
+                    % [tri,vert]=isosurface(x,y,z,binaryVol); % alternate approach to only specify the isovalue when necessary
+                    % if isempty(vert) 
+                    %     [tri,vert]=isosurface(x,y,z,binaryVol,0.1); 
                     % end
+
                     tri=tri + size(vert_tot, 1);
                     vert=[vert(:,2) vert(:,1) vert(:,3)];
                     vert_tot=[vert_tot;vert];
                     tri_tot=[tri_tot;tri];
+
+                    % [tri,vert]=isosurface(x,y,z,binaryVol); % alternate approach attempting to exclude surfaces that can't be realized. This does not work yet
+                    % if ~isempty(vert)
+                    %     tri=tri + size(vert_tot, 1);
+                    %     vert=[vert(:,2) vert(:,1) vert(:,3)];
+                    %     vert_tot=[vert_tot;vert];
+                    %     tri_tot=[tri_tot;tri];
+                    % end
+
                     surf.TriId=[surf.TriId;obj.internalIds(i)*ones(size(tri, 1),1)];
                     surf.VertId=[surf.VertId;obj.internalIds(i)*ones(size(vert, 1),1)];
                     surf.Annotation=[surf.Annotation; obj.internalIds(i)*ones(size(vert, 1),1)];

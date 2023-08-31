@@ -86,7 +86,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                 waitbar(i/length(obj.internalIds),f);
                 if(any(any(any(binaryVol)))) %only check if exists
                      [x,y,z]=meshgrid(1:size(binaryVol,2),1:size(binaryVol,1),1:size(binaryVol,3));
-                     [~,vert]=isosurface(x,y,z,binaryVol); 
+                     [~,vert]=isosurface(x,y,z,binaryVol,0.1); % James added the last input, isovalue. Similar to issue found in LabelVolume2Surface
                      vert=[vert(:,2) vert(:,1) vert(:,3)]; %reorient from matlabs normal view...
                      vert=vol.Vox2Ras(vert);
                      for i_loc=1:size(out.Location,1)
