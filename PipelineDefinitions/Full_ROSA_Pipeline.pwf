@@ -17,12 +17,9 @@
         <Name>"Import ROSA File"</Name>
     </Component>
 
-    <Component Type="ImportFreesurferSegmentation">
-        <Name>"Load Freesurfer Segmentation Folder"</Name>
-    </Component>
-
-    <Component Type="FreesurferSurfaceLoader">
-        <Name>"Load Freesurfer Surface"</Name>
+    <Component Type="FreesurferModelGeneration">
+        <Name>"Generate Freesurfer Model"</Name>
+        <AnnotationType>"aparc"</AnnotationType>
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">
@@ -33,6 +30,11 @@
     <Component Type="FreesurferHippocampalSegmentation">
         <Name>"Load or Generate Hippocampal Subsegmentation"</Name>
         <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="FreesurferThalamusSegmentation">
+        <Name>"Load or Generate Thalamus Subsegmentation"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
     </Component>
 
 
@@ -70,10 +72,6 @@
         <Name>"Reorder Electrodes"</Name>
     </Component>
 
-    <Component Type="CalculateDistanceToSurfaceLabel">
-        <Name>"Distance to Surface Labels"</Name>
-    </Component>
-
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Volume Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
@@ -89,11 +87,20 @@
 		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
 	</Component>
 
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Thalamus"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="CalculateDistanceToSurfaceLabel">
+        <Name>"Distance to Surface Labels"</Name>
+    </Component>
+
     <Component Type="ReplaceLabels">
         <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[0,3,3,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplaceableLabels>["unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
@@ -103,11 +110,62 @@
         <ReplacementRadius>[0]</ReplacementRadius>
     </Component>
 
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Left Hippocampus Surface"</Name>
+        <VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Right Hippocampus Surface"</Name>
+        <VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Thalamus Surface"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
+        <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Cingulate Surface"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier> 
+        <LabelNames>["ctx-lh-caudalanteriorcingulate","ctx-lh-isthmuscingulate","ctx-lh-posteriorcingulate","ctx-lh-rostralanteriorcingulate","ctx-rh-caudalanteriorcingulate","ctx-rh-isthmuscingulate","ctx-rh-posteriorcingulate","ctx-rh-rostralanteriorcingulate"]</LabelNames>
+        <LabelIds>[1002,1010,1023,1026,2002,2010,2023,2026]</LabelIds>
+        <Smoothing>3</Smoothing>
+    </Component>
+
 
 
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat"</Name>
+        <Name>"Create brain.mat with cortex"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat with Left Hippocampus"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat with Right Hippocampus"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat with Thalamus"</Name>
+        <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat with Cingulate"</Name>
+        <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier>
     </Component>
     
     <Component Type="FreesurferDatExport">
@@ -147,7 +205,31 @@
   
 	
     <View Type="Model3DView">
-	    <Name>"3D View"</Name>
+	    <Name>"Cortex 3D View"</Name>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Left Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+    
+    <View Type="Model3DView">
+        <Name>"Right Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Thalamus 3D View"</Name>
+        <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Cingulate 3D View"</Name>
+        <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
     <View Type="SliceViewerView">
