@@ -105,7 +105,8 @@ classdef FreesurferElectrodeLocalization < AComponent
                     
                 %wayptfileIds{i}=regexprep(wayptfileIds{i},'[<>:"/\|?*]','_${num2str(sscanf(''a'',''%x''))}');
                 if(~acceptAll && exist(wayptfileIds{i},'file'))
-                    answer=questdlg(['Existing Point file for ' elDef.Definition(i).Name ' found!'],'Override?','Override all','Keep all','Keep all');
+                    answer=questdlg(['Existing Point file for ' elDef.Definition(i).Name ' found! ',...
+                        '''Override all'' with results from the previous step? Or ''Keep all'' with results from the last run of Freesurfer Electrode Localization?'],'','Override all','Keep all','Keep all');
                     switch(answer)
                         case 'Override'
                             override = true;
