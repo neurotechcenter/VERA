@@ -40,7 +40,7 @@
 
 
 
-    <Component Type="MoveRASOrigin">
+    <Component Type="MoveRASOrigin2Volume">
         <Name>"Move RAS Origin"</Name>
     </Component>
 
@@ -49,7 +49,7 @@
     </Component>
 
     <Component Type="Coregistration">
-	    <Name>"Coregister ROSA MRI"</Name>
+	    <Name>"Coregister ROSA CT"</Name>
         <CTIdentifier>"ROSAVolume"</CTIdentifier>
         <TIdentifier>"T_ROSA"</TIdentifier>
     </Component>

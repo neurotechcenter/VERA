@@ -29,7 +29,7 @@
 
 
     
-    <Component Type="MoveRASOrigin">
+    <Component Type="MoveRASOrigin2Volume">
         <Name>"Move RAS Origin"</Name>
     </Component>
 

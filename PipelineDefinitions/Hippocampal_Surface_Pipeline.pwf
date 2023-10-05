@@ -33,7 +33,7 @@
 
 
 
-    <Component Type="MoveRASOrigin"/>
+    <Component Type="MoveRASOrigin2Volume"/>
 
     <Component Type="Coregistration"/>
 
