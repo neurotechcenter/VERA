@@ -14,12 +14,13 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
     
     methods
         function obj = ElectrodeDefinitionView(varargin)
-            
+
              obj.gridDefinitionTable=uitable('Parent',obj,...
                  'ColumnName',{'Select','Type','Name','# of electrodes','Spacing (mm)','Electrode Volume (mm3)'},...
                  'ColumnFormat',{'logical',ElectrodeDefinition.ElectrodeTypes,'char','numeric','numeric','numeric'},...
                  'ColumnEditable',[true,true,true,true,true,true],...
                  'CellEditCallback',@(~,~)obj.compUpdate());
+
              obj.buttonGrid=uix.Grid('Parent',obj);
              obj.deleteButton=uicontrol('Parent',obj.buttonGrid,'Style','pushbutton','String','Delete','Callback',@obj.deleteButtonPressed);
              obj.addButton=uicontrol('Parent',obj.buttonGrid,'Style','pushbutton','String','Add','Callback',@obj.addButtonPressed);
@@ -108,7 +109,9 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 tbl=cell(1,6);
                 tbl{1,1}=false;
             else
-                tbl(end+1,:)={false,[],'',[],[],[]};
+                % tbl(end+1,:)={false,[],'',[],[],[]};
+                % James changed
+                tbl(end+1,:)={false,'','',[],[],[]};
             end
             obj.gridDefinitionTable.Data=tbl;
              if(isprop(comp,'History'))
