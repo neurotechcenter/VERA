@@ -12,7 +12,7 @@ classdef Model3DView < AView & uix.Grid
         cSlider
         vSurf
     end
-    
+
     methods
         function obj = Model3DView(varargin)
             %MODEL3DVIEW Construct an instance of this class
@@ -32,30 +32,30 @@ classdef Model3DView < AView & uix.Grid
             addlistener(obj.cSlider, 'Value', 'PostSet',@obj.changeAlpha);
             obj.Widths=[-1];
             obj.Heights=[-1, 15];
-             try
+            try
                 uix.set( obj, varargin{:} )
-             catch e
+            catch e
                 delete( obj )
                 e.throwAsCaller()
             end
         end
-        
+
 
     end
-    
+
     methods(Access = protected)
         function changeAlpha(obj,~,~)
             if(~isempty(obj.vSurf))
                 alpha(obj.vSurf,obj.cSlider.Value);
             end
         end
-        
+
         function dataUpdate(obj)
             obj.updateView();
         end
-        
+
         function updateView(obj)
-           
+
             if(~obj.AvailableData.isKey(obj.SurfaceIdentifier))
                 cla(obj.axModel);
                 obj.vSurf=[];
@@ -63,74 +63,74 @@ classdef Model3DView < AView & uix.Grid
             end
             surface=obj.AvailableData(obj.SurfaceIdentifier);
             hold(obj.axModel,'off');
-               
-              if(~isempty(surface))
-                    
-                    if(~isempty(surface.Model) && isempty(surface.Annotation))
-                        obj.vSurf=plot3DModel(obj.axModel,surface.Model);
-                       % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3) ,'Parent',obj.axModel,settings{:});
-                    elseif(~isempty(surface.Model) && ~isempty(surface.Annotation))
-                        pbar=waitbar(0,'Creating 3D Model...');
-                        [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface);
-                        obj.vSurf=plot3DModel(obj.axModel,surface.Model,annotation_remap);
-                       % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3),annotation_remap ,'Parent',obj.axModel,settings{:});
-                        colormap(obj.axModel,cmap);
-                        
-                        %light(obj.axModel,'Position',[-1 0 0]);
-                       % camlight(obj.axModel,'headlight');
-                        material(obj.axModel,'dull');
-                        elIdentifiers=obj.ElectrodeLocationIdentifier;
-                        elDefIdentifiers=obj.ElectrodeDefinitionIdentifier;
-                        if(~iscell(obj.ElectrodeLocationIdentifier))
-                            elIdentifiers={obj.ElectrodeLocationIdentifier};
-                        end
-                        if(~iscell(obj.ElectrodeDefinitionIdentifier))
-                            elDefIdentifiers={obj.ElectrodeDefinitionIdentifier};
-                        end
-                        waitbar(0.3,pbar);
-                        for i_elId=1:length(elIdentifiers)
-                            waitbar(0.3+0.7*(i_elId/length(elIdentifiers)),pbar);
-                            if(obj.AvailableData.isKey(elIdentifiers{i_elId}))
-                                elPos=obj.AvailableData(elIdentifiers{i_elId});
-                                if(~isempty(elPos) && ~isempty(elPos.DefinitionIdentifier))
-                                    for i=unique(elPos.DefinitionIdentifier)'
-                                        plotBallsOnVolume(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
-                                        if(obj.AvailableData.isKey(elDefIdentifiers{i_elId}))
-                                            elDef=obj.AvailableData(elDefIdentifiers{i_elId});
-                                            names{end+1}=elDef.Definition(i).Name;
-                                            name_id(end+1)=length(name_id)+1;
-                                        end
-                                    end
 
-                                end
-                            
-								for i=1:size(elPos.Location,1)
-									text(obj.axModel,elPos.Location(i,1)+1,elPos.Location(i,2)+1,elPos.Location(i,3)+1,num2str(i),'FontSize',14,'Color','w');
-								end
-							end
-                        end
-                       cb=colorbar(obj.axModel,'FontSize',12,'location','east','TickLabelInterpreter','none','Ticks',1:length(name_id)); 
-                       cb=colorbar(obj.axModel,'Ticks',linspace(1.5,length(name_id)+0.5,length(name_id)+1),'Limits',[min(name_id) max(name_id)],'TickLabels',names,'FontSize',12,'location','east','TickLabelInterpreter','none');
-                       % set(cb,'TickLabelInterpreter','none')
-                        close(pbar);
+            if(~isempty(surface))
+
+                if(~isempty(surface.Model) && isempty(surface.Annotation))
+                    obj.vSurf=plot3DModel(obj.axModel,surface.Model);
+                    % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3) ,'Parent',obj.axModel,settings{:});
+                elseif(~isempty(surface.Model) && ~isempty(surface.Annotation))
+                    pbar=waitbar(0,'Creating 3D Model...');
+                    [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface);
+                    obj.vSurf=plot3DModel(obj.axModel,surface.Model,annotation_remap);
+                    % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3),annotation_remap ,'Parent',obj.axModel,settings{:});
+                    colormap(obj.axModel,cmap);
+
+                    %light(obj.axModel,'Position',[-1 0 0]);
+                    % camlight(obj.axModel,'headlight');
+                    material(obj.axModel,'dull');
+                    elIdentifiers=obj.ElectrodeLocationIdentifier;
+                    elDefIdentifiers=obj.ElectrodeDefinitionIdentifier;
+                    if(~iscell(obj.ElectrodeLocationIdentifier))
+                        elIdentifiers={obj.ElectrodeLocationIdentifier};
                     end
-                    alpha(obj.vSurf,obj.cSlider.Value);
-                    
-                    set(obj.axModel,'AmbientLightColor',[1 1 1])
-                    %zoom(obj.axModel,'on');
-                   
-                     set(obj.axModel,'xtick',[]);
-                      set(obj.axModel,'ytick',[]);
-                     axis(obj.axModel,'equal');
-                     axis(obj.axModel,'off');
-                     xlim(obj.axModel,'auto');
-                     ylim(obj.axModel,'auto');
-                     set(obj.axModel,'Color','k');
-                     set(obj.axModel,'clipping','off');
-                     set(obj.axModel,'XColor', 'none','YColor','none','ZColor','none')                    
-             else
-                 delete(obj.axModel.Children);
-              end
+                    if(~iscell(obj.ElectrodeDefinitionIdentifier))
+                        elDefIdentifiers={obj.ElectrodeDefinitionIdentifier};
+                    end
+                    waitbar(0.3,pbar);
+                    for i_elId=1:length(elIdentifiers)
+                        waitbar(0.3+0.7*(i_elId/length(elIdentifiers)),pbar);
+                        if(obj.AvailableData.isKey(elIdentifiers{i_elId}))
+                            elPos=obj.AvailableData(elIdentifiers{i_elId});
+                            if(~isempty(elPos) && ~isempty(elPos.DefinitionIdentifier))
+                                for i=unique(elPos.DefinitionIdentifier)'
+                                    plotBallsOnVolume(obj.axModel,elPos.Location(elPos.DefinitionIdentifier==i,:),[],2);
+                                    if(obj.AvailableData.isKey(elDefIdentifiers{i_elId}))
+                                        elDef=obj.AvailableData(elDefIdentifiers{i_elId});
+                                        names{end+1}=elDef.Definition(i).Name;
+                                        name_id(end+1)=length(name_id)+1;
+                                    end
+                                end
+
+                            end
+
+                            for i=1:size(elPos.Location,1)
+                                text(obj.axModel,elPos.Location(i,1)+1,elPos.Location(i,2)+1,elPos.Location(i,3)+1,num2str(i),'FontSize',14,'Color','k');
+                            end
+                        end
+                    end
+                    cb=colorbar(obj.axModel,'FontSize',12,'location','east','TickLabelInterpreter','none','Ticks',1:length(name_id));
+                    cb=colorbar(obj.axModel,'Ticks',linspace(1.5,length(name_id)+0.5,length(name_id)+1),'Limits',[min(name_id) max(name_id)],'TickLabels',names,'FontSize',12,'location','east','TickLabelInterpreter','none');
+                    % set(cb,'TickLabelInterpreter','none')
+                    close(pbar);
+                end
+                alpha(obj.vSurf,obj.cSlider.Value);
+
+                set(obj.axModel,'AmbientLightColor',[1 1 1])
+                %zoom(obj.axModel,'on');
+
+                set(obj.axModel,'xtick',[]);
+                set(obj.axModel,'ytick',[]);
+                axis(obj.axModel,'equal');
+                axis(obj.axModel,'off');
+                xlim(obj.axModel,'auto');
+                ylim(obj.axModel,'auto');
+                set(obj.axModel,'Color','k');
+                set(obj.axModel,'clipping','off');
+                set(obj.axModel,'XColor', 'none','YColor','none','ZColor','none')
+            else
+                delete(obj.axModel.Children);
+            end
         end
     end
 

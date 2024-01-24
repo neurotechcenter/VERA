@@ -28,6 +28,8 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
         light(ax,'Position',[1 0 0],'Style','local');
         set(ax,'AmbientLightColor',[1 1 1]);
         camlight(ax,'headlight');
+    else
+        camlight(ax,'headlight');
     end
     set(ax,'xtick',[]);
     set(ax,'ytick',[]);

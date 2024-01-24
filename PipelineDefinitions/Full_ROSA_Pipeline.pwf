@@ -49,7 +49,7 @@
     </Component>
 
     <Component Type="Coregistration">
-	    <Name>"Coregister ROSA CT"</Name>
+	    <Name>"Coregister ROSA Volume"</Name>
         <CTIdentifier>"ROSAVolume"</CTIdentifier>
         <TIdentifier>"T_ROSA"</TIdentifier>
     </Component>

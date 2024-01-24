@@ -1,6 +1,6 @@
 classdef MatlabElectrodeSelection < AComponent
     % MatlabElectrodeSelection This Component allows manual and
-    % ( semi)automated localization of electrode grids, strips and depth electrodes fully implemented in
+    % (semi)automated localization of electrode grids, strips and depth electrodes fully implemented in
     % Matlab
 
     % After an initial threshold of the CT, we create 3D centroids by finding connected voxels. 

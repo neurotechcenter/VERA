@@ -38,12 +38,13 @@
     <Component Type="Coregistration"/>
 
     <Component Type="Coregistration">
-	    <Name>"Coregister ROSA Trajectories"</Name>
+        <Name>"Coregister ROSA Volume"</Name>
         <CTIdentifier>"ROSAVolume"</CTIdentifier>
         <TIdentifier>"T_ROSA"</TIdentifier>
     </Component>
 
     <Component Type="ElectrodeTransformation">
+        <Name>"Transform ROSA Trajectories"</Name>
         <TIdentifier>"T_ROSA"</TIdentifier>
         <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
     </Component>

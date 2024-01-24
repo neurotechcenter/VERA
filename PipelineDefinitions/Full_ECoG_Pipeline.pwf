@@ -24,6 +24,11 @@
         <Name>"Load Freesurfer Surface"</Name>
     </Component>
 
+    <Component Type="LoadFreesurferSegmentationVolume">
+        <Name>"Load Freesurfer Segmentation Volume"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
+    </Component>
+
 
 
 
@@ -38,6 +43,11 @@
     <Component Type="ReorderElectrodes"/>
 
     <Component Type="ElectrodeProjection"/>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Volume Labels"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+    </Component>
 
     <Component Type="CalculateDistanceToSurfaceLabel"/>	
 
