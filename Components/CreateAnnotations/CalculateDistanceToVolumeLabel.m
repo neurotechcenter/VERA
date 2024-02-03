@@ -75,7 +75,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
 
         function out=Process(obj,vol,elLocs)
              if(strcmp(obj.LoadLUTFile,'true'))
-                [file,path]=uigetfile('*.txt','Select LUT');
+                [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                 [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
              end
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
