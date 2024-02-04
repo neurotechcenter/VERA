@@ -77,6 +77,11 @@ classdef CalculateDistanceToVolumeLabel < AComponent
              if(strcmp(obj.LoadLUTFile,'true'))
                 [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                 [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
+
+                % James added to deal with THOMAS lookup table
+                if isa(obj.internalLabels,'char')
+                    obj.internalLabels = cellstr(obj.internalLabels);
+                end
              end
             out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
             f = waitbar(0,'Calculating Distance from Electrode to Labels');

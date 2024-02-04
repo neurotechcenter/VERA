@@ -66,6 +66,9 @@ classdef ThomasSegmentation < AComponent
                 % Run docker from terminal instead of app?
                 system('open -a docker')
 
+                % Might need to wait for docker to open?
+                pause(5)
+
                 % Check docker image
                 % This will check if usr/local/bin is on the system path
                 dockerImage = 'anagrammarian/thomasmerged:latest';

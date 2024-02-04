@@ -12,9 +12,6 @@ function [code,lut]=loadLUTFile(lutfile)
             lut{end+1}=X.textdata{i,3};
         end
     end
-    % James added to deal with THOMAS lookup table
-    if isa(lut,'char')
-        lut = cellstr(lut);
-    end
+
 end
 
