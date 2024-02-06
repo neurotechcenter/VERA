@@ -50,7 +50,6 @@ classdef ThomasSegmentation < AComponent
                 % WMn/FGATIR
                 docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
                     ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
-
             end
             
             segmentationPath = fullfile(segmentationFolder,'Segmentation');
@@ -85,13 +84,23 @@ classdef ThomasSegmentation < AComponent
 
             end
 
-            Lvolout = obj.CreateOutput(obj.LeftVolumeIdentifier);
-            nii_path = fullfile(segmentationPath,'left','thomasfull.nii.gz');
-            Lvolout.LoadFromFile(nii_path);
+            Lvolout          = obj.CreateOutput(obj.LeftVolumeIdentifier);
+            nii_path         = fullfile(segmentationPath,'left','thomasfull.nii.gz');
+            nii_path_reslice = fullfile(segmentationPath,'left','thomasfull_reslice.nii.gz');
 
-            Rvolout = obj.CreateOutput(obj.RightVolumeIdentifier);
-            nii_path = fullfile(segmentationPath,'right','thomasrfull.nii.gz');
-            Rvolout.LoadFromFile(nii_path);
+            reslice_nii(nii_path,nii_path_reslice); % needed to reslice because the tolerance of 0 is too low for FGATIR image
+
+            Lvolout.LoadFromFile(nii_path_reslice);
+
+
+            Rvolout          = obj.CreateOutput(obj.RightVolumeIdentifier);
+            nii_path         = fullfile(segmentationPath,'right','thomasrfull.nii.gz');
+            nii_path_reslice = fullfile(segmentationPath,'right','thomasfull_reslice.nii.gz');
+
+            reslice_nii(nii_path,nii_path_reslice);
+
+            Rvolout.LoadFromFile(nii_path_reslice);
+
 
             pathInfo      = obj.CreateOutput(obj.SegmentationPathIdentifier);
             pathInfo.Path = segmentationPath;

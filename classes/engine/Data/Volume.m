@@ -149,6 +149,7 @@ classdef Volume < AData & IFileLoader
                 obj.Image=load_nii(path,[],[],[],[],[],0);
                 obj.Path=path;
             catch e
+                fprintf(e.message);
                 obj.Image=load_untouch_nii(path,[],[],[],[],[]);
                 obj.Path=path;    
             end

@@ -37,19 +37,6 @@
         <FSVolume>"aparc+aseg"</FSVolume>
     </Component>
 
-    <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation T1"</Name>
-        <MRIIdentifier>"MRI"</MRIIdentifier>
-        <LeftVolumeIdentifier>"LThomasVolumeT1"</LeftVolumeIdentifier>
-        <RightVolumeIdentifier>"RThomasVolumeT1"</RightVolumeIdentifier>
-    </Component>
-
-    <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation FGATIR"</Name>
-        <MRIIdentifier>"FGATIR"</MRIIdentifier>
-        <LeftVolumeIdentifier>"LThomasVolumeFGATIR"</LeftVolumeIdentifier>
-        <RightVolumeIdentifier>"RThomasVolumeFGATIR"</RightVolumeIdentifier>
-    </Component>
 
 
 
@@ -59,6 +46,11 @@
 
     <Component Type="Coregistration">
         <Name>"Coregister CT to MRI"</Name>
+    </Component>
+
+    <Component Type="Coregistration">
+        <Name>"Coregister FGATIR to T1 MRI"</Name>
+        <CoregistrationIdentifier>"FGATIR"</CoregistrationIdentifier>
     </Component>
 
     <Component Type="DBSLeadDetection">
@@ -71,6 +63,20 @@
 
     <Component Type="ReorderElectrodes">
         <Name>"Reorder Electrodes"</Name>
+    </Component>
+
+    <Component Type="ThomasSegmentation">
+        <Name>"Thomas Segmentation T1"</Name>
+        <MRIIdentifier>"MRI"</MRIIdentifier>
+        <LeftVolumeIdentifier>"LThomasVolumeT1"</LeftVolumeIdentifier>
+        <RightVolumeIdentifier>"RThomasVolumeT1"</RightVolumeIdentifier>
+    </Component>
+
+    <Component Type="ThomasSegmentation">
+        <Name>"Thomas Segmentation FGATIR"</Name>
+        <MRIIdentifier>"FGATIR"</MRIIdentifier>
+        <LeftVolumeIdentifier>"LThomasVolumeFGATIR"</LeftVolumeIdentifier>
+        <RightVolumeIdentifier>"RThomasVolumeFGATIR"</RightVolumeIdentifier>
     </Component>
 
     <Component Type="CalculateDistanceToVolumeLabel">
@@ -130,6 +136,20 @@
         <Smoothing>3</Smoothing>
     </Component>
 
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Left Thalamus FGATIR Surface"</Name>
+        <VolumeIdentifier>"LThomasVolumeFGATIR"</VolumeIdentifier>
+        <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Right Thalamus FGATIR Surface"</Name>
+        <VolumeIdentifier>"RThomasVolumeFGATIR"</VolumeIdentifier>
+        <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+    </Component>
+
 
 
 
@@ -146,6 +166,16 @@
     <Component Type="MatOutput">
         <Name>"Create brain.mat with Right Thalamus T1"</Name>
         <SurfaceIdentifier>"RThalamusSurfaceT1"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat with Left Thalamus FGATIR"</Name>
+        <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Create brain.mat with Right Thalamus FGATIR"</Name>
+        <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
     </Component>
 
     <Component Type="FreesurferDatExport">
