@@ -37,34 +37,6 @@
         <FSVolume>"aparc+aseg"</FSVolume>
     </Component>
 
-
-
-
-    <Component Type="MoveRASOrigin2Volume">
-        <Name>"Move RAS Origin"</Name>
-    </Component>
-
-    <Component Type="Coregistration">
-        <Name>"Coregister CT to MRI"</Name>
-    </Component>
-
-    <Component Type="Coregistration">
-        <Name>"Coregister FGATIR to T1 MRI"</Name>
-        <CoregistrationIdentifier>"FGATIR"</CoregistrationIdentifier>
-    </Component>
-
-    <Component Type="DBSLeadDetection">
-        <Name>"DBS Lead Detection"</Name>
-    </Component>
-
-    <Component Type="FreesurferElectrodeLocalization">
-        <Name>"Freesurfer Electrode Localization"</Name>
-    </Component>
-
-    <Component Type="ReorderElectrodes">
-        <Name>"Reorder Electrodes"</Name>
-    </Component>
-
     <Component Type="ThomasSegmentation">
         <Name>"Thomas Segmentation T1"</Name>
         <MRIIdentifier>"MRI"</MRIIdentifier>
@@ -79,6 +51,30 @@
         <RightVolumeIdentifier>"RThomasVolumeFGATIR"</RightVolumeIdentifier>
     </Component>
 
+
+
+    <Component Type="MoveRASOrigin2Volume">
+        <Name>"Move RAS Origin"</Name>
+    </Component>
+
+    <Component Type="Coregistration">
+        <Name>"Coregister CT to MRI"</Name>
+    </Component>
+
+    
+
+    <Component Type="DBSLeadDetection">
+        <Name>"DBS Lead Detection"</Name>
+    </Component>
+
+    <Component Type="FreesurferElectrodeLocalization">
+        <Name>"Freesurfer Electrode Localization"</Name>
+    </Component>
+
+    <Component Type="ReorderElectrodes">
+        <Name>"Reorder Electrodes"</Name>
+    </Component>
+
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Freesurfer Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
@@ -87,32 +83,32 @@
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Left Thomas T1 Labels"</Name>
         <VolumeIdentifier>"LThomasVolumeT1"</VolumeIdentifier>
-        <LoadLUTFile>"true"</LoadLUTFile>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
     </Component>
 
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Right Thomas T1 Labels"</Name>
         <VolumeIdentifier>"RThomasVolumeT1"</VolumeIdentifier>
-        <LoadLUTFile>"true"</LoadLUTFile>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
     </Component>
 
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Left Thomas FGATIR Labels"</Name>
         <VolumeIdentifier>"LThomasVolumeFGATIR"</VolumeIdentifier>
-        <LoadLUTFile>"true"</LoadLUTFile>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
     </Component>
 
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Right Thomas FGATIR Labels"</Name>
         <VolumeIdentifier>"RThomasVolumeFGATIR"</VolumeIdentifier>
-        <LoadLUTFile>"true"</LoadLUTFile>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
     </Component>
 
     <Component Type="ReplaceLabels">
         <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ReplaceableLabels>["unknown","Background","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplacementRadius>[0,1,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
@@ -126,6 +122,7 @@
         <Name>"Generate Left Thalamus T1 Surface"</Name>
         <VolumeIdentifier>"LThomasVolumeT1"</VolumeIdentifier>
         <SurfaceIdentifier>"LThalamusSurfaceT1"</SurfaceIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
         <Smoothing>3</Smoothing>
     </Component>
 
@@ -133,6 +130,7 @@
         <Name>"Generate Right Thalamus T1 Surface"</Name>
         <VolumeIdentifier>"RThomasVolumeT1"</VolumeIdentifier>
         <SurfaceIdentifier>"RThalamusSurfaceT1"</SurfaceIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
         <Smoothing>3</Smoothing>
     </Component>
 
@@ -140,6 +138,7 @@
         <Name>"Generate Left Thalamus FGATIR Surface"</Name>
         <VolumeIdentifier>"LThomasVolumeFGATIR"</VolumeIdentifier>
         <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
         <Smoothing>3</Smoothing>
     </Component>
 
@@ -147,6 +146,7 @@
         <Name>"Generate Right Thalamus FGATIR Surface"</Name>
         <VolumeIdentifier>"RThomasVolumeFGATIR"</VolumeIdentifier>
         <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
         <Smoothing>3</Smoothing>
     </Component>
 
@@ -226,6 +226,7 @@
     <View Type="ElectrodeDefinitionView">
         <Name>"Electrode Definition View"</Name>
     </View>
+
 
 
 </PipelineDefinition>

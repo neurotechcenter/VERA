@@ -19,11 +19,11 @@ classdef LabelVolume2Surface < AComponent
 
     methods
         function obj = LabelVolume2Surface()
-            obj.VolumeIdentifier  = '';
-            obj.SurfaceIdentifier = '';
-            obj.LabelIds          = [];
-            obj.LabelNames        = {};
-            obj.ignoreList{end+1} = 'internalIds';
+            obj.VolumeIdentifier   = '';
+            obj.SurfaceIdentifier  = '';
+            obj.LabelIds           = [];
+            obj.LabelNames         = {};
+            obj.ignoreList{end+1}  = 'internalIds';
             obj.ignoreList{end+1}  = 'LabelNames';
             obj.Smoothing          = [];
             obj.LoadLUTFile        = "false";
@@ -34,8 +34,8 @@ classdef LabelVolume2Surface < AComponent
             if(isempty(obj.VolumeIdentifier) || isempty(obj.SurfaceIdentifier))
                 error('VolumeIdentifier or SurfaceIdentifier is empty');
             end
-            obj.AddInput(obj.VolumeIdentifier,'Volume');
-            obj.AddOutput(obj.SurfaceIdentifier,'Surface');
+            obj.AddInput(obj.VolumeIdentifier,   'Volume');
+            obj.AddOutput(obj.SurfaceIdentifier, 'Surface');
 
         end
 
@@ -81,9 +81,18 @@ classdef LabelVolume2Surface < AComponent
 
         function surf=Process(obj,vol)
             if(strcmp(obj.LoadLUTFile,'true'))
-                [file,path]                          = uigetfile('*.txt','Select LUT');
-                [obj.internalIds,obj.internalLabels] = loadLUTFile(fullfile(path,file));
+                [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
+                [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
+            elseif(strcmp(obj.LoadLUTFile,'thomas'))
+                path     = obj.GetDependency('Thomas');
+                lut_path = fullfile(path,'CustomAtlas.ctbl');
+                [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
             end
+            % James added to deal with THOMAS lookup table
+            if isa(obj.internalLabels,'char')
+                obj.internalLabels = cellstr(obj.internalLabels);
+            end
+
             surf = obj.CreateOutput(obj.SurfaceIdentifier);
 
             tri_tot         = [];
