@@ -203,6 +203,18 @@
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
+    <View Type="Model3DView">
+        <Name>"Left Thalamus FGATIR 3D View"</Name>
+        <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Right Thalamus FGATIR 3D View"</Name>
+        <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
     <View Type="SliceViewerView">
         <Name>"Slice View"</Name>
     </View>
