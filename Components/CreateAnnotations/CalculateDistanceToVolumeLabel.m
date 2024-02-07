@@ -5,6 +5,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
     properties
         VolumeIdentifier
         ElectrodeLocationIdentifier
+        ElectrodeLocationIdentifierOut
         LabelIds
         LabelNames
         Prefix
@@ -19,29 +20,32 @@ classdef CalculateDistanceToVolumeLabel < AComponent
         function obj = CalculateDistanceToVolumeLabel()
             %CALCULATECLOSESTSURFACELABEL Construct an instance of this class
             %   Detailed explanation goes here
-            obj.VolumeIdentifier            = 'ASEG';
-            obj.ElectrodeLocationIdentifier = 'ElectrodeLocation';
-            obj.ignoreList{end+1}           = 'internalIds';
-            obj.ignoreList{end+1}           = 'LabelNames';
-            obj.Prefix                      = '';
-            obj.LoadLUTFile                 = "false";
+            obj.VolumeIdentifier               = 'ASEG';
+            obj.ElectrodeLocationIdentifier    = 'ElectrodeLocation';
+            obj.ElectrodeLocationIdentifierOut = 'ElectrodeLocation';
+            obj.ignoreList{end+1}              = 'internalIds';
+            obj.ignoreList{end+1}              = 'LabelNames';
+            obj.Prefix                         = '';
+            obj.LoadLUTFile                    = "false";
         end
 
         function  Publish(obj)
-            obj.AddInput(obj.VolumeIdentifier,             'Volume');
-            obj.AddInput(obj.ElectrodeLocationIdentifier,  'ElectrodeLocation');
-            obj.AddOutput(obj.ElectrodeLocationIdentifier, 'ElectrodeLocation');
+            obj.AddInput(obj.VolumeIdentifier,                'Volume');
+            obj.AddInput(obj.ElectrodeLocationIdentifier,     'ElectrodeLocation');
+            obj.AddOutput(obj.ElectrodeLocationIdentifierOut, 'ElectrodeLocation');
         end
 
         function Initialize(obj)
             if(strcmp(obj.LoadLUTFile,'true'))
+                return;
+            elseif(strcmp(obj.LoadLUTFile,'thomas'))
                 return;
             end
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
                     path=obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
-                    warning('No labels provided or label configuration configuration incorrect, trying Freesurfer LUT');
+                    warning(['For Component: "',obj.Name,'" no labels provided or label configuration configuration incorrect, trying Freesurfer LUT']);
                     lut_path=fullfile(path,'FreeSurferColorLUT.txt');
                     [code, lut]=loadLUTFile(lut_path);
                     if(isempty(obj.LabelIds))
@@ -86,7 +90,7 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                 obj.internalLabels = cellstr(obj.internalLabels);
             end
             
-            out=obj.CreateOutput(obj.ElectrodeLocationIdentifier,elLocs);
+            out=obj.CreateOutput(obj.ElectrodeLocationIdentifierOut,elLocs);
             f = waitbar(0,'Calculating Distance from Electrode to Labels');
             for i=1:length(obj.internalIds)
                 binaryVol=zeros(size(vol.Image.img));

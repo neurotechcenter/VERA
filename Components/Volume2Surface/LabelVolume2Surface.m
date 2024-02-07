@@ -43,12 +43,14 @@ classdef LabelVolume2Surface < AComponent
         function Initialize(obj)
             if(strcmp(obj.LoadLUTFile,'true'))
                 return;
+            elseif(strcmp(obj.LoadLUTFile,'thomas'))
+                return;
             end
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
                     path = obj.GetDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
-                    warning('Label configuration configuration not found or incorrect, trying Freesurfer LUT');
+                    warning(['For Component: "',obj.Name,'" no labels provided or label configuration configuration incorrect, trying Freesurfer LUT']);
                     lut_path    = fullfile(path,'FreeSurferColorLUT.txt');
                     [code, lut] = loadLUTFile(lut_path);
                     if(isempty(obj.LabelIds))
