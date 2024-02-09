@@ -51,10 +51,21 @@ classdef ThomasSegmentation < AComponent
             
             if ispc
                 subsyspath  = obj.GetDependency('UbuntuSubsystemPath');
-                imageFolder = convertToUbuntuSubsystemPath(imageFolder, subsyspath);
+                w_imageFolder = convertToUbuntuSubsystemPath(imageFolder, subsyspath);
             end
 
-            if strcmp(obj.MRIIdentifier,'MRI')
+            if ispc
+                if strcmp(obj.MRIIdentifier,'MRI')
+                    % T1
+                    docker_script = ['docker run -v ',w_imageFolder,':',w_imageFolder,' -w ',w_imageFolder,...
+                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
+                elseif strcmp(obj.MRIIdentifier,'FGATIR')
+                    % WMn/FGATIR
+                    docker_script = ['docker run -v ',w_imageFolder,':',w_imageFolder,' -w ',w_imageFolder,...
+                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
+                end
+            else
+                if strcmp(obj.MRIIdentifier,'MRI')
                 % T1
                 docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
                     ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
@@ -62,6 +73,7 @@ classdef ThomasSegmentation < AComponent
                 % WMn/FGATIR
                 docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
                     ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
+            end
             end
             
             segmentationPath = fullfile(segmentationFolder,'Segmentation');
