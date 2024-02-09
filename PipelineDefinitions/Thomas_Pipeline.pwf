@@ -41,7 +41,13 @@
 
 
     <Component Type="MoveRASOrigin2Volume">
-        <Name>"Move RAS Origin"</Name>
+        <Name>"Move RAS Origin CT"</Name>
+    </Component>
+
+    <Component Type="MoveRASOrigin2Volume">
+        <Name>"Move RAS Origin FGATIR"</Name>
+        <VolumeIdentifier1>"FGATIR"</VolumeIdentifier1>
+        <VolumeIdentifier2>"MRI"</VolumeIdentifier2>
     </Component>
 
     <Component Type="Coregistration">
