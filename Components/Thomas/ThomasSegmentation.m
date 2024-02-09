@@ -22,15 +22,23 @@ classdef ThomasSegmentation < AComponent
             obj.AddOutput(obj.RightVolumeIdentifier,      'Volume');
             obj.AddOutput(obj.SegmentationPathIdentifier, 'PathInformation');
             obj.RequestDependency('Thomas','folder');
-            % obj.RequestDependency('Docker','file');
+            obj.RequestDependency('Docker','file');
         end
 
         function Initialize(obj)
             path = obj.GetDependency('Thomas');
             addpath(path);
+            path = obj.GetDependency('Docker');
+            addpath(path);
             
-            % path = obj.GetDependency('Docker');
-            % addpath(path);
+            if(ispc)
+               obj.GetDependency('UbuntuSubsystemPath');
+               if(system('WHERE bash >nul 2>nul echo %ERRORLEVEL%') == 1)
+                   error('If you want to use THOMAS components on windows, the Windows 10 Ubuntu subsystem is required!');
+               else
+                   disp('Found ubuntu subsystem on Windows 10!');
+               end
+            end
         end
 
         function [Lvolout,Rvolout,pathInfo] = Process(obj,mri)
@@ -39,13 +47,17 @@ classdef ThomasSegmentation < AComponent
             [imageFolder, imageName, imageExt] = fileparts(mri_path);
             imageName                          = [imageName, imageExt];
             ThomasPath                         = obj.GetDependency('Thomas');
-            % DockerPath                         = obj.GetDependency('Docker');
+            DockerPath                         = obj.GetDependency('Docker');
+            
+            if ispc
+                subsyspath  = obj.GetDependency('UbuntuSubsystemPath');
+                imageFolder = convertToUbuntuSubsystemPath(imageFolder, subsyspath);
+            end
 
             if strcmp(obj.MRIIdentifier,'MRI')
                 % T1
                 docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
                     ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
-
             elseif strcmp(obj.MRIIdentifier,'FGATIR')
                 % WMn/FGATIR
                 docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
@@ -63,10 +75,14 @@ classdef ThomasSegmentation < AComponent
 
                 % what happens if docker isn't installed?
                 % Run docker from terminal instead of app?
-                system('open -a docker')
+                if ispc
+                    system(['"',fullfile(DockerPath,'Docker Desktop.exe"')]);
+                else
+                    system('open -a docker');
+                end
 
                 % Might need to wait for docker to open?
-                pause(5)
+                pause(10)
 
                 % Check docker image
                 % This will check if usr/local/bin is on the system path
@@ -74,7 +90,12 @@ classdef ThomasSegmentation < AComponent
                 checkDocker(dockerImage);
 
                 % run docker
-                system(docker_script);
+                if ispc
+                    systemWSL(docker_script,'-echo');
+%                     system(['bash -c ''',docker_script,'''']);
+                else
+                    system(docker_script,'-echo');
+                end
 
                 % Move Thomas files to correct location
                 movefile(fullfile(imageFolder,'left'),  fullfile(segmentationPath,'left'))
