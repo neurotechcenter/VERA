@@ -37,20 +37,7 @@
         <FSVolume>"aparc+aseg"</FSVolume>
     </Component>
 
-    <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation T1"</Name>
-        <MRIIdentifier>"MRI"</MRIIdentifier>
-        <LeftVolumeIdentifier>"LThomasVolumeT1"</LeftVolumeIdentifier>
-        <RightVolumeIdentifier>"RThomasVolumeT1"</RightVolumeIdentifier>
-    </Component>
-
-    <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation FGATIR"</Name>
-        <MRIIdentifier>"FGATIR"</MRIIdentifier>
-        <LeftVolumeIdentifier>"LThomasVolumeFGATIR"</LeftVolumeIdentifier>
-        <RightVolumeIdentifier>"RThomasVolumeFGATIR"</RightVolumeIdentifier>
-    </Component>
-
+    
 
 
     <Component Type="MoveRASOrigin2Volume">
@@ -77,6 +64,21 @@
     <Component Type="ReorderElectrodes">
         <Name>"Reorder Electrodes"</Name>
     </Component>
+
+    <Component Type="ThomasSegmentation">
+        <Name>"Thomas Segmentation T1"</Name>
+        <MRIIdentifier>"MRI"</MRIIdentifier>
+        <LeftVolumeIdentifier>"LThomasVolumeT1"</LeftVolumeIdentifier>
+        <RightVolumeIdentifier>"RThomasVolumeT1"</RightVolumeIdentifier>
+    </Component>
+
+    <Component Type="ThomasSegmentation">
+        <Name>"Thomas Segmentation FGATIR"</Name>
+        <MRIIdentifier>"FGATIR"</MRIIdentifier>
+        <LeftVolumeIdentifier>"LThomasVolumeFGATIR"</LeftVolumeIdentifier>
+        <RightVolumeIdentifier>"RThomasVolumeFGATIR"</RightVolumeIdentifier>
+    </Component>
+
 
 
 

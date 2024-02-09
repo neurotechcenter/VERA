@@ -54,7 +54,8 @@ classdef SettingsGUI < uix.Panel
                entry=[];
                switch(DependencyHandler.Instance.RequestLibrary(depName))
                    case 'file'
-                       entry=uigetfile('*.*',depName);
+                       [filename, filepath]=uigetfile('*.*',depName);
+                       entry = fullfile(filepath, filename);
                    case 'folder'
                        entry=uigetdir([],depName);
                    case 'internal'
