@@ -88,7 +88,7 @@ classdef ThomasSegmentation < AComponent
                 % what happens if docker isn't installed?
                 % Run docker from terminal instead of app?
                 if ispc
-                    system(['"',fullfile(DockerPath,'Docker Desktop.exe"')]);
+                    system(['"',DockerPath,'"']);
                 else
                     system('open -a docker');
                 end
@@ -104,7 +104,6 @@ classdef ThomasSegmentation < AComponent
                 % run docker
                 if ispc
                     systemWSL(docker_script,'-echo');
-%                     system(['bash -c ''',docker_script,'''']);
                 else
                     system(docker_script,'-echo');
                 end
