@@ -36,7 +36,7 @@
     </Component>
 
     <Component Type="ElectrodeTransformation">
-        <Name>"Transform ROSA Electrodes"</Name>
+        <Name>"Transform ROSA Trajectories"</Name>
         <TIdentifier>"T_ROSA"</TIdentifier>
         <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
     </Component>
