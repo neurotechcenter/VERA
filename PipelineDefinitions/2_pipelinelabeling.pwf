@@ -53,7 +53,7 @@
     <Component Type="ReorderElectrodes"/>
 
     <Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to FS segmentation labels"</Name>
+        <Name>"Distance to Volume Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
     </Component>
 
