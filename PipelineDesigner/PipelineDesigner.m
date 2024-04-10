@@ -5,13 +5,13 @@ classdef PipelineDesigner < handle
         ProjectRunner Runner
         Views %ViewMap
         pipeline
+        pipeline_unprotected
         viewComponent
         treeNodes
         pipelineTree
         pipelineName
-        componentNodes containers.Map
-        viewTabs containers.Map
-        componentMenu
+        componentList
+        saveComponentList
     end
     
     properties (Access = private)
@@ -23,6 +23,11 @@ classdef PipelineDesigner < handle
         fileMenuContent
         configMenuContent
         ProgressBarTool
+        componentNodes containers.Map
+        viewTabs containers.Map
+        componentMenu
+        modifyComponentsButton
+        modifyViewsButton
 
     end
     
@@ -41,28 +46,37 @@ classdef PipelineDesigner < handle
             if(exist('settings.xml','file'))
                 DependencyHandler.Instance.LoadDependencyFile('settings.xml');
             end
-            obj.viewTabs=containers.Map();
-            obj.hBox=uix.HBoxFlex('Parent',obj.window);
-            obj.pipelineTree=uiw.widget.Tree('Parent',obj.hBox,'MouseClickedCallback',@obj.treeClick);
-            obj.mainView=uitabgroup('Parent',obj.hBox);
-            obj.hBox.Widths=[200 -1];
-            % empty views
-            
+            obj.viewTabs     = containers.Map();
+            obj.hBox         = uix.HBoxFlex('Parent',obj.window);
+            obj.pipelineTree = uiw.widget.Tree('Parent',obj.hBox,'MouseClickedCallback',@obj.treeClick);
+            obj.mainView     = uitabgroup('Parent',obj.hBox);
+            obj.hBox.Widths  = [200 -1];
+
             obj.fileMenu=uimenu(obj.window,'Label','File');
-            obj.fileMenuContent.NewPipeline   = uimenu(obj.fileMenu,'Label','New Pipeline','MenuSelectedFcn',@(~,~,~)obj.createNewPipeline);
+            obj.fileMenuContent.NewPipeline   = uimenu(obj.fileMenu,'Label','New Pipeline', 'MenuSelectedFcn',@(~,~,~)obj.createNewPipeline);
             obj.fileMenuContent.OpenPipeline  = uimenu(obj.fileMenu,'Label','Open Pipeline','MenuSelectedFcn',@obj.openPipeline);
             obj.fileMenuContent.SavePipeline  = uimenu(obj.fileMenu,'Label','Save Pipeline','MenuSelectedFcn',@obj.savePipeline);
             obj.fileMenuContent.ClosePipeline = uimenu(obj.fileMenu,'Label','Close Pipeline','Enable','off','MenuSelectedFcn',@(~,~,~)obj.closePipeline);
             
             obj.configMenu=uimenu(obj.window,'Label','Configuration');
-            obj.configMenuContent.Settings     = uimenu(obj.configMenu,'Label','Settings','MenuSelectedFcn',@(~,~,~) SettingsGUI());
+            obj.configMenuContent.Settings     = uimenu(obj.configMenu,'Label','Settings',           'MenuSelectedFcn',@(~,~,~) SettingsGUI());
             obj.configMenuContent.ViewPipeline = uimenu(obj.configMenu,'Label','View Pipeline Graph','MenuSelectedFcn',@(~,~,~) obj.viewPipelineGraph());
             
             obj.pipelineTree.Root.Name = 'Pipeline';
-            obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input','Parent',obj.pipelineTree.Root,'UserData',0);
+            obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input',     'Parent',obj.pipelineTree.Root,'UserData',0);
             obj.treeNodes.Processing   = uiw.widget.TreeNode('Name','Processing','Parent',obj.pipelineTree.Root);
-            obj.treeNodes.Output       = uiw.widget.TreeNode('Name','Output','Parent',obj.pipelineTree.Root);
-            obj.treeNodes.Views        = uiw.widget.TreeNode('Name','Views','Parent',obj.pipelineTree.Root);
+            obj.treeNodes.Output       = uiw.widget.TreeNode('Name','Output',    'Parent',obj.pipelineTree.Root);
+            obj.treeNodes.Views        = uiw.widget.TreeNode('Name','Views',     'Parent',obj.pipelineTree.Root);
+
+            obj.modifyComponentsButton          = uicontrol('Parent',obj.window,'Style','pushbutton','String','Modify Components',...
+                                                                'Units','normalized','Position',[0.5 0.2 0.1 0.1],'Visible','on');
+            obj.modifyComponentsButton.Callback = @(src,event)obj.modifyComponents;
+
+            obj.modifyViewsButton               = uicontrol('Parent',obj.window,'Style','pushbutton','String','Modify Views',...
+                                                                'Units','normalized','Position',[0.7 0.2 0.1 0.1],'Visible','on');
+            obj.modifyViewsButton.Callback      = @(src,event)obj.modifyViews;
+
+
             warning on;
             obj.ProgressBarTool=UnifiedProgressBar(obj.window);
 
@@ -81,10 +95,14 @@ classdef PipelineDesigner < handle
             delete(obj.treeNodes.Processing.Children);
             delete(obj.treeNodes.Output.Children);
             delete(obj.treeNodes.Views.Children);
+
+            % delete(obj.AddComponentButton);
+            % delete(obj.RemoveComponentButton);
+            % delete(obj.AddViewButton);
+            % delete(obj.RemoveViewButton);
             
             for v=values(obj.componentNodes)
                 delete(v{1});
-  
             end
             %obj.ProgressBarTool.ShowProgressBar(obj,30);
             obj.componentNodes=containers.Map();
@@ -478,6 +496,35 @@ classdef PipelineDesigner < handle
             obj.ProgressBarTool.HideProgressBar();
         end
         
+        function treeClick(obj,a,b)
+            if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData))
+                switch b.SelectionType
+                    case 'normal'
+                        %context=b.Nodes.UIContextMenu;
+                            delete(obj.componentMenu);
+                            obj.componentMenu=[];
+                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
+                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
+                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
+                            end
+                    case 'open'
+                            delete(obj.componentMenu);
+                            obj.componentMenu=[];
+                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
+                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
+                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
+                            end
+                            obj.runComponent(b.Nodes.Name,true);
+
+                    otherwise
+                        return;
+
+                end
+    
+  
+            end
+        end 
+        
         function removeTempPath(obj)
             %removeTempPath - removing the temp path from the dependency
             %handler and delete the temp folder with all its contents
@@ -503,7 +550,7 @@ classdef PipelineDesigner < handle
             delete(obj.ProjectRunner);
             % delete(obj.Views);
             delete(hob);
-            DependencyHandler.Instance.RemoveDependency('ProjectPath');
+            % DependencyHandler.Instance.RemoveDependency('ProjectPath');
             
         end
        
@@ -718,34 +765,118 @@ classdef PipelineDesigner < handle
 
         end
         
-        function treeClick(obj,a,b)
-            if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData))
-                switch b.SelectionType
-                    case 'normal'
-                        %context=b.Nodes.UIContextMenu;
-                            delete(obj.componentMenu);
-                            obj.componentMenu=[];
-                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
-                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
-                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
-                            end
-                    case 'open'
-                            delete(obj.componentMenu);
-                            obj.componentMenu=[];
-                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
-                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
-                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
-                            end
-                            obj.runComponent(b.Nodes.Name,true);
+        function modifyComponents(obj)
+            % Open new window that shows compact version of whole pipeline,
+            % ignoring inputs, processing, outputs structure
 
-                    otherwise
-                        return;
+            h = figure('Name','Add or Remove Components');
 
-                end
-    
-  
+            flexb        = uix.HBoxFlex('Parent',h);
+            selPanel     = uix.Panel('Parent',flexb,'Title','Pipeline');
+            flexb.Units  = 'normalized';
+            flexb.Widths = [-0.3];
+            
+            selV         = uix.VBox('Parent',selPanel);
+            mainviewBox  = uix.HBox('Parent',selV);
+
+            uicontrol(selV,'Style','pushbutton','String','Accept','callback',@(~,~)close(h));
+            selV.Heights = [-0.9,-0.1];
+            
+            selBox                   = uix.HBox('Parent',mainviewBox);
+            obj.componentList        = uicontrol(selBox,'Style','listbox','Min',0,'Max',2,'callback',@(~,~)obj.pipelineChanged());
+            if isempty(obj.saveComponentList)
+                obj.componentList.String = obj.pipeline.Components;
+                obj.saveComponentList    = obj.componentList.String;
+            else
+                obj.componentList.String = obj.saveComponentList;
             end
-        end           
+
+            buttonBox = uix.VBox('Parent',selBox);
+            uicontrol(buttonBox,'Style','pushbutton','String','Up',          'callback',@(~,~)obj.resortUp());
+            uicontrol(buttonBox,'Style','pushbutton','String','Down',        'callback',@(~,~)obj.resortDown());
+            uicontrol(buttonBox,'Style','pushbutton','String','Insert Below','callback',@(~,~)obj.insertComp());
+            uix.Empty('Parent',buttonBox);
+
+            buttonBox.Heights = [-0.15 -0.15 -0.15 -0.7];
+            selBox.Widths     = [-0.8 -0.2];
+
+            
+        end
+
+
+        function modifyViews(obj)
+            h = figure('Name','Add or Remove Views');
+
+            flexb        = uix.HBoxFlex('Parent',h);
+            selPanel     = uix.Panel('Parent',flexb,'Title','Pipeline');
+            flexb.Units  = 'normalized';
+            flexb.Widths = [-0.3];
+            
+            selV         = uix.VBox('Parent',selPanel);
+            mainviewBox  = uix.HBox('Parent',selV);
+
+            uicontrol(selV,'Style','pushbutton','String','Accept','callback',@(~,~)close(h));
+            selV.Heights = [-0.9,-0.1];
+            
+            selBox       = uix.HBox('Parent',mainviewBox);
+            uicontrol(selBox,'Style','listbox','Min',0,'Max',2,'callback',@(~,~)obj.displayPipeline());
+
+            buttonBox = uix.VBox('Parent',selBox);
+            uicontrol(buttonBox,'Style','pushbutton','String','Up',          'callback',@(~,~)obj.resortUp());
+            uicontrol(buttonBox,'Style','pushbutton','String','Down',        'callback',@(~,~)obj.resortDown());
+            uicontrol(buttonBox,'Style','pushbutton','String','Insert Below','callback',@(~,~)obj.insertView());
+            uix.Empty('Parent',buttonBox);
+
+            buttonBox.Heights = [-0.15 -0.15 -0.15 -0.7];
+            selBox.Widths     = [-0.8 -0.2];
+            
+        end
+
+        function pipelineChanged(obj)
+            % obj.pipeline.Components = obj.componentList.String; % list of components
+
+        end
+
+        function resortUp(obj)
+            pos    = obj.componentList.Value;
+            newPos = pos - 1;
+
+            currentOrder     = 1:length(obj.componentList.String);
+            newOrder         = currentOrder;
+            newOrder(pos)    = newPos;
+            newOrder(newPos) = pos;
+
+            obj.componentList.String = obj.componentList.String(newOrder);
+            obj.saveComponentList    = obj.componentList.String;
+            set(obj.componentList,'Value',newPos);
+
+        end
+
+        function resortDown(obj)
+            pos    = obj.componentList.Value;
+            newPos = pos + 1;
+
+            currentOrder     = 1:length(obj.componentList.String);
+            newOrder         = currentOrder;
+            newOrder(pos)    = newPos;
+            newOrder(newPos) = pos;
+
+            obj.componentList.String = obj.componentList.String(newOrder);
+            obj.saveComponentList    = obj.componentList.String;
+            set(obj.componentList,'Value',newPos);
+
+
+        end
+
+        function insertComp(obj)
+            %obj.pipeline.AddComponent(compName,compXml) %??
+
+        end
+
+        function insertView(obj)
+            
+
+        end
         
         function viewPipelineGraph(obj)
             if(~isempty(obj.ProjectRunner))
