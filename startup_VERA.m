@@ -34,4 +34,3 @@ end
 
 %startup GUI
 guihandle=MainGUI();
-addToolbarExplorationButtons(guihandle);

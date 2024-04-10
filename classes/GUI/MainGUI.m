@@ -35,6 +35,7 @@ classdef MainGUI < handle
             'MenuBar', 'none', ...
             'Toolbar', 'none', ...
             'HandleVisibility', 'off','CloseRequestFcn',@obj.onClose);
+            addToolbarExplorationButtons(obj.window);
             cameratoolbar(obj.window,'NoReset');
             if(exist('settings.xml','file'))
                 DependencyHandler.Instance.LoadDependencyFile('settings.xml');
