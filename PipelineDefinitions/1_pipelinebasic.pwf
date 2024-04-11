@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="1 pipeline basic">
+<PipelineDefinition Name="1 Pipeline Basic">
 
 
     <Component Type="FileLoader">
+        <Name>"CT Loader"</Name>
         <Identifier>"CT"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
     <Component Type="FileLoader">
+        <Name>"MRI Loader"</Name>
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
@@ -51,7 +53,8 @@
 
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat"</Name>
+        <Name>"Cortex"</Name>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -68,6 +71,14 @@
 
     <View Type="SliceViewerView">
     	<Name>"Slice Viewer"</Name>
+    </View>
+
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
+
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
     </View>
  
 

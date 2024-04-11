@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="Full Pipeline UIC Pipeline">
+<PipelineDefinition Name="Full Pipeline UIC">
 
 
     <Component Type="FileLoader">
@@ -17,8 +17,8 @@
     <Component Type="FreesurferModelGeneration"/>
 
     <Component Type="LoadFreesurferSegmentationVolume">
-      <Name>"Load FS Segmentation"</Name>
-      <FSVolume>"aparc+aseg"</FSVolume>
+        <Name>"Load FS Segmentation"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">
@@ -58,7 +58,19 @@
 
     <Component Type="CalculateDistanceToSurfaceLabel"/>	
 
-    <Component Type="ReplaceLabels"/>
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Unknown Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0]</ReplacementRadius>
+    </Component>
 
 
 
@@ -94,7 +106,6 @@
         <TIdentifier>"T_MNI"</TIdentifier>
     </Component>
     
-
     <Component Type="MatOutput">
         <Name>"Create MNI brain.mat"</Name>
     </Component>
@@ -110,8 +121,12 @@
     	<Name>"Slice View"</Name>
     </View>
 
-    <View Type="ElectrodeLocationTableView"/>
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
 
-    <View Type="ElectrodeDefinitionView"/>
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
+    </View>
 
 </PipelineDefinition>

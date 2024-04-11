@@ -3,11 +3,13 @@
 
 
     <Component Type="FileLoader">
+        <Name>"CT Loader"</Name>
         <Identifier>"CT"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
     <Component Type="FileLoader">
+        <Name>"MRI Loader"</Name>
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
@@ -45,36 +47,54 @@
 
     <Component Type="ReorderElectrodes"/>
 
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to ASEG"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
 	<Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Right Hippocampus"</Name>
 		<VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
 	</Component>
 
 	<Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Left Hippocampus"</Name>
 		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
-	</Component>
-
-	<Component Type="CalculateDistanceToVolumeLabel">
-		<Name>"Distance to ASEG"</Name>
-		<VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
 	</Component>
 
     <Component Type="CalculateDistanceToSurfaceLabel"/>	
 
-    <Component Type="ReplaceLabels"/>
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Unknown Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0]</ReplacementRadius>
+    </Component>
 
 
 
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat"</Name>
+        <Name>"Cortex"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="FreesurferDatExport">
         <Name>"Write Freesurfer PointSet files"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
+        <SavePathIdentifier>"DataOutput/Electrodes"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -99,7 +119,9 @@
     </Component>
     
     <Component Type="MatOutput">
-        <Name>"Create MNI brain.mat"</Name>
+        <Name>"MNI Cortex"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/MNIbrain.mat"</SavePathIdentifier>
     </Component>
 
 
@@ -113,9 +135,13 @@
     	<Name>"Slice View"</Name>
     </View>
 
-    <View Type="ElectrodeLocationTableView"/>
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
 
-    <View Type="ElectrodeDefinitionView"/>
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
+    </View>
 
 
 </PipelineDefinition>

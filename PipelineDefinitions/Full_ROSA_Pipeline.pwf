@@ -75,21 +75,25 @@
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Volume Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
 	<Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Right Hippocampus"</Name>
 		<VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
 	</Component>
 
 	<Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Left Hippocampus"</Name>
 		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
 	</Component>
 
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Thalamus"</Name>
         <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
     <Component Type="CalculateDistanceToSurfaceLabel">
@@ -99,15 +103,15 @@
     <Component Type="ReplaceLabels">
         <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
         <Name>"Replace Unknown Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["unknown"]</ReplaceableLabels>
-        <ReplacementRadius>[0]</ReplacementRadius>
+        <ReplaceableLabels>["Unknown","unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0]</ReplacementRadius>
     </Component>
 
     <Component Type="LabelVolume2Surface">
@@ -115,6 +119,7 @@
         <VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
         <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
         <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
     <Component Type="LabelVolume2Surface">
@@ -122,6 +127,7 @@
         <VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
         <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
         <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
     <Component Type="LabelVolume2Surface">
@@ -129,6 +135,7 @@
         <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
         <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
         <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
     <Component Type="LabelVolume2Surface">
@@ -138,40 +145,47 @@
         <LabelNames>["ctx-lh-caudalanteriorcingulate","ctx-lh-isthmuscingulate","ctx-lh-posteriorcingulate","ctx-lh-rostralanteriorcingulate","ctx-rh-caudalanteriorcingulate","ctx-rh-isthmuscingulate","ctx-rh-posteriorcingulate","ctx-rh-rostralanteriorcingulate"]</LabelNames>
         <LabelIds>[1002,1010,1023,1026,2002,2010,2023,2026]</LabelIds>
         <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
 
 
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with cortex"</Name>
+        <Name>"Cortex"</Name>
         <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Left Hippocampus"</Name>
+        <Name>"Left Hippocampus"</Name>
         <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/LHipp.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Right Hippocampus"</Name>
+        <Name>"Right Hippocampus"</Name>
         <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/RHipp.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Thalamus"</Name>
+        <Name>"Thalamus"</Name>
         <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/Thalamus.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Cingulate"</Name>
+        <Name>"Cingulate"</Name>
         <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/Cingulate.mat"</SavePathIdentifier>
     </Component>
     
     <Component Type="FreesurferDatExport">
         <Name>"Write Freesurfer PointSet Files"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
+        <SavePathIdentifier>"DataOutput/Electrodes"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -198,7 +212,8 @@
     </Component>
     
     <Component Type="MatOutput">
-        <Name>"Create MNI brain.mat"</Name>
+        <Name>"MNI Cortex"</Name>
+        <SavePathIdentifier>"DataOutput/MNIbrain.mat"</SavePathIdentifier>
     </Component>
 
 

@@ -2,6 +2,7 @@
 <PipelineDefinition Name="Create Freesurfer Model Pipeline">
 
     <Component Type="FileLoader">
+        <Name>"MRI Loader"</Name>
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
@@ -15,10 +16,60 @@
         <Name>"Generate Hippocampal Subsegmentation"</Name>
     </Component>
 
+
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Left Hippocampus Surface"</Name>
+        <VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Right Hippocampus Surface"</Name>
+        <VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    
+
+    <Component Type="MatOutputNoElectrodes">
+        <Name>"Cortex"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
+    </Component>
+
+    <Component Type="MatOutputNoElectrodes">
+        <Name>"Left Hippocampus"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/LHipp.mat"</SavePathIdentifier>
+    </Component>
+
+    <Component Type="MatOutputNoElectrodes">
+        <Name>"Right Hippocampus"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/RHipp.mat"</SavePathIdentifier>
+    </Component>
+
     
 
     <View Type="Model3DView">
 	    <Name>"3D View"</Name>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Left Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+    
+    <View Type="Model3DView">
+        <Name>"Right Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
     <View Type="SliceViewerView">

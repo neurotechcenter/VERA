@@ -94,6 +94,7 @@
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeLocationIdentifierOut>"ElectrodeLocationASEG"</ElectrodeLocationIdentifierOut>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
     <Component Type="ReplaceLabels">
@@ -102,9 +103,10 @@
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with cortex"</Name>
+        <Name>"Cortex"</Name>
         <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocationASEG"</ElectrodeLocationIdentifier>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
 
@@ -150,15 +152,17 @@
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Left Thalamus T1"</Name>
+        <Name>"Left Thalamus T1"</Name>
         <SurfaceIdentifier>"LThalamusSurfaceT1"</SurfaceIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
+        <SavePathIdentifier>"DataOutput/LThalamusT1.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Right Thalamus T1"</Name>
+        <Name>"Right Thalamus T1"</Name>
         <SurfaceIdentifier>"RThalamusSurfaceT1"</SurfaceIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
+        <SavePathIdentifier>"DataOutput/RThalamusT1.mat"</SavePathIdentifier>
     </Component>
 
 
@@ -204,15 +208,17 @@
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Left Thalamus FGATIR"</Name>
+        <Name>"Left Thalamus FGATIR"</Name>
         <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
+        <SavePathIdentifier>"DataOutput/LThalamusFGATIR.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat with Right Thalamus FGATIR"</Name>
+        <Name>"Right Thalamus FGATIR"</Name>
         <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
+        <SavePathIdentifier>"DataOutput/RThalamusFGATIR.mat"</SavePathIdentifier>
     </Component>
 
 
@@ -222,6 +228,7 @@
         <Name>"Write Freesurfer PointSet Files"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
+        <SavePathIdentifier>"DataOutput/Electrodes"</SavePathIdentifier>
     </Component>
 
 

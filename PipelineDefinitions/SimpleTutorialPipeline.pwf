@@ -53,7 +53,8 @@
 	
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat"</Name>
+        <Name>"Cortex"</Name>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -64,16 +65,20 @@
   
 
 
-    <View Type="ElectrodeDefinitionView">
-    	<Name>"Electrode Definition"</Name>
-    </View>
-
     <View Type="Model3DView">
 	    <Name>"3D View"</Name>
     </View>
 
     <View Type="SliceViewerView">
     	<Name>"Slice View"</Name>
+    </View>
+
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
+
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
     </View>
 
 </PipelineDefinition>

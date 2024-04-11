@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="0 pipeline no ROSA">
+<PipelineDefinition Name="0 Pipeline No ROSA">
 
     <Component Type="ElectrodeDefinitionConfiguration">
         <Name>"Electrode Definition"</Name>
@@ -47,7 +47,8 @@
 
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat"</Name>
+        <Name>"Cortex"</Name>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -57,16 +58,20 @@
 
 
 
-	<View Type="ElectrodeDefinitionView">
-        <Name>"Electrode Definition"</Name>
-    </View>
-
     <View Type="Model3DView">
 	   <Name>"3D View"</Name>
     </View>
 
     <View Type="SliceViewerView">
     	<Name>"Slice Viewer"</Name>
+    </View>
+
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
+
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
     </View>
 
 </PipelineDefinition>

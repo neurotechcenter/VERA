@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="ROSA Pipeline with Segmentation">
+<PipelineDefinition Name="Paulk Pipeline">
 
-
-
-
-    <Component Type="LoadBIDSDataInformationPaulk">
-    </Component>
+    <Component Type="LoadBIDSDataInformationPaulk"/>
 
     <Component Type="Copy">
         <Name>"ElectrodeLocations for MNI"</Name>
@@ -17,12 +13,12 @@
     <Component Type="FreesurferModelGeneration"/>
 
     <Component Type="LoadFreesurferSegmentationVolume">
-      <Name>"Load FS Segmentation"</Name>
-      <FSVolume>"aparc+aseg"</FSVolume>
+        <Name>"Load FS Segmentation"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">
-    <Name>"Load Hippocampal subsegmentations"</Name>
+        <Name>"Load Hippocampal subsegmentations"</Name>
         <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
     </Component>
 
@@ -44,7 +40,19 @@
 
     <Component Type="CalculateDistanceToSurfaceLabel"/>	
 
-    <Component Type="ReplaceLabels"/>
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Unknown Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0]</ReplacementRadius>
+    </Component>
 
     <Component Type="MatOutput">
         <Name>"Create brain.mat"</Name>
@@ -59,13 +67,13 @@
     </Component>
 
     <Component Type="ReportGenerator">
-	<Name>"Report Generator MRI"</Name>
+	    <Name>"Report Generator MRI"</Name>
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
 
- <Component Type="ImportFreesurferSegmentation">
-      <Name>"Import MNI Freesurfer Template"</Name>
-      <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Import MNI Freesurfer Template"</Name>
+        <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
     </Component>
     
     <Component Type="FreesurferSurfaceLoader">
@@ -76,16 +84,16 @@
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">
-      <Name>"Load MNI Brain"</Name>
-     <VolumeIdentifier>"MNI"</VolumeIdentifier>
-     <FSVolume>"brain"</FSVolume>
-     <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+        <Name>"Load MNI Brain"</Name>
+        <VolumeIdentifier>"MNI"</VolumeIdentifier>
+        <FSVolume>"brain"</FSVolume>
+        <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
     </Component>
 
      <Component Type="LoadFreesurferSegmentationVolume">
-      <Name>"Load Stripped Brain"</Name>
-     <VolumeIdentifier>"MRI_stripped"</VolumeIdentifier>
-     <FSVolume>"brain"</FSVolume>
+        <Name>"Load Stripped Brain"</Name>
+        <VolumeIdentifier>"MRI_stripped"</VolumeIdentifier>
+        <FSVolume>"brain"</FSVolume>
     </Component>
 
     <Component Type="ANTCoregistration">
@@ -97,14 +105,14 @@
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">
-      <Name>"Load MNI FS Segmentation"</Name>
-      <FSVolume>"aparc+aseg"</FSVolume>
-      <VolumeIdentifier>"MNIASEG"</VolumeIdentifier>
-      <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
+        <Name>"Load MNI FS Segmentation"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
+        <VolumeIdentifier>"MNIASEG"</VolumeIdentifier>
+        <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
     </Component>
 
     <Component Type="FreesurferHippocampalSegmentation">
-    <Name>"Load MNI Hippocampal subsegmentations"</Name>
+        <Name>"Load MNI Hippocampal subsegmentations"</Name>
         <VolumeIdentifier>"MNIHippocampus"</VolumeIdentifier>
         <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
         <SegmentationPathIdentifier>"MNIPath"</SegmentationPathIdentifier>
@@ -144,30 +152,28 @@
   
 	
     <View Type="Model3DView">
-	<Name>"3D View"</Name>
+	    <Name>"3D View"</Name>
     </View>
 
-     <View Type="Model3DView">
-	<Name>"3D View MNI"</Name>
-    <SurfaceIdentifier>"MNISurface"</SurfaceIdentifier>
-    <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+    <View Type="Model3DView">
+	    <Name>"3D View MNI"</Name>
+        <SurfaceIdentifier>"MNISurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
-     <View Type="Model3DView">
-	<Name>"3D View Subject in MNI"</Name>
-    <SurfaceIdentifier>"SubjectMNISurface"</SurfaceIdentifier>
-    <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
+    <View Type="Model3DView">
+	    <Name>"3D View Subject in MNI"</Name>
+        <SurfaceIdentifier>"SubjectMNISurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
 
     <View Type="SliceViewerView">
     	<Name>"Slice Viewer"</Name>
     </View>
 
-    <View Type="ElectrodeLocationTableView"/>
     <View Type="ElectrodeLocationTableView">
         <Name>"MNI Electrode Location Table"</Name>
         <ElectrodeLocationIdentifier>"MNIElectrodeLocation"</ElectrodeLocationIdentifier>
     </View>
-
 
 </PipelineDefinition>

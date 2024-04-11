@@ -2,11 +2,13 @@
 <PipelineDefinition Name="Full ECoG Pipeline">
 
     <Component Type="FileLoader">
+        <Name>"CT Loader"</Name>
         <Identifier>"CT"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
     <Component Type="FileLoader">
+        <Name>"MRI Loader"</Name>
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
@@ -47,6 +49,7 @@
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Volume Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
     <Component Type="CalculateDistanceToSurfaceLabel"/>	
@@ -57,13 +60,16 @@
 
 
     <Component Type="MatOutput">
-        <Name>"Create brain.mat"</Name>
+        <Name>"Cortex"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="FreesurferDatExport">
         <Name>"Write Freesurfer PointSet files"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
+        <SavePathIdentifier>"DataOutput/Electrodes"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -88,9 +94,9 @@
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Create MNI brain.mat"</Name>
+        <Name>"MNI Cortex"</Name>
+        <SavePathIdentifier>"DataOutput/MNIbrain.mat"</SavePathIdentifier>
     </Component>
-
 
 
 
@@ -102,8 +108,12 @@
     	<Name>"Slice View"</Name>
     </View>
 
-    <View Type="ElectrodeLocationTableView"/>
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
 
-    <View Type="ElectrodeDefinitionView"/>
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
+    </View>
 
 </PipelineDefinition>
