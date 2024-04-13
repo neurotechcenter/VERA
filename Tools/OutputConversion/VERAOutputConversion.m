@@ -6,9 +6,10 @@ close;
 clc;
 
 % Select file to load
-[file, path] = uigetfile('*.mat');
-if isequal(file, 0) || isequal(path, 0)
-    error('Selection aborted');
+[file,path] = uigetfile('*.mat','Select brain.mat file to load','MultiSelect','off');
+if filepath == 0
+    fprintf('\nError: Please select at least one file.\n')
+    return;
 end
 
 load(fullfile(path,file));
@@ -39,7 +40,7 @@ end
 
 function [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala)
     surfaceModel.Model              = cortex;                                   % Surface model (in vertId/triId, 1 is left hemisphere and 2 is right)
-    surfaceModel.Annotation         = annotation.Annotation;                    % Identifier number associating each triangle of a surface with a given annotation
+    surfaceModel.Annotation         = annotation.Annotation;                    % Identifier number associating each vertice of a surface with a given annotation
     surfaceModel.AnnotationLabel    = annotation.AnnotationLabel;               % Surface annotation map connecting identifier values with annotation
     
     electrodes.Definition           = electrodeDefinition.Definition;           % Implanted grid/shank type, name, NElectrodes, spacing, and volume

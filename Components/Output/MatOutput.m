@@ -58,7 +58,7 @@ classdef MatOutput < AComponent
                                                                              % specified through SurfaceIdentifier in VERA. Additionally, it also contains triId and vertId,
                                                                              % which allows you to distinguish between the left (1) and right (2) hemisphere if your data 
                                                                              % comes from a freesurfer Surface.
-            surfaceModel.Annotation         = surf.Annotation;               % Identifier number associating each triangle of a surface with a given annotation
+            surfaceModel.Annotation         = surf.Annotation;               % Identifier number associating each vertice of a surface with a given annotation
             surfaceModel.AnnotationLabel    = surf.AnnotationLabel;          % Surface annotation map connecting identifier values with annotation
             
             electrodes.Definition           = eDef.Definition;               % Implanted grid/shank type, name, NElectrodes, spacing, and volume

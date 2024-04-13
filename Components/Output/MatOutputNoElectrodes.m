@@ -47,8 +47,11 @@ classdef MatOutputNoElectrodes < AComponent
                 mkdir(path)
             end
 
-            surfaceModel.Model           = surf.Model;           % Surface model (in vertId/triId, 1 is left hemisphere and 2 is right)
-            surfaceModel.Annotation      = surf.Annotation;      % Identifier number associating each triangle of a surface with a given annotation
+            surfaceModel.Model           = surf.Model;           % Contains vert (x,y,z points) and tri (triangle triangulation vector) to create the 3D model
+                                                                 % specified through SurfaceIdentifier in VERA. Additionally, it also contains triId and vertId,
+                                                                 % which allows you to distinguish between the left (1) and right (2) hemisphere if your data 
+                                                                 % comes from a freesurfer Surface.
+            surfaceModel.Annotation      = surf.Annotation;      % Identifier number associating each vertice of a surface with a given annotation
             surfaceModel.AnnotationLabel = surf.AnnotationLabel; % Surface annotation map connecting identifier values with annotation
             
             save(fullfile(path,file),'surfaceModel');
