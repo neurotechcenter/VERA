@@ -1,15 +1,15 @@
-function [ surfs] = plotBallsOnVolume(ax,electrodes, color, radius,varargin)
+function [ surfs] = plotBallsOnVolume(ax,electrodes,color,radius,varargin)
 %PLOTBALLS  Plots electrodes in assigned color
 %ax - axis to be plotted on
 %color - color to be plotted
-%radiues - size of ball to be plotted in 3d Sapce
+%radius - size of ball to be plotted in 3d Sapce
 %varargin - additional parameters passed to surf
 %See also surf
 ELS = size(electrodes, 1);
 cmap=colormap(ax);
- hold(ax,'on');
- % The axes should stay aligned
- surfs={};
+hold(ax,'on');
+% The axes should stay aligned
+surfs={};
 if(isempty(color))
     index  = get(ax,'ColorOrderIndex');
     colors = get(ax,'ColorOrder');
@@ -22,9 +22,9 @@ end
 if(numel(color) == 1)
     cmap_id=color;
 else
- cmap(end+1,:)=color;
- colormap(ax,cmap);
- cmap_id=(size(cmap,1));
+    cmap(end+1,:)=color;
+    colormap(ax,cmap);
+    cmap_id=(size(cmap,1));
 end
  %caxis(ax,[1 size(cmap,1)]);
 for els = 1 : ELS    

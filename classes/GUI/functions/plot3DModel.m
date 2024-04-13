@@ -21,6 +21,9 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
     if(~exist('annotation','var'))
         annotation=ones(size(model.vert,1),1);
     end
+    if isempty(annotation)
+        annotation=ones(size(model.vert,1),1);
+    end
     surf=trisurf(model.tri, model.vert(:, 1), model.vert(:, 2), model.vert(:, 3),annotation ,'Parent',...
         ax,'linestyle', 'none','FaceLighting','gouraud','BackFaceLighting','unlit','AmbientStrength',1); % James removed varargin to deal with lighting... was ,varargin){:}
     material(ax,'dull');

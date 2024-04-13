@@ -6,7 +6,7 @@ clc;
 % Add VERA to path
 addpath(genpath(fullfile(cd,'..','..')))
 
-% Load hippocampus (output from VERA)
+% Load output from VERA MatOutput component
 [filename,filepath] = uigetfile('*.mat','Select brain.mat file to load','MultiSelect','off');
 if filepath == 0
     fprintf('\nError: Please select at least one file.\n')
@@ -25,7 +25,8 @@ elec_radius = 0.5;
 figure;
 plot3DModel(gca,brainmat.cortex,remap);
 colormap(cmap); % colorize with annotation for Surface
-cb = colorbar('Ticks',name_id-0.5,'TickLabels',names);
+cb = colorbar('Ticks',[name_id; name_id(end)+1]+0.5,'TickLabels',[names; {'electrodes'}]);
+clim([1 name_id(end)+2]) % add 2, one for unknown, 1 for electrodes
 cb.TickLabelInterpreter = 'none';
 alpha(0.05);
 hold on;
@@ -34,20 +35,27 @@ plotBallsOnVolume(gca,brainmat.tala.electrodes,[],elec_radius);
 
 
 %% Plot brain model with sticks
-NumElecs = [brainmat.electrodeDefinition.Definition.NElectrodes];
-elecCtr  = 1;
+NumImplants = size(brainmat.electrodeDefinition.Definition,1);
+NumElecs    = [brainmat.electrodeDefinition.Definition.NElectrodes];
+implantcmap = jet(NumImplants);
 
 figure;
-hold on;
-plot3DModel(gca,brainmat.cortex,remap);
-colormap([0.5 0.5 0.5]); % colorize grayscale
+plot3DModel(gca,brainmat.cortex,[]);
 alpha(0.3);
-for i = 1:size(brainmat.electrodeDefinition.Definition,1)
+hold on;
+elecCtr  = 1;
+for i = 1:NumImplants
     plot3([brainmat.tala.electrodes(elecCtr,1), brainmat.tala.electrodes(elecCtr + NumElecs(i)-1,1)],...
-        [brainmat.tala.electrodes(elecCtr,2), brainmat.tala.electrodes(elecCtr + NumElecs(i)-1,2)],...
-        [brainmat.tala.electrodes(elecCtr,3), brainmat.tala.electrodes(elecCtr + NumElecs(i)-1,3)],'LineWidth',6)
+          [brainmat.tala.electrodes(elecCtr,2), brainmat.tala.electrodes(elecCtr + NumElecs(i)-1,2)],...
+          [brainmat.tala.electrodes(elecCtr,3), brainmat.tala.electrodes(elecCtr + NumElecs(i)-1,3)],...
+          'Color',implantcmap(i,:),'LineWidth',6)
+
     elecCtr = elecCtr + NumElecs(i);
 end
+colormap([0.5 0.5 0.5;implantcmap]); 
+cb = colorbar('Ticks',[0:NumImplants]+1.5,'TickLabels',{'cortex',brainmat.electrodeDefinition.Definition.Name});
+clim([1 NumImplants+2])
+cb.TickLabelInterpreter = 'none';
 
 %% Plot implanted electrodes on brain model, using electrode labels
 % Use secondary labels (more specific) for electrode locations (typically volume labels)
@@ -70,11 +78,12 @@ for i=1:length(unique_labels)
 end
 view(-114,25)
 
-% Modify colorbar to include more detailed labeling (original surface labels on bottom)
+% Modify colorbar to include more detailed labeling (original surface labels on bottom, electrode labels on top)
 cb            = colorbar;
-cb.Ticks      = [name_id; (name_id(end)+1:1:name_id(end)+length(unique_labels))']-0.5;
+cb.Ticks      = [name_id; (name_id(end)+1:1:name_id(end)+length(unique_labels))']+0.5;
 cb.TickLabels = {names{:}, unique_labels{:}}';
 cb.TickLabelInterpreter = 'none';
+clim([name_id(1) name_id(end) + length(unique_labels) + 1])
 
 %% Plot implanted electrodes on gray brain model, using electrode labels
 % Use secondary labels (more specific) for electrode locations (typically volume labels)
@@ -100,9 +109,10 @@ view(-114,25)
 
 % Modify colorbar to include electrode labeling
 cb            = colorbar;
-cb.Ticks      = [0:length(unique_labels)+1]+0.5;
+cb.Ticks      = [1:length(unique_labels)+1]+0.5;
 cb.TickLabels = {'cortex',unique_labels{:}}';
 cb.TickLabelInterpreter = 'none';
+clim([1 length(unique_labels) + 2])
 
 
 % Save the best one
