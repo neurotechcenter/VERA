@@ -2,42 +2,47 @@ classdef ObjOutput < AComponent
     %NIIOUTPUT Creates a .nii file as Output of VERA using spm12's save_nii
     %function
     properties
+        ElectrodeLocationIdentifier
         SurfaceIdentifier
         SavePathIdentifier char
     end
     
     methods
         function obj = ObjOutput()
-            obj.SurfaceIdentifier  = 'Surface';
-            obj.SavePathIdentifier = '';
+            obj.ElectrodeLocationIdentifier = 'ElectrodeLocation';
+            obj.SurfaceIdentifier           = 'Surface';
+            obj.SavePathIdentifier          = '';
         end
         
         function Publish(obj)
-            obj.AddInput(obj.SurfaceIdentifier,          'Surface');
-            obj.AddOptionalInput(obj.SavePathIdentifier, 'PathInformation');
+            obj.AddInput(obj.ElectrodeLocationIdentifier, 'ElectrodeLocation');
+            obj.AddInput(obj.SurfaceIdentifier,           'Surface');
+            obj.AddOptionalInput(obj.SavePathIdentifier,  'PathInformation');
         end
         
         function Initialize(obj)
         end
         
-        function []= Process(obj, surf)
+        function []= Process(obj, eLocs, surf)
             % if empty, use dialog (default behavior)
             if isempty(obj.SavePathIdentifier)
                 [file, path] = uiputfile('*.obj');
                 if isequal(file, 0) || isequal(path, 0)
                     error('Selection aborted');
                 end
+                [path, file, ext] = fileparts(fullfile(path,file));
+
             % Otherwise, save on relative path in project folder using component name as file name
             else
                 [path, file, ext] = fileparts(obj.SavePathIdentifier);
-                file = [file,ext];
 
                 path = fullfile(obj.ComponentPath,'..',path); 
 
                 if ~strcmp(ext,'.obj')
                     path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier); 
-                    file = [obj.Name,'.obj'];
+                    file = [obj.Name];
                     file = replace(file,' ','_');
+                    ext = '.obj';
                 end
             end
 
@@ -45,38 +50,61 @@ classdef ObjOutput < AComponent
             if ~isfolder(path)
                 mkdir(path)
             end
-            
-            % Make a material structure
-            % material(1).type = 'newmtl';
-            % material(1).data = 'skin';
-            % material(2).type = 'Ka';
-            % material(2).data = [0.8 0.4 0.4];
-            % material(3).type = 'Kd';
-            % material(3).data = [0.8 0.4 0.4];
-            % material(4).type = 'Ks';
-            % material(4).data = [1 1 1];
-            % material(5).type = 'illum';
-            % material(5).data = 2;
-            % material(6).type = 'Ns';
-            % material(6).data = 27;
-            
-            % Make OBJ structure
-            OBJ_out.vertices                 = surf.Model.vert;
-            % OBJ_out.material                 = material;
-            OBJ_out.objects(1).type          = 'g';
-            OBJ_out.objects(1).data          = 'skin';
-            OBJ_out.objects(2).type          = 'usemtl';
-            OBJ_out.objects(2).data          = 'skin';
-            OBJ_out.objects(3).type          = 'f';
-            OBJ_out.objects(3).data.vertices = surf.Model.tri;
-            OBJ_out.objects(3).data.normal   = surf.Model.tri;
 
-            write_wobj(OBJ_out, fullfile(path,file));
+            % surface
+            obj_out.vertices = surf.Model.vert;
+            obj_out.faces    = surf.Model.tri;
+
+            % rotate 90 degrees in x so the brain is oriented correctly
+            obj_out.vertices = rotation(obj_out.vertices, 1, pi/2);
+
+            % colors
+            LabelIdx = zeros(size(surf.Annotation));
+            RGBvec   = zeros(length(surf.Annotation),3);
+            for i = 1:length(surf.Annotation)
+                if surf.Annotation(i) ~= 0
+                    LabelIdx(i) = find([surf.AnnotationLabel.Identifier] == surf.Annotation(i));
+                    RGBvec(i,:) = surf.AnnotationLabel(LabelIdx(i)).PreferredColor;
+                end
+            end
+
+            % Delete old file (save function appends instead of overwriting)
+            if exist(fullfile(path,[file,ext]))
+                delete(fullfile(path,[file,ext]));
+                delete(fullfile(path,[file,'.mtl']));
+            end
+
+            % Save obj
+            obj_write_color(obj_out,fullfile(path,file),RGBvec);
+          
 
             % Popup stating where file was saved
-            msgbox(['File saved as: ',GetFullPath(fullfile(path,file))],['"',obj.Name,'" file saved'])
+            msgbox(['File saved as: ',GetFullPath(fullfile(path,[file,ext]))],['"',obj.Name,'" file saved'])
         end
         
     end
 end
 
+function vertex = rotation(V, indice, angle)
+%     [V, F]=stlread("isopoison.stl"); 
+%     angle=-pi/2;
+    Rz = [ cos(angle), -sin(angle), 0 ;
+          sin(angle), cos(angle), 0 ;
+    0, 0, 1 ];
+    Ry = [ cos(angle), 0, sin(angle) ;
+    0, 1, 0 ;
+          -sin(angle), 0, cos(angle) ];
+    Rx = [ 1, 0, 0 ;
+    0, cos(angle), -sin(angle);
+    0, sin(angle), cos(angle) ];
+    
+    if(indice==1)
+           vertex = V*Rx;
+    end
+    if(indice==2)
+           vertex = V*Ry;
+    end
+    if(indice==3)
+           vertex = V*Rz;
+    end
+end 

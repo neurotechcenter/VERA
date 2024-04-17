@@ -1,0 +1,114 @@
+{
+  "_schemaVersion": "1.0.0",
+  "obj_write_color":
+  {
+     "inputs":
+     [
+         {"name":"FV", "kind":"required", "type":["struct"], "purpose":"triangulated mesh to be saved to obj"},
+         {"name":"filename", "kind":"required", "type":["string"], "purpose":"filename to save"},
+         {"name":"colors", "kind":"required", "type":["numeric"], "purpose":"colors - vector of values or Nx3 matrix of RGB values"},
+         {"name":"colorMap", "kind":"namevalue", "type":["string"], "purpose":"color Map to apply "},
+         {"name":"cmin", "kind":"namevalue", "type":["numeric", "scalar"], "purpose":"min of caxis"},
+         {"name":"cmax", "kind":"namevalue", "type":["numeric", "scalar"], "purpose":"max of caxis"},
+         {"name":"RGB_bins", "kind":"namevalue", "type":["numeric", "scalar"], "purpose":"number of bins to divide caxis"},
+         {"name":"d", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"dissolve value"},
+         {"name":"Ni", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"optical density"},
+         {"name":"Ns", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"specular exponent"},
+         {"name":"illum", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"illumination model"},
+         {"name":"object", "kind":"namevalue", "type":["string"], "purpose":"object name"}
+     ]
+  },
+  
+  "SYS_obj_write_color":
+  {
+     "inputs":
+     [
+         {"name":"FV", "kind":"required", "type":["struct"], "purpose":"triangulated mesh to be saved to obj"},
+         {"name":"filename", "kind":"required", "type":["string"], "purpose":"filename to save"},
+         {"name":"colors", "kind":"required", "type":["numeric"], "purpose":"colors - vector of values or Nx3 matrix of RGB values"},
+         {"name":"colorMap", "kind":"namevalue", "type":["string"], "purpose":"color Map to apply "},
+         {"name":"cmin", "kind":"namevalue", "type":["numeric", "scalar"], "purpose":"min of caxis"},
+         {"name":"cmax", "kind":"namevalue", "type":["numeric", "scalar"], "purpose":"max of caxis"},
+         {"name":"RGB_bins", "kind":"namevalue", "type":["numeric", "scalar"], "purpose":"number of bins to divide caxis"},
+         {"name":"d", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"dissolve value"},
+         {"name":"Ni", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"optical density"},
+         {"name":"Ns", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"specular exponent"},
+         {"name":"illum", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"illumination model"},
+         {"name":"object", "kind":"namevalue", "type":["string"], "purpose":"object name"}
+     ]
+  },
+  
+  "obj_write_manual_mtl":
+  {
+     "inputs":
+     [
+         {"name":"FV", "kind":"required", "type":["struct"], "purpose":"triangulated mesh to be saved to obj"},
+         {"name":"filename", "kind":"required", "type":["string"], "purpose":"filename to save"},
+         {"name":"Ka", "kind":"required", "type":["numeric", "ncols=3"], "purpose":"Ka - ambient light color values"},
+         {"name":"Kd", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Kd - diffuse light color values"},
+         {"name":"Ks", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Ks - specular light color values"},
+         {"name":"Tf", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Tf - transmission filter"},
+         {"name":"d", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"dissolve value"},
+         {"name":"Ni", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"optical density"},
+         {"name":"Ns", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"specular exponent"},
+         {"name":"illum", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"illumination model"},
+         {"name":"object", "kind":"namevalue", "type":["string"], "purpose":"object name"}
+     ]
+  },
+  
+  "SYS_obj_write_manual_mtl":
+  {
+     "inputs":
+     [
+         {"name":"FV", "kind":"required", "type":["struct"], "purpose":"triangulated mesh to be saved to obj"},
+         {"name":"filename", "kind":"required", "type":["string"], "purpose":"filename to save"},
+         {"name":"Ka", "kind":"required", "type":["numeric", "ncols=3"], "purpose":"Ka - ambient light color values"},
+         {"name":"Kd", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Kd - diffuse light color values"},
+         {"name":"Ks", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Ks - specular light color values"},
+         {"name":"Tf", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Tf - transmission filter"},
+         {"name":"d", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"dissolve value"},
+         {"name":"Ni", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"optical density"},
+         {"name":"Ns", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"specular exponent"},
+         {"name":"illum", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"illumination model"},
+         {"name":"object", "kind":"namevalue", "type":["string"], "purpose":"object name"}
+     ]
+  },
+  
+  "obj_write_vertex_colors":
+  {
+     "inputs":
+     [
+         {"name":"FV", "kind":"required", "type":["struct"], "purpose":"triangulated mesh to be saved to obj"},
+         {"name":"filename", "kind":"required", "type":["string"], "purpose":"filename to save"},
+         {"name":"colors", "kind":"required", "type":["numeric", "ncols=3"], "purpose":"Ka - ambient light color values"},
+         {"name":"Kd", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Kd - diffuse light color values"},
+         {"name":"Ks", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Ks - specular light color values"},
+         {"name":"Tf", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Tf - transmission filter"},
+         {"name":"d", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"dissolve value"},
+         {"name":"Ni", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"optical density"},
+         {"name":"Ns", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"specular exponent"},
+         {"name":"illum", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"illumination model"},
+         {"name":"object", "kind":"namevalue", "type":["string"], "purpose":"object name"}
+     ]
+  },
+  
+  "SYS_obj_write_vertex_colors":
+  {
+     "inputs":
+     [
+         {"name":"FV", "kind":"required", "type":["struct"], "purpose":"triangulated mesh to be saved to obj"},
+         {"name":"filename", "kind":"required", "type":["string"], "purpose":"filename to save"},
+         {"name":"colors", "kind":"required", "type":["numeric", "ncols=3"], "purpose":"Ka - ambient light color values"},
+         {"name":"Kd", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Kd - diffuse light color values"},
+         {"name":"Ks", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Ks - specular light color values"},
+         {"name":"Tf", "kind":"namevalue", "type":["numeric", "ncols=3"], "purpose":"Tf - transmission filter"},
+         {"name":"d", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"dissolve value"},
+         {"name":"Ni", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"optical density"},
+         {"name":"Ns", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"specular exponent"},
+         {"name":"illum", "kind":"namevalue", "type":["numeric", "scalar"],"purpose":"illumination model"},
+         {"name":"object", "kind":"namevalue", "type":["string"], "purpose":"object name"}
+     ]
+  }
+  
+
+}
