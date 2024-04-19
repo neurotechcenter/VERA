@@ -15,11 +15,13 @@ end
 
 brainmat = load(fullfile(filepath,filename));
 
+GenerateRotatingGif = 0;
+
 %% Create surface annotation colors
 [surfRemap,surfcmap,surfNames,surfName_id] = createColormapFromAnnotations(brainmat.surfaceModel);
 
 %% Create electrode annotation colors
-electrodeLabels       = cellfun(@(x)x{1},brainmat.electrodes.Label,'UniformOutput',false); % convert to easier to use cell array
+electrodeLabels       = cellfun(@(x)x{1},brainmat.electrodes.Label,'UniformOutput',false);          % convert to easier to use cell array
 uniqueElectrodeLabels = unique(electrodeLabels);
 electrodeColors       = distinguishable_colors(length(uniqueElectrodeLabels));
 electrodeRadius       = 0.75;
@@ -27,19 +29,19 @@ electrodeRadius       = 0.75;
 %% Plot implanted electrodes on brain model, using electrode labels
 % Plot brain model using VERA function (uses trisurf)
 
-fullcolorFig = figure;
-plot3DModel(gca,brainmat.surfaceModel.Model,surfRemap);
+fullcolorFig = figure('Position',[50 50 1200 900]);
+modelPlot = plot3DModel(gca,brainmat.surfaceModel.Model,surfRemap);
 colormap(surfcmap); % colorize with annotation for Surface
 alpha(0.05);
 hold on;
-% Plot electrode numbering
-plotElNums(brainmat.electrodes.Location*1.075, 1:size(brainmat.electrodes.Location,1), 12);
 % Plot electrodes colorized by brain area (annotation)
 for i = 1:length(uniqueElectrodeLabels)
     % Find the electrodes that belong to each unique label and color them appropriately
     elecsToPlot = strcmp(uniqueElectrodeLabels{i},electrodeLabels);
-    plotBallsOnVolume(gca,brainmat.electrodes.Location(elecsToPlot,:),electrodeColors(i,:),electrodeRadius);
+    elecPlot = plotBallsOnVolume(gca,brainmat.electrodes.Location(elecsToPlot,:),electrodeColors(i,:),electrodeRadius);
 end
+% Plot electrode numbering
+plotElNums(brainmat.electrodes.Location*1.075, 1:size(brainmat.electrodes.Location,1), 12);
 view(-114,25)
 
 % Modify colorbar to include more detailed labeling (surface labels on bottom, electrode labels on top)
@@ -52,6 +54,30 @@ clim([surfName_id(1) surfName_id(end)+length(uniqueElectrodeLabels)+1])
 % Save full color figure
 saveas(fullcolorFig,[filepath,filename(1:end-4),'.fig'])
 
+%% Create Rotating Figure
+if GenerateRotatingGif
+    set(gcf,'color','w');
+    set(gca,'CameraViewAngleMode','Manual')
+    axis equal
+    zoom(1.3)
+    numFrames = 500;
+    for i = 1:numFrames
+        view(i/numFrames*360-114,25)
+        drawnow
+        frame = getframe(fullcolorFig);
+        im{i} = frame2im(frame);
+    end
+    
+    for i = 1:numFrames
+        [A,map] = rgb2ind(im{i},256);
+        if i == 1
+            imwrite(A,map,[filepath,filename(1:end-4),'.gif'],"gif","LoopCount",Inf,"DelayTime",0.05);
+        else
+            imwrite(A,map,[filepath,filename(1:end-4),'.gif'],"gif","WriteMode","append","DelayTime",0.05);
+        end
+    end
+    clear numFrames frame im A map
+end
 
 %% Plot implanted electrodes on brain model
 % Plot brain model using VERA function (uses trisurf)
@@ -109,13 +135,14 @@ plot3DModel(gca,brainmat.surfaceModel.Model);
 colormap([0.5 0.5 0.5]); % colorize grayscale
 alpha(0.1);
 hold on;
-plotElNums(brainmat.electrodes.Location*1.075, 1:size(brainmat.electrodes.Location,1), 12);
 % Plot electrodes colorized by brain area
 for i=1:length(uniqueElectrodeLabels)
     % Find the electrodes that belong to each unique label and color them appropriately
     elecsToPlot = strcmp(uniqueElectrodeLabels{i},electrodeLabels);
     plotBallsOnVolume(gca,brainmat.electrodes.Location(elecsToPlot,:),electrodeColors(i,:),electrodeRadius);
 end
+% Plot electrode numbering
+plotElNums(brainmat.electrodes.Location*1.075, 1:size(brainmat.electrodes.Location,1), 12);
 view(-114,25)
 
 % Modify colorbar to include electrode labeling
