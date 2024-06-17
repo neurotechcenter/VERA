@@ -110,6 +110,10 @@
         <Smoothing>3</Smoothing>
         <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
+    
+    <Component Type="EEGElectrodeNames">
+        <Name>"Generate EEG Electrode Names Key"</Name>
+    </Component>
 
     
 
@@ -181,6 +185,10 @@
         <Name>"Right Hippocampus 3D View"</Name>
         <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="EEGNamesView">
+        <Name>"EEG Names View"</Name>
     </View>
 
     <View Type="SliceViewerView">

@@ -81,6 +81,9 @@
         <ReplacementRadius>[0,0]</ReplacementRadius>
     </Component>
 
+    <Component Type="EEGElectrodeNames">
+        <Name>"Generate EEG Electrode Names Key"</Name>
+    </Component>
 
 
 
@@ -129,6 +132,10 @@
 	
     <View Type="Model3DView">
 	    <Name>"3D View"</Name>
+    </View>
+
+    <View Type="EEGNamesView">
+        <Name>"EEG Names View"</Name>
     </View>
 
     <View Type="SliceViewerView">
