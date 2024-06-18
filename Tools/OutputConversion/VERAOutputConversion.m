@@ -7,7 +7,7 @@ clc;
 
 % Select file to load
 [file,path] = uigetfile('*.mat','Select brain.mat file to load','MultiSelect','off');
-if filepath == 0
+if path == 0
     fprintf('\nError: Please select at least one file.\n')
     return;
 end
@@ -20,7 +20,7 @@ if exist('tala','var')
 
     % Save
     [~,file,ext] = fileparts(file);
-    save(fullfile(path,[file,'_new',ext]),'surfaceModel','electrodes')
+    save(fullfile(path,[file,'_new',ext]),'surfaceModel','electrodes','electrodeNamesKey')
     msgbox(['File saved as: ',GetFullPath(fullfile(path,[file,'_new',ext]))],'Converted from Legacy to New Format')
 
 % convert from New to Legacy format
@@ -49,6 +49,8 @@ function [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, ele
     electrodes.Label                = electrodeDefinition.Label;                % Final label, accounting for ReplaceLabels component if used (same as old secondaryLabel)
     electrodes.Name                 = electrodeNames;                           % electrode names
     electrodes.Location             = tala.electrodes;                          % electrode locations (x,y,z)
+
+    electrodeNamesKey               = [];                                       % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
 end
 
 function [cortex, annotation, electrodeNames, electrodeDefinition, tala,...

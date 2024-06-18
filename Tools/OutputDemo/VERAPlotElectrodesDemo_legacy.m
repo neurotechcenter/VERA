@@ -19,7 +19,14 @@ elec_radius = 0.5;
 
 %% Plot implanted electrodes on brain model
 % Create color map from annotations (surface labels)
-[remap,cmap,names,name_id] = createColormapFromAnnotations(brainmat.annotation);
+if isfield(brainmat,'annotation')
+    [remap,cmap,names,name_id] = createColormapFromAnnotations(brainmat.annotation);
+else
+    remap   = [];
+    cmap    = [0 0 0];
+    names   = ['cortex'];
+    name_id = [1];
+end
 
 % Plot brain model using VERA function (uses trisurf)
 figure;
