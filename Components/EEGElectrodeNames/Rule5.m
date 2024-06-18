@@ -25,7 +25,7 @@ for i = 1:length(VERA_elNames)
         % Normalized names
         VERA_elNames_normalized{i,1} = strcat(VERA_shank,LastNumber{1});
     else
-        VERA_elNames_normalized = [];
+        VERA_elNames_normalized{i,1} = '';
     end
 end
 
