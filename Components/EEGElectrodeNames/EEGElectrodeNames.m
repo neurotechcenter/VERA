@@ -111,7 +111,7 @@ classdef EEGElectrodeNames < AComponent
             % generate list of rule functions
             iter = 1;
             for i = 1:length(d)
-                if ~isempty(strfind(d(i).name,'Rule'))
+                if ~isempty(strfind(d(i).name,'Rule')) && ~isempty(strfind(d(i).name,'.m'))
                     rulelist{iter,1} = d(i).name;
                     iter = iter + 1;
                 end
