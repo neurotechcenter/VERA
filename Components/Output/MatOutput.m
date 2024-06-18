@@ -23,7 +23,7 @@ classdef MatOutput < AComponent
             obj.AddInput(obj.ElectrodeLocationIdentifier,   'ElectrodeLocation');
             obj.AddInput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition');
             obj.AddInput(obj.SurfaceIdentifier,             'Surface');
-            obj.AddOptionalInput(obj.EEGNamesIdentifier,    'ElectrodeDefinition');   % this currently breaks all projects!!!!
+            obj.AddOptionalInput(obj.EEGNamesIdentifier,    'ElectrodeDefinition'); 
             obj.AddOptionalInput(obj.SavePathIdentifier,    'PathInformation');
         end
 

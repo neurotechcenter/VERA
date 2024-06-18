@@ -9,8 +9,8 @@ classdef EEGElectrodeNames < AComponent
     end
 
     properties
-        internalDefinitions
         EEGNames
+        internalDefinitions
     end
     
     methods
@@ -18,9 +18,9 @@ classdef EEGElectrodeNames < AComponent
             obj.ElectrodeDefinitionIdentifier = 'ElectrodeDefinition';
             obj.ElectrodeLocationIdentifier   = 'ElectrodeLocation';
             obj.EEGNamesIdentifier            = 'EEGNames';
+            obj.FileTypeWildcard              = '*.*';
             obj.EEGNames                      = [];
             obj.internalDefinitions           = [];
-            obj.FileTypeWildcard              = '*.*';
         end
 
         function Publish(obj)
@@ -160,6 +160,9 @@ classdef EEGElectrodeNames < AComponent
 
             % elNameKey should relate EEG electrode names to original VERA electrode names
             hldr            = cell(size(eeg_elNames,1),2);
+            for i = 1:size(eeg_elNames)
+                hldr(i,:) = {'',''};
+            end
             hldr(:,1)       = eeg_elNames;
             hldr(eeg_idx,2) = VERA_elNames_recorded;
 
