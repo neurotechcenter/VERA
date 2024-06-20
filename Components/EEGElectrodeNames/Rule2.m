@@ -2,7 +2,7 @@ function VERA_elNames_normalized = Rule2(VERA_shankNames,VERA_numEl,eeg_elNames)
 
 idx = 1;
 for i = 1:length(VERA_shankNames)
-    for ii = 1:VERA_numEl
+    for ii = 1:VERA_numEl(i)
         VERA_elNames{idx,1} = [VERA_shankNames{i} num2str(ii)];
         idx = idx + 1;
     end

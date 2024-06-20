@@ -2,7 +2,7 @@ function VERA_elNames_normalized = Rule7(VERA_shankNames,VERA_numEl,eeg_elNames)
 
 idx = 1;
 for i = 1:length(VERA_shankNames)
-    for ii = 1:VERA_numEl
+    for ii = 1:VERA_numEl(i)
         VERA_elNames{idx,1} = [VERA_shankNames{i} num2str(ii)];
         idx = idx + 1;
     end
@@ -19,7 +19,7 @@ for i = 1:length(VERA_elNames)
     idx = min([idx1, idx2]);
 
     if ~isempty(idx)
-        
+
         % First Letter
         VERA_shank = VERA_elNames{i}(1:idx-1);
 
