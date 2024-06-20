@@ -1,4 +1,12 @@
-function VERA_elNames_normalized = Rule1(VERA_elNames,eeg_elNames)
+function VERA_elNames_normalized = Rule1(VERA_shankNames,VERA_numEl,eeg_elNames)
+
+idx = 1;
+for i = 1:length(VERA_shankNames)
+    for ii = 1:VERA_numEl
+        VERA_elNames{idx,1} = [VERA_shankNames{i} num2str(ii)];
+        idx = idx + 1;
+    end
+end
 
 VERA_elNames_normalized = [];
 

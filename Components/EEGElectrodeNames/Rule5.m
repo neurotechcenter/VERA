@@ -1,4 +1,12 @@
-function VERA_elNames_normalized = Rule5(VERA_elNames,eeg_elNames)
+function VERA_elNames_normalized = Rule5(VERA_shankNames,VERA_numEl,eeg_elNames)
+
+idx = 1;
+for i = 1:length(VERA_shankNames)
+    for ii = 1:VERA_numEl
+        VERA_elNames{idx,1} = [VERA_shankNames{i} num2str(ii)];
+        idx = idx + 1;
+    end
+end
 
 VERA_elNames_normalized = [];
 
@@ -6,8 +14,9 @@ for i = 1:length(VERA_elNames)
     % Take all letters before ^
     idx = strfind(VERA_elNames{i},'^');
 
+    idx = min(idx);
+
     if ~isempty(idx)
-        idx = idx(1);
 
         % First Letter
         VERA_shank = VERA_elNames{i}(1:idx-1);

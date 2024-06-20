@@ -1,4 +1,4 @@
-function VERA_elNames_normalized = RuleTemplate(VERA_elNames,eeg_elNames)
+function VERA_elNames_normalized = RuleTemplate(VERA_shankNames,VERA_numEl,eeg_elNames)
 % The objective of this function is to translate the electrode names found in VERA_elNames 
 % into the same format as those found in eeg_elNames
 % The order should not matter - only the character of the names needs to be matched, 

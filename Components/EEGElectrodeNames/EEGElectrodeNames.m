@@ -60,8 +60,13 @@ classdef EEGElectrodeNames < AComponent
     
                 VERA_elNames = eLocs.GetElectrodeNames(eDef);
                 eeg_elNames  = bci2000parameters.ChannelNames.Value; % comes from amplifier via BCI2000
+
+                for i = 1:size(eDef.Definition,1)
+                    VERA_shankNames{i,1} = eDef.Definition(i).Name;
+                    VERA_numEl(i)        = eDef.Definition(i).NElectrodes;
+                end
     
-                elNameKey = GetElNameKey(obj,VERA_elNames,eeg_elNames);
+                elNameKey = GetElNameKey(obj,VERA_elNames,VERA_shankNames,VERA_numEl,eeg_elNames);
 
             elseif strcmp(answer,'Excel')
                 [file,path]=uigetfile(obj.FileTypeWildcard,'Please select Excel file with electrode names key');
@@ -96,7 +101,7 @@ classdef EEGElectrodeNames < AComponent
 
         end
 
-        function [elNameKey] = GetElNameKey(obj,VERA_elNames,eeg_elNames)
+        function [elNameKey] = GetElNameKey(obj,VERA_elNames,VERA_shankNames,VERA_numEl,eeg_elNames)
             % The goal is to force the VERA channel names (either manually
             % created or from ROSA) to conform to the channel names
             % recorded in a BCI2000 data file (usually from the amplifier)
@@ -119,7 +124,7 @@ classdef EEGElectrodeNames < AComponent
 
             % Run Rules
             for i = 1:length(rulelist)
-                VERA_elNames_normalized{i} = feval(rulelist{i}(1:end-2),VERA_elNames,eeg_elNames);
+                VERA_elNames_normalized{i} = feval(rulelist{i}(1:end-2),VERA_shankNames,VERA_numEl,eeg_elNames);
 
                 % Get intersection of VERA and EEG names, determine performance
                 % based on number of empty cells
