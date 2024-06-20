@@ -1,4 +1,4 @@
-function VERA_elNames_normalized = Rule6(VERA_elNames,eeg_elNames)
+function VERA_elNames_normalized = Rule7(VERA_elNames,eeg_elNames)
 
 VERA_elNames_normalized = [];
 
@@ -15,6 +15,13 @@ for i = 1:length(VERA_elNames)
 
         % First Letter
         VERA_shank = VERA_elNames{i}(1:idx-1);
+
+        % ' means Left
+        if contains(VERA_shank,'''')
+            VERA_shank(end) = 'L';
+        else
+            VERA_shank = [VERA_shank 'R'];
+        end
 
         % Last digits
         LastNumber = regexp(VERA_elNames{i},'((\d+)\D*$)','match');
