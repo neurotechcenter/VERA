@@ -41,6 +41,11 @@ classdef LabelVolume2Surface < AComponent
 
 
         function Initialize(obj)
+            if ~isempty(obj.LabelIds) && (length(obj.LabelIds) == length(obj.LabelNames))
+                obj.internalIds    = obj.LabelIds;
+                obj.internalLabels = obj.LabelNames;
+            end
+
             if(strcmp(obj.LoadLUTFile,'true'))
                 return;
             elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
@@ -48,6 +53,7 @@ classdef LabelVolume2Surface < AComponent
             elseif(strcmp(obj.LoadLUTFile,'thomas'))
                 return;
             end
+
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
                     path = obj.GetDependency('Freesurfer');
@@ -84,17 +90,19 @@ classdef LabelVolume2Surface < AComponent
         end
 
         function surf=Process(obj,vol)
-            if(strcmp(obj.LoadLUTFile,'true'))
-                [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
-                [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
-            elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
-                path     = obj.GetDependency('Freesurfer');
-                lut_path = fullfile(path,'FreeSurferColorLUT.txt');
-                [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
-            elseif(strcmp(obj.LoadLUTFile,'thomas'))
-                path     = obj.GetDependency('Thomas');
-                lut_path = fullfile(path,'CustomAtlas.ctbl');
-                [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
+            if (isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
+                if(strcmp(obj.LoadLUTFile,'true'))
+                    [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
+                    [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
+                elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
+                    path     = obj.GetDependency('Freesurfer');
+                    lut_path = fullfile(path,'FreeSurferColorLUT.txt');
+                    [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
+                elseif(strcmp(obj.LoadLUTFile,'thomas')) 
+                    path     = obj.GetDependency('Thomas');
+                    lut_path = fullfile(path,'CustomAtlas.ctbl');
+                    [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
+                end
             end
             % James added to deal with THOMAS lookup table
             if isa(obj.internalLabels,'char')
