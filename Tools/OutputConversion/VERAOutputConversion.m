@@ -16,7 +16,7 @@ load(fullfile(path,file));
 
 % convert from Legacy to New format
 if exist('tala','var')
-    [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala);
+    [surfaceModel, electrodes, electrodeNamesKey] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala);
 
     % Save
     [~,file,ext] = fileparts(file);
@@ -38,7 +38,7 @@ else
 end
 
 
-function [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala)
+function [surfaceModel, electrodes, electrodeNamesKey] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala)
     surfaceModel.Model              = cortex;                                   % Surface model (in vertId/triId, 1 is left hemisphere and 2 is right)
     surfaceModel.Annotation         = annotation.Annotation;                    % Identifier number associating each vertice of a surface with a given annotation
     surfaceModel.AnnotationLabel    = annotation.AnnotationLabel;               % Surface annotation map connecting identifier values with annotation
@@ -50,7 +50,9 @@ function [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, ele
     electrodes.Name                 = electrodeNames;                           % electrode names
     electrodes.Location             = tala.electrodes;                          % electrode locations (x,y,z)
 
-    electrodeNamesKey               = [];                                       % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
+    if ~exist('electrodeNamesKey', 'var')
+        electrodeNamesKey           = [];                                       % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
+    end
 end
 
 function [cortex, annotation, electrodeNames, electrodeDefinition, tala,...
