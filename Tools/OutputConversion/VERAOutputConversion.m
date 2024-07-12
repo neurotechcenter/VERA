@@ -14,13 +14,17 @@ end
 
 load(fullfile(path,file));
 
+if ~exist('electrodeNamesKey', 'var')
+    electrodeNamesKey  = [];          % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
+end
+
 % convert from Legacy to New format
 if exist('tala','var')
-    [surfaceModel, electrodes, electrodeNamesKey] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala);
+    [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala);
 
     % Save
     [~,file,ext] = fileparts(file);
-    save(fullfile(path,[file,'_new',ext]),'surfaceModel','electrodes','electrodeNamesKey')
+    save(fullfile(path,[file,'_new',ext]), 'surfaceModel', 'electrodes', 'electrodeNamesKey')
     msgbox(['File saved as: ',GetFullPath(fullfile(path,[file,'_new',ext]))],'Converted from Legacy to New Format')
 
 % convert from New to Legacy format
@@ -30,15 +34,15 @@ elseif exist('surfaceModel','var')
 
     % Save
     [~,file,ext] = fileparts(file);
-    save(fullfile(path,[file,'_legacy',ext]),'cortex', 'annotation', 'electrodeNames', 'electrodeDefinition', 'tala',...
-    'electrodeLabels', 'LabelName', 'SecondaryLabel', 'cmapstruct', 'viewstruct', 'vcontribs', 'ix')
+    save(fullfile(path,[file,'_legacy',ext]), 'cortex', 'annotation', 'electrodeNames', 'electrodeDefinition', 'tala',...
+    'electrodeLabels', 'LabelName', 'SecondaryLabel', 'cmapstruct', 'viewstruct', 'vcontribs', 'ix', 'electrodeNamesKey')
     msgbox(['File saved as: ',GetFullPath(fullfile(path,[file,'_legacy',ext]))],'Converted from New to Legacy Format')
 else
     fprintf('\nUnfamiliar file loaded. Please load output of\nMatOutput or MatOutput_legacy component.\n\n')
 end
 
 
-function [surfaceModel, electrodes, electrodeNamesKey] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala)
+function [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, electrodeDefinition, electrodeNames, tala)
     surfaceModel.Model              = cortex;                                   % Surface model (in vertId/triId, 1 is left hemisphere and 2 is right)
     surfaceModel.Annotation         = annotation.Annotation;                    % Identifier number associating each vertice of a surface with a given annotation
     surfaceModel.AnnotationLabel    = annotation.AnnotationLabel;               % Surface annotation map connecting identifier values with annotation
@@ -49,15 +53,11 @@ function [surfaceModel, electrodes, electrodeNamesKey] = ConvertLegacyToNew(cort
     electrodes.Label                = electrodeDefinition.Label;                % Final label, accounting for ReplaceLabels component if used (same as old secondaryLabel)
     electrodes.Name                 = electrodeNames;                           % electrode names
     electrodes.Location             = tala.electrodes;                          % electrode locations (x,y,z)
-
-    if ~exist('electrodeNamesKey', 'var')
-        electrodeNamesKey           = [];                                       % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
-    end
 end
 
 function [cortex, annotation, electrodeNames, electrodeDefinition, tala,...
     electrodeLabels, LabelName, SecondaryLabel, cmapstruct, viewstruct, vcontribs, ix] = ConvertNewToLegacy(surfaceModel, electrodes)
-    
+
     % surface model
     cortex = surfaceModel.Model;
 
