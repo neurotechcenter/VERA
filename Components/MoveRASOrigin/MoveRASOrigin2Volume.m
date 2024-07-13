@@ -17,7 +17,6 @@ classdef MoveRASOrigin2Volume < AComponent
             obj.AddOutput(obj.VolumeIdentifier1,'Volume');
         end
         function Initialize(~)
-            
         end
         
         function [vol1] = Process(~,vol1,vol2)

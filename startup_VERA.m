@@ -5,8 +5,6 @@
 close all;
 clearvars;
 clc;
-%restoredefaultpath;
-
 
 %add all paths
 addpath(genpath('classes'));
