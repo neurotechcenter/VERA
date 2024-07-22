@@ -17,9 +17,12 @@
         <Name>"Import ROSA File"</Name>
     </Component>
 
-    <Component Type="FreesurferModelGeneration">
-        <Name>"Generate Freesurfer Model"</Name>
-        <AnnotationType>"aparc"</AnnotationType>
+    <Component Type="ImportFreesurferSegmentation">
+        <Name>"Load Freesurfer Segmentation Folder"</Name>
+    </Component>
+
+    <Component Type="FreesurferSurfaceLoader">
+        <Name>"Load Freesurfer Surface"</Name>
     </Component>
 
     <Component Type="LoadFreesurferSegmentationVolume">
