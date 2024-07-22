@@ -5,7 +5,13 @@ clear;
 close;
 clc;
 
-% Select file to load
+% Add VERA dependencies to path
+p = mfilename('fullpath');
+FILEPATH = fileparts(p);
+addpath(genpath(fullfile(FILEPATH,'..','..','dependencies')));
+clear p FILEPATH
+
+% Select file to loadck
 [file,path] = uigetfile('*.mat','Select brain.mat file to load','MultiSelect','off');
 if path == 0
     fprintf('\nError: Please select at least one file.\n')
