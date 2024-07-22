@@ -8,6 +8,19 @@ function VERA_elNames_normalized = RuleTemplate(VERA_shankNames,VERA_numEl,eeg_e
 % Note that VERA is looking for the word 'Rule' in the name of the function. 
 % I would recommend naming new rule functions as 'Rule_institution1.m', 'Rule_institution2.m', etc
 
+VERA_elNames = [];
+for i = 1:size(VERA_shankNames,1)
+    for ii = 1:VERA_numEl(i)
+        VERA_elNames = [VERA_elNames;VERA_shankNames(i)];
+    end
+end
+
+VERA_elNumbers = [];
+for i = 1:size(VERA_numEl,2)
+    VERA_elNumbers = [VERA_elNumbers; [1:VERA_numEl(i)]';];
+end
+
+
 VERA_elNames_normalized = [];
 
 end

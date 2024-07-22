@@ -55,17 +55,31 @@ classdef EEGElectrodeNames < AComponent
                 if isequal(file,0)
                     error([obj.EEGNamesIdentifier ' selection aborted']);
                 else
-                    [~,~,bci2000parameters] = load_bcidat(fullfile(path,file));
+                    [signal,states,bci2000parameters] = load_bcidat(fullfile(path,file));
                 end
     
-                VERA_elNames = eLocs.GetElectrodeNames(eDef);
-                eeg_elNames  = bci2000parameters.ChannelNames.Value; % comes from amplifier via BCI2000
-
+                % VERA_elNames = eLocs.GetElectrodeNames(eDef);
+                
+                if ~isempty(bci2000parameters.ChannelNames.Value)
+                    eeg_elNames = bci2000parameters.ChannelNames.Value; % comes from amplifier via BCI2000
+                else
+                    for i = 1:size(signal,2)
+                        eeg_elNames{i} = ['Ch', num2str(i)];
+                    end
+                end
+                
                 for i = 1:size(eDef.Definition,1)
                     VERA_shankNames{i,1} = eDef.Definition(i).Name;
                     VERA_numEl(i)        = eDef.Definition(i).NElectrodes;
                 end
-    
+
+                VERA_elNames = [];
+                for i = 1:size(VERA_shankNames,1)
+                    for ii = 1:VERA_numEl(i)
+                        VERA_elNames = [VERA_elNames;{[VERA_shankNames{i} num2str(ii)]}];
+                    end
+                end
+
                 elNameKey = GetElNameKey(obj,VERA_elNames,VERA_shankNames,VERA_numEl,eeg_elNames);
 
             elseif strcmp(answer,'Excel')
@@ -158,8 +172,9 @@ classdef EEGElectrodeNames < AComponent
             % Create electrode naming key
 
             % Find intersection
+            % need better than intersect. For loop w/ strcmp
             [~,eeg_idx,vera_idx] = intersect(eeg_elNames_normalized,VERA_elNames_normalized,'stable');
-
+              
             % VERA electrode locations that were actually recorded from
             VERA_elNames_recorded = VERA_elNames(vera_idx);
 
@@ -183,6 +198,7 @@ classdef EEGElectrodeNames < AComponent
                     emptyctr = emptyctr + 1;
                 end
             end
+            
         end
         
     end
