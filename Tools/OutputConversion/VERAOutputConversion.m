@@ -8,6 +8,8 @@ clc;
 % Add VERA dependencies to path
 p = mfilename('fullpath');
 FILEPATH = fileparts(p);
+addpath(genpath(fullfile(FILEPATH,'..','..','classes')));
+addpath(genpath(fullfile(FILEPATH,'..','..','Components')));
 addpath(genpath(fullfile(FILEPATH,'..','..','dependencies')));
 clear p FILEPATH
 

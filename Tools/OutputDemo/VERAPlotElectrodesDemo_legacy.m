@@ -1,10 +1,16 @@
 %% Startup, load brain.mat and add VERA to MATLAB path
 clear;
-close all;
+% close all;
 clc;
 
 % Add VERA to path
-addpath(genpath(fullfile(cd,'..','..')))
+p = mfilename('fullpath');
+FILEPATH = fileparts(p);
+addpath(genpath(fullfile(FILEPATH,'..','..','classes')));
+addpath(genpath(fullfile(FILEPATH,'..','..','Components')));
+addpath(genpath(fullfile(FILEPATH,'..','..','dependencies')));
+clear p FILEPATH
+
 
 % Load output from VERA MatOutput component
 [filename,filepath] = uigetfile('*.mat','Select brain.mat file to load','MultiSelect','off');
@@ -39,7 +45,6 @@ alpha(0.05);
 hold on;
 % Plot electrodes in one color
 plotBallsOnVolume(gca,brainmat.tala.electrodes,[],elec_radius);
-
 
 %% Plot brain model with sticks
 NumImplants = size(brainmat.electrodeDefinition.Definition,1);
