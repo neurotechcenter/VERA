@@ -1,18 +1,20 @@
 classdef ImportFreesurferSegmentation < AComponent
     %IMPORTFREESURFERSEGMENTATION Imports the freesurfer segmentation by
     %creating a local copy within VERA
-    
+
     properties
         SegmentationPathIdentifier
+        InputFilepath char
     end
-    
+
     methods
         function obj = ImportFreesurferSegmentation()
             %IMPORTFREESURFERSEGMENTATION Construct an instance of this class
             %   Detailed explanation goes here
-            obj.SegmentationPathIdentifier='SegmentationPath';
+            obj.SegmentationPathIdentifier = 'SegmentationPath';
+            obj.InputFilepath              = '';
         end
-        
+
         function Publish(obj)
             obj.AddOutput(obj.SegmentationPathIdentifier,'PathInformation');
         end
@@ -21,17 +23,28 @@ classdef ImportFreesurferSegmentation < AComponent
         end
 
         function [outPath]=Process(obj)
-            [segmentationPath]=uigetdir([],'Please select Freesurfer Folder');
-            mri_path=fullfile(segmentationPath,'mri/orig.mgz');
+            if ~isempty(obj.InputFilepath)
+                segmentationPath = fullfile(obj.ComponentPath,'..','..',obj.InputFilepath);
+
+                % Open a file load dialog if you can't find the path
+                d = dir(fullfile(segmentationPath,'*.dcm'));
+                if isempty(d)
+                    segmentationPath = uigetdir([],'Please select Freesurfer Folder');
+                end
+            else
+                segmentationPath = uigetdir([],'Please select Freesurfer Folder');
+            end
+
+            mri_path = fullfile(segmentationPath,'mri/orig.mgz');
             if(~exist(mri_path,"file"))
                 error('Could not find orig.mgz in the Freesurfer segmentation folder! Please check if you selected the correct folder!');
             end
 
-            segmentationFolder=fullfile(obj.ComponentPath,'segmentation');
+            segmentationFolder = fullfile(obj.ComponentPath,'segmentation');
             copyfile(segmentationPath,segmentationFolder);
-            outPath=obj.CreateOutput(obj.SegmentationPathIdentifier);
-            [~,b]=fileparts(obj.ComponentPath);
-            outPath.Path=fullfile('./',b,'segmentation');
+            outPath      = obj.CreateOutput(obj.SegmentationPathIdentifier);
+            [~,b]        = fileparts(obj.ComponentPath);
+            outPath.Path = fullfile('./',b,'segmentation');
         end
     end
 end

@@ -3,19 +3,21 @@ classdef FileLoader < AComponent
     %Generic component that allows to select a file which will than be
     %passed to the AData object that implements IFileLoader
     %See also AData, IFileLoader
-    
+
     properties
-        Identifier char % Data identifier
-        IdentifierType char % Data type, See also AData
+        Identifier char       % Data identifier
+        IdentifierType char   % Data type, See also AData
         FileTypeWildcard char % Wildcard definition for File Loader
+        InputFilepath char
     end
-    
+
     methods
         function obj = FileLoader()
             %FileLoader - Constructor
-            obj.Identifier='';
-            obj.IdentifierType='';
-            obj.FileTypeWildcard='*.*';
+            obj.Identifier       = '';
+            obj.IdentifierType   = '';
+            obj.FileTypeWildcard = '*.*';
+            obj.InputFilepath    = '';
         end
         function Publish(obj)
             % Publish - Define Output for Component
@@ -29,6 +31,9 @@ classdef FileLoader < AComponent
             if(~isObjectTypeOf(obj.IdentifierType,'IFileLoader'))
                 error(['Invalid IdentifierType; ' obj.IdentifierType ' has to implement IFileLoader']);
             end
+
+            % obj.AddInput(obj.InputFilepath,'PathInformation');
+
             obj.AddOutput(obj.Identifier,obj.IdentifierType);
 
             if strcmp(obj.Name,'FileLoader')
@@ -40,18 +45,30 @@ classdef FileLoader < AComponent
             % See also AComponent.Initialize
 
         end
-        
+
         function [out] = Process(obj)
             % Process - opens file selector GUI and passes the file or
             % folder to the Data object
             % See also AComponent.Process, IFileLoader
-             [file,path]=uigetfile(obj.FileTypeWildcard,['Please select ' obj.Identifier]);
-             if isequal(file,0)
-                 error([obj.Identifier ' selection aborted']);
-             else
-                 out=obj.CreateOutput(obj.Identifier);
-                 out.LoadFromFile(fullfile(path,file));
-             end
+            if ~isempty(obj.InputFilepath)
+                file = '';
+                path = fullfile(obj.ComponentPath,'..','..',obj.InputFilepath);
+
+                % Open a file load dialog if you can't find the path
+                d = dir(fullfile(path,'*.dcm'));
+                if isempty(d)
+                    [file,path] = uigetfile(obj.FileTypeWildcard,['Please select ' obj.Identifier]);
+                end
+            else
+                [file,path] = uigetfile(obj.FileTypeWildcard,['Please select ' obj.Identifier]);
+            end
+
+            if isequal(file,0)
+                error([obj.Identifier ' selection aborted']);
+            else
+                out=obj.CreateOutput(obj.Identifier);
+                out.LoadFromFile(fullfile(path,file));
+            end
         end
     end
 end
