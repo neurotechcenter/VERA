@@ -1,6 +1,6 @@
 %% Startup, load brain.mat and add VERA to MATLAB path
 clear;
-% close all;
+close all;
 clc;
 
 % Add VERA to path

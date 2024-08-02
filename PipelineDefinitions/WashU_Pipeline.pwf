@@ -163,40 +163,34 @@
 
 
     <Component Type="MatOutput">
-        <Name>"Cortex"</Name>
+        <Name>"Brain"</Name>
         <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
-        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
         <Name>"Left Hippocampus"</Name>
         <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
-        <SavePathIdentifier>"DataOutput/LHipp.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
         <Name>"Right Hippocampus"</Name>
         <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
-        <SavePathIdentifier>"DataOutput/RHipp.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
         <Name>"Thalamus"</Name>
         <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
-        <SavePathIdentifier>"DataOutput/Thalamus.mat"</SavePathIdentifier>
     </Component>
 
     <Component Type="MatOutput">
         <Name>"Cingulate"</Name>
         <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier>
-        <SavePathIdentifier>"DataOutput/Cingulate.mat"</SavePathIdentifier>
     </Component>
     
     <Component Type="FreesurferDatExport">
-        <Name>"Write Freesurfer PointSet Files"</Name>
+        <Name>"Freesurfer PointSets"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
         <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
-        <SavePathIdentifier>"DataOutput/Electrodes"</SavePathIdentifier>
     </Component>
 
     <Component Type="ReportGenerator">
@@ -224,7 +218,6 @@
     
     <Component Type="MatOutput">
         <Name>"MNI Cortex"</Name>
-        <SavePathIdentifier>"DataOutput/MNIbrain.mat"</SavePathIdentifier>
     </Component>
 
 

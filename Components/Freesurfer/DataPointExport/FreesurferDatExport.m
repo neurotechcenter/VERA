@@ -11,27 +11,34 @@ classdef FreesurferDatExport < AComponent
         function obj = FreesurferDatExport()
             obj.ElectrodeLocationIdentifier   = 'ElectrodeLocation';
             obj.ElectrodeDefinitionIdentifier = 'ElectrodeDefinition';
-            obj.SavePathIdentifier            = '';
+            obj.SavePathIdentifier            = 'default';
         end
         
         function Publish(obj)
             obj.AddInput(obj.ElectrodeLocationIdentifier,   'ElectrodeLocation');
             obj.AddInput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition');
-            obj.AddOptionalInput(obj.SavePathIdentifier,    'PathInformation');
         end
-        
         
         function Initialize(obj)
         end
         
         function []= Process(obj, eLocsIn,elDef)
-            % if empty, use dialog (default behavior)
-            if isempty(obj.SavePathIdentifier)
+
+            % create output file in DataOutput folder with ProjectName_ComponentName.mat (default behavior)
+            if strcmp(obj.SavePathIdentifier,'default')
+                ProjectPath      = fileparts(obj.ComponentPath);
+                [~, ProjectName] = fileparts(ProjectPath);
+
+                path = fullfile(obj.ComponentPath,'..','DataOutput',[ProjectName,'_Electrodes']);
+
+            % if empty, use dialog
+            elseif isempty(obj.SavePathIdentifier)
                 path = uigetdir;
                 if isequal(path, 0)
                     error('Selection aborted');
                 end
-            % Otherwise, save on relative path in project folder using component name as file name
+                
+            % Otherwise, save with specified file name
             else
                 path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier); 
             end

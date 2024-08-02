@@ -9,12 +9,11 @@ classdef MatOutputNoElectrodes < AComponent
     methods
         function obj = MatOutputNoElectrodes()
             obj.SurfaceIdentifier  = 'Surface';
-            obj.SavePathIdentifier = '';
+            obj.SavePathIdentifier = 'default';
         end
         
         function Publish(obj)
-            obj.AddInput(obj.SurfaceIdentifier,          'Surface');
-            obj.AddOptionalInput(obj.SavePathIdentifier, 'PathInformation');
+            obj.AddInput(obj.SurfaceIdentifier, 'Surface');
         end
         
         function Initialize(obj)
@@ -22,25 +21,35 @@ classdef MatOutputNoElectrodes < AComponent
         
         function []= Process(obj, surf)
             
-            % if empty, use dialog (default behavior)
-            if isempty(obj.SavePathIdentifier)
+            % create output file in DataOutput folder with ProjectName_ComponentName.mat (default behavior)
+            if strcmp(obj.SavePathIdentifier,'default')
+                ProjectPath      = fileparts(obj.ComponentPath);
+                [~, ProjectName] = fileparts(ProjectPath);
+
+                path = fullfile(obj.ComponentPath,'..','DataOutput');
+                file = [ProjectName, '_', obj.Name,'.mat'];
+
+            % if empty, use dialog
+            elseif isempty(obj.SavePathIdentifier)
                 [file, path] = uiputfile('*.mat');
                 if isequal(file, 0) || isequal(path, 0)
                     error('Selection aborted');
                 end
-            % Otherwise, save on relative path in project folder using component name as file name
+
+            % Otherwise, save with specified file name
             else
                 [path, file, ext] = fileparts(obj.SavePathIdentifier);
                 file = [file,ext];
-
-                path = fullfile(obj.ComponentPath,'..',path); 
+                path = fullfile(obj.ComponentPath,'..',path);
 
                 if ~strcmp(ext,'.mat')
-                    path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier); 
+                    path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier);
                     file = [obj.Name,'.mat'];
-                    file = replace(file,' ','_');
                 end
             end
+
+            % convert spaces to underscores
+            file = replace(file,' ','_');
 
             % create save folder if it doesn't exist
             if ~isfolder(path)
