@@ -27,8 +27,7 @@ classdef ImportFreesurferSegmentation < AComponent
                 segmentationPath = fullfile(obj.ComponentPath,'..','..',obj.InputFilepath);
 
                 % Open a file load dialog if you can't find the path
-                d = dir(fullfile(segmentationPath,'*.dcm'));
-                if isempty(d)
+                if ~exist(segmentationPath,'dir')
                     segmentationPath = uigetdir([],'Please select Freesurfer Folder');
                 end
             else

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PipelineDefinition Name="WashU Pipeline">
+<PipelineDefinition Name="WashU Load Electrodes Pipeline">
 
     <Component Type="FileLoader">
         <Name>"CT Loader"</Name>
@@ -18,6 +18,11 @@
     <Component Type="ImportROSFile">
         <Name>"Import ROSA File"</Name>
         <InputFilepath>"notes/executed/"</InputFilepath>
+    </Component>
+
+    <Component Type="LoadFreeviewPointFile">
+        <Name>"Load Electrodes"</Name>
+        <InputFilepath>"imaging/electrodes/"</InputFilepath>
     </Component>
 
     <Component Type="ImportFreesurferSegmentation">
@@ -46,7 +51,6 @@
 
 
 
-
     <Component Type="MoveRASOrigin2Volume">
         <Name>"Move RAS Origin"</Name>
     </Component>
@@ -65,18 +69,6 @@
         <Name>"Transform ROSA Trajectories"</Name>
         <TIdentifier>"T_ROSA"</TIdentifier>
         <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
-    </Component>
-
-    <Component Type="MatlabElectrodeSelection">
-        <Name>"MATLAB Electrode Selection"</Name>
-    </Component>
-
-    <Component Type="FreesurferElectrodeLocalization">
-        <Name>"Freesurfer Electrode Localization"</Name>
-    </Component>
-
-    <Component Type="ReorderElectrodes">
-        <Name>"Reorder Electrodes"</Name>
     </Component>
 
     <Component Type="CalculateDistanceToVolumeLabel">

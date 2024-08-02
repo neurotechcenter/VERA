@@ -32,8 +32,6 @@ classdef FileLoader < AComponent
                 error(['Invalid IdentifierType; ' obj.IdentifierType ' has to implement IFileLoader']);
             end
 
-            % obj.AddInput(obj.InputFilepath,'PathInformation');
-
             obj.AddOutput(obj.Identifier,obj.IdentifierType);
 
             if strcmp(obj.Name,'FileLoader')
