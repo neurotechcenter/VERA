@@ -49,12 +49,13 @@ classdef FileLoader < AComponent
             % folder to the Data object
             % See also AComponent.Process, IFileLoader
             if ~isempty(obj.InputFilepath)
-                file = '';
-                path = fullfile(obj.ComponentPath,'..','..',obj.InputFilepath);
+
+                [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath));
+
+                file = [file,ext];
 
                 % Open a file load dialog if you can't find the path
-                d = dir(fullfile(path,'*.dcm'));
-                if isempty(d)
+                if ~exist(fullfile(path,file),'file')
                     [file,path] = uigetfile(obj.FileTypeWildcard,['Please select ' obj.Identifier]);
                 end
             else
