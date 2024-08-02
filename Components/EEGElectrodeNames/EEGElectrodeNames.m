@@ -6,6 +6,7 @@ classdef EEGElectrodeNames < AComponent
         ElectrodeLocationIdentifier   % Electrode Locations
         EEGNamesIdentifier            % EEG Names
         FileTypeWildcard char         % Wildcard Definition
+        InputFilepath char            % Load file path
     end
 
     properties
@@ -21,6 +22,7 @@ classdef EEGElectrodeNames < AComponent
             obj.FileTypeWildcard              = '*.*';
             obj.EEGNames                      = [];
             obj.internalDefinitions           = [];
+            obj.InputFilepath                 = '';
         end
 
         function Publish(obj)
@@ -43,22 +45,45 @@ classdef EEGElectrodeNames < AComponent
 
         function [out] = Process(obj,eDef,eLocs)
 
-            % dialog box asking bci2000 file or excel file
-            quest    = 'Load BCI2000 data file and generate electrode key? Or load excel file with pre-determined electrode key?';
-            dlgtitle = 'Electrode Names Key';
-            btn1     = 'BCI2000';
-            btn2     = 'Excel';
-            answer = questdlg(quest,dlgtitle,btn1,btn2,btn1);
+            elNameKey  = [];
+            answer     = '';
+            NeedDialog = 1;
 
+            % if an input file is specified, use it and disable the file
+            % selection dialog
+            if ~isempty(obj.InputFilepath)
+
+                [path, file, ext] = fileparts(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath));
+
+                if strcmp(ext,'.dat') && exist(fullfile(path,[file,ext]),'file')
+                    answer     = 'BCI2000';
+                    NeedDialog = 0;
+                elseif strcmp(ext,'.xlsx') && exist(fullfile(path,[file,ext]),'file')
+                    answer     = 'Excel';
+                    NeedDialog = 0;
+                end
+            end
+
+            % dialog box asking bci2000 file or excel file
+            if isempty(answer)
+                quest    = 'Load BCI2000 data file and generate electrode key? Or load excel file with pre-determined electrode key?';
+                dlgtitle = 'Electrode Names Key';
+                btn1     = 'BCI2000';
+                btn2     = 'Excel';
+                answer = questdlg(quest,dlgtitle,btn1,btn2,btn1);
+            end
+    
+            % if a BCI200 data file is selected
             if strcmp(answer,'BCI2000')
-                [file,path]=uigetfile(obj.FileTypeWildcard,'Please select BCI2000 data file');
+                if NeedDialog
+                    [file,path] = uigetfile(obj.FileTypeWildcard,'Please select BCI2000 data file');
+                end
+
                 if isequal(file,0)
                     error([obj.EEGNamesIdentifier ' selection aborted']);
                 else
                     [signal,states,bci2000parameters] = load_bcidat(fullfile(path,file));
                 end
-    
-                % VERA_elNames = eLocs.GetElectrodeNames(eDef);
                 
                 if ~isempty(bci2000parameters.ChannelNames.Value)
                     eeg_elNames = bci2000parameters.ChannelNames.Value; % comes from amplifier via BCI2000
@@ -82,8 +107,12 @@ classdef EEGElectrodeNames < AComponent
 
                 elNameKey = GetElNameKey(obj,VERA_elNames,VERA_shankNames,VERA_numEl,eeg_elNames);
 
+            % if an excel file is selected
             elseif strcmp(answer,'Excel')
-                [file,path]=uigetfile(obj.FileTypeWildcard,'Please select Excel file with electrode names key');
+                if NeedDialog
+                    [file,path] = uigetfile(obj.FileTypeWildcard,'Please select Excel file with electrode names key');
+                end
+
                 if isequal(file,0)
                     error([obj.EEGNamesIdentifier ' selection aborted']);
                 else
@@ -92,8 +121,10 @@ classdef EEGElectrodeNames < AComponent
                     eeg_elNames  = T.Var2(2:end);
                     VERA_elNames = T.Var8(2:end);
 
+                    elNameKey = struct('EEGNames',[],'VERANames',[]);
                     for i = 1:size(eeg_elNames,1)
-                        elNameKey(i) = struct('EEGNames',eeg_elNames{i,1},'VERANames',VERA_elNames{i,1});
+                        elNameKey(i).EEGNames  = eeg_elNames{i,1};
+                        elNameKey(i).VERANames = VERA_elNames{i,1};
                     end
                 end
             end
