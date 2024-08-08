@@ -6,6 +6,7 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
 %annotation - Annotations for each vertex
 %varargin - additional settings to be passed to trisurf
 %See also Surface, trisurf
+
     %%% Added by James
     if ~isempty(varargin)
         if strcmp(varargin{1},'LightOn') && varargin{2} == 1
@@ -42,5 +43,6 @@ function [surf] = plot3DModel(ax,model,annotation,varargin)
     ylim(ax,'auto');
     set(ax,'clipping','off');
     set(ax,'XColor', 'none','YColor','none','ZColor','none')
+    
 end
 
