@@ -98,6 +98,11 @@ classdef (Abstract)  AData < Serializable & matlab.mixin.Copyable
                 pathout=fullfile(obj.GetDependency('ProjectPath'),strrep(pathIn,'\','/'));
             else
                 pathout=fullfile(cd,pathIn);
+
+                % Sometimes the ProjectPath dependency is not set. Unsure why.
+                % This results in VERA searching for files on the wrong path.
+                % Have not resolved this yet so created this warning.
+                msgbox('Warning! Project path not found. Consider reopening the project to resolve.','Warning!')
             end
         end
 
