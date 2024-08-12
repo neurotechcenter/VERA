@@ -167,7 +167,7 @@ classdef Volume < AData & IFileLoader
             obj.Path=obj.makeFullPath(obj.Path);
             if(~isempty(obj.Path))
                 try
-                    obj.Image=load_nii(obj.Path,[],[],[],[],[],0);
+                    obj.Image=load_nii(path,[],[],[],[],[],0);
                 catch
                     obj.Image=load_untouch_nii(obj.Path,[],[],[],[],[]);
                 end
