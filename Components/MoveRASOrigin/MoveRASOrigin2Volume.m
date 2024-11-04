@@ -31,11 +31,15 @@ classdef MoveRASOrigin2Volume < AComponent
                 vol1.Image.hdr.hist.srow_x(4) = vol1.Image.hdr.dime.pixdim(2)*img_size(1);
             end
 
-            if vol1.Image.hdr.hist.srow_y(2) > 0
-                vol1.Image.hdr.hist.srow_y(4) = -vol1.Image.hdr.dime.pixdim(3)*img_size(2);
-            else
-                vol1.Image.hdr.hist.srow_y(4) = vol1.Image.hdr.dime.pixdim(3)*img_size(2);
-            end
+            % if vol1.Image.hdr.hist.srow_y(2) > 0
+            %     vol1.Image.hdr.hist.srow_y(4) = -vol1.Image.hdr.dime.pixdim(3)*img_size(2);
+            % else
+            %     vol1.Image.hdr.hist.srow_y(4) = vol1.Image.hdr.dime.pixdim(3)*img_size(2);
+            % end
+
+            % commented out the above section as it caused an issue with a
+            % VCU subject
+            vol1.Image.hdr.hist.srow_y(4) = -vol1.Image.hdr.dime.pixdim(3)*img_size(2);
 
             if vol1.Image.hdr.hist.srow_z(3) > 0
                 vol1.Image.hdr.hist.srow_z(4) = -vol1.Image.hdr.dime.pixdim(4)*img_size(3);
