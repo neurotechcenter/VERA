@@ -21,7 +21,8 @@ end
 
 brainmat = load(fullfile(filepath,filename));
 
-elec_radius = 0.5;
+elec_radius  = 0.5;
+modelOpacity = 0.2; % Range from 0 to 1
 
 %% Plot implanted electrodes on brain model
 % Create color map from annotations (surface labels)
@@ -41,7 +42,7 @@ colormap(cmap); % colorize with annotation for Surface
 cb = colorbar('Ticks',[name_id; name_id(end)+1]+0.5,'TickLabels',[names; {'electrodes'}]);
 clim([1 name_id(end)+2]) % add 2, one for unknown, 1 for electrodes
 cb.TickLabelInterpreter = 'none';
-alpha(0.05);
+alpha(modelOpacity);
 hold on;
 % Plot electrodes in one color
 plotBallsOnVolume(gca,brainmat.tala.electrodes,[],elec_radius);
@@ -53,7 +54,7 @@ implantcmap = jet(NumImplants);
 
 figure;
 plot3DModel(gca,brainmat.cortex,[]);
-alpha(0.3);
+alpha(modelOpacity);
 hold on;
 elecCtr  = 1;
 for i = 1:NumImplants
@@ -80,7 +81,7 @@ label_cols        = distinguishable_colors(length(unique_labels));
 fullcolor = figure;
 plot3DModel(gca,brainmat.cortex,remap);
 colormap(cmap); % colorize with annotation for Surface
-alpha(0.1);
+alpha(modelOpacity);
 hold on;
 % Plot electrodes colorized by brain area (annotation, secondary labels)
 for i=1:length(unique_labels)
@@ -108,7 +109,7 @@ label_cols        = distinguishable_colors(length(unique_labels));
 figure;
 plot3DModel(gca,brainmat.cortex);
 colormap([0.5 0.5 0.5]); % colorize grayscale
-alpha(0.1);
+alpha(modelOpacity);
 hold on;
 plotElNums(brainmat.tala.electrodes*1.075, 1:size(brainmat.tala.electrodes,1), 12);
 % Plot electrodes colorized by brain area (secondary labels)

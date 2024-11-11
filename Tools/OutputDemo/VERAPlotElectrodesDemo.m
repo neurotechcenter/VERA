@@ -22,6 +22,7 @@ end
 brainmat = load(fullfile(filepath,filename));
 
 GenerateRotatingGif = 0;
+modelOpacity = 0.2; % Range from 0 to 1
 
 %% Create surface annotation colors
 [surfRemap,surfcmap,surfNames,surfName_id] = createColormapFromAnnotations(brainmat.surfaceModel);
@@ -38,7 +39,7 @@ electrodeRadius       = 0.75;
 fullcolorFig = figure('Position',[50 50 1200 900]);
 modelPlot = plot3DModel(gca,brainmat.surfaceModel.Model,surfRemap);
 colormap(surfcmap); % colorize with annotation for Surface
-alpha(0.05);
+alpha(modelOpacity);
 hold on;
 % Plot electrodes colorized by brain area (annotation)
 for i = 1:length(uniqueElectrodeLabels)
@@ -91,7 +92,7 @@ end
 figure;
 plot3DModel(gca,brainmat.surfaceModel.Model,surfRemap);
 colormap(surfcmap); % colorize with annotation for Surface
-alpha(0.05);
+alpha(modelOpacity);
 hold on;
 % Plot electrodes in one color
 plotBallsOnVolume(gca,brainmat.electrodes.Location,[],electrodeRadius);
@@ -112,7 +113,7 @@ implantcmap = jet(NumImplants);
 
 figure;
 plot3DModel(gca,brainmat.surfaceModel.Model,[]);
-alpha(0.3);
+alpha(modelOpacity);
 hold on;
 elecCtr = 1;
 for i = 1:NumImplants
@@ -139,7 +140,7 @@ clim([1 NumImplants+2])
 figure;
 plot3DModel(gca,brainmat.surfaceModel.Model);
 colormap([0.5 0.5 0.5]); % colorize grayscale
-alpha(0.1);
+alpha(modelOpacity);
 hold on;
 % Plot electrodes colorized by brain area
 for i=1:length(uniqueElectrodeLabels)
@@ -161,49 +162,50 @@ clim([1 length(uniqueElectrodeLabels) + 2])
 
 %% Plot implanted electrodes using custom electrode names from the recording amplifier
 
-elNamesKey = struct2cell(brainmat.electrodeNamesKey);
-
-eeg_idx     = zeros(size(brainmat.electrodes.Name,1),1);
-eeg_elNames = cell(size(brainmat.electrodes.Name,1),1);
-
-for i = 1:size(brainmat.electrodes.Name,1)
-    % find indices of recorded electrodes
-    if any(strcmp(elNamesKey(2,:),brainmat.electrodes.Name{i}))
-        eeg_idx(i) = find(strcmp(elNamesKey(2,:),brainmat.electrodes.Name{i}));
-    end
-    % create cell of recorded electrode names with the correct indices
-    if eeg_idx(i) ~= 0
-        eeg_elNames{i} = elNamesKey(1,eeg_idx(i))';
-    else
-        eeg_elNames{i} = '';
-    end
-end
-
-figure;
-plot3DModel(gca,brainmat.surfaceModel.Model);
-colormap([0.5 0.5 0.5]); % colorize grayscale
-alpha(0.1);
-hold on;
-% Plot electrodes colorized by brain area
-for i=1:length(uniqueElectrodeLabels)
-    % Find the electrodes that belong to each unique label and color them appropriately
-    elecsToPlot = strcmp(uniqueElectrodeLabels{i},electrodeLabels);
-    plotBallsOnVolume(gca,brainmat.electrodes.Location(elecsToPlot,:),electrodeColors(i,:),electrodeRadius);
+if ~isempty(brainmat.electrodeNamesKey)
+    elNamesKey = struct2cell(brainmat.electrodeNamesKey);
     
+    eeg_idx     = zeros(size(brainmat.electrodes.Name,1),1);
+    eeg_elNames = cell(size(brainmat.electrodes.Name,1),1);
+    
+    for i = 1:size(brainmat.electrodes.Name,1)
+        % find indices of recorded electrodes
+        if any(strcmp(elNamesKey(2,:),brainmat.electrodes.Name{i}))
+            eeg_idx(i) = find(strcmp(elNamesKey(2,:),brainmat.electrodes.Name{i}));
+        end
+        % create cell of recorded electrode names with the correct indices
+        if eeg_idx(i) ~= 0
+            eeg_elNames{i} = elNamesKey(1,eeg_idx(i))';
+        else
+            eeg_elNames{i} = '';
+        end
+    end
+    
+    figure;
+    plot3DModel(gca,brainmat.surfaceModel.Model);
+    colormap([0.5 0.5 0.5]); % colorize grayscale
+    alpha(0.1);
+    hold on;
+    % Plot electrodes colorized by brain area
+    for i=1:length(uniqueElectrodeLabels)
+        % Find the electrodes that belong to each unique label and color them appropriately
+        elecsToPlot = strcmp(uniqueElectrodeLabels{i},electrodeLabels);
+        plotBallsOnVolume(gca,brainmat.electrodes.Location(elecsToPlot,:),electrodeColors(i,:),electrodeRadius);
+        
+    end
+    for i = 1:size(brainmat.electrodes.Location,1)
+        % Plot electrode names
+        text(brainmat.electrodes.Location(i,1)*1.075, brainmat.electrodes.Location(i,2)*1.075, brainmat.electrodes.Location(i,3)*1.075, eeg_elNames{i},'FontSize',12,'FontWeight','bold','color','b');
+    end
+    view(-114,25)
+    
+    % Modify colorbar to include electrode labeling
+    cb                      = colorbar;
+    cb.Ticks                = [0:length(uniqueElectrodeLabels)]+1.5;
+    cb.TickLabels           = [{'cortex'}; uniqueElectrodeLabels(:)];
+    cb.TickLabelInterpreter = 'none';
+    clim([1 length(uniqueElectrodeLabels) + 2])
 end
-for i = 1:size(brainmat.electrodes.Location,1)
-    % Plot electrode names
-    text(brainmat.electrodes.Location(i,1)*1.075, brainmat.electrodes.Location(i,2)*1.075, brainmat.electrodes.Location(i,3)*1.075, eeg_elNames{i},'FontSize',12,'FontWeight','bold','color','b');
-end
-view(-114,25)
-
-% Modify colorbar to include electrode labeling
-cb                      = colorbar;
-cb.Ticks                = [0:length(uniqueElectrodeLabels)]+1.5;
-cb.TickLabels           = [{'cortex'}; uniqueElectrodeLabels(:)];
-cb.TickLabelInterpreter = 'none';
-clim([1 length(uniqueElectrodeLabels) + 2])
-
 
 
 
