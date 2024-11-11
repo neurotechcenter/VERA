@@ -28,6 +28,12 @@ modelOpacity = 0.2; % Range from 0 to 1
 [surfRemap,surfcmap,surfNames,surfName_id] = createColormapFromAnnotations(brainmat.surfaceModel);
 
 %% Create electrode annotation colors
+for i = 1:length(brainmat.electrodes.Label)
+    if isempty(brainmat.electrodes.Label{i})
+        brainmat.electrodes.Label{i} = 'no-label';
+    end
+end
+
 electrodeLabels       = cellfun(@(x)x{1},brainmat.electrodes.Label,'UniformOutput',false);          % convert to easier to use cell array
 uniqueElectrodeLabels = unique(electrodeLabels);
 electrodeColors       = distinguishable_colors(length(uniqueElectrodeLabels));
@@ -184,7 +190,7 @@ if ~isempty(brainmat.electrodeNamesKey)
     figure;
     plot3DModel(gca,brainmat.surfaceModel.Model);
     colormap([0.5 0.5 0.5]); % colorize grayscale
-    alpha(0.1);
+    alpha(modelOpacity);
     hold on;
     % Plot electrodes colorized by brain area
     for i=1:length(uniqueElectrodeLabels)
