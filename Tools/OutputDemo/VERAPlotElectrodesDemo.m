@@ -22,7 +22,7 @@ end
 brainmat = load(fullfile(filepath,filename));
 
 GenerateRotatingGif = 0;
-modelOpacity = 0.2; % Range from 0 to 1
+modelOpacity = 0.1; % Range from 0 to 1
 
 %% Create surface annotation colors
 [surfRemap,surfcmap,surfNames,surfName_id] = createColormapFromAnnotations(brainmat.surfaceModel);
@@ -30,7 +30,7 @@ modelOpacity = 0.2; % Range from 0 to 1
 %% Create electrode annotation colors
 for i = 1:length(brainmat.electrodes.Label)
     if isempty(brainmat.electrodes.Label{i})
-        brainmat.electrodes.Label{i} = 'no-label';
+        brainmat.electrodes.Label(i) = {{'no-label'}};
     end
 end
 
