@@ -41,7 +41,6 @@ classdef FreesurferDeface < AComponent
 
             pathtoTalMixSkull = fullfile(freesurferPath, 'average', 'talairach_mixed_with_skull.gca');
             pathtoFace        = fullfile(freesurferPath, 'average', 'face.gca');
-            setup_script      = fullfile(freesurferPath, 'SetUpFreeSurfer.sh');
             mri_deface_script = fullfile(fileparts(fileparts(mfilename('fullpath'))),'/scripts/mri_deface.sh');
 
             % EXECUTE call
@@ -62,11 +61,12 @@ classdef FreesurferDeface < AComponent
                 stat = systemWSL(shellcmd,'-echo');
                 
             else
-                deface_command = ['mri_deface ', vol.Path, ' ', pathtoTalMixSkull, ' ', pathtoFace, ' ', vol.Path];
-
-                syscall = ['export FREESURFER_HOME=', freesurferPath, ' && source ', setup_script, ' && ', deface_command];
-            
-                stat = system(syscall,'-echo');
+                systemWSL(['chmod +x ''' mri_deface_script ''''],'-echo');
+                
+                shellcmd = ['''' mri_deface_script ''' ''' freesurferPath ''' ''' vol.Path ''' ''' ...
+                pathtoTalMixSkull ''' ''' pathtoFace ''' ''' vol.Path ''''];
+                
+                stat = systemWSL(shellcmd,'-echo');
             end
             
             if stat ~= 0
