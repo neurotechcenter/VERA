@@ -1,11 +1,11 @@
-classdef DeFace < AComponent
+classdef FreesurferDeface < AComponent
     % The DeFace component applies the Freesurfer defacing algorithm
     properties
         Identifier
     end
 
     methods
-        function obj = DeFace()
+        function obj = FreesurferDeface()
             obj.Identifier  = 'MRI';
         end
 
