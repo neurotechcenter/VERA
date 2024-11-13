@@ -39,27 +39,38 @@ classdef FreesurferDeface < AComponent
 
             freesurferPath = obj.GetDependency('Freesurfer');
 
-            pathtoTalMixSkull = strcat(freesurferPath, '/average/talairach_mixed_with_skull.gca');
-            pathtoFace        = strcat(freesurferPath, '/average/face.gca');
-
-            deface_command = ['mri_deface ', vol.Path, ' ', pathtoTalMixSkull, ' ', pathtoFace, ' ', vol.Path];
-
-            syscall = ['export FREESURFER_HOME=', freesurferPath, ' && source ', freesurferPath, '/SetUpFreeSurfer.sh && ', deface_command];
+            pathtoTalMixSkull = fullfile(freesurferPath, 'average', 'talairach_mixed_with_skull.gca');
+            pathtoFace        = fullfile(freesurferPath, 'average', 'face.gca');
+            setup_script      = fullfile(freesurferPath, 'SetUpFreeSurfer.sh');
+            mri_deface_script = fullfile(fileparts(fileparts(mfilename('fullpath'))),'/scripts/mri_deface.sh');
 
             % EXECUTE call
             if(ispc)
                 subsyspath = obj.GetDependency('UbuntuSubsystemPath');
 
-                w_syscall = convertToUbuntuSubsystemPath(syscall, subsyspath);
+                w_pathtoTalMixSkull = convertToUbuntuSubsystemPath(pathtoTalMixSkull, subsyspath);
+                w_pathtoFace        = convertToUbuntuSubsystemPath(pathtoFace,        subsyspath);
+                w_freesurferPath    = convertToUbuntuSubsystemPath(freesurferPath,    subsyspath);
+                w_volpath           = convertToUbuntuSubsystemPath(vol.Path,          subsyspath);
+                w_mri_deface_script = convertToUbuntuSubsystemPath(mri_deface_script, subsyspath);
 
-                systemWSL(w_syscall,'-echo');
-
+                systemWSL(['chmod +x ''' w_mri_deface_script ''''],'-echo');
+                
+                shellcmd = ['''' w_mri_deface_script ''' ''' w_freesurferPath ''' ''' w_volpath ''' ''' ...
+                w_pathtoTalMixSkull ''' ''' w_pathtoFace ''' ''' w_volpath ''''];
+                
+                stat = systemWSL(shellcmd,'-echo');
+                
             else
+                deface_command = ['mri_deface ', vol.Path, ' ', pathtoTalMixSkull, ' ', pathtoFace, ' ', vol.Path];
+
+                syscall = ['export FREESURFER_HOME=', freesurferPath, ' && source ', setup_script, ' && ', deface_command];
+            
                 stat = system(syscall,'-echo');
-    
-                if stat ~= 0
-                    disp('Problem with defacing')
-                end
+            end
+            
+            if stat ~= 0
+                disp('Problem with defacing')
             end
 
             % This is so the defaced volume is used in further VERA processing
