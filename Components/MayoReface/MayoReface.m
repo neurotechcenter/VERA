@@ -55,22 +55,26 @@ classdef MayoReface < AComponent
                 [~,TL]    = system('tasklist');
                 IsRunning = contains(TL, 'Docker Desktop.exe');
                 if ~IsRunning
+                    fprintf('Starting Docker\n');
                     system(['"',DockerPath,'"']);
+                else
+                    fprintf('Docker already running\n');
                 end
             else
                 system('open -a docker');
             end
 
             % Might need to wait for docker to open?
-            pause(10)
+            pause(20)
             
             % Check docker image
             dockerImageName = 'mri_reface';
             dockerImage     = fullfile(mri_refacePath,'mri_reface_docker_image');
             [~, id]         = system(['docker images -q ' dockerImageName]);
             if ~isempty(id)
-                fprintf('docker image found: %s\n', dockerImageName);
+                fprintf('docker image found: %s\n',   dockerImageName);
             else
+                fprintf('Loading docker image: %s\n', dockerImage);
                 system(['docker load < ' dockerImage]);
             end
 
@@ -108,7 +112,7 @@ classdef MayoReface < AComponent
             
             % Replace the original volume file so there is no identified
             % image still stored in the VERA project folder
-            outputfile = fullfile(outputpath,'MRI_deFaced.nii');
+            outputfile = fullfile(outputpath,[obj.Identifier,'_deFaced.nii']);
             copyfile(outputfile,vol.Path);
             
             % This is so the defaced volume is used in further VERA processing
