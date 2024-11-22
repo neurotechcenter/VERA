@@ -61,7 +61,16 @@ classdef MayoReface < AComponent
                     fprintf('Docker already running\n');
                 end
             else
-                system('open -a docker');
+                if ~contains(getenv('PATH'),'/usr/local/bin')
+                    fprintf('adding /usr/local/bin to path\n')
+                    setenv('PATH', [getenv('PATH') ':/usr/local/bin']);
+                end
+                [~,TL]    = system('ps aux');
+                IsRunning = contains(TL, 'Docker');
+                if ~IsRunning
+                    fprintf('Starting Docker\n')
+                    system('open -a docker');
+                end
             end
 
             % Might need to wait for docker to open?
