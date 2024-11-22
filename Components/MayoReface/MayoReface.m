@@ -118,7 +118,7 @@ classdef MayoReface < AComponent
             % This is so the defaced volume is used in further VERA processing
             vol.LoadFromFile(outputfile);
             
-            
+            delete(outputfile);
 
         end
     end

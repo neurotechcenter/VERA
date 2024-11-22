@@ -26,10 +26,15 @@ classdef ThomasSegmentation < AComponent
         end
 
         function Initialize(obj)
-            path = obj.GetDependency('Thomas');
-            addpath(path);
-            path = obj.GetDependency('Docker');
-            addpath(path);
+            thomaspath = obj.GetDependency('Thomas');
+            addpath(thomaspath);
+            
+            dockerpath = obj.GetDependency('Docker');
+            if ispc
+                addpath(['"' dockerpath '"']);
+            else
+                addpath(dockerpath);
+            end
             
             if(ispc)
                obj.GetDependency('UbuntuSubsystemPath');
@@ -66,14 +71,14 @@ classdef ThomasSegmentation < AComponent
                 end
             else
                 if strcmp(obj.MRIIdentifier,'MRI')
-                % T1
-                docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
-                    ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
-            elseif strcmp(obj.MRIIdentifier,'FGATIR')
-                % WMn/FGATIR
-                docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
-                    ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
-            end
+                    % T1
+                    docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
+                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
+                elseif strcmp(obj.MRIIdentifier,'FGATIR')
+                    % WMn/FGATIR
+                    docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
+                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
+                end
             end
             
             segmentationPath = fullfile(segmentationFolder,'Segmentation');
