@@ -72,7 +72,17 @@ classdef FreesurferDeface < AComponent
             if stat ~= 0
                 disp('Problem with defacing')
             end
-
+            
+            % Replace the original volume file so there is no identified
+            % image still stored in the VERA project folder            
+            filelist = dir(fullfile(obj.ComponentPath,'..','**',['*',obj.Identifier,'.nii']));
+            
+            for i = 1:length(filelist)
+                if ~strcmp(vol.Path,fullfile(filelist(i).folder,filelist(i).name))
+                    copyfile(vol.Path,fullfile(filelist(i).folder,filelist(i).name));
+                end
+            end
+            
             % This is so the defaced volume is used in further VERA processing
             vol.LoadFromFile(vol.Path);
 

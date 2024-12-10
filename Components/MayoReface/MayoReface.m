@@ -122,7 +122,13 @@ classdef MayoReface < AComponent
             % Replace the original volume file so there is no identified
             % image still stored in the VERA project folder
             outputfile = fullfile(outputpath,[obj.Identifier,'_deFaced.nii']);
-            copyfile(outputfile,vol.Path);
+            
+            filelist = dir(fullfile(obj.ComponentPath,'..','**',['*',obj.Identifier,'.nii']));
+            
+            % copyfile(outputfile,vol.Path);
+            for i = 1:length(filelist)
+                copyfile(outputfile,fullfile(filelist(i).folder,filelist(i).name));
+            end
             
             % This is so the defaced volume is used in further VERA processing
             vol.LoadFromFile(outputfile);
