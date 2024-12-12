@@ -165,15 +165,18 @@ classdef LabelVolume2Surface < AComponent
                     surf.AnnotationLabel(ii).PreferredColor = colmap(i,:);
 
                     ii = ii + 1;
-                else
-                    % volume does not exist
-                    errordlg(['Error: Volume does not exist! Check that the specified LabelNames and LabelIds are correct ',...
-                                    'and that these volume labels exist in the VolumeIdentifier.'],'Volume does not exist!');
                 end
-            end
-            surf.Model.vert = vol.Vox2Ras(vert_tot);
-            surf.Model.tri  = tri_tot;
 
+            end
+
+            if ~any(any(vert_tot)) || ~any(any(tri_tot)) % volume does not exist
+                errordlg(['Error: Volume does not exist! Check that the specified LabelNames and LabelIds are correct ',...
+                                'and that these volume labels exist in the VolumeIdentifier.'],'Volume does not exist!');
+            else
+                surf.Model.vert = vol.Vox2Ras(vert_tot);
+                surf.Model.tri  = tri_tot;
+            end
+           
         end
     end
 end
