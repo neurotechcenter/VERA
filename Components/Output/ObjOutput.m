@@ -27,11 +27,13 @@ classdef ObjOutput < AComponent
                 [~, ProjectName] = fileparts(ProjectPath);
 
                 path = fullfile(obj.ComponentPath,'..','DataOutput');
-                file = [ProjectName, '_', obj.Name,'.obj'];
+                file = [ProjectName, '_', obj.Name];
+                ext  = '.obj';
 
             % if empty, use dialog
             elseif isempty(obj.SavePathIdentifier)
                 [file, path] = uiputfile('*.obj');
+                ext  = '.obj';
                 if isequal(file, 0) || isequal(path, 0)
                     error('Selection aborted');
                 end
