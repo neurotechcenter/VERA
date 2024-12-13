@@ -32,8 +32,9 @@ classdef ObjOutput < AComponent
 
             % if empty, use dialog
             elseif isempty(obj.SavePathIdentifier)
-                [file, path] = uiputfile('*.obj');
-                ext  = '.obj';
+                [file, path]      = uiputfile('*.obj');
+                [path, file, ext] = fileparts(fullfile(path,file));
+                
                 if isequal(file, 0) || isequal(path, 0)
                     error('Selection aborted');
                 end
@@ -41,13 +42,8 @@ classdef ObjOutput < AComponent
             % Otherwise, save with specified file name
             else
                 [path, file, ext] = fileparts(obj.SavePathIdentifier);
-                % file = [file,ext];
-                path = fullfile(obj.ComponentPath,'..',path);
 
-                % if ~strcmp(ext,'.obj')
-                %     path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier);
-                %     file = [obj.Name,'.obj'];
-                % end
+                path = fullfile(obj.ComponentPath,'..',path);
             end
 
             % convert spaces to underscores
