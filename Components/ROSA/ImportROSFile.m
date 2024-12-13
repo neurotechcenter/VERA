@@ -19,9 +19,10 @@ classdef ImportROSFile < AComponent
         end
 
         function Publish(obj)
-            obj.AddOutput(obj.TrajectoryIdentifier,          'ElectrodeLocation');
-            obj.AddOutput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition');
-            obj.AddOutput(obj.VolumeIdentifier,              'Volume');
+            obj.AddOptionalInput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition',true);
+            obj.AddOutput(obj.TrajectoryIdentifier,                 'ElectrodeLocation');
+            obj.AddOutput(obj.ElectrodeDefinitionIdentifier,        'ElectrodeDefinition');
+            obj.AddOutput(obj.VolumeIdentifier,                     'Volume');
 
             obj.ignoreList{end+1} = 'History';
         end
@@ -29,7 +30,13 @@ classdef ImportROSFile < AComponent
         function Initialize(obj)
         end
 
-        function [trajectories,definitions,volume]=Process(obj)
+        function [trajectories,definitions,volume]=Process(obj,optInp)
+            if(nargin > 1) %segmentation path exists
+                obj.ElectrodeDefinition = optInp;
+            else
+                obj.ElectrodeDefinition = [];
+            end
+
             if ~isempty(obj.InputFilepath)
                 d = dir(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath,'*.ros'));
 
@@ -56,7 +63,11 @@ classdef ImportROSFile < AComponent
 
             rosa_parsed  = parseROSAfile(fullfile(path,file));
 
-            definitions  = obj.CreateOutput(obj.ElectrodeDefinitionIdentifier);
+            if ~isempty(obj.ElectrodeDefinition)
+                definitions = obj.ElectrodeDefinition;
+            else
+                definitions = obj.CreateOutput(obj.ElectrodeDefinitionIdentifier);
+            end
             trajectories = obj.CreateOutput(obj.TrajectoryIdentifier);
             volume       = obj.CreateOutput(obj.VolumeIdentifier);
 
@@ -112,6 +123,14 @@ classdef ImportROSFile < AComponent
             % All trajectories are in the coregistration space, so all we need to do is
             % transform the trajectories into RAS space by applying rot2ras
 
+            if isempty(obj.ElectrodeDefinition)
+                for ii = 1:length(rosa_parsed.Trajectories)
+                    definitions.Definition(ii).Name   = rosa_parsed.Trajectories(ii).name;
+                    definitions.Definition(ii).Type   = 'Depth';
+                    definitions.Definition(ii).Volume = 30;
+                end
+            end
+
             for ii = 1:length(rosa_parsed.Trajectories)
                 traj_tosave = [rosa_parsed.Trajectories(ii).start 1;rosa_parsed.Trajectories(ii).end 1];
                 traj_tosave = (rot2ras*traj_tosave')';
@@ -123,10 +142,10 @@ classdef ImportROSFile < AComponent
                     ras_projected.Trajectories(ii).start = traj_tosave(1,:);
                     ras_projected.Trajectories(ii).end   = traj_tosave(2,:);
                 end
-                definitions.Definition(ii).Type   = 'Depth';
-                definitions.Definition(ii).Volume = 30;
-
-                definitions.Definition(ii).Name          = rosa_parsed.Trajectories(ii).name;
+                % definitions.Definition(ii).Type   = 'Depth';
+                % definitions.Definition(ii).Volume = 30;
+                % 
+                % definitions.Definition(ii).Name          = rosa_parsed.Trajectories(ii).name;
                 trajectories.DefinitionIdentifier(end+1) = ii;
                 trajectories.Location(end+1,:)           = ras_projected.Trajectories(ii).start;
                 trajectories.DefinitionIdentifier(end+1) = ii;
@@ -135,26 +154,28 @@ classdef ImportROSFile < AComponent
             end
 
             volume.LoadFromFile(ras_projected.displays{1});
-            obj.ElectrodeDefinition = definitions.Definition;
-            h = figure;
-            elView = ElectrodeDefinitionView('Parent',h);
-            elView.SetComponent(obj);
-            uiwait(h);
-            hist = obj.History;
-            definitions.Definition = obj.ElectrodeDefinition;
-            for i = 1:length(hist)
-                cmd = hist{i}{1};
-                val = hist{i}{2};
-                if(strcmp(cmd,'Add'))
-                elseif(strcmp(cmd,'Delete'))
-                    for i_traj = 1:length(val)
-                        trajectories.Location(trajectories.DefinitionIdentifier == val(i),:)           = [];
-                        trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier == val(i)) = [];
-                        trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i))  = trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i)) -1;
+            if isempty(obj.ElectrodeDefinition)
+                obj.ElectrodeDefinition = definitions.Definition;
+                h = figure;
+                elView = ElectrodeDefinitionView('Parent',h);
+                elView.SetComponent(obj);
+                uiwait(h);
+                hist = obj.History;
+                definitions.Definition = obj.ElectrodeDefinition;
+                for i = 1:length(hist)
+                    cmd = hist{i}{1};
+                    val = hist{i}{2};
+                    if(strcmp(cmd,'Add'))
+                    elseif(strcmp(cmd,'Delete'))
+                        for i_traj = 1:length(val)
+                            trajectories.Location(trajectories.DefinitionIdentifier == val(i),:)           = [];
+                            trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier == val(i)) = [];
+                            trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i))  = trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i)) -1;
+                        end
+                    elseif(strcmp(cmd,'Update'))
+                    else
+                        error('unknown ElectrodeDefinitionView history command');
                     end
-                elseif(strcmp(cmd,'Update'))
-                else
-                    error('unknown ElectrodeDefinitionView history command');
                 end
             end
 

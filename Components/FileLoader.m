@@ -50,6 +50,7 @@ classdef FileLoader < AComponent
             % See also AComponent.Process, IFileLoader
             if ~isempty(obj.InputFilepath)
 
+                % working directory is parent of VERA
                 [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath));
 
                 file = [file,ext];
@@ -68,6 +69,7 @@ classdef FileLoader < AComponent
                 out=obj.CreateOutput(obj.Identifier);
                 out.LoadFromFile(fullfile(path,file));
             end
+
         end
     end
 end

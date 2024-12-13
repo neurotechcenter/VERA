@@ -7,6 +7,7 @@ classdef EEGElectrodeNames < AComponent
         EEGNamesIdentifier            % EEG Names
         FileTypeWildcard char         % Wildcard Definition
         InputFilepath char            % Load file path
+        SkipGUI
     end
 
     properties
@@ -23,6 +24,7 @@ classdef EEGElectrodeNames < AComponent
             obj.EEGNames                      = [];
             obj.internalDefinitions           = [];
             obj.InputFilepath                 = '';
+            obj.SkipGUI                       = 0;
         end
 
         function Publish(obj)
@@ -132,9 +134,10 @@ classdef EEGElectrodeNames < AComponent
             obj.internalDefinitions = elNameKey;
 
             out = obj.CreateOutput(obj.EEGNamesIdentifier);
+            obj.EEGNames = obj.internalDefinitions;
+            
             % visualize
-            if(isempty(obj.EEGNames))
-                obj.EEGNames = obj.internalDefinitions;
+            if(isempty(obj.EEGNames)) && ~obj.SkipGUI
                 
                 h      = figure('Name',obj.Name);
                 elView = EEGNamesView('Parent',h);
