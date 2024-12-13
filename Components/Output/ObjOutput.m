@@ -39,13 +39,13 @@ classdef ObjOutput < AComponent
             % Otherwise, save with specified file name
             else
                 [path, file, ext] = fileparts(obj.SavePathIdentifier);
-                file = [file,ext];
+                % file = [file,ext];
                 path = fullfile(obj.ComponentPath,'..',path);
 
-                if ~strcmp(ext,'.obj')
-                    path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier);
-                    file = [obj.Name,'.obj'];
-                end
+                % if ~strcmp(ext,'.obj')
+                %     path = fullfile(obj.ComponentPath,'..',obj.SavePathIdentifier);
+                %     file = [obj.Name,'.obj'];
+                % end
             end
 
             % convert spaces to underscores
