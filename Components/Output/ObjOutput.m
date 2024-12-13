@@ -2,27 +2,24 @@ classdef ObjOutput < AComponent
     %NIIOUTPUT Creates a .nii file as Output of VERA using spm12's save_nii
     %function
     properties
-        ElectrodeLocationIdentifier
         SurfaceIdentifier
         SavePathIdentifier char
     end
     
     methods
         function obj = ObjOutput()
-            obj.ElectrodeLocationIdentifier = 'ElectrodeLocation';
-            obj.SurfaceIdentifier           = 'Surface';
-            obj.SavePathIdentifier          = 'default';
+            obj.SurfaceIdentifier  = 'Surface';
+            obj.SavePathIdentifier = 'default';
         end
         
         function Publish(obj)
-            obj.AddInput(obj.ElectrodeLocationIdentifier, 'ElectrodeLocation');
-            obj.AddInput(obj.SurfaceIdentifier,           'Surface');
+            obj.AddInput(obj.SurfaceIdentifier, 'Surface');
         end
         
         function Initialize(obj)
         end
         
-        function []= Process(obj, eLocs, surf)
+        function []= Process(obj, surf)
             
             % create output file in DataOutput folder with ProjectName_ComponentName.mat (default behavior)
             if strcmp(obj.SavePathIdentifier,'default')
