@@ -1,910 +1,414 @@
-classdef PipelineDesigner < handle
-    %PipelineDesigner VERA Pipeline Designer GUI
+function PipelineDesigner()
+    % Create the main figure for the GUI
+    fig = uifigure('Position', [100, 100, 1400, 800], 'Name', 'Pipeline Designer');
     
-    properties (Access = public)
-        ProjectRunner Runner
-        Views %ViewMap
-        pipeline
-        pipeline_unprotected
-        viewComponent
-        treeNodes
-        pipelineTree
-        pipelineName
-        componentList
-        saveComponentList
-    end
+    %% Create the TextArea for writing pipeline code
+    uilabel(fig, ...
+        'Position', [20, 730, 300, 20], ...
+        'Text','Pipeline','FontName', 'Courier New', 'FontSize', 12);
     
-    properties (Access = private)
-        window
-        hBox
-        mainView
-        fileMenu
-        configMenu
-        fileMenuContent
-        configMenuContent
-        ProgressBarTool
-        componentNodes containers.Map
-        viewTabs containers.Map
-        componentMenu
-        modifyComponentsButton
-        modifyViewsButton
-
-    end
+    pipelineTextArea = uitextarea(fig, ...
+        'Position', [20, 20, 560, 710], ...
+        'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
     
-    methods
-        function obj = PipelineDesigner()
-            
-            DependencyHandler.Purge();
-            obj.componentNodes = containers.Map();
-            warning off;
-            obj.window = figure('Name','VERA Pipeline Designer', ...
-            'NumberTitle', 'off', ...
-            'MenuBar', 'none', ...
-            'Toolbar', 'none', ...
-            'HandleVisibility', 'off','CloseRequestFcn',@obj.onClose);
-            cameratoolbar(obj.window,'NoReset');
-            if(exist('settings.xml','file'))
-                DependencyHandler.Instance.LoadDependencyFile('settings.xml');
-            end
-            obj.viewTabs     = containers.Map();
-            obj.hBox         = uix.HBoxFlex('Parent',obj.window);
-            obj.pipelineTree = uiw.widget.Tree('Parent',obj.hBox,'MouseClickedCallback',@obj.treeClick);
-            obj.mainView     = uitabgroup('Parent',obj.hBox);
-            obj.hBox.Widths  = [200 -1];
+    
+    %% Listbox of Input components
+    uilabel(fig, ...
+        'Position', [590, 730, 300, 20], ...
+        'Text','Input Components','FontName', 'Courier New', 'FontSize', 12);
+    
+    availableInputComponentsListBox = uilistbox(fig, ...
+        'Position', [590, 605, 390, 125], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
 
-            obj.fileMenu=uimenu(obj.window,'Label','File');
-            obj.fileMenuContent.NewPipeline   = uimenu(obj.fileMenu,'Label','New Pipeline', 'MenuSelectedFcn',@(~,~,~)obj.createNewPipeline);
-            obj.fileMenuContent.OpenPipeline  = uimenu(obj.fileMenu,'Label','Open Pipeline','MenuSelectedFcn',@obj.openPipeline);
-            obj.fileMenuContent.SavePipeline  = uimenu(obj.fileMenu,'Label','Save Pipeline','MenuSelectedFcn',@obj.savePipeline);
-            obj.fileMenuContent.ClosePipeline = uimenu(obj.fileMenu,'Label','Close Pipeline','Enable','off','MenuSelectedFcn',@(~,~,~)obj.closePipeline);
-            
-            obj.configMenu=uimenu(obj.window,'Label','Configuration');
-            obj.configMenuContent.Settings     = uimenu(obj.configMenu,'Label','Settings',           'MenuSelectedFcn',@(~,~,~) SettingsGUI());
-            obj.configMenuContent.ViewPipeline = uimenu(obj.configMenu,'Label','View Pipeline Graph','MenuSelectedFcn',@(~,~,~) obj.viewPipelineGraph());
-            
-            obj.pipelineTree.Root.Name = 'Pipeline';
-            obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input',     'Parent',obj.pipelineTree.Root,'UserData',0);
-            obj.treeNodes.Processing   = uiw.widget.TreeNode('Name','Processing','Parent',obj.pipelineTree.Root);
-            obj.treeNodes.Output       = uiw.widget.TreeNode('Name','Output',    'Parent',obj.pipelineTree.Root);
-            obj.treeNodes.Views        = uiw.widget.TreeNode('Name','Views',     'Parent',obj.pipelineTree.Root);
+    %% Listbox of Processing components
+    uilabel(fig, ...
+        'Position', [590, 580, 300, 20], ...
+        'Text','Processing Components','FontName', 'Courier New', 'FontSize', 12);
 
-            obj.modifyComponentsButton          = uicontrol('Parent',obj.window,'Style','pushbutton','String','Modify Components',...
-                                                                'Units','normalized','Position',[0.5 0.2 0.1 0.1],'Visible','on');
-            obj.modifyComponentsButton.Callback = @(src,event)obj.modifyComponents;
+    availableProcessingComponentsListBox = uilistbox(fig, ...
+        'Position', [590, 455, 390, 125], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
 
-            obj.modifyViewsButton               = uicontrol('Parent',obj.window,'Style','pushbutton','String','Modify Views',...
-                                                                'Units','normalized','Position',[0.7 0.2 0.1 0.1],'Visible','on');
-            obj.modifyViewsButton.Callback      = @(src,event)obj.modifyViews;
+    %% Listbox of Output components
+    uilabel(fig, ...
+        'Position', [590, 430, 300, 20], ...
+        'Text','Output Components','FontName', 'Courier New', 'FontSize', 12);
+
+    availableOutputComponentsListBox = uilistbox(fig, ...
+        'Position', [590, 305, 390, 125], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
+    
+    %% Create the TextArea for modifying component code
+    uilabel(fig, ...
+        'Position', [590, 280, 300, 20], ...
+        'Text','Current Component','FontName', 'Courier New', 'FontSize', 12);
+
+    componentTextArea = uitextarea(fig, ...
+        'Position', [590, 20, 390, 260], ...
+        'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
+    
+    
+    %% Listbox of possible views
+    uilabel(fig, ...
+        'Position', [990, 730, 300, 20], ...
+        'Text','Available Views','FontName', 'Courier New', 'FontSize', 12);
+    
+    availableViewsListBox = uilistbox(fig, ...
+        'Position', [990, 305, 390, 425], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
+    
+    %% Create the TextArea for modifying view code
+    uilabel(fig, ...
+        'Position', [990, 280, 300, 20], ...
+        'Text','Current View','FontName', 'Courier New', 'FontSize', 12);
+
+    viewTextArea = uitextarea(fig, ...
+        'Position', [990, 20, 390, 260], ...
+        'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
+    
+    
+    %% Create a Load button to load a pipeline from a file
+    uibutton(fig, 'push', 'Text', 'Load Pipeline', ...
+        'Position', [20, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) loadPipeline(pipelineTextArea));
+    
+    %% Create a Save button to save the pipeline to a file
+    uibutton(fig, 'push', 'Text', 'Save Pipeline', ...
+        'Position', [140, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) savePipeline(pipelineTextArea));
+    
+
+    %% On startup, display demo pipeline
+    path_to_demo = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions','SimpleTutorialPipeline.pwf'));
+    loadPipeline(pipelineTextArea,path_to_demo);
+    
+
+    %% Get all components
+    componentParentClasses = {'AComponent'};
+    componentPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','Components'));
+    [AvailableComponents, componentTypes] = getAvailableElements(componentPath, componentParentClasses, 'component');
+    
+    %% Populate list of possible Input components
+    inputIDXs = contains(componentTypes,'Input');
+    
+    availableInputComponentsListBox.Items = AvailableComponents(inputIDXs);
+    
+    % Update view window to display current component
+    availableInputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableInputComponentsListBox.Value);
+    
+
+    %% Populate list of possible Processing components
+    processingIDXs = contains(componentTypes,'Processing');
+    
+    availableProcessingComponentsListBox.Items = AvailableComponents(processingIDXs);
+    
+    % Update view window to display current component
+    availableProcessingComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableProcessingComponentsListBox.Value);
+    
+
+    %% Populate list of possible Output components
+    outputIDXs = contains(componentTypes,'Output');
+    
+    availableOutputComponentsListBox.Items = AvailableComponents(outputIDXs);
+    
+    % Update view window to display current component
+    availableOutputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableOutputComponentsListBox.Value);
+    
+
+    %% Populate list of possible views
+    viewParentClasses = {'uix.Grid','AView','IComponentView'};
+    viewPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','classes','GUI','Views'));
+    [availableViewsListBox.Items] = getAvailableElements(viewPath, viewParentClasses, 'view');
+    
+    % Update view window to display current view
+    availableViewsListBox.ValueChangedFcn = @(src,event) viewView(viewTextArea, viewParentClasses, availableViewsListBox.Value);
 
 
-            warning on;
-            obj.ProgressBarTool=UnifiedProgressBar(obj.window);
 
 
+%% Function to load pipeline from a file
+    function loadPipeline(textArea,varargin)
+        if ~isempty(varargin)
+            [path, file, ext] = fileparts(varargin{1});
+            file = [file,ext];
+        else
+            [file, path] = uigetfile('*.pwf', 'Select a pipeline file to load');
         end
-        
-    end
-    
-    methods (Access = protected)
-        function closePipeline(obj)
-            %closeProject close project call delete all references save
-            %everything cleanup
-            % delete(obj.Views);
-            delete(obj.ProjectRunner);
-            delete(obj.treeNodes.Input.Children);
-            delete(obj.treeNodes.Processing.Children);
-            delete(obj.treeNodes.Output.Children);
-            delete(obj.treeNodes.Views.Children);
+        if file ~= 0
+            fullPath = fullfile(path, file);
 
-            % delete(obj.AddComponentButton);
-            % delete(obj.RemoveComponentButton);
-            % delete(obj.AddViewButton);
-            % delete(obj.RemoveViewButton);
-            
-            for v=values(obj.componentNodes)
-                delete(v{1});
-            end
-            %obj.ProgressBarTool.ShowProgressBar(obj,30);
-            obj.componentNodes=containers.Map();
-            for v=values(obj.viewTabs)
-                delete(v{1});
-            end
-            if ~isempty(obj.viewComponent)
-                delete(obj.viewComponent);
-            end
-            obj.viewTabs=containers.Map();
-            obj.fileMenuContent.CloseProject.Enable='off';
-            obj.removeTempPath();
-            obj.pipelineTree.Root.Name='Pipeline';
-            delete(obj.componentMenu);
-            obj.componentMenu=[];
+            pipelineContent = readcell(fullPath,'FileType','text','Delimiter','\n','LeadingDelimitersRule','keep',...
+                'ConsecutiveDelimitersRule','split','Whitespace','\t');
 
+            textArea.Value = pipelineContent;
+        else
+            uialert(fig, 'Error reading the file.', 'File Error');
         end
-        
-        function start_dir=getPipelineDefaultPath(~)
-            %getProjectDefaultPath - get the default directory path, either
-            %if no default specified, create one
-            if(DependencyHandler.Instance.IsDependency('PipelineDefaultPath'))
-                start_dir=DependencyHandler.Instance.GetDependency('PipelineDefaultPath');
+    end
+
+%% Function to save pipeline to a file
+    function savePipeline(textArea)
+        defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+        [file, path]    = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
+        if file ~= 0
+            fullPath = fullfile(path, file);
+            fid = fopen(fullPath, 'wt');
+            if fid ~= -1
+                for i = 1:length(textArea.Value)
+                    fprintf(fid, [textArea.Value{i},'\n']);
+                end
+                fclose(fid);
+                uialert(fig, 'pipeline saved successfully!', 'Success');
             else
-                start_dir='./';
+                uialert(fig, 'Error saving the file.', 'File Error');
             end
         end
-        
-        function setPipelineDefaultPath(~,path)
-            if(~DependencyHandler.Instance.IsDependency('PipelineDefaultPath'))
-                DependencyHandler.Instance.CreateAndSetDependency('PipelineDefaultPath',fileparts(path),'folder');
-            end
+    end
+
+%% Function to get all components/views in a given directory
+    function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses, compOrView)
+
+        % set up parentClasses to be used in regular expression
+        parentClassesString = [];
+        for i = 1:length(parentClasses)
+            parentClassesString = [parentClassesString,  parentClasses{i}, '|'];
         end
-        
-        function createNewPipeline(obj)
-            %createNewProject callback from createNewProject menu path
-            % not working
+        parentClassesString(end) = [];
 
-            % AddView exists
+        % Get all subdirectories, including the root directory
+        allSubdirs = genpath(dirPath);
 
-            folder=uigetdir(obj.getPipelineDefaultPath(),'Select Pipeline Folder');
-            obj.ProgressBarTool.suspendGUIWithMessage('Creating Pipeline...');
-    
-            obj.ProgressBarTool.ShowProgressBar(0);
-            try
-            if(folder ~= 0)
-                obj.setPipelineDefaultPath(folder);
-                avail_pipelFiles=dir('PipelineDefinitions/*.pwf');
-                if(length(avail_pipelFiles) == 1)
-                    pplineFile=fullfile(avail_pipelFiles(1).folder,avail_pipelFiles(1).name);
-                else
-                    %select pipeline
-                    [idx,tf]=listdlg('PromptString','Select Pipeline','SelectionMode','single','ListString',{avail_pipelFiles.name});
-                    if(tf ~= 0)
-                        pplineFile=fullfile(avail_pipelFiles(idx).folder,avail_pipelFiles(idx).name);
-                    else
-                        obj.ProgressBarTool.resumeGUI();
-                        return;
-                    end
-                end
-                copyfile(pplineFile,fullfile(folder,'pipeline.pwf'));
-                prj=Project.CreateProjectOnPath(folder,pplineFile);
-                obj.ProjectRunner=Runner.CreateFromProject(prj);
-                obj.createTreeView();
-                obj.createViews(pplineFile,prj);
-                obj.updateTreeView();
-                mkdir(fullfile(folder,'temp'));
-                
-                obj.fileMenuContent.CloseProject.Enable = 'on';
-            end
-            catch e
-                warning(getReport(e));
-            end
-            delete(obj.componentMenu);
-            obj.componentMenu = [];
-            obj.ProgressBarTool.resumeGUI();
-             
-        end
+        % Split the subdirectories into a cell array
+        subdirs = strsplit(allSubdirs, pathsep);
 
-        function openPipeline(obj,~,~)
-            %openPipeline - callback from openPipeline menu button
-            [file,folder]=uigetfile('*.pwf','Select Pipeline',obj.getPipelineDefaultPath());
-            
-            obj.ProgressBarTool.suspendGUIWithMessage('Opening Pipeline...');
-            try
-                if(folder ~= 0)
-                    obj.setPipelineDefaultPath(folder);
-                    obj.closePipeline();
+        % Initialize an empty array to store files that inherit from parentClass
+        filesInheritingParentClass = [];
 
-                    % create pipeline
-                    obj.pipeline     = Pipeline.CreateFromPipelineDefinition(fullfile(folder,file));
-                    obj.pipelineName = file;
+        % Loop over each subdirectory and look for class definitions
+        for i = 1:length(subdirs)
+            % Get all .m files in the current subdirectory
+            files = dir(fullfile(subdirs{i}, '*.m'));
 
-                    % create views
-                    % prj          = Project.CreateProjectOnPath(folder,file);
-                    % obj.Views    = ViewMap.LoadViewsFromPipelineFile(fullfile(folder,file),prj);
+            % Loop over each file and check if it defines a class inheriting from parentClass
+            for j = 1:length(files)
+                filePath = fullfile(subdirs{i}, files(j).name);
 
-                    % if(isObjectTypeOf(pipeline,'Pipeline'))
-                    %     ppline=pipeline;
-                    % else
-                    %     ppline=Pipeline.CreateFromPipelineDefinition(pipeline);
-                    % end
-            
-                    % prj=Project.Project();
-                    % prj.Path        = [];
-                    % prj.ProjectName = 'pipeline';
-                    % prj.Pipeline    = obj.pipeline;
-                    % obj.Views       = ViewMap.LoadViewsFromPipelineFile(fullfile(folder,file),prj);
-
-                    % gotta get views in a weird way
-                    poss_p=xml2struct(fullfile(folder,file));
-
-                    for i = 1:size(poss_p.PipelineDefinition{1}.View,2)
-                        views{i}=ObjectFactory.CreateView(poss_p.PipelineDefinition{1}.View{i}.Attributes.Type,poss_p.PipelineDefinition{1}.View{i});
-                    end
-                    
-                    obj.Views = views;
-
-                    % obj.Views = obj.LoadViewsFromPipelineFile(fullfile(folder,file));
-
-
-                    obj.viewTabs = containers.Map();
-
-                    obj.createTreeView();
-
-                    obj.fileMenuContent.CloseProject.Enable = 'on';
-                    obj.ProgressBarTool.resumeGUI();
-                end
-
-            catch e
-                warning(getReport(e,'extended'));
-            end
-            delete(obj.componentMenu);
-            obj.componentMenu = [];
-            obj.ProgressBarTool.resumeGUI();
-        end
-        
-        function savePipeline(obj,~,~)
-            %savePipeline - callback from savePipeline menu button
-            [file,folder]=uiputfile('*.pwf','Select Pipeline Save Filename',obj.getPipelineDefaultPath());
-            % folder = '/Users/jamesswift/Documents/git/VERA/PipelineDefinitions';
-            % file   = '0_test.pwf';
-            
-            obj.ProgressBarTool.suspendGUIWithMessage('Saving Pipeline...');
-            try
-                if(folder ~= 0)
-                    obj.setPipelineDefaultPath(folder);
-                    % obj.closePipeline();
-
-                    % components
-                    compNames = obj.pipeline.Components;
-                    for i = 1:size(compNames,2)
-                        % Create matlab struct from class definition
-                        currentComponent  = obj.pipeline.GetComponent(compNames{i});
-
-                        warning off;
-                        scurrentComponent = struct(currentComponent);
-                        warning on;
-
-                        % Get proper component type
-                        currentComponentClassName = class(currentComponent);
-
-                        inputStruct = [];
-                        inputStruct.(currentComponentClassName) = scurrentComponent;
-
-                        compprops = properties(currentComponent);
-                        fnames    = fieldnames(scurrentComponent);
-
-                        % if a property is not editable, remove it from the list
-                        SetAccessProps = {};
-                        for j = 1:length(compprops)
-                            SetAccessProps{j} = findprop(currentComponent,compprops{j}).SetAccess;
-                        end
-
-                        fields2keep   = compprops(strcmp(SetAccessProps,'public'));
-                        fields2remove = setdiff(fnames,fields2keep);
-
-                        % also remove weird fields that were added when
-                        % converting from classdef to struct
-                        inputStruct.(currentComponentClassName) = rmfield(inputStruct.(currentComponentClassName),fields2remove);
-
-                        % make sure empty cells are char
-                        for j = 1:length(fields2keep)
-                            if isempty(inputStruct.(currentComponentClassName).(fields2keep{j}))
-                                inputStruct.(currentComponentClassName).(fields2keep{j}) = '';
-                            end
-                        end
-
-                        % Generate xml code for individual components
-                        Componentxml{i} = struct2xml(inputStruct);
-                        Componentxml{i} = erase(Componentxml{i},'<?xml version="1.0" encoding="utf-8"?>');
-                        Componentxml{i} = replace(Componentxml{i},['<',currentComponentClassName,'>'],['<Component Type="',currentComponentClassName,'">']);
-                        Componentxml{i} = replace(Componentxml{i},['</',currentComponentClassName,'>'],'</Component>');
-                    end
-
-
-                    % Views
-                    views = obj.Views;
-                    for i = 1:size(views,2)
-                        ViewList{i} = views{i}.Name;
-                    end
-                    for i = 1:length(views)
-                        currentView = views{i};
-                        warning off;
-                        scurrentView = struct(currentView);
-                        warning on;
-
-                        % Get proper component type
-                        currentViewClassName = class(currentView);
-
-                        inputStruct = [];
-                        inputStruct.(currentViewClassName) = scurrentView;
-
-                        viewprops = properties(currentView);
-                        uixprops  = properties(uix.Grid);
-                        fnames    = fieldnames(scurrentView);
-
-                        % if a property is not editable, remove it from the list
-                        SetAccessProps = {};
-                        DefiningClassProps = {};
-                        for j = 1:length(viewprops)
-                            SetAccessProps{j}     = findprop(currentView,viewprops{j}).SetAccess;
-                            DefiningClassProps{j} = findprop(currentView,viewprops{j}).DefiningClass.Name;
-                        end
-
-                        % remove uix properties from list to avoid writing
-                        % these to pipeline file
-                        externalclass2remove = viewprops(logical(contains(DefiningClassProps,'AView') .* ~strcmp(viewprops,'Name')'));
-                        externalclass2remove = [externalclass2remove; viewprops(contains(DefiningClassProps,'uix'))];
-                        externalclass2remove = [externalclass2remove; viewprops(contains(DefiningClassProps,'matlab'))];
-
-                        fields2keep   = viewprops(strcmp(SetAccessProps,'public'));
-                        fields2remove = setdiff(fnames,fields2keep);
-                        fields2remove = unique([externalclass2remove; fields2remove]);
-
-                        % also remove weird fields that were added when
-                        % converting from classdef to struct
-                        inputStruct.(currentViewClassName) = rmfield(inputStruct.(currentViewClassName),fields2remove);
-
-                        fieldsfinal = fieldnames(inputStruct.(currentViewClassName));
-
-                        % make sure empty cells are char
-                        for j = 1:length(fieldsfinal)
-                            if isempty(inputStruct.(currentViewClassName).(fieldsfinal{j}))
-                                inputStruct.(currentViewClassName).(fieldsfinal{j}) = '';
-                            end
-                        end
-
-                        % Generate xml code for individual components
-                        Viewxml{i} = struct2xml(inputStruct);
-                        Viewxml{i} = erase(Viewxml{i},'<?xml version="1.0" encoding="utf-8"?>');
-                        Viewxml{i} = replace(Viewxml{i},['<',currentViewClassName,'>'],['<View Type="',currentViewClassName,'">']);
-                        Viewxml{i} = replace(Viewxml{i},['</',currentViewClassName,'>'],'</View>');
-                    end
-
-                    obj.pipelineName = file;
-
-                    % Generate pipeline xml
-                    pipelinexml = ['<?xml version="1.0" encoding="utf-8"?>', ...
-                                    newline,...
-                                    '<PipelineDefinition Name="',obj.pipelineName,'">'];
-                    
-                    for i = 1:length(Componentxml)
-                        pipelinexml = [pipelinexml,...
-                                        newline,...
-                                        Componentxml{i}];
-                    end
-
-                    for i = 1:length(Viewxml)
-                        pipelinexml = [pipelinexml,...
-                                        newline,...
-                                        Viewxml{i}];
-                    end
-
-                    % End pipeline file
-                    pipelinexml = [pipelinexml,... 
-                                    newline,...
-                                    newline,...
-                                    '</PipelineDefinition>'];
-
-                    % Save pipeline xml file (pwf)
-                    fid = fopen(fullfile(folder,file),'w'); % open file for writing (overwrite if necessary)
-                    fprintf(fid,'%s',pipelinexml);          % Write the char array, interpret newline as new line
-                    fclose(fid);     
-
-                    obj.createTreeView();
-
-                    obj.fileMenuContent.CloseProject.Enable='on';
-                    obj.ProgressBarTool.resumeGUI();
-                end
-
-            catch e
-                warning(getReport(e,'extended'));
-            end
-    
-            % obj.updateTreeView();
-
-            delete(obj.componentMenu);
-            obj.componentMenu=[];
-            obj.ProgressBarTool.resumeGUI();
-        end
-
-        function createTreeView(obj)
-            %createTreeView - delete the Treeview and create a new Tree
-            delete(obj.componentMenu);
-            if(~isempty(obj.pipeline))
-                obj.ProgressBarTool.ShowProgressBar(0.1,'Initializing Tree');
-                delete(obj.treeNodes.Input.Children);
-                delete(obj.treeNodes.Processing.Children);
-                delete(obj.treeNodes.Output.Children);
-                delete(obj.treeNodes.Views.Children);
-                
-                for v = values(obj.componentNodes)
-                    delete(v{1});
-                end
-                for v = values(obj.viewTabs)
-                    delete(v{1});
-                end
-
-                obj.componentNodes         = containers.Map();
-                obj.viewTabs               = containers.Map();
-                obj.pipelineTree.Root.Name = obj.pipelineName;
-                % for k = obj.pipeline.GetInputComponentNames()
-                %     compdef = class(obj.pipeline.GetComponent(k{1}));
-                %     v       = uiw.widget.TreeNode('Name',compdef,'Parent',obj.treeNodes.Input,'UserData',compdef,'UIContextMenu',obj.buildContextMenu(compdef));
-                %     obj.componentNodes(compdef) = v;
-                % end
-                %  obj.ProgressBarTool.ShowProgressBar(0.25);
-                % for k = obj.pipeline.GetProcessingComponentNames()
-                %     compdef = class(obj.pipeline.GetComponent(k{1}));
-                %     v       = uiw.widget.TreeNode('Name',compdef,'Parent',obj.treeNodes.Processing,'UserData',compdef,'UIContextMenu',obj.buildContextMenu(compdef));
-                %     obj.componentNodes(compdef) = v;
-                % end
-                % obj.ProgressBarTool.ShowProgressBar(0.50);
-                % for k = obj.pipeline.GetOutputComponentNames()
-                %     compdef = class(obj.pipeline.GetComponent(k{1}));
-                %     v       = uiw.widget.TreeNode('Name',compdef,'Parent',obj.treeNodes.Output,'UserData',compdef,'UIContextMenu',obj.buildContextMenu(compdef));
-                %     obj.componentNodes(compdef) = v;
-                % end
-                % obj.ProgressBarTool.ShowProgressBar(0.75);
-                % for k = 1:size(obj.Views,2)
-                %     viewname = class(obj.Views{k});
-                %     v        = uiw.widget.TreeNode('Name',viewname,'Parent',obj.treeNodes.Views,'UserData',viewname,'UIContextMenu',obj.buildContextMenu(viewname));
-                %     obj.viewTabs(viewname) = v;
-                % end
-                % obj.ProgressBarTool.ShowProgressBar(1);
-
-                for k=obj.pipeline.GetInputComponentNames()
-                    v=uiw.widget.TreeNode('Name',k{1},'Parent',obj.treeNodes.Input,'UserData',k{1},'UIContextMenu',obj.buildContextMenu(k{1}));
-                    obj.componentNodes(k{1})=v;
-                end
-                 obj.ProgressBarTool.ShowProgressBar(0.25);
-                for k=obj.pipeline.GetProcessingComponentNames()
-                    v=uiw.widget.TreeNode('Name',k{1},'Parent',obj.treeNodes.Processing,'UserData',k{1},'UIContextMenu',obj.buildContextMenu(k{1}));
-                    obj.componentNodes(k{1})=v;
-                end
-                obj.ProgressBarTool.ShowProgressBar(0.50);
-                for k=obj.pipeline.GetOutputComponentNames()
-                    v=uiw.widget.TreeNode('Name',k{1},'Parent',obj.treeNodes.Output,'UserData',k{1},'UIContextMenu',obj.buildContextMenu(k{1}));
-                    obj.componentNodes(k{1})=v;
-                end
-                obj.ProgressBarTool.ShowProgressBar(0.75);
-                for k = 1:size(obj.Views,2)
-                    viewname = obj.Views{k}.Name;
-                    v        = uiw.widget.TreeNode('Name',viewname,'Parent',obj.treeNodes.Views,'UserData',viewname,'UIContextMenu',obj.buildContextMenu(viewname));
-                    obj.viewTabs(viewname) = v;
-                end
-                obj.ProgressBarTool.ShowProgressBar(1);
-            end
-
-        end
-
-        function updateTreeView(obj)
-            %updateTreeView - updates the Component pipeline view
-            obj.ProgressBarTool.ShowProgressBar(0,'Updating Views');
-            for v=values(obj.componentNodes)
-                obj.ProgressBarTool.IncreaseProgressBar(1/length(obj.componentNodes));
-                cName=v{1}.UserData;
-                switch (obj.ProjectRunner.GetComponentStatus(cName))
-                    case 'Invalid'
-                        setIcon(v{1},'./Icons/error.png');
-                    case 'Configured'
-                        setIcon(v{1},'./Icons/configured1.png');
-                    case 'Ready'
-                        setIcon(v{1},'./Icons/ready_1.png');
-                    case 'Completed'
-                        setIcon(v{1},'./Icons/success.png');
-                end
-            end
-            drawnow();
-            obj.ProgressBarTool.HideProgressBar();
-        end
-        
-        function treeClick(obj,a,b)
-            if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData))
-                switch b.SelectionType
-                    case 'normal'
-                        %context=b.Nodes.UIContextMenu;
-                            delete(obj.componentMenu);
-                            obj.componentMenu=[];
-                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
-                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
-                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
-                            end
-                    case 'open'
-                            delete(obj.componentMenu);
-                            obj.componentMenu=[];
-                            if(any(strcmp(b.Nodes.Name,keys(obj.componentNodes))))
-                                obj.componentMenu=uimenu(obj.window,'Text',b.Nodes.Name);
-                                obj.addContextEntries(obj.componentMenu,b.Nodes.Name);
-                            end
-                            obj.runComponent(b.Nodes.Name,true);
-
-                    otherwise
-                        return;
-
-                end
-    
-  
-            end
-        end 
-        
-        function removeTempPath(obj)
-            %removeTempPath - removing the temp path from the dependency
-            %handler and delete the temp folder with all its contents
-            if(any(strcmp(keys(DependencyHandler.Instance.ResolvedLibrary),'TempPath')))
-                tdir=DependencyHandler.Instance.GetDependency('TempPath');
-                if(isempty(tdir))
-                    return;
-                end
+                % Try to read the class definition from the file
                 try
-                     rmdir(tdir,'s');
-                catch e
-                    warning(e.message);
-                end
-                DependencyHandler.Instance.RemoveDependency('TempPath');
-            end
-            
-        end
-        
-        function onClose(obj,hob,~)
-            %onClose - close project callback
-            obj.removeTempPath();
-            DependencyHandler.Instance.SaveDependencyFile('settings.xml');
-            delete(obj.ProjectRunner);
-            % delete(obj.Views);
-            delete(hob);
-            % DependencyHandler.Instance.RemoveDependency('ProjectPath');
-            
-        end
-       
-        function cm=buildContextMenu(obj,compName)
-            cm = uicontextmenu(obj.window);
-            obj.addContextEntries(cm,compName);
-        end
-        
-        function addContextEntries(obj,cm,compName)
-            uimenu(cm,'Text','View Component','Callback', @(~,~) obj.ViewComponent(compName));
-            uimenu(cm,'Text','Show Help','Callback',@(~,~) showDocumentation(obj.ProjectRunner.Project.Pipeline.GetComponent(compName)));
-        end
+                    % Read the file's contents
+                    fileContents = fileread(filePath);
 
-        function success=runComponent(obj,compName,updateView)
-            if(~exist('updateView','var'))
-                updateView=false;
-            end
-            success=1;
-            if(~obj.checkResolvedDependencies())
-                success=0;
-                return;
-            end
+                    % Look for a class definition and check for inheritance from parentClass
+                    classDefPattern = ['classdef\s+(\w+)\s*(?:\w+\s*<\s*)?[^>]*(', parentClassesString, ')'];
 
-            % idx = 1;
-            % for i = obj.pipeline.GetInputComponentNames()
-            %     InputList{idx}      = class(obj.pipeline.GetComponent(i{1}));
-            %     idx = idx + 1;
-            % end
-            % idx = 1;
-            % for i = obj.pipeline.GetProcessingComponentNames()
-            %     ProcessingList{idx} = class(obj.pipeline.GetComponent(i{1}));
-            %     idx = idx + 1;
-            % end
-            % idx = 1;
-            % for i = obj.pipeline.GetOutputComponentNames()
-            %     OutputList{idx}     = class(obj.pipeline.GetComponent(i{1}));
-            %     idx = idx + 1;
-            % end
-            % views = obj.Views;
-            % for i = 1:size(views,2)
-            %     ViewList{i} = class(views{i});
-            % end
-
-            InputList      = obj.pipeline.GetInputComponentNames();
-            ProcessingList = obj.pipeline.GetProcessingComponentNames();
-            OutputList     = obj.pipeline.GetOutputComponentNames();
-
-            views = obj.Views;
-            for i = 1:size(views,2)
-                ViewList{i} = views{i}.Name;
-            end
-            
-
-            if any(contains(InputList,compName)) || any(contains(ProcessingList,compName)) || any(contains(OutputList,compName))
-                vo               = obj.componentNodes(compName);
-                currentComponent = obj.pipeline.GetComponent(compName);
-            elseif any(contains(ViewList,compName))
-                vo               = obj.viewTabs(compName);
-                viewidx          = strcmp(ViewList,compName);
-                currentComponent = views{viewidx};
-            end
-
-            try
-                obj.ProgressBarTool.suspendGUIWithMessage({'Running component ' compName});
-
-                % [inputs, outputs, optInputs] = obj.pipeline.InterfaceInformation(compName);
-
-                proplist = properties(currentComponent);
-
-                % if a property is not editable, remove it from the list
-                SetAccessProps = {};
-                for j = 1:length(proplist)
-                    SetAccessProps{j} = findprop(currentComponent,proplist{j}).SetAccess;
-                end
-
-                proplist = proplist(strcmp(SetAccessProps,'public'));
-
-                DefiningClassProps = {};
-                for j = 1:length(proplist)
-                    DefiningClassProps{j} = findprop(currentComponent,proplist{j}).DefiningClass.Name;
-                end
-
-                % remove uix properties from list to avoid writing
-                % these to pipeline file
-                externalclass2remove = proplist(logical(contains(DefiningClassProps,'AView') .* ~strcmp(proplist,'Name')'));
-                externalclass2remove = [externalclass2remove; proplist(contains(DefiningClassProps,'uix'))];
-                externalclass2remove = [externalclass2remove; proplist(contains(DefiningClassProps,'matlab'))];
-
-                proplist = setdiff(proplist,externalclass2remove);
-
-
-                % make everything in the table char
-                colformat = cell(size(proplist))';
-                for i = 1:size(proplist,1)
-                    colformat{i} = 'char';
-                end
-
-                % block editing of "inputs" for input components (only have outputs)
-                coleditable = strcmp(SetAccessProps,'public');
-
-                % Change cells to strings to be displayed in table
-                tbl = cell(size(proplist));
-                for i = 1:size(proplist,1)
-                    tbl{i} = currentComponent.(proplist{i});
-                    if iscell(tbl{i})
-                        newentry = [];
-                        for j = 1:size(tbl{i},2)
-                            newentry = [newentry, char(tbl{i}{j}), '; '];
-                        end
-                        tbl{i} = newentry;
+                    % Check if the pattern matches
+                    if ~isempty(regexp(fileContents, classDefPattern, 'once'))
+                        % If the class inherits from parentClass, add it to the list
+                        filesInheritingParentClass = [filesInheritingParentClass; files(j)];
                     end
-                end
-
-                % Convert empty cells to char
-                for i = 1:size(tbl,1)
-                    if isempty(tbl{i,1})
-                        tbl{i,1} = '';
-                    end
-                end
-
-                tbl = tbl';
-
-                % Create table to display component information
-                if ~isempty(obj.viewComponent)
-                    delete(obj.viewComponent);
-                end
-
-                obj.viewComponent=uitable('Parent',obj.window,...
-                 'ColumnName',proplist',...
-                 'ColumnFormat',colformat,...
-                 'ColumnEditable',coleditable,...
-                 'CellEditCallback',@(~,~)obj.compUpdate(compName,proplist,tbl));
-
-
-                % Populate table
-                obj.viewComponent.Data = tbl;
-
-                % Position table (work in progress)
-                window_size   = get(obj.window,   'outerposition');
-                mainView_size = get(obj.mainView, 'outerposition');
-                hBox_size     = get(obj.hBox,     'outerposition');
-
-                obj.viewComponent.Units    = 'normalized';
-                obj.viewComponent.Position = [1.05-mainView_size(3)/window_size(3) mainView_size(3)/window_size(3) 1.2*obj.viewComponent.Extent(3) 2*obj.viewComponent.Extent(4)];
-                % obj.viewComponent.Position = [0.25 0.8 1.2*obj.viewComponent.Extent(3) 2*obj.viewComponent.Extent(4)];
-                % obj.viewComponent.Position = [window_size(3)/mainView_size(3)-1.05 1.9-window_size(4)/mainView_size(4) 1.2*obj.viewComponent.Extent(3) 2*obj.viewComponent.Extent(4)];
-
-                vo.TooltipString='';
-
-                % obj.createTreeView();
-
-            catch e
-                vo.TooltipString=e.message;
-                errordlg(e.message);
-                success=0;
-            end
-
-            obj.ProgressBarTool.resumeGUI();
-        end
-
-        function compUpdate(obj,compName,proplist,tbl_orig)
-
-            InputList      = obj.pipeline.GetInputComponentNames();
-            ProcessingList = obj.pipeline.GetProcessingComponentNames();
-            OutputList     = obj.pipeline.GetOutputComponentNames();
-            for i = 1:size(obj.Views,2)
-                ViewList{i} = obj.Views{i}.Name;
-            end
-
-            tbl_modified = obj.viewComponent.Data;
-
-            % Compare original table to new table, only change things that changed
-            compared = zeros(size(tbl_orig));
-            for i = 1:size(tbl_orig,2)
-                if ~strcmp(tbl_orig{i},tbl_modified{i})
-                    compared(i) = 1;
+                catch
+                    % If there's an error reading the file (e.g., not a MATLAB file), skip it
+                    continue;
                 end
             end
+        end
 
-            % update table
-            for i = 1:size(compared,2)
-                if compared(i) == 1
-                    if any(strcmp(InputList,compName)) || any(strcmp(ProcessingList,compName)) || any(strcmp(OutputList,compName))
-                        obj.pipeline.GetComponent(compName).(proplist{i}) = tbl_modified{i};
-                    elseif any(strcmp(ViewList,compName))
-                        obj.Views{strcmp(ViewList,compName)}.(proplist{i}) = tbl_modified{i};
-                    end
-                end
+        % Collect names of components
+        Names = {};
+        for i = 1:length(filesInheritingParentClass)
+            [~, Name] = fileparts(filesInheritingParentClass(i).name);
+            Names{i,1} = Name;
+        end
+        Names = sort(Names);
+
+        % Collect types of components
+        if strcmp(compOrView,'component')
+            for i = 1:length(Names)
+                componentTypes{i,1} = getComponentType(Names{i});
             end
-
-            % orig_name      = tbl_orig{strcmp(proplist,'Name')};
-            % new_name       = tbl_modified{strcmp(proplist,'Name')};
-            % 
-            % InputList      = obj.pipeline.GetInputComponentNames();
-            % ProcessingList = obj.pipeline.GetProcessingComponentNames();
-            % OutputList     = obj.pipeline.GetOutputComponentNames();
-            
-            % if any(strcmp(InputList,orig_name))
-            %     InputList{strcmp(InputList,orig_name)}           = new_name;
-            % end
-            % if any(strcmp(ProcessingList,orig_name))
-            %     ProcessingList{strcmp(ProcessingList,orig_name)} = new_name;
-            % end
-            % if any(strcmp(OutputList,orig_name))
-            %     OutputList{strcmp(OutputList,orig_name)}         = new_name;
-            % end
-
-            % obj.pipeline.Components = [InputList, ProcessingList, OutputList];
-
-            % obj.updateTreeView();
-            obj.createTreeView();
-
-        end
-        
-        function modifyComponents(obj)
-            % Open new window that shows compact version of whole pipeline,
-            % ignoring inputs, processing, outputs structure
-
-            h = figure('Name','Add or Remove Components');
-
-            flexb        = uix.HBoxFlex('Parent',h);
-            selPanel     = uix.Panel('Parent',flexb,'Title','Pipeline');
-            flexb.Units  = 'normalized';
-            flexb.Widths = [-0.3];
-            
-            selV         = uix.VBox('Parent',selPanel);
-            mainviewBox  = uix.HBox('Parent',selV);
-
-            uicontrol(selV,'Style','pushbutton','String','Accept','callback',@(~,~)close(h));
-            selV.Heights = [-0.9,-0.1];
-            
-            selBox                   = uix.HBox('Parent',mainviewBox);
-            obj.componentList        = uicontrol(selBox,'Style','listbox','Min',0,'Max',2,'callback',@(~,~)obj.pipelineChanged());
-            if isempty(obj.saveComponentList)
-                obj.componentList.String = obj.pipeline.Components;
-                obj.saveComponentList    = obj.componentList.String;
-            else
-                obj.componentList.String = obj.saveComponentList;
-            end
-
-            buttonBox = uix.VBox('Parent',selBox);
-            uicontrol(buttonBox,'Style','pushbutton','String','Up',          'callback',@(~,~)obj.resortUp());
-            uicontrol(buttonBox,'Style','pushbutton','String','Down',        'callback',@(~,~)obj.resortDown());
-            uicontrol(buttonBox,'Style','pushbutton','String','Insert Below','callback',@(~,~)obj.insertComp());
-            uix.Empty('Parent',buttonBox);
-
-            buttonBox.Heights = [-0.15 -0.15 -0.15 -0.7];
-            selBox.Widths     = [-0.8 -0.2];
-
-            
-        end
-
-
-        function modifyViews(obj)
-            h = figure('Name','Add or Remove Views');
-
-            flexb        = uix.HBoxFlex('Parent',h);
-            selPanel     = uix.Panel('Parent',flexb,'Title','Pipeline');
-            flexb.Units  = 'normalized';
-            flexb.Widths = [-0.3];
-            
-            selV         = uix.VBox('Parent',selPanel);
-            mainviewBox  = uix.HBox('Parent',selV);
-
-            uicontrol(selV,'Style','pushbutton','String','Accept','callback',@(~,~)close(h));
-            selV.Heights = [-0.9,-0.1];
-            
-            selBox       = uix.HBox('Parent',mainviewBox);
-            uicontrol(selBox,'Style','listbox','Min',0,'Max',2,'callback',@(~,~)obj.displayPipeline());
-
-            buttonBox = uix.VBox('Parent',selBox);
-            uicontrol(buttonBox,'Style','pushbutton','String','Up',          'callback',@(~,~)obj.resortUp());
-            uicontrol(buttonBox,'Style','pushbutton','String','Down',        'callback',@(~,~)obj.resortDown());
-            uicontrol(buttonBox,'Style','pushbutton','String','Insert Below','callback',@(~,~)obj.insertView());
-            uix.Empty('Parent',buttonBox);
-
-            buttonBox.Heights = [-0.15 -0.15 -0.15 -0.7];
-            selBox.Widths     = [-0.8 -0.2];
-            
-        end
-
-        function pipelineChanged(obj)
-            % obj.pipeline.Components = obj.componentList.String; % list of components
-
-        end
-
-        function resortUp(obj)
-            pos    = obj.componentList.Value;
-            newPos = pos - 1;
-
-            currentOrder     = 1:length(obj.componentList.String);
-            newOrder         = currentOrder;
-            newOrder(pos)    = newPos;
-            newOrder(newPos) = pos;
-
-            obj.componentList.String = obj.componentList.String(newOrder);
-            obj.saveComponentList    = obj.componentList.String;
-            set(obj.componentList,'Value',newPos);
-
-        end
-
-        function resortDown(obj)
-            pos    = obj.componentList.Value;
-            newPos = pos + 1;
-
-            currentOrder     = 1:length(obj.componentList.String);
-            newOrder         = currentOrder;
-            newOrder(pos)    = newPos;
-            newOrder(newPos) = pos;
-
-            obj.componentList.String = obj.componentList.String(newOrder);
-            obj.saveComponentList    = obj.componentList.String;
-            set(obj.componentList,'Value',newPos);
-
-
-        end
-
-        function insertComp(obj)
-            %obj.pipeline.AddComponent(compName,compXml) %??
-
-        end
-
-        function insertView(obj)
-            
-
-        end
-        
-        function viewPipelineGraph(obj)
-            if(~isempty(obj.ProjectRunner))
-                figure;
-                graph=obj.ProjectRunner.Project.Pipeline.GetDependencyGraph();
-                plot(graph,'Layout','layered','Sources',obj.ProjectRunner.Project.Pipeline.GetInputComponentNames(),...
-                    'Sinks',obj.ProjectRunner.Project.Pipeline.GetOutputComponentNames(),'EdgeLabel',graph.Edges.Name,'LineWidth',2,...
-                'EdgeFontSize',12,'EdgeFontAngle','normal','NodeFontSize',16,'NodeFontAngle','normal', 'Interpreter', 'none',...
-                'ArrowSize',12);
-            end
-        end
-
-        function res=checkResolvedDependencies(obj)
-            missingDep={};
-           for k=keys(DependencyHandler.Instance.RequestLibrary)
-               if(~DependencyHandler.Instance.ResolvedLibrary.isKey(k{1}) && ~strcmp(DependencyHandler.Instance.GetDependencyType(k{1}),'internal'))
-                   missingDep{end+1}=k{1};
-               end
-           end
-           if(~isempty(missingDep))
-               res=false;
-               errordlg('Unresolved Project dependencies! Go to Configuration->Settings to resolve Issues!','Unresolved Dependencies','replace');
-           else
-               res=true;
-           end
+        else
+            componentTypes = {};
         end
 
     end
-    
+
+%% Function to inspect the properties of a component selected in the listbox
+    function viewComponent(textArea,parentClass,currentcomponent)
+        [~,componentName] = fileparts(currentcomponent);
+        component = eval(componentName);
+
+        % Get the component type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
+        componentType = class(component);
+
+        % Get the list of properties for the component
+        props = properties(component);
+
+        % Get the properties of the parent class(es)
+        iter = 1;
+        for i = 1:length(parentClass)
+            parentClassProps = meta.class.fromName(parentClass{i});
+            for j = 1:length(parentClassProps.PropertyList) 
+                parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
+                iter = iter + 1;
+            end
+        end
+
+        uniqueComponentProperties = setdiff(props,parentClassNames,'stable');
+        uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
+
+        % Start building the XML string
+        textArea.Value{1,1} = [sprintf('    <Component Type="%s">', componentType)];
+
+        % Loop through the properties and add them to the XML string
+        for i = 1:length(uniqueComponentProperties)
+            % Get the property value
+            propValue = component.(uniqueComponentProperties{i});
+
+            % Convert the property value to a string if it's not already
+            if ischar(propValue) || isstring(propValue)
+                propValue = sprintf('"%s"', propValue);
+            elseif isnumeric(propValue)
+                propValue = sprintf('"%g"', propValue);
+            elseif islogical(propValue)
+                propValue = sprintf('"%s"', mat2str(propValue));
+            else
+                propValue = '"Unknown"';  % For unsupported or complex types
+            end
+
+            % Add property to XML (with the property name as the tag)
+            textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueComponentProperties{i}, propValue, uniqueComponentProperties{i})];
+        end
+
+        % Close the component and XML structure
+        textArea.Value{end+1,1} = '    </Component>';
+
+    end
+
+%% Function to inspect the properties of a view selected in the listbox
+    function viewView(textArea,parentClass,currentView)
+        [~,viewName] = fileparts(currentView);
+        view = eval(viewName);
+
+        % Get the view type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
+        viewType = class(view);
+
+        % Get the list of properties for the view
+        props = properties(view);
+
+        % Get the properties of the parent class(es)
+        iter = 1;
+        for i = 1:length(parentClass)
+            parentClassProps = meta.class.fromName(parentClass{i});
+            for j = 1:length(parentClassProps.PropertyList) 
+                parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
+                iter = iter + 1;
+            end
+        end
+
+        uniqueViewProperties = setdiff(props,parentClassNames,'stable');
+        uniqueViewProperties = [uniqueViewProperties; 'Name']; % add back Name
+
+        % Start building the XML string
+        textArea.Value{1,1} = [sprintf('    <View Type="%s">', viewType)];
+
+        % Loop through the properties and add them to the XML string
+        for i = 1:length(uniqueViewProperties)
+            % Get the property value
+            propValue = view.(uniqueViewProperties{i});
+
+            % Convert the property value to a string if it's not already
+            if ischar(propValue) || isstring(propValue)
+                propValue = sprintf('"%s"', propValue);
+            elseif isnumeric(propValue)
+                propValue = sprintf('"%g"', propValue);
+            elseif islogical(propValue)
+                propValue = sprintf('"%s"', mat2str(propValue));
+            else
+                propValue = '"Unknown"';  % For unsupported or complex types
+            end
+
+            % Add property to XML (with the property name as the tag)
+            textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueViewProperties{i}, propValue, uniqueViewProperties{i})];
+        end
+
+        % Close the view and XML structure
+        textArea.Value{end+1,1} = '    </View>';
+
+    end
+
 end
 
+%% Function to get component type (input, processing, or output)
+function [componentType] = getComponentType(className)
+    % This function examines a given class to determine its type.
+    % Inputs:
+    %   - className: The name of the class as a string (e.g., 'MayoReface')
+    % Outputs:
+    %   - componentType: can be Input, Processing, or Output
+
+    % Check if the class exists
+    if ~exist('className', 'var') || ~ischar(className)
+        error('Class name must be a valid string');
+    end
+
+    componentType = '';
+    
+    % Get the class definition
+    classInfo = meta.class.fromName(className);
+    
+    % Iterate through the class methods
+    for i = 1:length(classInfo.MethodList)
+        methodName = classInfo.MethodList(i).Name;
+        
+        % Check for AddInput and AddOutput methods
+        if strcmp(methodName, 'Publish')
+            % Look at the Publish method to get inputs and outputs
+            [inputs, outputs] = extractInputsOutputs(className);
+        end
+        
+    end
+
+    if ~isempty(inputs) && ~isempty(outputs)
+        componentType = 'Processing';
+    elseif ~isempty(inputs) && isempty(outputs)
+        componentType = 'Output';
+    elseif isempty(inputs) && ~isempty(outputs)
+        componentType = 'Input';
+    else
+        componentType = 'NotValid';
+    end
+end
+
+%% Function to 
+function [inputs, outputs] = extractInputsOutputs(className)
+
+    % Check for calls to AddInput and AddOutput in the method body
+    filePath   = which([className '.m']);
+    methodCode = fileread(filePath);
+    
+    % Regular expression to find AddInput and AddOutput calls
+    inputPattern  = 'obj.AddInput\((.*?)\);';
+    outputPattern = 'obj.AddOutput\((.*?)\);';
+    
+    % Extract inputs and outputs
+    inputsMatch  = regexp(methodCode, inputPattern,  'match');
+    outputsMatch = regexp(methodCode, outputPattern, 'match');
+
+    % Parse the matched results
+    inputs = parseAddInputOutput(inputsMatch);
+    outputs = parseAddInputOutput(outputsMatch);
+end
+
+%%
+function result = parseAddInputOutput(matches)
+    % Parse the AddInput/Output calls into structured results
+    result = {};
+    
+    for i = 1:length(matches)
+        match      = matches{i};
+        parts      = strsplit(match, '(');
+        object     = strsplit(parts{2},',');
+        identifier = object{1};
+
+        result{end+1} = identifier;
+    end
+end
