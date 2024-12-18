@@ -256,6 +256,7 @@ function PipelineDesigner()
         uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
 
         % Start building the XML string
+        textArea.Value      = {''};
         textArea.Value{1,1} = [sprintf('    <Component Type="%s">', componentType)];
 
         % Loop through the properties and add them to the XML string
@@ -308,6 +309,7 @@ function PipelineDesigner()
         uniqueViewProperties = [uniqueViewProperties; 'Name']; % add back Name
 
         % Start building the XML string
+        textArea.Value      = {''};
         textArea.Value{1,1} = [sprintf('    <View Type="%s">', viewType)];
 
         % Loop through the properties and add them to the XML string

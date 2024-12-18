@@ -1,6 +1,5 @@
 % Startup VERA through this script
 
-
 %Clear matlab environment
 close all;
 clearvars;
@@ -10,6 +9,7 @@ clc;
 addpath(genpath('classes'));
 addpath(genpath('Components'));
 addpath(genpath('Dependencies'));
+addpath(genpath('PipelineDesigner'));
 
 %java stuff to make sure that the GUI works as expected
 warning off

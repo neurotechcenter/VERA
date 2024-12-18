@@ -48,6 +48,7 @@ classdef MainGUI < handle
             % empty views
             
             obj.fileMenu=uimenu(obj.window,'Label','File');
+            obj.fileMenuContent.OpenPipelineDesigner=uimenu(obj.fileMenu,'Label','Open Pipeline Designer','MenuSelectedFcn',@(~,~,~)PipelineDesigner);
             obj.fileMenuContent.NewProject=uimenu(obj.fileMenu,'Label','New Project','MenuSelectedFcn',@(~,~,~)obj.createNewProject);
             obj.fileMenuContent.OpenProject=uimenu(obj.fileMenu,'Label','Open Project','MenuSelectedFcn',@obj.openProject);
             obj.fileMenuContent.CloseProject=uimenu(obj.fileMenu,'Label','Close Project','Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
