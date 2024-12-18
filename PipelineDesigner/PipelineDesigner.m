@@ -115,7 +115,7 @@ function PipelineDesigner()
     
 
     %% Populate list of possible views
-    viewParentClasses = {'uix.Grid','AView','IComponentView'};
+    viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'};
     viewPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','classes','GUI','Views'));
     [availableViewsListBox.Items] = getAvailableElements(viewPath, viewParentClasses, 'view');
     
@@ -272,7 +272,7 @@ function PipelineDesigner()
             elseif islogical(propValue)
                 propValue = sprintf('"%s"', mat2str(propValue));
             else
-                propValue = '"Unknown"';  % For unsupported or complex types
+                propValue = '""';  % For unsupported or complex types
             end
 
             % Add property to XML (with the property name as the tag)
@@ -325,7 +325,7 @@ function PipelineDesigner()
             elseif islogical(propValue)
                 propValue = sprintf('"%s"', mat2str(propValue));
             else
-                propValue = '"Unknown"';  % For unsupported or complex types
+                propValue = '""';  % For unsupported or complex types
             end
 
             % Add property to XML (with the property name as the tag)
