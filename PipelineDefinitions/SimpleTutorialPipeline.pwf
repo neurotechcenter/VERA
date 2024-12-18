@@ -1,84 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineDefinition Name="Simple Tutorial Pipeline">
-
+    
     <Component Type="ElectrodeDefinitionConfiguration">
         <Name>"Electrode Definition"</Name>
-	    <Identifier>"ElectrodeDefinition"</Identifier>
+        <Identifier>"ElectrodeDefinition"</Identifier>
     </Component>
-
+    
     <Component Type="FileLoader">
         <Name>"CT Loader"</Name>
         <Identifier>"CT"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
-
+    
     <Component Type="FileLoader">
         <Name>"MRI Loader"</Name>
         <Identifier>"MRI"</Identifier>
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
-
+    
     <Component Type="ImportFreesurferSegmentation">
         <Name>"Load Freesurfer Segmentation Folder"</Name>
     </Component>
-
+    
     <Component Type="FreesurferSurfaceLoader">
         <Name>"Load Freesurfer Surface"</Name>
     </Component>
-
-
-
     
+    
+    
+
     <Component Type="MoveRASOrigin2Volume">
         <Name>"Move RAS Origin"</Name>
     </Component>
-
+    
     <Component Type="Coregistration">
         <Name>"Coregister CT to MRI"</Name>
     </Component>
-
+    
     <Component Type="MatlabElectrodeSelection">
         <Name>"MATLAB Electrode Selection"</Name>
     </Component>
-
+    
     <Component Type="FreesurferElectrodeLocalization">
         <Name>"Freesurfer Electrode Localization"</Name>
     </Component>
-
+    
     <Component Type="ReorderElectrodes">
         <Name>"Reorder Electrodes"</Name>
     </Component>
-
-
-	
-
+    
+    
+    
+    
     <Component Type="MatOutput">
         <Name>"Cortex"</Name>
         <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
     </Component>
-
+    
     <Component Type="ReportGenerator">
-	    <Name>"Report Generator MRI"</Name>
+        <Name>"Report Generator MRI"</Name>
     	<ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
-
-  
-
-
+    
+    
+    
+    
     <View Type="Model3DView">
-	    <Name>"3D View"</Name>
+        <Name>"3D View"</Name>
     </View>
-
+    
     <View Type="SliceViewerView">
-    	<Name>"Slice View"</Name>
+        <Name>"Slice View"</Name>
     </View>
-
+    
     <View Type="ElectrodeLocationTableView">
         <Name>"Electrode Location Table View"</Name>
     </View>
-
+    
     <View Type="ElectrodeDefinitionView">
         <Name>"Electrode Definition View"</Name>
     </View>
-
+    
 </PipelineDefinition>
