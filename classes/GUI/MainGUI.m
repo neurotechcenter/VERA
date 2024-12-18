@@ -233,7 +233,9 @@ classdef MainGUI < handle
             delete(obj.Views);
             delete(obj.ProjectRunner);
             delete(hob);
-            DependencyHandler.Instance.RemoveDependency('ProjectPath');
+            if DependencyHandler.Instance.IsDependency('ProjectPath')
+                DependencyHandler.Instance.RemoveDependency('ProjectPath');
+            end
             
         end
         
