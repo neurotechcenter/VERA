@@ -10,7 +10,12 @@ function PipelineDesigner()
     pipelineTextArea = uitextarea(fig, ...
         'Position', [20, 20, 560, 710], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
-    
+
+    %% context menus
+    InputsContextMenu     = uicontextmenu(fig);
+    ProcessingContextMenu = uicontextmenu(fig);
+    OutputsContextMenu    = uicontextmenu(fig);
+    ViewsContextMenu      = uicontextmenu(fig);
     
     %% Listbox of Input components
     uilabel(fig, ...
@@ -19,7 +24,8 @@ function PipelineDesigner()
     
     availableInputComponentsListBox = uilistbox(fig, ...
         'Position', [590, 605, 390, 125], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
+        'ContextMenu',InputsContextMenu);
 
     %% Listbox of Processing components
     uilabel(fig, ...
@@ -28,7 +34,8 @@ function PipelineDesigner()
 
     availableProcessingComponentsListBox = uilistbox(fig, ...
         'Position', [590, 455, 390, 125], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
+        'ContextMenu',ProcessingContextMenu);
 
     %% Listbox of Output components
     uilabel(fig, ...
@@ -37,7 +44,8 @@ function PipelineDesigner()
 
     availableOutputComponentsListBox = uilistbox(fig, ...
         'Position', [590, 305, 390, 125], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
+        'ContextMenu',OutputsContextMenu);
     
     %% Create the TextArea for modifying component code
     uilabel(fig, ...
@@ -56,7 +64,8 @@ function PipelineDesigner()
     
     availableViewsListBox = uilistbox(fig, ...
         'Position', [990, 305, 390, 425], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
+        'ContextMenu',ViewsContextMenu);
     
     %% Create the TextArea for modifying view code
     uilabel(fig, ...
@@ -94,7 +103,9 @@ function PipelineDesigner()
     
     % Update view window to display current component
     availableInputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableInputComponentsListBox.Value);
-    
+
+    % show help info for selected component
+    uimenu(InputsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableInputComponentsListBox.Value));
 
     %% Populate list of possible Processing components
     processingIDXs = contains(componentTypes,'Processing');
@@ -104,6 +115,8 @@ function PipelineDesigner()
     % Update view window to display current component
     availableProcessingComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableProcessingComponentsListBox.Value);
     
+    % show help info for selected component
+    uimenu(ProcessingContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableProcessingComponentsListBox.Value));
 
     %% Populate list of possible Output components
     outputIDXs = contains(componentTypes,'Output');
@@ -112,7 +125,9 @@ function PipelineDesigner()
     
     % Update view window to display current component
     availableOutputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableOutputComponentsListBox.Value);
-    
+
+    % show help info for selected component
+    uimenu(OutputsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableOutputComponentsListBox.Value));
 
     %% Populate list of possible views
     viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'};
@@ -122,7 +137,8 @@ function PipelineDesigner()
     % Update view window to display current view
     availableViewsListBox.ValueChangedFcn = @(src,event) viewView(viewTextArea, viewParentClasses, availableViewsListBox.Value);
 
-
+    % show help info for selected component
+    uimenu(ViewsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableViewsListBox.Value));
 
 
 %% Function to load pipeline from a file
