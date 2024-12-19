@@ -201,21 +201,68 @@ end
 
 %% Function to save pipeline to a file
 function savePipeline(fig,textArea)
-    defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
-    fig.Visible     = 'off'; % Hide the main window
-    [file, path]    = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
-    fig.Visible     = 'on'; % Show the main window
-    if file ~= 0
-        fullPath = fullfile(path, file);
-        fid = fopen(fullPath, 'wt');
-        if fid ~= -1
-            for i = 1:length(textArea.Value)
-                fprintf(fid, [textArea.Value{i},'\n']);
+    % check component names to make sure there are no duplicates
+    duplicateNames = checkComponentNames(textArea);
+
+    if ~duplicateNames
+        defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+        fig.Visible     = 'off'; % Hide the main window
+        [file, path]    = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
+        fig.Visible     = 'on'; % Show the main window
+        if file ~= 0
+            fullPath = fullfile(path, file);
+            fid = fopen(fullPath, 'wt');
+            if fid ~= -1
+                for i = 1:length(textArea.Value)
+                    fprintf(fid, [textArea.Value{i},'\n']);
+                end
+                fclose(fid);
+                uialert(fig, 'pipeline saved successfully!', 'Success');
+            else
+                uialert(fig, 'Error saving the file.', 'File Error');
             end
-            fclose(fid);
-            uialert(fig, 'pipeline saved successfully!', 'Success');
+        end
+    else
+        uialert(fig, 'Duplicate component or view names found. Ensure that all components and views have unique names.', 'File Error');
+    end
+end
+
+%% Function to ensure there are no duplicate names of components
+function result = checkComponentNames(textArea)
+    % Use a regular expression to extract all 'Name' values from the XML text
+    pattern = '<Name>"(.*?)"</Name>';  % This regex matches text between <Name>"..."</Name>
+    names = regexp(textArea.Value, pattern, 'tokens');
+    
+    % Flatten the cell array and remove quotes from the extracted names
+    % names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
+
+    notnames = cellfun(@isempty, names, 'UniformOutput', true);
+    names(notnames) = [];
+
+    names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
+    
+    % Check for duplicates
+    duplicate_names = find_duplicates(names);
+    
+    % Display result
+    if ~isempty(duplicate_names)
+        result = 1;
+    else
+        result = 0;
+    end
+end
+
+% Helper function to find duplicate names
+function duplicates = find_duplicates(names)
+    % Find duplicates by comparing each name with others
+    duplicates = {};
+    seen = {};
+    for i = 1:length(names)
+        name = names{i}{1};
+        if any(strcmp(seen, name))
+            duplicates{end+1} = name;  % Add to duplicates list
         else
-            uialert(fig, 'Error saving the file.', 'File Error');
+            seen{end+1} = name;  % Mark this name as seen
         end
     end
 end
