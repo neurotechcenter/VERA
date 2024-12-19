@@ -11,7 +11,7 @@ function PipelineDesigner()
         'Position', [20, 20, 560, 710], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
 
-    %% context menus
+    %% context menus for help
     InputsContextMenu     = uicontextmenu(fig);
     ProcessingContextMenu = uicontextmenu(fig);
     OutputsContextMenu    = uicontextmenu(fig);
@@ -49,11 +49,11 @@ function PipelineDesigner()
     
     %% Create the TextArea for modifying component code
     uilabel(fig, ...
-        'Position', [590, 280, 300, 20], ...
+        'Position', [590, 265, 300, 20], ...
         'Text','Current Component','FontName', 'Courier New', 'FontSize', 12);
 
     componentTextArea = uitextarea(fig, ...
-        'Position', [590, 20, 390, 260], ...
+        'Position', [590, 20, 390, 230], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
     
     
@@ -69,11 +69,11 @@ function PipelineDesigner()
     
     %% Create the TextArea for modifying view code
     uilabel(fig, ...
-        'Position', [990, 280, 300, 20], ...
+        'Position', [990, 265, 300, 20], ...
         'Text','Current View','FontName', 'Courier New', 'FontSize', 12);
 
     viewTextArea = uitextarea(fig, ...
-        'Position', [990, 20, 390, 260], ...
+        'Position', [990, 20, 390, 230], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
     
     
@@ -84,23 +84,37 @@ function PipelineDesigner()
     %% Create a Save button to save the pipeline to a file
     uibutton(fig, 'push', 'Text', 'Save Pipeline', ...
         'Position', [140, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) savePipeline(pipelineTextArea));
-    
+
+    %% Create an Add Component button to move current component to the bottom of the pipeline text area
+    uibutton(fig, 'push', 'Text', 'Add Component', ...
+        'Position', [730, 260, 100, 30], 'ButtonPushedFcn', @(btn, event) AddComponent(pipelineTextArea, componentTextArea));
+
+    %% Create an Add View button to move current view to the bottom of the pipeline text area
+    uibutton(fig, 'push', 'Text', 'Add View', ...
+        'Position', [1090, 260, 100, 30], 'ButtonPushedFcn', @(btn, event) AddView(pipelineTextArea, viewTextArea));
 
     %% On startup, display demo pipeline
-    path_to_demo = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions','SimpleTutorialPipeline.pwf'));
-    loadPipeline(pipelineTextArea,path_to_demo);
+    % path_to_demo = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions','SimpleTutorialPipeline.pwf'));
+    % loadPipeline(pipelineTextArea,path_to_demo);
     
+    %% On startup, display empty pipeline
+    pipelineTextArea.Value = {'<?xml version="1.0" encoding="utf-8"?>';
+                              '<PipelineDefinition Name="Pipeline Name">';
+                              '';
+                              '';
+                              '</PipelineDefinition>'};
 
     %% Get all components
     componentParentClasses = {'AComponent'};
-    componentPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','Components'));
+    componentPath          = GetFullPath(fullfile(mfilename('fullpath'),'..','..','Components'));
+
     [AvailableComponents, componentTypes] = getAvailableElements(componentPath, componentParentClasses, 'component');
     
     %% Populate list of possible Input components
     inputIDXs = contains(componentTypes,'Input');
     
     availableInputComponentsListBox.Items = AvailableComponents(inputIDXs);
-    
+
     % Update view window to display current component
     availableInputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableInputComponentsListBox.Value);
 
@@ -131,14 +145,16 @@ function PipelineDesigner()
 
     %% Populate list of possible views
     viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'}; % properties to be excluded
-    viewPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','classes','GUI','Views'));
-    [availableViewsListBox.Items] = getAvailableElements(viewPath, viewParentClasses, 'view');
+    viewPath          = GetFullPath(fullfile(mfilename('fullpath'),'..','..','classes','GUI','Views'));
+
+    availableViewsListBox.Items = getAvailableElements(viewPath, viewParentClasses, 'view');
     
     % Update view window to display current view
     availableViewsListBox.ValueChangedFcn = @(src,event) viewView(viewTextArea, viewParentClasses, availableViewsListBox.Value);
 
     % show help info for selected component
     uimenu(ViewsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableViewsListBox.Value));
+
 
 
 %% Function to load pipeline from a file
@@ -152,13 +168,6 @@ function PipelineDesigner()
         end
         if file ~= 0
             fullPath = fullfile(path, file);
-
-            % working
-            % pipelineContent = readcell(fullPath,'FileType','text','Delimiter',{'\n','\r','\r\n'},...
-            %     'LineEnding',{'\n','\r','\r\n'},...
-            %     'LeadingDelimitersRule','keep',...
-            %     'ConsecutiveDelimitersRule','split',...
-            %     'Whitespace','','EmptyLineRule','read');
 
             pipelineContent = readcell(fullPath,'FileType','text','Delimiter',{'\n','\r','\r\n'},...
                 'Whitespace','','EmptyLineRule','read');
@@ -377,10 +386,28 @@ function PipelineDesigner()
 
     end
 
-end
+%% Function to move component to bottom of pipeline
+    function AddComponent(pipelineTextArea, componentTextArea)
+        pipelineTextArea.Value = [
+                                    pipelineTextArea.Value(1:end-2); 
+                                    componentTextArea.Value; 
+                                    '    '; 
+                                    pipelineTextArea.Value(end-1:end)
+                                 ];
+    end
+
+%% Function to move component to bottom of pipeline
+    function AddView(pipelineTextArea, viewTextArea)
+        pipelineTextArea.Value = [
+                                    pipelineTextArea.Value(1:end-2); 
+                                    viewTextArea.Value; 
+                                    '    '; 
+                                    pipelineTextArea.Value(end-1:end)
+                                 ];
+    end
 
 %% Function to get component type (input, processing, or output)
-function [componentType] = getComponentType(className)
+    function [componentType] = getComponentType(className)
     % This function examines a given class to determine its type.
     % Inputs:
     %   - className: The name of the class as a string (e.g., 'MayoReface')
@@ -420,8 +447,8 @@ function [componentType] = getComponentType(className)
     end
 end
 
-%% Function to 
-function [inputs, outputs] = extractInputsOutputs(className)
+%% Function to extract inputs and outputs of a component
+    function [inputs, outputs] = extractInputsOutputs(className)
 
     % Check for calls to AddInput and AddOutput in the method body
     filePath   = which([className '.m']);
@@ -436,12 +463,12 @@ function [inputs, outputs] = extractInputsOutputs(className)
     outputsMatch = regexp(methodCode, outputPattern, 'match');
 
     % Parse the matched results
-    inputs = parseAddInputOutput(inputsMatch);
+    inputs  = parseAddInputOutput(inputsMatch);
     outputs = parseAddInputOutput(outputsMatch);
 end
 
-%%
-function result = parseAddInputOutput(matches)
+%% Function to parse the component for the matched string
+    function result = parseAddInputOutput(matches)
     % Parse the AddInput/Output calls into structured results
     result = {};
     
@@ -453,4 +480,6 @@ function result = parseAddInputOutput(matches)
 
         result{end+1} = identifier;
     end
+end
+
 end
