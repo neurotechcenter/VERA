@@ -130,7 +130,7 @@ function PipelineDesigner()
     uimenu(OutputsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableOutputComponentsListBox.Value));
 
     %% Populate list of possible views
-    viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'};
+    viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'}; % properties to be excluded
     viewPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','classes','GUI','Views'));
     [availableViewsListBox.Items] = getAvailableElements(viewPath, viewParentClasses, 'view');
     
@@ -147,14 +147,38 @@ function PipelineDesigner()
             [path, file, ext] = fileparts(varargin{1});
             file = [file,ext];
         else
-            [file, path] = uigetfile('*.pwf', 'Select a pipeline file to load');
+            defaultLoadPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+            [file, path] = uigetfile(fullfile(defaultLoadPath,'*.pwf'), 'Select a pipeline file to load');
         end
         if file ~= 0
             fullPath = fullfile(path, file);
 
-            pipelineContent = readcell(fullPath,'FileType','text','Delimiter','\n','LeadingDelimitersRule','keep',...
-                'ConsecutiveDelimitersRule','split','Whitespace','\t');
+            % working
+            % pipelineContent = readcell(fullPath,'FileType','text','Delimiter',{'\n','\r','\r\n'},...
+            %     'LineEnding',{'\n','\r','\r\n'},...
+            %     'LeadingDelimitersRule','keep',...
+            %     'ConsecutiveDelimitersRule','split',...
+            %     'Whitespace','','EmptyLineRule','read');
 
+            pipelineContent = readcell(fullPath,'FileType','text','Delimiter',{'\n','\r','\r\n'},...
+                'Whitespace','','EmptyLineRule','read');
+
+            % replace empty lines with spaces so they can exist
+            emptyCells = cellfun(@ismissing,pipelineContent,'UniformOutput',false);
+            emptyCells = cellfun(@any,emptyCells);
+
+            for i = 1:length(emptyCells)
+                if emptyCells(i)
+                    pipelineContent{i} = '    ';
+                end
+            end
+
+            % replace tabs with spaces
+            for i = 1:length(pipelineContent)
+                pipelineContent{i} = regexprep(pipelineContent{i}, '\t', '    ');
+            end
+
+            % write pipeline to text area
             textArea.Value = pipelineContent;
         else
             uialert(fig, 'Error reading the file.', 'File Error');
