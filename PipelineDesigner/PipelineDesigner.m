@@ -1,4 +1,7 @@
 function PipelineDesigner()
+    % The pipeline designer is a tool to load, modify, and save VERA 
+    % pipelines
+
     % Create the main figure for the GUI
     fig = uifigure('Position', [100, 100, 1400, 800], 'Name', 'Pipeline Designer');
     
@@ -79,11 +82,11 @@ function PipelineDesigner()
     
     %% Create a Load button to load a pipeline from a file
     uibutton(fig, 'push', 'Text', 'Load Pipeline', ...
-        'Position', [20, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) loadPipeline(pipelineTextArea));
+        'Position', [20, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) loadPipeline(fig,pipelineTextArea));
     
     %% Create a Save button to save the pipeline to a file
     uibutton(fig, 'push', 'Text', 'Save Pipeline', ...
-        'Position', [140, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) savePipeline(pipelineTextArea));
+        'Position', [140, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) savePipeline(fig,pipelineTextArea));
 
     %% Create an Add Component button to move current component to the bottom of the pipeline text area
     uibutton(fig, 'push', 'Text', 'Add Component', ...
@@ -154,332 +157,334 @@ function PipelineDesigner()
 
     % show help info for selected component
     uimenu(ViewsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableViewsListBox.Value));
-
+end
 
 
 %% Function to load pipeline from a file
-    function loadPipeline(textArea,varargin)
-        if ~isempty(varargin)
-            [path, file, ext] = fileparts(varargin{1});
-            file = [file,ext];
-        else
-            defaultLoadPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
-            [file, path] = uigetfile(fullfile(defaultLoadPath,'*.pwf'), 'Select a pipeline file to load');
-        end
-        if file ~= 0
-            fullPath = fullfile(path, file);
-
-            pipelineContent = readcell(fullPath,'FileType','text','Delimiter',{'\n','\r','\r\n'},...
-                'Whitespace','','EmptyLineRule','read');
-
-            % replace empty lines with spaces so they can exist
-            emptyCells = cellfun(@ismissing,pipelineContent,'UniformOutput',false);
-            emptyCells = cellfun(@any,emptyCells);
-
-            for i = 1:length(emptyCells)
-                if emptyCells(i)
-                    pipelineContent{i} = '    ';
-                end
-            end
-
-            % replace tabs with spaces
-            for i = 1:length(pipelineContent)
-                pipelineContent{i} = regexprep(pipelineContent{i}, '\t', '    ');
-            end
-
-            % write pipeline to text area
-            textArea.Value = pipelineContent;
-        else
-            uialert(fig, 'Error reading the file.', 'File Error');
-        end
+function loadPipeline(fig,textArea,varargin)
+    if ~isempty(varargin)
+        [path, file, ext] = fileparts(varargin{1});
+        file = [file,ext];
+    else
+        defaultLoadPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+        fig.Visible     = 'off'; % Hide the main window
+        [file, path]    = uigetfile(fullfile(defaultLoadPath,'*.pwf'), 'Select a pipeline file to load');
+        fig.Visible     = 'on'; % Show the main window
     end
+    if file ~= 0
+        fullPath = fullfile(path, file);
+
+        pipelineContent = readcell(fullPath,'FileType','text','Delimiter',{'\n','\r','\r\n'},...
+            'Whitespace','','EmptyLineRule','read');
+
+        % replace empty lines with spaces so they can exist
+        emptyCells = cellfun(@ismissing,pipelineContent,'UniformOutput',false);
+        emptyCells = cellfun(@any,emptyCells);
+
+        for i = 1:length(emptyCells)
+            if emptyCells(i)
+                pipelineContent{i} = '    ';
+            end
+        end
+
+        % replace tabs with spaces
+        for i = 1:length(pipelineContent)
+            pipelineContent{i} = regexprep(pipelineContent{i}, '\t', '    ');
+        end
+
+        % write pipeline to text area
+        textArea.Value = pipelineContent;
+    else
+        uialert(fig, 'Error reading the file.', 'File Error');
+    end
+end
 
 %% Function to save pipeline to a file
-    function savePipeline(textArea)
-        defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
-        [file, path]    = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
-        if file ~= 0
-            fullPath = fullfile(path, file);
-            fid = fopen(fullPath, 'wt');
-            if fid ~= -1
-                for i = 1:length(textArea.Value)
-                    fprintf(fid, [textArea.Value{i},'\n']);
-                end
-                fclose(fid);
-                uialert(fig, 'pipeline saved successfully!', 'Success');
-            else
-                uialert(fig, 'Error saving the file.', 'File Error');
+function savePipeline(fig,textArea)
+    defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+    fig.Visible     = 'off'; % Hide the main window
+    [file, path]    = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
+    fig.Visible     = 'on'; % Show the main window
+    if file ~= 0
+        fullPath = fullfile(path, file);
+        fid = fopen(fullPath, 'wt');
+        if fid ~= -1
+            for i = 1:length(textArea.Value)
+                fprintf(fid, [textArea.Value{i},'\n']);
             end
+            fclose(fid);
+            uialert(fig, 'pipeline saved successfully!', 'Success');
+        else
+            uialert(fig, 'Error saving the file.', 'File Error');
         end
     end
+end
 
 %% Function to get all components/views in a given directory
-    function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses, compOrView)
+function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses, compOrView)
 
-        % set up parentClasses to be used in regular expression
-        parentClassesString = [];
-        for i = 1:length(parentClasses)
-            parentClassesString = [parentClassesString,  parentClasses{i}, '|'];
-        end
-        parentClassesString(end) = [];
-
-        % Get all subdirectories, including the root directory
-        allSubdirs = genpath(dirPath);
-
-        % Split the subdirectories into a cell array
-        subdirs = strsplit(allSubdirs, pathsep);
-
-        % Initialize an empty array to store files that inherit from parentClass
-        filesInheritingParentClass = [];
-
-        % Loop over each subdirectory and look for class definitions
-        for i = 1:length(subdirs)
-            % Get all .m files in the current subdirectory
-            files = dir(fullfile(subdirs{i}, '*.m'));
-
-            % Loop over each file and check if it defines a class inheriting from parentClass
-            for j = 1:length(files)
-                filePath = fullfile(subdirs{i}, files(j).name);
-
-                % Try to read the class definition from the file
-                try
-                    % Read the file's contents
-                    fileContents = fileread(filePath);
-
-                    % Look for a class definition and check for inheritance from parentClass
-                    classDefPattern = ['classdef\s+(\w+)\s*(?:\w+\s*<\s*)?[^>]*(', parentClassesString, ')'];
-
-                    % Check if the pattern matches
-                    if ~isempty(regexp(fileContents, classDefPattern, 'once'))
-                        % If the class inherits from parentClass, add it to the list
-                        filesInheritingParentClass = [filesInheritingParentClass; files(j)];
-                    end
-                catch
-                    % If there's an error reading the file (e.g., not a MATLAB file), skip it
-                    continue;
-                end
-            end
-        end
-
-        % Collect names of components
-        Names = {};
-        for i = 1:length(filesInheritingParentClass)
-            [~, Name] = fileparts(filesInheritingParentClass(i).name);
-            Names{i,1} = Name;
-        end
-        Names = sort(Names);
-
-        % Collect types of components
-        if strcmp(compOrView,'component')
-            for i = 1:length(Names)
-                componentTypes{i,1} = getComponentType(Names{i});
-            end
-        else
-            componentTypes = {};
-        end
-
+    % set up parentClasses to be used in regular expression
+    parentClassesString = [];
+    for i = 1:length(parentClasses)
+        parentClassesString = [parentClassesString,  parentClasses{i}, '|'];
     end
+    parentClassesString(end) = [];
+
+    % Get all subdirectories, including the root directory
+    allSubdirs = genpath(dirPath);
+
+    % Split the subdirectories into a cell array
+    subdirs = strsplit(allSubdirs, pathsep);
+
+    % Initialize an empty array to store files that inherit from parentClass
+    filesInheritingParentClass = [];
+
+    % Loop over each subdirectory and look for class definitions
+    for i = 1:length(subdirs)
+        % Get all .m files in the current subdirectory
+        files = dir(fullfile(subdirs{i}, '*.m'));
+
+        % Loop over each file and check if it defines a class inheriting from parentClass
+        for j = 1:length(files)
+            filePath = fullfile(subdirs{i}, files(j).name);
+
+            % Try to read the class definition from the file
+            try
+                % Read the file's contents
+                fileContents = fileread(filePath);
+
+                % Look for a class definition and check for inheritance from parentClass
+                classDefPattern = ['classdef\s+(\w+)\s*(?:\w+\s*<\s*)?[^>]*(', parentClassesString, ')'];
+
+                % Check if the pattern matches
+                if ~isempty(regexp(fileContents, classDefPattern, 'once'))
+                    % If the class inherits from parentClass, add it to the list
+                    filesInheritingParentClass = [filesInheritingParentClass; files(j)];
+                end
+            catch
+                % If there's an error reading the file (e.g., not a MATLAB file), skip it
+                continue;
+            end
+        end
+    end
+
+    % Collect names of components
+    Names = {};
+    for i = 1:length(filesInheritingParentClass)
+        [~, Name] = fileparts(filesInheritingParentClass(i).name);
+        Names{i,1} = Name;
+    end
+    Names = sort(Names);
+
+    % Collect types of components
+    if strcmp(compOrView,'component')
+        for i = 1:length(Names)
+            componentTypes{i,1} = getComponentType(Names{i});
+        end
+    else
+        componentTypes = {};
+    end
+
+end
 
 %% Function to inspect the properties of a component selected in the listbox
-    function viewComponent(textArea,parentClass,currentcomponent)
-        [~,componentName] = fileparts(currentcomponent);
-        component = eval(componentName);
+function viewComponent(textArea,parentClass,currentcomponent)
+    [~,componentName] = fileparts(currentcomponent);
+    component = eval(componentName);
 
-        % Get the component type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
-        componentType = class(component);
+    % Get the component type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
+    componentType = class(component);
 
-        % Get the list of properties for the component
-        props = properties(component);
+    % Get the list of properties for the component
+    props = properties(component);
 
-        % Get the properties of the parent class(es)
-        iter = 1;
-        for i = 1:length(parentClass)
-            parentClassProps = meta.class.fromName(parentClass{i});
-            for j = 1:length(parentClassProps.PropertyList) 
-                parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
-                iter = iter + 1;
-            end
+    % Get the properties of the parent class(es)
+    iter = 1;
+    for i = 1:length(parentClass)
+        parentClassProps = meta.class.fromName(parentClass{i});
+        for j = 1:length(parentClassProps.PropertyList) 
+            parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
+            iter = iter + 1;
         end
-
-        uniqueComponentProperties = setdiff(props,parentClassNames,'stable');
-        uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
-
-        % Start building the XML string
-        textArea.Value      = {''};
-        textArea.Value{1,1} = [sprintf('    <Component Type="%s">', componentType)];
-
-        % Loop through the properties and add them to the XML string
-        for i = 1:length(uniqueComponentProperties)
-            % Get the property value
-            propValue = component.(uniqueComponentProperties{i});
-
-            % Convert the property value to a string if it's not already
-            if ischar(propValue) || isstring(propValue)
-                propValue = sprintf('"%s"', propValue);
-            elseif isnumeric(propValue)
-                propValue = sprintf('"%g"', propValue);
-            elseif islogical(propValue)
-                propValue = sprintf('"%s"', mat2str(propValue));
-            else
-                propValue = '""';  % For unsupported or complex types
-            end
-
-            % Add property to XML (with the property name as the tag)
-            textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueComponentProperties{i}, propValue, uniqueComponentProperties{i})];
-        end
-
-        % Close the component and XML structure
-        textArea.Value{end+1,1} = '    </Component>';
-
     end
+
+    uniqueComponentProperties = setdiff(props,parentClassNames,'stable');
+    uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
+
+    % Start building the XML string
+    textArea.Value      = {''};
+    textArea.Value{1,1} = [sprintf('    <Component Type="%s">', componentType)];
+
+    % Loop through the properties and add them to the XML string
+    for i = 1:length(uniqueComponentProperties)
+        % Get the property value
+        propValue = component.(uniqueComponentProperties{i});
+
+        % Convert the property value to a string if it's not already
+        if ischar(propValue) || isstring(propValue)
+            propValue = sprintf('"%s"', propValue);
+        elseif isnumeric(propValue)
+            propValue = sprintf('"%g"', propValue);
+        elseif islogical(propValue)
+            propValue = sprintf('"%s"', mat2str(propValue));
+        else
+            propValue = '""';  % For unsupported or complex types
+        end
+
+        % Add property to XML (with the property name as the tag)
+        textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueComponentProperties{i}, propValue, uniqueComponentProperties{i})];
+    end
+
+    % Close the component and XML structure
+    textArea.Value{end+1,1} = '    </Component>';
+
+end
 
 %% Function to inspect the properties of a view selected in the listbox
-    function viewView(textArea,parentClass,currentView)
-        [~,viewName] = fileparts(currentView);
-        view = eval(viewName);
+function viewView(textArea,parentClass,currentView)
+    [~,viewName] = fileparts(currentView);
+    view = eval(viewName);
 
-        % Get the view type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
-        viewType = class(view);
+    % Get the view type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
+    viewType = class(view);
 
-        % Get the list of properties for the view
-        props = properties(view);
+    % Get the list of properties for the view
+    props = properties(view);
 
-        % Get the properties of the parent class(es)
-        iter = 1;
-        for i = 1:length(parentClass)
-            parentClassProps = meta.class.fromName(parentClass{i});
-            for j = 1:length(parentClassProps.PropertyList) 
-                parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
-                iter = iter + 1;
-            end
+    % Get the properties of the parent class(es)
+    iter = 1;
+    for i = 1:length(parentClass)
+        parentClassProps = meta.class.fromName(parentClass{i});
+        for j = 1:length(parentClassProps.PropertyList) 
+            parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
+            iter = iter + 1;
+        end
+    end
+
+    uniqueViewProperties = setdiff(props,parentClassNames,'stable');
+    uniqueViewProperties = [uniqueViewProperties; 'Name']; % add back Name
+
+    % Start building the XML string
+    textArea.Value      = {''};
+    textArea.Value{1,1} = [sprintf('    <View Type="%s">', viewType)];
+
+    % Loop through the properties and add them to the XML string
+    for i = 1:length(uniqueViewProperties)
+        % Get the property value
+        propValue = view.(uniqueViewProperties{i});
+
+        % Convert the property value to a string if it's not already
+        if ischar(propValue) || isstring(propValue)
+            propValue = sprintf('"%s"', propValue);
+        elseif isnumeric(propValue)
+            propValue = sprintf('"%g"', propValue);
+        elseif islogical(propValue)
+            propValue = sprintf('"%s"', mat2str(propValue));
+        else
+            propValue = '""';  % For unsupported or complex types
         end
 
-        uniqueViewProperties = setdiff(props,parentClassNames,'stable');
-        uniqueViewProperties = [uniqueViewProperties; 'Name']; % add back Name
-
-        % Start building the XML string
-        textArea.Value      = {''};
-        textArea.Value{1,1} = [sprintf('    <View Type="%s">', viewType)];
-
-        % Loop through the properties and add them to the XML string
-        for i = 1:length(uniqueViewProperties)
-            % Get the property value
-            propValue = view.(uniqueViewProperties{i});
-
-            % Convert the property value to a string if it's not already
-            if ischar(propValue) || isstring(propValue)
-                propValue = sprintf('"%s"', propValue);
-            elseif isnumeric(propValue)
-                propValue = sprintf('"%g"', propValue);
-            elseif islogical(propValue)
-                propValue = sprintf('"%s"', mat2str(propValue));
-            else
-                propValue = '""';  % For unsupported or complex types
-            end
-
-            % Add property to XML (with the property name as the tag)
-            textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueViewProperties{i}, propValue, uniqueViewProperties{i})];
-        end
-
-        % Close the view and XML structure
-        textArea.Value{end+1,1} = '    </View>';
-
+        % Add property to XML (with the property name as the tag)
+        textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueViewProperties{i}, propValue, uniqueViewProperties{i})];
     end
+
+    % Close the view and XML structure
+    textArea.Value{end+1,1} = '    </View>';
+
+end
 
 %% Function to move component to bottom of pipeline
-    function AddComponent(pipelineTextArea, componentTextArea)
-        pipelineTextArea.Value = [
-                                    pipelineTextArea.Value(1:end-2); 
-                                    componentTextArea.Value; 
-                                    '    '; 
-                                    pipelineTextArea.Value(end-1:end)
-                                 ];
-    end
+function AddComponent(pipelineTextArea, componentTextArea)
+    pipelineTextArea.Value = [
+                                pipelineTextArea.Value(1:end-2); 
+                                componentTextArea.Value; 
+                                '    '; 
+                                pipelineTextArea.Value(end-1:end)
+                             ];
+end
 
 %% Function to move component to bottom of pipeline
-    function AddView(pipelineTextArea, viewTextArea)
-        pipelineTextArea.Value = [
-                                    pipelineTextArea.Value(1:end-2); 
-                                    viewTextArea.Value; 
-                                    '    '; 
-                                    pipelineTextArea.Value(end-1:end)
-                                 ];
-    end
+function AddView(pipelineTextArea, viewTextArea)
+    pipelineTextArea.Value = [
+                                pipelineTextArea.Value(1:end-2); 
+                                viewTextArea.Value; 
+                                '    '; 
+                                pipelineTextArea.Value(end-1:end)
+                             ];
+end
 
 %% Function to get component type (input, processing, or output)
-    function [componentType] = getComponentType(className)
-    % This function examines a given class to determine its type.
-    % Inputs:
-    %   - className: The name of the class as a string (e.g., 'MayoReface')
-    % Outputs:
-    %   - componentType: can be Input, Processing, or Output
+function [componentType] = getComponentType(className)
+% This function examines a given class to determine its type.
+% Inputs:
+%   - className: The name of the class as a string (e.g., 'MayoReface')
+% Outputs:
+%   - componentType: can be Input, Processing, or Output
 
-    % Check if the class exists
-    if ~exist('className', 'var') || ~ischar(className)
-        error('Class name must be a valid string');
-    end
+% Check if the class exists
+if ~exist('className', 'var') || ~ischar(className)
+    error('Class name must be a valid string');
+end
 
-    componentType = '';
+componentType = '';
+
+% Get the class definition
+classInfo = meta.class.fromName(className);
+
+% Iterate through the class methods
+for i = 1:length(classInfo.MethodList)
+    methodName = classInfo.MethodList(i).Name;
     
-    % Get the class definition
-    classInfo = meta.class.fromName(className);
+    % Check for AddInput and AddOutput methods
+    if strcmp(methodName, 'Publish')
+        % Look at the Publish method to get inputs and outputs
+        [inputs, outputs] = extractInputsOutputs(className);
+    end
     
-    % Iterate through the class methods
-    for i = 1:length(classInfo.MethodList)
-        methodName = classInfo.MethodList(i).Name;
-        
-        % Check for AddInput and AddOutput methods
-        if strcmp(methodName, 'Publish')
-            % Look at the Publish method to get inputs and outputs
-            [inputs, outputs] = extractInputsOutputs(className);
-        end
-        
-    end
+end
 
-    if ~isempty(inputs) && ~isempty(outputs)
-        componentType = 'Processing';
-    elseif ~isempty(inputs) && isempty(outputs)
-        componentType = 'Output';
-    elseif isempty(inputs) && ~isempty(outputs)
-        componentType = 'Input';
-    else
-        componentType = 'NotValid';
-    end
+if ~isempty(inputs) && ~isempty(outputs)
+    componentType = 'Processing';
+elseif ~isempty(inputs) && isempty(outputs)
+    componentType = 'Output';
+elseif isempty(inputs) && ~isempty(outputs)
+    componentType = 'Input';
+else
+    componentType = 'NotValid';
+end
 end
 
 %% Function to extract inputs and outputs of a component
-    function [inputs, outputs] = extractInputsOutputs(className)
+function [inputs, outputs] = extractInputsOutputs(className)
 
-    % Check for calls to AddInput and AddOutput in the method body
-    filePath   = which([className '.m']);
-    methodCode = fileread(filePath);
-    
-    % Regular expression to find AddInput and AddOutput calls
-    inputPattern  = 'obj.AddInput\((.*?)\);';
-    outputPattern = 'obj.AddOutput\((.*?)\);';
-    
-    % Extract inputs and outputs
-    inputsMatch  = regexp(methodCode, inputPattern,  'match');
-    outputsMatch = regexp(methodCode, outputPattern, 'match');
+% Check for calls to AddInput and AddOutput in the method body
+filePath   = which([className '.m']);
+methodCode = fileread(filePath);
 
-    % Parse the matched results
-    inputs  = parseAddInputOutput(inputsMatch);
-    outputs = parseAddInputOutput(outputsMatch);
+% Regular expression to find AddInput and AddOutput calls
+inputPattern  = 'obj.AddInput\((.*?)\);';
+outputPattern = 'obj.AddOutput\((.*?)\);';
+
+% Extract inputs and outputs
+inputsMatch  = regexp(methodCode, inputPattern,  'match');
+outputsMatch = regexp(methodCode, outputPattern, 'match');
+
+% Parse the matched results
+inputs  = parseAddInputOutput(inputsMatch);
+outputs = parseAddInputOutput(outputsMatch);
 end
 
 %% Function to parse the component for the matched string
-    function result = parseAddInputOutput(matches)
-    % Parse the AddInput/Output calls into structured results
-    result = {};
-    
-    for i = 1:length(matches)
-        match      = matches{i};
-        parts      = strsplit(match, '(');
-        object     = strsplit(parts{2},',');
-        identifier = object{1};
+function result = parseAddInputOutput(matches)
+% Parse the AddInput/Output calls into structured results
+result = {};
 
-        result{end+1} = identifier;
-    end
+for i = 1:length(matches)
+    match      = matches{i};
+    parts      = strsplit(match, '(');
+    object     = strsplit(parts{2},',');
+    identifier = object{1};
+
+    result{end+1} = identifier;
 end
-
 end
