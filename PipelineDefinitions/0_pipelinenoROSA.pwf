@@ -52,18 +52,18 @@
     </Component>
 
     <Component Type="ReportGenerator">
-	    <Name>"Report Generator MRI"</Name>
-    	<ImageIdentifier>"MRI"</ImageIdentifier>
+        <Name>"Report Generator MRI"</Name>
+        <ImageIdentifier>"MRI"</ImageIdentifier>
     </Component>
 
 
 
     <View Type="Model3DView">
-	   <Name>"3D View"</Name>
+        <Name>"3D View"</Name>
     </View>
 
     <View Type="SliceViewerView">
-    	<Name>"Slice Viewer"</Name>
+        <Name>"Slice Viewer"</Name>
     </View>
 
     <View Type="ElectrodeLocationTableView">

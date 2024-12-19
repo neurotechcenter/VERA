@@ -20,31 +20,6 @@
         <InputFilepath>"notes/executed/"</InputFilepath>
     </Component>
 
-    <Component Type="ImportFreesurferSegmentation">
-        <Name>"Load Freesurfer Segmentation Folder"</Name>
-        <InputFilepath>"imaging/segmentation/"</InputFilepath>
-    </Component>
-
-    <Component Type="FreesurferSurfaceLoader">
-        <Name>"Load Freesurfer Surface"</Name>
-    </Component>
-
-    <Component Type="LoadFreesurferSegmentationVolume">
-        <Name>"Load Freesurfer Segmentation Volume"</Name>
-        <FSVolume>"aparc+aseg"</FSVolume>
-    </Component>
-
-    <Component Type="FreesurferHippocampalSegmentation">
-        <Name>"Load or Generate Hippocampal Subsegmentation"</Name>
-        <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
-    </Component>
-
-    <Component Type="FreesurferThalamusSegmentation">
-        <Name>"Load or Generate Thalamus Subsegmentation"</Name>
-        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
-    </Component>
-
-
 
 
     <Component Type="MoveRASOrigin2Volume">
@@ -65,6 +40,41 @@
         <Name>"Transform ROSA Trajectories"</Name>
         <TIdentifier>"T_ROSA"</TIdentifier>
         <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
+    </Component>
+
+    <Component Type="MayoReface">
+        <Identifier>"MRI"</Identifier>
+        <Name>"Re-face MRI"</Name>
+    </Component>
+
+    <Component Type="MayoReface">
+        <Identifier>"CT"</Identifier>
+        <Name>"Re-face CT"</Name>
+    </Component>
+
+    <Component Type="MayoReface">
+        <Identifier>"ROSAVolume"</Identifier>
+        <Name>"Re-face ROSA"</Name>
+    </Component>
+
+    <Component Type="FreesurferModelGeneration">
+        <Name>"Generate Freesurfer Model"</Name>
+        <AnnotationType>"aparc"</AnnotationType>
+    </Component>
+
+    <Component Type="LoadFreesurferSegmentationVolume">
+        <Name>"Load Freesurfer Segmentation Volume"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
+    </Component>
+
+    <Component Type="FreesurferHippocampalSegmentation">
+        <Name>"Load or Generate Hippocampal Subsegmentation"</Name>
+        <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="FreesurferThalamusSegmentation">
+        <Name>"Load or Generate Thalamus Subsegmentation"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
     </Component>
 
     <Component Type="MatlabElectrodeSelection">
@@ -161,7 +171,6 @@
 
 
 
-
     <Component Type="MatOutput">
         <Name>"Brain"</Name>
         <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
@@ -200,7 +209,6 @@
 
 
 
-
     <Component Type="LoadFSMNIProjection">
         <Name>"Load MNI Projection"</Name>
     </Component>
@@ -221,8 +229,7 @@
     </Component>
 
 
-  
-	
+
     <View Type="Model3DView">
 	    <Name>"Cortex 3D View"</Name>
     </View>
