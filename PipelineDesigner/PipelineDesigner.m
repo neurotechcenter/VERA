@@ -179,7 +179,7 @@ function loadPipeline(fig,textArea,varargin)
 
         % replace empty lines with spaces so they can exist
         emptyCells = cellfun(@ismissing,pipelineContent,'UniformOutput',false);
-        emptyCells = cellfun(@any,emptyCells);
+        emptyCells = cellfun(@all,emptyCells);
 
         for i = 1:length(emptyCells)
             if emptyCells(i)
