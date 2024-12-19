@@ -4,97 +4,97 @@ function PipelineDesigner()
 
     % Create the main figure for the GUI
     fig = uifigure('Position', [100, 100, 1400, 800], 'Name', 'Pipeline Designer');
+
+    % Create a menu bar
+    mbar = uimenu(fig, 'Text', 'File');
     
     %% Create the TextArea for writing pipeline code
     uilabel(fig, ...
-        'Position', [20, 730, 300, 20], ...
-        'Text','Pipeline','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [20, 770, 300, 20], ...
+        'Text','Pipeline','FontName', 'Courier New', 'FontSize', 16);
     
     pipelineTextArea = uitextarea(fig, ...
-        'Position', [20, 20, 560, 710], ...
+        'Position', [20, 20, 560, 750], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
 
-    %% context menus for help
-    InputsContextMenu     = uicontextmenu(fig);
-    ProcessingContextMenu = uicontextmenu(fig);
-    OutputsContextMenu    = uicontextmenu(fig);
-    ViewsContextMenu      = uicontextmenu(fig);
-    
     %% Listbox of Input components
     uilabel(fig, ...
-        'Position', [590, 730, 300, 20], ...
-        'Text','Input Components','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [590, 770, 300, 20], ...
+        'Text','Input Components','FontName', 'Courier New', 'FontSize', 16);
     
     availableInputComponentsListBox = uilistbox(fig, ...
-        'Position', [590, 605, 390, 125], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
-        'ContextMenu',InputsContextMenu);
+        'Position', [590, 632, 390, 138], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
 
     %% Listbox of Processing components
     uilabel(fig, ...
-        'Position', [590, 580, 300, 20], ...
-        'Text','Processing Components','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [590, 606, 300, 20], ...
+        'Text','Processing Components','FontName', 'Courier New', 'FontSize', 16);
 
     availableProcessingComponentsListBox = uilistbox(fig, ...
-        'Position', [590, 455, 390, 125], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
-        'ContextMenu',ProcessingContextMenu);
+        'Position', [590, 468, 390, 138], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
 
     %% Listbox of Output components
     uilabel(fig, ...
-        'Position', [590, 430, 300, 20], ...
-        'Text','Output Components','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [590, 443, 300, 20], ...
+        'Text','Output Components','FontName', 'Courier New', 'FontSize', 16);
 
     availableOutputComponentsListBox = uilistbox(fig, ...
-        'Position', [590, 305, 390, 125], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
-        'ContextMenu',OutputsContextMenu);
+        'Position', [590, 305, 390, 138], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
     
     %% Create the TextArea for modifying component code
     uilabel(fig, ...
-        'Position', [590, 265, 300, 20], ...
-        'Text','Current Component','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [590, 255, 300, 20], ...
+        'Text','Current Component','FontName', 'Courier New', 'FontSize', 16);
 
     componentTextArea = uitextarea(fig, ...
         'Position', [590, 20, 390, 230], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
     
-    
     %% Listbox of possible views
     uilabel(fig, ...
-        'Position', [990, 730, 300, 20], ...
-        'Text','Available Views','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [990, 443, 300, 20], ...
+        'Text','Available Views','FontName', 'Courier New', 'FontSize', 16);
     
     availableViewsListBox = uilistbox(fig, ...
-        'Position', [990, 305, 390, 425], ...
-        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12,...
-        'ContextMenu',ViewsContextMenu);
+        'Position', [990, 305, 390, 138], ...
+        'Items',{''}, 'FontName', 'Courier New', 'FontSize', 12);
     
     %% Create the TextArea for modifying view code
     uilabel(fig, ...
-        'Position', [990, 265, 300, 20], ...
-        'Text','Current View','FontName', 'Courier New', 'FontSize', 12);
+        'Position', [990, 255, 300, 20], ...
+        'Text','Current View','FontName', 'Courier New', 'FontSize', 16);
 
     viewTextArea = uitextarea(fig, ...
         'Position', [990, 20, 390, 230], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
     
+    %% Create the TextArea for showing component/view help
+    uilabel(fig, ...
+        'Position', [990, 770, 300, 20], ...
+        'Text','Help','FontName', 'Courier New', 'FontSize', 16);
+
+    helpTextArea = uitextarea(fig, ...
+        'Position', [990, 468, 390, 303], ...
+        'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
     
-    %% Create a Load button to load a pipeline from a file
-    uibutton(fig, 'push', 'Text', 'Load Pipeline', ...
-        'Position', [20, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) loadPipeline(fig,pipelineTextArea));
+    %% Create a Load menu button to load a pipeline from a file
+    uimenu(mbar, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineTextArea));
     
-    %% Create a Save button to save the pipeline to a file
-    uibutton(fig, 'push', 'Text', 'Save Pipeline', ...
-        'Position', [140, 755, 100, 30], 'ButtonPushedFcn', @(btn, event) savePipeline(fig,pipelineTextArea));
+    %% Create a Save menu button to save the pipeline to a file
+    uimenu(mbar, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineTextArea));
 
     %% Create an Add Component button to move current component to the bottom of the pipeline text area
     uibutton(fig, 'push', 'Text', 'Add Component', ...
-        'Position', [730, 260, 100, 30], 'ButtonPushedFcn', @(btn, event) AddComponent(pipelineTextArea, componentTextArea));
+        'Position', [780, 260, 150, 30], 'FontSize', 16,...
+        'ButtonPushedFcn', @(btn, event) AddComponent(pipelineTextArea, componentTextArea));
 
     %% Create an Add View button to move current view to the bottom of the pipeline text area
     uibutton(fig, 'push', 'Text', 'Add View', ...
-        'Position', [1090, 260, 100, 30], 'ButtonPushedFcn', @(btn, event) AddView(pipelineTextArea, viewTextArea));
+        'Position', [1130, 260, 100, 30], 'FontSize', 16,...
+        'ButtonPushedFcn', @(btn, event) AddView(pipelineTextArea, viewTextArea));
 
     %% On startup, display demo pipeline
     % path_to_demo = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions','SimpleTutorialPipeline.pwf'));
@@ -119,10 +119,7 @@ function PipelineDesigner()
     availableInputComponentsListBox.Items = AvailableComponents(inputIDXs);
 
     % Update view window to display current component
-    availableInputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableInputComponentsListBox.Value);
-
-    % show help info for selected component
-    uimenu(InputsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableInputComponentsListBox.Value));
+    availableInputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, helpTextArea, componentParentClasses, availableInputComponentsListBox.Value);
 
     %% Populate list of possible Processing components
     processingIDXs = contains(componentTypes,'Processing');
@@ -130,10 +127,7 @@ function PipelineDesigner()
     availableProcessingComponentsListBox.Items = AvailableComponents(processingIDXs);
     
     % Update view window to display current component
-    availableProcessingComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableProcessingComponentsListBox.Value);
-    
-    % show help info for selected component
-    uimenu(ProcessingContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableProcessingComponentsListBox.Value));
+    availableProcessingComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, helpTextArea, componentParentClasses, availableProcessingComponentsListBox.Value);
 
     %% Populate list of possible Output components
     outputIDXs = contains(componentTypes,'Output');
@@ -141,10 +135,7 @@ function PipelineDesigner()
     availableOutputComponentsListBox.Items = AvailableComponents(outputIDXs);
     
     % Update view window to display current component
-    availableOutputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, componentParentClasses, availableOutputComponentsListBox.Value);
-
-    % show help info for selected component
-    uimenu(OutputsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableOutputComponentsListBox.Value));
+    availableOutputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, helpTextArea, componentParentClasses, availableOutputComponentsListBox.Value);
 
     %% Populate list of possible views
     viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'}; % properties to be excluded
@@ -153,10 +144,8 @@ function PipelineDesigner()
     availableViewsListBox.Items = getAvailableElements(viewPath, viewParentClasses, 'view');
     
     % Update view window to display current view
-    availableViewsListBox.ValueChangedFcn = @(src,event) viewView(viewTextArea, viewParentClasses, availableViewsListBox.Value);
+    availableViewsListBox.ValueChangedFcn = @(src,event) viewView(viewTextArea, helpTextArea, viewParentClasses, availableViewsListBox.Value);
 
-    % show help info for selected component
-    uimenu(ViewsContextMenu,'Text','Show help', 'MenuSelectedFcn', @(src, event) help(availableViewsListBox.Value));
 end
 
 
@@ -201,8 +190,8 @@ end
 
 %% Function to save pipeline to a file
 function savePipeline(fig,textArea)
-    % check component names to make sure there are no duplicates
-    duplicateNames = checkComponentNames(textArea);
+    % check component/view names to make sure there are no duplicates
+    duplicateNames = checkforDuplicateNames(textArea);
 
     if ~duplicateNames
         defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
@@ -227,8 +216,8 @@ function savePipeline(fig,textArea)
     end
 end
 
-%% Function to ensure there are no duplicate names of components
-function result = checkComponentNames(textArea)
+%% Function to ensure there are no duplicate names of components or views
+function isDuplicated = checkforDuplicateNames(textArea)
     % Use a regular expression to extract all 'Name' values from the XML text
     pattern = '<Name>"(.*?)"</Name>';  % This regex matches text between <Name>"..."</Name>
     names = regexp(textArea.Value, pattern, 'tokens');
@@ -246,9 +235,9 @@ function result = checkComponentNames(textArea)
     
     % Display result
     if ~isempty(duplicate_names)
-        result = 1;
+        isDuplicated = 1;
     else
-        result = 0;
+        isDuplicated = 0;
     end
 end
 
@@ -335,8 +324,8 @@ function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses, c
 end
 
 %% Function to inspect the properties of a component selected in the listbox
-function viewComponent(textArea,parentClass,currentcomponent)
-    [~,componentName] = fileparts(currentcomponent);
+function viewComponent(textArea,helpArea,parentClass,currentComponent)
+    [~,componentName] = fileparts(currentComponent);
     component = eval(componentName);
 
     % Get the component type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
@@ -385,10 +374,13 @@ function viewComponent(textArea,parentClass,currentcomponent)
     % Close the component and XML structure
     textArea.Value{end+1,1} = '    </Component>';
 
+    % show help of selected view
+    showHelp(helpArea, currentComponent)
+
 end
 
 %% Function to inspect the properties of a view selected in the listbox
-function viewView(textArea,parentClass,currentView)
+function viewView(textArea,helpArea,parentClass,currentView)
     [~,viewName] = fileparts(currentView);
     view = eval(viewName);
 
@@ -438,6 +430,14 @@ function viewView(textArea,parentClass,currentView)
     % Close the view and XML structure
     textArea.Value{end+1,1} = '    </View>';
 
+    % show help of selected view
+    showHelp(helpArea, currentView)
+
+end
+
+%% Help function to display help text
+function showHelp(helpTextArea, element)
+    helpTextArea.Value = help(element);
 end
 
 %% Function to move component to bottom of pipeline
@@ -462,76 +462,76 @@ end
 
 %% Function to get component type (input, processing, or output)
 function [componentType] = getComponentType(className)
-% This function examines a given class to determine its type.
-% Inputs:
-%   - className: The name of the class as a string (e.g., 'MayoReface')
-% Outputs:
-%   - componentType: can be Input, Processing, or Output
-
-% Check if the class exists
-if ~exist('className', 'var') || ~ischar(className)
-    error('Class name must be a valid string');
-end
-
-componentType = '';
-
-% Get the class definition
-classInfo = meta.class.fromName(className);
-
-% Iterate through the class methods
-for i = 1:length(classInfo.MethodList)
-    methodName = classInfo.MethodList(i).Name;
+    % This function examines a given class to determine its type.
+    % Inputs:
+    %   - className: The name of the class as a string (e.g., 'MayoReface')
+    % Outputs:
+    %   - componentType: can be Input, Processing, or Output
     
-    % Check for AddInput and AddOutput methods
-    if strcmp(methodName, 'Publish')
-        % Look at the Publish method to get inputs and outputs
-        [inputs, outputs] = extractInputsOutputs(className);
+    % Check if the class exists
+    if ~exist('className', 'var') || ~ischar(className)
+        error('Class name must be a valid string');
     end
     
+    componentType = '';
+    
+    % Get the class definition
+    classInfo = meta.class.fromName(className);
+    
+    % Iterate through the class methods
+    for i = 1:length(classInfo.MethodList)
+        methodName = classInfo.MethodList(i).Name;
+        
+        % Check for AddInput and AddOutput methods
+        if strcmp(methodName, 'Publish')
+            % Look at the Publish method to get inputs and outputs
+            [inputs, outputs] = extractInputsOutputs(className);
+        end
+        
+    end
+    
+    if ~isempty(inputs) && ~isempty(outputs)
+        componentType = 'Processing';
+    elseif ~isempty(inputs) && isempty(outputs)
+        componentType = 'Output';
+    elseif isempty(inputs) && ~isempty(outputs)
+        componentType = 'Input';
+    else
+        componentType = 'NotValid';
+    end
 end
 
-if ~isempty(inputs) && ~isempty(outputs)
-    componentType = 'Processing';
-elseif ~isempty(inputs) && isempty(outputs)
-    componentType = 'Output';
-elseif isempty(inputs) && ~isempty(outputs)
-    componentType = 'Input';
-else
-    componentType = 'NotValid';
-end
-end
-
-%% Function to extract inputs and outputs of a component
+% Function to extract inputs and outputs of a component
 function [inputs, outputs] = extractInputsOutputs(className)
-
-% Check for calls to AddInput and AddOutput in the method body
-filePath   = which([className '.m']);
-methodCode = fileread(filePath);
-
-% Regular expression to find AddInput and AddOutput calls
-inputPattern  = 'obj.AddInput\((.*?)\);';
-outputPattern = 'obj.AddOutput\((.*?)\);';
-
-% Extract inputs and outputs
-inputsMatch  = regexp(methodCode, inputPattern,  'match');
-outputsMatch = regexp(methodCode, outputPattern, 'match');
-
-% Parse the matched results
-inputs  = parseAddInputOutput(inputsMatch);
-outputs = parseAddInputOutput(outputsMatch);
+    % Check for calls to AddInput and AddOutput in the method body
+    filePath   = which([className '.m']);
+    methodCode = fileread(filePath);
+    
+    % Regular expression to find AddInput and AddOutput calls
+    inputPattern  = 'obj.AddInput\((.*?)\);';
+    outputPattern = 'obj.AddOutput\((.*?)\);';
+    
+    % Extract inputs and outputs
+    inputsMatch  = regexp(methodCode, inputPattern,  'match');
+    outputsMatch = regexp(methodCode, outputPattern, 'match');
+    
+    % Parse the matched results
+    inputs  = parseAddInputOutput(inputsMatch);
+    outputs = parseAddInputOutput(outputsMatch);
 end
 
-%% Function to parse the component for the matched string
+% Function to parse the component for the matched string
 function result = parseAddInputOutput(matches)
-% Parse the AddInput/Output calls into structured results
-result = {};
+    % Parse the AddInput/Output calls into structured results
+    result = {};
+    
+    for i = 1:length(matches)
+        match      = matches{i};
+        parts      = strsplit(match, '(');
+        object     = strsplit(parts{2},',');
+        identifier = object{1};
+    
+        result{end+1} = identifier;
+    end
 
-for i = 1:length(matches)
-    match      = matches{i};
-    parts      = strsplit(match, '(');
-    object     = strsplit(parts{2},',');
-    identifier = object{1};
-
-    result{end+1} = identifier;
-end
 end
