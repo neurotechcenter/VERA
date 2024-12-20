@@ -78,7 +78,7 @@ function PipelineDesigner()
 
     helpTextArea = uitextarea(fig, ...
         'Position', [990, 468, 390, 303], ...
-        'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'on');
+        'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'off');
     
     %% Create a Load menu button to load a pipeline from a file
     uimenu(mbar, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineTextArea));
@@ -437,7 +437,23 @@ end
 
 %% Help function to display help text
 function showHelp(helpTextArea, element)
-    helpTextArea.Value = help(element);
+    helpText = help(element);
+    
+    % find and remove documentation text for formatting
+    documentationStart = strfind(helpText,['Documentation for ', element]);
+    documentation      = helpText(documentationStart:end);
+
+    % clean up help text
+    helpText = strtrim(helpText(1:documentationStart-1));
+    helpText = strrep(helpText, newline, '');
+    helpText = strrep(helpText, '  ', newline);
+
+    % add back documentation
+    helpText = [helpText, newline, newline, documentation];
+
+
+    % write help text to helpTextArea
+    helpTextArea.Value = helpText;
 end
 
 %% Function to move component to bottom of pipeline
