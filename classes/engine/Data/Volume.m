@@ -122,28 +122,38 @@ classdef Volume < AData & IFileLoader
             % selection dialog
             % See also IFileLoader
             try
-            tpath=fullfile(obj.GetDependency('TempPath'),'dicom_convert');
+                tpath=fullfile(obj.GetDependency('TempPath'),'dicom_convert');
             catch
                 tpath='temp';
             end
 
             mkdir(tpath);
             try
-            [spath,~,ext]=fileparts(path);
-            if(any(strcmpi(ext,{'.dcm','.dicom','','.IMA'})))
-                dicm2nii(spath,tpath,0);
-                path=dir(fullfile(tpath,'*.nii'));
-                if(numel(path) > 1 )
-                    warning('Dicom contains multiple Image Containers!');
-                    sel_name={path.name};
-                    [idx,tf]=listdlg('PromptString','Please Select the correct Dicom for import','SelectionMode','single','ListString',sel_name);
-                    if(tf ~= 0)
-                        path=path(idx);
-                    else
-                        error('No Dicom selected!');
+                [spath,~,ext]=fileparts(path);
+                if(any(strcmpi(ext,{'.dcm','.dicom','','.IMA'})))
+                    dicm2nii(spath,tpath,0);
+                    path=dir(fullfile(tpath,'*.nii'));
+
+                    % remove . files from options (mac files)
+                    remfile = [];
+                    for i = 1:length(path)
+                        if startsWith(path(i).name,'.')
+                            remfile = i;
+                        end
                     end
-                end
-                path=fullfile(path.folder,path.name);
+                    path(remfile) = [];
+
+                    if(numel(path) > 1 )
+                        warning('Dicom contains multiple Image Containers!');
+                        sel_name={path.name};
+                        [idx,tf]=listdlg('PromptString','Please Select the correct Dicom for import','SelectionMode','single','ListString',sel_name);
+                        if(tf ~= 0)
+                            path=path(idx);
+                        else
+                            error('No Dicom selected!');
+                        end
+                    end
+                    path=fullfile(path.folder,path.name);
             end
             try
                 obj.Image=load_nii(path,[],[],[],[],[],0);
