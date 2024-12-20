@@ -71,7 +71,7 @@ classdef MainGUI < handle
         
     end
     
-    methods (Access = protected)
+    methods (Access = public)
         function closeProject(obj)
             %closeProject close project call delete all references save
             %everything cleanup
@@ -158,9 +158,13 @@ classdef MainGUI < handle
              
         end
 
-        function openProject(obj,~,~)
+        function openProject(obj,~,~,varargin)
             %openProject - callback from openProject menu button
-            folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
+            if ~isempty(varargin)
+                folder=varargin{1};
+            else
+                folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
+            end
             
             obj.ProgressBarTool.suspendGUIWithMessage('Opening Project...');
             try
