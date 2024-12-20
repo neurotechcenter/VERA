@@ -38,7 +38,12 @@ classdef ImportROSFile < AComponent
             end
 
             if ~isempty(obj.InputFilepath)
-                d = dir(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath,'*.ros'));
+                % working directory is VERA project
+                if isAbsolutePath(obj.InputFilepath)
+                    d = dir(fullfile(obj.InputFilepath,'*.ros'));
+                else
+                    d = dir(fullfile(obj.ComponentPath,'..',obj.InputFilepath,'*.ros'));
+                end
 
                 % remove hidden files
                 rem = [];

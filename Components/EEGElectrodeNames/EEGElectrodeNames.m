@@ -54,8 +54,13 @@ classdef EEGElectrodeNames < AComponent
             % if an input file is specified, use it and disable the file
             % selection dialog
             if ~isempty(obj.InputFilepath)
-
-                [path, file, ext] = fileparts(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath));
+                % working directory is VERA project
+                if isAbsolutePath(obj.InputFilepath)
+                    [path,file,ext] = fileparts(obj.InputFilepath);
+                else
+                    [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.InputFilepath));
+                    path = GetFullPath(path);
+                end
 
                 if strcmp(ext,'.dat') && exist(fullfile(path,[file,ext]),'file')
                     answer     = 'BCI2000';

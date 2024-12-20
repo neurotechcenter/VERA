@@ -40,7 +40,13 @@ classdef LoadFreeviewPointFile < AComponent
 
             % Use the path given in InputFilepath
             if ~isempty(obj.InputFilepath)
-                path = fullfile(obj.ComponentPath,'..','..',obj.InputFilepath);
+                % working directory is VERA project
+                if isAbsolutePath(obj.InputFilepath)
+                    [path,file,ext] = fileparts(obj.InputFilepath);
+                else
+                    [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.InputFilepath));
+                    path = GetFullPath(path);
+                end
 
                 % Open a file load dialog if you can't find the path
                 if ~exist(path,'dir')

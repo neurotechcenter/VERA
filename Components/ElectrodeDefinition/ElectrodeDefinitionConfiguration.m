@@ -47,8 +47,13 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
 
             if ~isempty(obj.InputFilepath)
 
-                % working directory is parent of VERA
-                [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..','..',obj.InputFilepath));
+                % working directory is VERA project
+                if isAbsolutePath(obj.InputFilepath)
+                    [path,file,ext] = fileparts(obj.InputFilepath);
+                else
+                    [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.InputFilepath));
+                    path = GetFullPath(path);
+                end
 
                 file = [file,ext];
 
