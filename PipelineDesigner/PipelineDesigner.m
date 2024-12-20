@@ -441,15 +441,21 @@ function showHelp(helpTextArea, element)
     
     % find and remove documentation text for formatting
     documentationStart = strfind(helpText,['Documentation for ', element]);
-    documentation      = helpText(documentationStart:end);
+    documentationEnd   = strfind(helpText,['doc ', element]) + length(['doc ', element]);
+    documentation      = helpText(documentationStart:documentationEnd);
+
+    % find and remove folder text for formatting
+    folderStart = strfind(helpText,['Folders named ', element]);
+    folderName  = helpText(folderStart:end);
 
     % clean up help text
     helpText = strtrim(helpText(1:documentationStart-1));
     helpText = strrep(helpText, newline, '');
     helpText = strrep(helpText, '  ', newline);
 
-    % add back documentation
+    % add back documentation and folder info
     helpText = [helpText, newline, newline, documentation];
+    helpText = [helpText, newline, folderName];
 
 
     % write help text to helpTextArea
