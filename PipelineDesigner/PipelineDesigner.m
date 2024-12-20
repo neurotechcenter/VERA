@@ -257,7 +257,7 @@ function duplicates = find_duplicates(names)
 end
 
 %% Function to get all components/views in a given directory
-function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses, compOrView)
+function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,compOrView)
 
     % set up parentClasses to be used in regular expression
     parentClassesString = [];
@@ -436,7 +436,7 @@ function viewView(textArea,helpArea,parentClass,currentView)
 end
 
 %% Help function to display help text
-function showHelp(helpTextArea, element)
+function showHelp(helpTextArea,element)
     helpText = help(element);
     
     % find and remove documentation text for formatting
@@ -457,13 +457,12 @@ function showHelp(helpTextArea, element)
     helpText = [helpText, newline, newline, documentation];
     helpText = [helpText, newline, folderName];
 
-
     % write help text to helpTextArea
     helpTextArea.Value = helpText;
 end
 
 %% Function to move component to bottom of pipeline
-function AddComponent(pipelineTextArea, componentTextArea)
+function AddComponent(pipelineTextArea,componentTextArea)
     pipelineTextArea.Value = [
                                 pipelineTextArea.Value(1:end-2); 
                                 componentTextArea.Value; 
@@ -473,7 +472,7 @@ function AddComponent(pipelineTextArea, componentTextArea)
 end
 
 %% Function to move component to bottom of pipeline
-function AddView(pipelineTextArea, viewTextArea)
+function AddView(pipelineTextArea,viewTextArea)
     pipelineTextArea.Value = [
                                 pipelineTextArea.Value(1:end-2); 
                                 viewTextArea.Value; 
