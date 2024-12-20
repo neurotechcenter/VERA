@@ -1,7 +1,12 @@
 classdef Inflatible3DView < AView & uix.Grid
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
-    
+%The `Inflatible3DView` class is a component for visualizing 3D surface models 
+%(such as brain surfaces) along with electrode locations, in an inflatable or 
+%projected 3D view. It allows the user to visualize and interact with 
+%inflated brain surfaces, along with electrode locations that are mapped onto 
+%these surfaces. This component can display both left and right hemisphere 
+%surfaces, with corresponding electrode information, and supports customization 
+%through inclusion radius and electrode labeling options.
+% See also AView
     properties
         SurfaceIdentifier
         SphereIdentifier

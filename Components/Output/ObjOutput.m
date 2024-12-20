@@ -1,6 +1,5 @@
 classdef ObjOutput < AComponent
-    %NIIOUTPUT Creates a .nii file as Output of VERA using spm12's save_nii
-    %function
+    %ObjOutput Creates an .obj file as Output of VERA using obj_write_color
     properties
         SurfaceIdentifier
         SavePathIdentifier char

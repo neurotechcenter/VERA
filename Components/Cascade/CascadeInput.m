@@ -1,6 +1,8 @@
 classdef CascadeInput < AComponent
-    %CascadeInput - allows Cascading VERA projects
-    %Use another VERA project as Input
+    %The CascadeInput component allows you to cascade VERA projects by
+    %using another VERA project as an input. This component facilitates
+    %the integration of data from one VERA project into another, enabling
+    %complex workflows that depend on data generated in separate projects.
     
     properties
         OutputIdentifiers

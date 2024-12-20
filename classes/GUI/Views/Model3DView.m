@@ -1,6 +1,7 @@
 classdef Model3DView < AView & uix.Grid
     %Model3DView - View of a Surface
-    %   Shows a Surface and the Electrode Locations if available
+    % Shows a Surface and the Electrode Locations if available
+    % See also AView
     properties
         SurfaceIdentifier %Identifier for which surface to show
         ElectrodeLocationIdentifier %Identifier for the Electrode Location to be shown

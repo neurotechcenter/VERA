@@ -1,7 +1,7 @@
 classdef CombineLocations < AComponent
-    %COMBINELOCATIONS Allows to combine Electrode Location Data objects
+    %CombineLocations Allows to combine Electrode Location Data objects
     %into a new Dataobject output
-    %Also see AComponent
+    % Also see AComponent
     
     properties
         In1

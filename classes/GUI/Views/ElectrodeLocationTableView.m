@@ -1,11 +1,7 @@
 classdef ElectrodeLocationTableView < AView & uix.Grid
-    %ELECTRODELOCATIONTABLEVIEW Table to show electrode locations including
+    %ElectrodeLocationTableView Table to show electrode locations including
     %names and labels
-    % 
-    % <View Type="ElectrodeLocationTableView"/>
-    %
-    %
-    % See aslo AView
+    % See also AView
     
     properties
         ElectrodeLocationIdentifier %Identifier for the Electrode Location to be shown

@@ -1,6 +1,6 @@
 classdef FreesurferCurvLoader < AComponent
-    %FreesurferSurfaceLoader Loads Curvature Information 
-    % from existing Freesurfer segmentation
+    %FreesurferSurfaceLoader Loads Curvature Information
+    %from existing Freesurfer segmentation
     
     properties
         SurfaceIdentifier

@@ -1,7 +1,6 @@
 classdef CalculateDistanceToSurfaceLabel < AComponent
-    %CALCULATECLOSESTSURFACELABEL Calculates the distance from an electrode
+    %CalculateDistanceToSurfaceLabel Calculates the distance from an electrode
     %to every available Label defined on a Surface.
-    %
     
     properties
         SurfaceIdentifier

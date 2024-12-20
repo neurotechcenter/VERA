@@ -1,7 +1,7 @@
 classdef ReplaceLabels < AComponent
-    %CREATELABELS The ReplaceLabels Component tries 
-    % to simplify existing electrode location labels based on some simple rules. 
-    % Rules will be applied iterative.
+    %ReplaceLabels The ReplaceLabels Component tries 
+    %to simplify existing electrode location labels based on some simple rules. 
+    % Rules will be applied iteratively.
     
     properties
         ElectrodeLocationIdentifier

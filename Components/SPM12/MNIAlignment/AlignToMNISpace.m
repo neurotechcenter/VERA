@@ -1,6 +1,6 @@
 classdef AlignToMNISpace < AComponent
-    %ALIGNTOMNISPACE Alignment to MNI Coordinate
-    %   based on: https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/spm_anat_normalization-rev.html
+    %AlignToMNISpace Alignment to MNI Coordinate
+    %based on: https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/spm_anat_normalization-rev.html
     
     properties
         VolumeInIdentifier

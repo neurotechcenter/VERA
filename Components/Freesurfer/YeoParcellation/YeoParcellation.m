@@ -1,6 +1,6 @@
 classdef YeoParcellation < AComponent
-    % This component generates the Yeo parcellation in the segmentation
-    % folder found on the segmentation path
+    %This component generates the Yeo parcellation in the segmentation
+    %folder found on the segmentation path
     properties
         SegmentationPathIdentifier
     end

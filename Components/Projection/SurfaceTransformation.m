@@ -1,5 +1,5 @@
 classdef SurfaceTransformation < AComponent
-    %SURFACETRANSFORMATION Apply Transform matrix to surface vertex coordinates 
+    %SurfaceTransformation Apply Transform matrix to surface vertex coordinates 
     
     properties
         SurfaceIdentifier

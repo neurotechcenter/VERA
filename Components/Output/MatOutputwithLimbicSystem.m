@@ -1,5 +1,5 @@
 classdef MatOutputwithLimbicSystem < AComponent
-    %MATOUTPUT Creates a .mat file as Output of VERA similar to neuralact
+    %MatOutputwithLimbicSystem Creates a .mat file of the limbic system similar to neuralact
     %but with additional information about electrode locations
     properties
         ElectrodeLocationIdentifier

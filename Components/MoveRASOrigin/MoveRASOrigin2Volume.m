@@ -1,5 +1,5 @@
 classdef MoveRASOrigin2Volume < AComponent
-    %MoveRASOrigin Moves the origin of RAS into the Center of the Volume
+    %MoveRASOrigin2Volume Moves the origin of RAS into the Center of the Volume
     %pixels
     properties
         VolumeIdentifier1 % volume to be moved

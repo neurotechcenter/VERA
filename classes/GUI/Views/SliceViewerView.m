@@ -1,6 +1,7 @@
 classdef SliceViewerView < SliceViewerXYZ & AView
     %SliceViewerView VERA View of Volume Data
-    %See also AView, Volume, SliceViewer, SliceViewerXYZ
+    % See also AView, Volume, SliceViewer, SliceViewerXYZ
+    
     properties (SetObservable = true)
         ImageIdentifiers %Data Identifier 
         ElectrodeLocationIdentifier

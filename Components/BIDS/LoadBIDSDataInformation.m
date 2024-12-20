@@ -1,6 +1,6 @@
 classdef LoadBIDSDataInformation < AComponent
     %Loading MRI, ElectrodeLocations and ElectrodeDefinitions from
-    % BIDS data
+    %BIDS data
     
     properties
         MRIIdentifier

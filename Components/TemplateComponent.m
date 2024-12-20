@@ -1,6 +1,6 @@
 classdef TemplateComponent < AComponent
-    % This is a template component with the goal of illustrating a
-    % component structure
+    %This is a template component with the goal of illustrating a
+    %component structure
     properties
         Object1Identifier
         Object2Identifier

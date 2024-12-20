@@ -1,26 +1,31 @@
 classdef MatlabElectrodeSelection < AComponent
-    % MatlabElectrodeSelection This Component allows manual and
-    % (semi)automated localization of electrode grids, strips and depth electrodes fully implemented in
-    % Matlab
-
-    % After an initial threshold of the CT, we create 3D centroids by finding connected voxels. 
-    % 
-    % Every Centroid identified after thresholding is used as a seed to create a connected graph based on some conditions:
-    % 
-    % For every centroid, we do the following:
-    % For Grids: Find 2 other centroids that create a 90-degree angle with the starting point. The search radius is the 
-    % inter-electrode distance. 
-    % For each of the valid points we find we look for other points fitting the criteria - this will create a connected graph.
-    % We can then traverse the graph to find out how many points are part of the grid.
-    % In addition, there is an uncertainty parameter: which is set to 0.15 or something close to it. This just means we allow 
-    % up to 15% error in the measurements (since we are not taking into account the curvature of grids, 
-    % that allows us to still get connected parts that are somewhat curved). 
-    % 
-    % For Strips and SEEG electrodes, we just use 180 degrees instead of 90.
-    % 
-    % And lastly, we will sweep through different threshold values of the CT to find where we get the best results. 
-    % The Cost function for that optimization searches for the minimum of the difference in the number of electrodes 
-    % found versus the known number of electrodes.
+    %MatlabElectrodeSelection This Component allows manual and
+    %(semi)automated localization of electrode grids, strips and depth electrodes fully implemented in
+    %Matlab
+    %
+    %
+    %After an initial threshold of the CT, we create 3D centroids by finding connected voxels.
+    %
+    %
+    %Every Centroid identified after thresholding is used as a seed to create a connected graph based on some conditions:
+    %
+    %
+    %For every centroid, we do the following:
+    %For Grids: Find 2 other centroids that create a 90-degree angle with the starting point. The search radius is the
+    %inter-electrode distance.
+    %For each of the valid points we find we look for other points fitting the criteria - this will create a connected graph.
+    %We can then traverse the graph to find out how many points are part of the grid.
+    %In addition, there is an uncertainty parameter: which is set to 0.15 or something close to it. This just means we allow
+    %up to 15% error in the measurements (since we are not taking into account the curvature of grids,
+    %that allows us to still get connected parts that are somewhat curved).
+    %
+    %
+    %For Strips and SEEG electrodes, we just use 180 degrees instead of 90.
+    %
+    %
+    %And lastly, we will sweep through different threshold values of the CT to find where we get the best results.
+    %The Cost function for that optimization searches for the minimum of the difference in the number of electrodes
+    %found versus the known number of electrodes.
 
     
     properties

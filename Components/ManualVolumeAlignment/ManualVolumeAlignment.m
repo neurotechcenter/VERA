@@ -1,6 +1,10 @@
 classdef ManualVolumeAlignment < AComponent
-    %TalairachProjection Projects a Surface into Talairach Coordinates,
-    %requires manual selection of AC, PC and mid-sag
+    %ManualVolumeAlignment provides functionality for manually aligning a
+    %volume (e.g., MRI or CT scan) into a standard coordinate system
+    %(such as Talairach coordinates). This alignment requires the user to
+    %manually select anatomical landmarks (Anterior Commissure (AC),
+    %Posterior Commissure (PC), and Mid-Sagittal point) through a
+    %graphical user interface (GUI).
     
     properties
         VolumeIdentifier

@@ -1,6 +1,7 @@
 classdef EEGNamesView < uix.Grid & AView & IComponentView
     %EEGNamesView - View associated with the EEGElectrodeNames
     % see also AView, IComponentView
+    
     properties (Access = public)
         History % history of changes made in the view
         EEGElectrodeNamesIdentifier

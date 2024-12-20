@@ -1,8 +1,8 @@
 classdef FileLoader < AComponent
     %FileLoader - Component loads data from a file with a file selector
-    %Generic component that allows to select a file which will than be
+    % Generic component that allows to select a file which will than be
     %passed to the AData object that implements IFileLoader
-    %See also AData, IFileLoader
+    % See also AData, IFileLoader
 
     properties
         Identifier char       % Data identifier

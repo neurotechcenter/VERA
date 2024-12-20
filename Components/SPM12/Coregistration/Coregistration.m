@@ -1,5 +1,5 @@
 classdef Coregistration < AComponent
-    %Coregistration Uses SPM12 to coregister Volumes to each  other
+    %Coregistration Uses SPM12 to coregister Volumes to each other
     
    properties
         MRIIdentifier

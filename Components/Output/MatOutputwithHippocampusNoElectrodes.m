@@ -1,6 +1,6 @@
 classdef MatOutputwithHippocampusNoElectrodes < AComponent
-    %MATOUTPUT Creates a .mat file as Output of VERA similar to neuralact
-    %but with additional information about electrode locations
+    %MatOutputwithHippocampusNoElectrodes Creates a .mat file of the
+    %hippocampus with no electrodes in a similar structure to neuralact
     properties
         SurfaceIdentifier1
         SurfaceIdentifier2

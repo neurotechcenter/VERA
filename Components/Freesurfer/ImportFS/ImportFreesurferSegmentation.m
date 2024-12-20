@@ -1,5 +1,5 @@
 classdef ImportFreesurferSegmentation < AComponent
-    %IMPORTFREESURFERSEGMENTATION Imports the freesurfer segmentation by
+    %ImportFreesurferSegmentation Imports the freesurfer segmentation by
     %creating a local copy within VERA
 
     properties

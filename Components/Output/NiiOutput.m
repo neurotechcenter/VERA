@@ -1,5 +1,5 @@
 classdef NiiOutput < AComponent
-    %NIIOUTPUT Creates a .nii file as Output of VERA using spm12's save_nii
+    %NiiOutput Creates a .nii file as Output of VERA using spm12's save_nii
     %function
     properties
         VolumeIdentifier

@@ -1,5 +1,5 @@
 classdef MatOutputwithThalamus < AComponent
-    %MATOUTPUT Creates a .mat file as Output of VERA similar to neuralact
+    %MatOutputwithThalamus Creates a .mat file of the thalamus similar to neuralact
     %but with additional information about electrode locations
     properties
         ElectrodeLocationIdentifier
