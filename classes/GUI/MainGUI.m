@@ -70,8 +70,60 @@ classdef MainGUI < handle
         end
         
     end
-    
+
     methods (Access = public)
+        function openProject(obj,~,~,varargin)
+            %openProject - callback from openProject menu button
+            if ~isempty(varargin)
+                folder=varargin{1};
+            else
+                folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
+            end
+            
+            obj.ProgressBarTool.suspendGUIWithMessage('Opening Project...');
+            try
+                if(folder ~= 0)
+                    obj.setProjectDefaultPath(folder);
+                    obj.closeProject();
+                    
+                    [prj,pplFile]=Project.OpenProjectFromPath(folder);
+                    obj.ProjectRunner=Runner.CreateFromProject(prj);
+                    obj.createTreeView();
+                    obj.createViews(pplFile,prj);
+                    obj.configureAll();
+                    %obj.updateTreeView();
+                    %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                    obj.fileMenuContent.CloseProject.Enable='on';
+                    obj.ProgressBarTool.resumeGUI();
+                end
+
+            catch e
+                warning(getReport(e,'extended'));
+            end
+            delete(obj.componentMenu);
+            obj.componentMenu=[];
+            obj.ProgressBarTool.resumeGUI();
+        end
+
+        function runAll(obj)
+            %runAll button callback
+            %run through all components and check which one to best run
+            %next
+            k=obj.ProjectRunner.GetNextReadyComponent();
+            while(~isempty(k))
+                obj.runComponent(k,false); %update view if last component
+                k2=obj.ProjectRunner.GetNextReadyComponent();
+                if(isempty(k2))
+                	obj.updateTreeView();
+                    obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                end
+                k=k2;
+                
+            end
+        end
+    end
+    
+    methods (Access = protected)
         function closeProject(obj)
             %closeProject close project call delete all references save
             %everything cleanup
@@ -115,8 +167,7 @@ classdef MainGUI < handle
                 DependencyHandler.Instance.CreateAndSetDependency('ProjectDefaultPath',fileparts(path),'folder');
             end
         end
-        
-        
+
         function createNewProject(obj)
             %createNewProject callback from createNewProject menu path
             folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
@@ -156,39 +207,6 @@ classdef MainGUI < handle
             obj.componentMenu=[];
             obj.ProgressBarTool.resumeGUI();
              
-        end
-
-        function openProject(obj,~,~,varargin)
-            %openProject - callback from openProject menu button
-            if ~isempty(varargin)
-                folder=varargin{1};
-            else
-                folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
-            end
-            
-            obj.ProgressBarTool.suspendGUIWithMessage('Opening Project...');
-            try
-                if(folder ~= 0)
-                    obj.setProjectDefaultPath(folder);
-                    obj.closeProject();
-                    
-                    [prj,pplFile]=Project.OpenProjectFromPath(folder);
-                    obj.ProjectRunner=Runner.CreateFromProject(prj);
-                    obj.createTreeView();
-                    obj.createViews(pplFile,prj);
-                    obj.configureAll();
-                    %obj.updateTreeView();
-                    %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-                    obj.fileMenuContent.CloseProject.Enable='on';
-                    obj.ProgressBarTool.resumeGUI();
-                end
-
-            catch e
-                warning(getReport(e,'extended'));
-            end
-            delete(obj.componentMenu);
-            obj.componentMenu=[];
-            obj.ProgressBarTool.resumeGUI();
         end
         
         function updateTreeView(obj)
@@ -254,23 +272,6 @@ classdef MainGUI < handle
                 end
                 obj.updateTreeView();
                 obj.ProgressBarTool.resumeGUI();
-            end
-        end
-        
-        function runAll(obj)
-            %runAll button callback
-            %run through all components and check which one to best run
-            %next
-            k=obj.ProjectRunner.GetNextReadyComponent();
-            while(~isempty(k))
-                obj.runComponent(k,false); %update view if last component
-                k2=obj.ProjectRunner.GetNextReadyComponent();
-                if(isempty(k2))
-                	obj.updateTreeView();
-                    obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
-                end
-                k=k2;
-                
             end
         end
         
