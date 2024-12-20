@@ -44,17 +44,20 @@
 
     <Component Type="MayoReface">
         <Identifier>"MRI"</Identifier>
-        <Name>"Re-face MRI"</Name>
+        <ImType>"T1"</ImType>
+        <Name>"Reface MRI"</Name>
     </Component>
 
     <Component Type="MayoReface">
         <Identifier>"CT"</Identifier>
-        <Name>"Re-face CT"</Name>
+        <ImType>"CT"</ImType>
+        <Name>"Reface CT"</Name>
     </Component>
 
     <Component Type="MayoReface">
         <Identifier>"ROSAVolume"</Identifier>
-        <Name>"Re-face ROSA"</Name>
+        <ImType>"T1"</ImType>
+        <Name>"Reface ROSA"</Name>
     </Component>
 
     <Component Type="FreesurferModelGeneration">

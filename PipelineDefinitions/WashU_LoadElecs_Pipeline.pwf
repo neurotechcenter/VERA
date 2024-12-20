@@ -49,16 +49,19 @@
 
     <Component Type="MayoReface">
         <Identifier>"MRI"</Identifier>
+        <ImType>"T1"</ImType>
         <Name>"Reface MRI"</Name>
     </Component>
 
     <Component Type="MayoReface">
         <Identifier>"CT"</Identifier>
+        <ImType>"CT"</ImType>
         <Name>"Reface CT"</Name>
     </Component>
 
     <Component Type="MayoReface">
         <Identifier>"ROSAVolume"</Identifier>
+        <ImType>"T1"</ImType>
         <Name>"Reface ROSA"</Name>
     </Component>
 
