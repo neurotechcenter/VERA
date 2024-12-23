@@ -2,6 +2,9 @@ function PipelineDesigner()
     % The pipeline designer is a tool to load, modify, and save VERA 
     % pipelines
 
+    addpath(genpath(fullfile('..','classes')));
+    addpath(genpath(fullfile('..','Components')));
+
     % Create the main figure for the GUI
     fig = uifigure('Position', [100, 100, 1400, 800], 'Name', 'Pipeline Designer');
 
@@ -77,9 +80,16 @@ function PipelineDesigner()
         'Text','Help','FontName', 'Courier New', 'FontSize', 16);
 
     helpTextArea = uitextarea(fig, ...
-        'Position', [990, 468, 390, 303], ...
+        'Position', [990, 497, 390, 273], ...
         'Value','', 'FontName', 'Courier New', 'FontSize', 12, 'Editable', 'off');
     
+    helpHyperlink = uihyperlink(fig,'Position', [990, 473, 400 20], ...
+        'FontName', 'Courier New', 'FontSize', 16);
+
+    helpHyperlink.Text    = '';
+    helpHyperlink.URL     = '';
+    helpHyperlink.Tooltip = '';
+
     %% Create a Load menu button to load a pipeline from a file
     uimenu(mbar, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineTextArea));
     
@@ -119,7 +129,8 @@ function PipelineDesigner()
     availableInputComponentsListBox.Items = AvailableComponents(inputIDXs);
 
     % Update view window to display current component
-    availableInputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, helpTextArea, componentParentClasses, availableInputComponentsListBox.Value);
+    availableInputComponentsListBox.ValueChangedFcn = @(src,event)...
+        viewComponent(componentTextArea, helpTextArea, helpHyperlink, componentParentClasses, availableInputComponentsListBox.Value);
 
     %% Populate list of possible Processing components
     processingIDXs = contains(componentTypes,'Processing');
@@ -127,7 +138,8 @@ function PipelineDesigner()
     availableProcessingComponentsListBox.Items = AvailableComponents(processingIDXs);
     
     % Update view window to display current component
-    availableProcessingComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, helpTextArea, componentParentClasses, availableProcessingComponentsListBox.Value);
+    availableProcessingComponentsListBox.ValueChangedFcn = @(src,event)...
+        viewComponent(componentTextArea, helpTextArea, helpHyperlink, componentParentClasses, availableProcessingComponentsListBox.Value);
 
     %% Populate list of possible Output components
     outputIDXs = contains(componentTypes,'Output');
@@ -135,7 +147,8 @@ function PipelineDesigner()
     availableOutputComponentsListBox.Items = AvailableComponents(outputIDXs);
     
     % Update view window to display current component
-    availableOutputComponentsListBox.ValueChangedFcn = @(src,event) viewComponent(componentTextArea, helpTextArea, componentParentClasses, availableOutputComponentsListBox.Value);
+    availableOutputComponentsListBox.ValueChangedFcn = @(src,event)...
+        viewComponent(componentTextArea, helpTextArea, helpHyperlink, componentParentClasses, availableOutputComponentsListBox.Value);
 
     %% Populate list of possible views
     viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'}; % properties to be excluded
@@ -144,7 +157,8 @@ function PipelineDesigner()
     availableViewsListBox.Items = getAvailableElements(viewPath, viewParentClasses, 'view');
     
     % Update view window to display current view
-    availableViewsListBox.ValueChangedFcn = @(src,event) viewView(viewTextArea, helpTextArea, viewParentClasses, availableViewsListBox.Value);
+    availableViewsListBox.ValueChangedFcn = @(src,event)...
+        viewView(viewTextArea, helpTextArea, helpHyperlink, viewParentClasses, availableViewsListBox.Value);
 
 end
 
@@ -324,7 +338,7 @@ function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,co
 end
 
 %% Function to inspect the properties of a component selected in the listbox
-function viewComponent(textArea,helpArea,parentClass,currentComponent)
+function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentComponent)
     [~,componentName] = fileparts(currentComponent);
     component = eval(componentName);
 
@@ -375,12 +389,12 @@ function viewComponent(textArea,helpArea,parentClass,currentComponent)
     textArea.Value{end+1,1} = '    </Component>';
 
     % show help of selected view
-    showHelp(helpArea, currentComponent)
+    showHelp(helpArea, helpHyperlink, currentComponent)
 
 end
 
 %% Function to inspect the properties of a view selected in the listbox
-function viewView(textArea,helpArea,parentClass,currentView)
+function viewView(textArea,helpArea,helpHyperlink,parentClass,currentView)
     [~,viewName] = fileparts(currentView);
     view = eval(viewName);
 
@@ -431,12 +445,12 @@ function viewView(textArea,helpArea,parentClass,currentView)
     textArea.Value{end+1,1} = '    </View>';
 
     % show help of selected view
-    showHelp(helpArea, currentView)
+    showHelp(helpArea, helpHyperlink, currentView)
 
 end
 
 %% Help function to display help text
-function showHelp(helpTextArea,element)
+function showHelp(helpTextArea,helpHyperlink,element)
     helpText = help(element);
     
     % find and remove documentation text for formatting
@@ -456,6 +470,10 @@ function showHelp(helpTextArea,element)
     % add back documentation and folder info
     helpText = [helpText, newline, newline, documentation];
     helpText = [helpText, newline, folderName];
+
+    helpHyperlink.Text    = element;
+    helpHyperlink.URL     = ['https://github.com/neurotechcenter/VERA/wiki/', element];
+    helpHyperlink.Tooltip = helpHyperlink.URL;
 
     % write help text to helpTextArea
     helpTextArea.Value = helpText;
