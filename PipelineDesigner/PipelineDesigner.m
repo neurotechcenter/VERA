@@ -9,7 +9,8 @@ function PipelineDesigner()
     fig = uifigure('Position', [100, 100, 1400, 800], 'Name', 'Pipeline Designer');
 
     % Create a menu bar
-    mbar = uimenu(fig, 'Text', 'File');
+    filemenu = uimenu(fig, 'Text', 'File');
+    helpmenu = uimenu(fig, 'Text', 'Help');
     
     %% Create the TextArea for writing pipeline code
     uilabel(fig, ...
@@ -91,10 +92,16 @@ function PipelineDesigner()
     helpHyperlink.Tooltip = '';
 
     %% Create a Load menu button to load a pipeline from a file
-    uimenu(mbar, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineTextArea));
+    uimenu(filemenu, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineTextArea));
     
     %% Create a Save menu button to save the pipeline to a file
-    uimenu(mbar, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineTextArea));
+    uimenu(filemenu, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineTextArea));
+
+    %% Create a clear pipeline button
+    uimenu(filemenu, 'Text', 'Clear Pipeline', 'MenuSelectedFcn', @(src, event) confirmAction(@() clearPipeline(fig,pipelineTextArea)));
+
+    %% Create a help button to link to the wiki
+    uimenu(helpmenu, 'Text', 'VERA Wiki', 'MenuSelectedFcn', @(src, event) web('https://github.com/neurotechcenter/VERA/wiki/PipelineDesigner', '-browser'));
 
     %% Create an Add Component button to move current component to the bottom of the pipeline text area
     uibutton(fig, 'push', 'Text', 'Add Component', ...
@@ -111,11 +118,7 @@ function PipelineDesigner()
     % loadPipeline(pipelineTextArea,path_to_demo);
     
     %% On startup, display empty pipeline
-    pipelineTextArea.Value = {'<?xml version="1.0" encoding="utf-8"?>';
-                              '<PipelineDefinition Name="Pipeline Name">';
-                              '';
-                              '';
-                              '</PipelineDefinition>'};
+    clearPipeline(fig,pipelineTextArea);
 
     %% Get all components
     componentParentClasses = {'AComponent'};
@@ -228,6 +231,16 @@ function savePipeline(fig,textArea)
     else
         uialert(fig, 'Duplicate component or view names found. Ensure that all components and views have unique names.', 'File Error');
     end
+end
+
+%% function to clear pipeline
+function clearPipeline(fig,textArea)
+    textArea.Value = {'<?xml version="1.0" encoding="utf-8"?>';
+                              '<PipelineDefinition Name="Pipeline Name">';
+                              '';
+                              '';
+                              '</PipelineDefinition>'};
+
 end
 
 %% Function to ensure there are no duplicate names of components or views
@@ -573,4 +586,17 @@ function result = parseAddInputOutput(matches)
         result{end+1} = identifier;
     end
 
+end
+
+
+%% Function to show a confirmation dialog
+function confirmAction(action)
+    % Ask the user for confirmation using questdlg
+    choice = questdlg('Are you sure?', ...
+        'Confirmation', 'Yes', 'No', 'No');
+    
+    % If the user selects 'Yes', execute the action
+    if strcmp(choice, 'Yes')
+        action();  % Call the action
+    end
 end
