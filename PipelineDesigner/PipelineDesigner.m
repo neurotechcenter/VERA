@@ -563,13 +563,25 @@ function [inputs, outputs] = extractInputsOutputs(className)
     inputPattern  = 'obj.AddInput\((.*?)\);';
     outputPattern = 'obj.AddOutput\((.*?)\);';
     
+    optionalInputPattern  = 'obj.AddOptionalInput\((.*?)\);';
+    optionalOutputPattern = 'obj.AddOptionalOutput\((.*?)\);';
+
     % Extract inputs and outputs
     inputsMatch  = regexp(methodCode, inputPattern,  'match');
     outputsMatch = regexp(methodCode, outputPattern, 'match');
+
+    optionalInputsMatch  = regexp(methodCode, optionalInputPattern,  'match');
+    optionalOutputsMatch = regexp(methodCode, optionalOutputPattern, 'match');
     
     % Parse the matched results
     inputs  = parseAddInputOutput(inputsMatch);
     outputs = parseAddInputOutput(outputsMatch);
+
+    optionalInputs  = parseAddInputOutput(optionalInputsMatch);
+    optionalOutputs = parseAddInputOutput(optionalOutputsMatch);
+
+    inputs  = [inputs,  optionalInputs];
+    outputs = [outputs, optionalOutputs];
 end
 
 % Function to parse the component for the matched string
@@ -587,7 +599,6 @@ function result = parseAddInputOutput(matches)
     end
 
 end
-
 
 %% Function to show a confirmation dialog
 function confirmAction(action)
