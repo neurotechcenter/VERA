@@ -2,8 +2,18 @@ function PipelineDesigner()
     % The pipeline designer is a tool to load, modify, and save VERA 
     % pipelines
 
-    addpath(genpath(fullfile('..','classes')));
-    addpath(genpath(fullfile('..','Components')));
+    mfilePath = fileparts(mfilename('fullpath'));
+
+    addpath(genpath(fullfile(mfilePath,'..')));
+    addpath(genpath(fullfile(mfilePath,'..','classes')));
+    addpath(genpath(fullfile(mfilePath,'..','Components')));
+    addpath(genpath(fullfile(mfilePath,'..','Dependencies')));
+
+    %java stuff to make sure that the GUI works as expected
+    warning off
+    javaaddpath(fullfile(mfilePath,'..','Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.jar'));
+    import uiextras.jTree.*;
+    warning on
 
     %% UI Layout Constants
     UI = struct();
@@ -206,6 +216,9 @@ function PipelineDesigner()
     %% Create a clear pipeline button
     uimenu(filemenu, 'Text', 'Clear Pipeline', 'MenuSelectedFcn', @(src, event) confirmAction(@() clearPipeline(pipelineTextArea)));
 
+    %% Create a Save menu button to save the pipeline to a file
+    uimenu(filemenu, 'Text', 'Check Pipeline', 'MenuSelectedFcn', @(src, event) checkPipeline(fig,pipelineTextArea));
+
     %% Create a help button to link to the wiki
     uimenu(helpmenu, 'Text', 'VERA Wiki', 'MenuSelectedFcn', @(src, event) web('https://github.com/neurotechcenter/VERA/wiki/PipelineDesigner', '-browser'));
 
@@ -314,15 +327,43 @@ function loadPipeline(fig,textArea,varargin)
 end
 
 %% Function to save pipeline to a file
-function savePipeline(fig,textArea)
-    % check component/view names to make sure there are no duplicates
-    duplicateNames = checkforDuplicateNames(textArea);
+function [fullPath] = savePipeline(fig,textArea,varargin)
+    fullPath = [];
 
-    if ~duplicateNames
+    % if there is an input file given, assume it comes from the
+    % checkPipeline function. This is used to avoid recursively checking
+    % the pipeline when using the 'check pipeline' file dialog
+    if nargin > 2
+        inputFilePath = varargin{1};
+        calledFromCheckPipeline = 1;
+    else
+        inputFilePath = [];
+        calledFromCheckPipeline = 0;
+    end
+
+    % check pipeline to see if it is valid in VERA
+    % Only check in SavePipeline if SavePipeline is called directly.
+    % Not sure if this logic is sound.
+    if ~calledFromCheckPipeline
+        pipelineStatus = checkPipeline(fig,textArea);
+    else
+        pipelineStatus = 1;
+    end
+
+    if pipelineStatus
         defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
-        fig.Visible     = 'off'; % Hide the main window
-        [file, path]    = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
-        fig.Visible     = 'on'; % Show the main window
+
+        % get save path
+        fig.Visible = 'off'; % Hide the main window
+        if ~isempty(inputFilePath)
+            [path, file, ext] = fileparts(inputFilePath);
+            file = [file, ext];
+        else
+            [file, path] = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
+        end
+        fig.Visible = 'on'; % Show the main window
+
+        % write text area to file
         if file ~= 0
             fullPath = fullfile(path, file);
             fid = fopen(fullPath, 'wt');
@@ -331,13 +372,19 @@ function savePipeline(fig,textArea)
                     fprintf(fid, [textArea.Value{i},'\n']);
                 end
                 fclose(fid);
-                uialert(fig, 'pipeline saved successfully!', 'Success');
             else
                 uialert(fig, 'Error saving the file.', 'File Error');
             end
+
+            if ~calledFromCheckPipeline
+                uialert(fig, 'Pipeline saved!', 'Save Success');
+            end
+        else
+            uialert(fig, 'Pipeline not saved! No file name selected', 'Save Failure');
         end
+
     else
-        uialert(fig, 'Duplicate component or view names found. Ensure that all components and views have unique names.', 'File Error');
+        uialert(fig, 'Pipeline cannot be saved because pipeline check failed! See error/warning messages!', 'Save Failure');
     end
 end
 
@@ -351,45 +398,168 @@ function clearPipeline(textArea)
 
 end
 
-%% Function to ensure there are no duplicate names of components or views
-function isDuplicated = checkforDuplicateNames(textArea)
-    % Use a regular expression to extract all 'Name' values from the XML text
-    pattern = '<Name>"(.*?)"</Name>';  % This regex matches text between <Name>"..."</Name>
-    names = regexp(textArea.Value, pattern, 'tokens');
-    
-    % Flatten the cell array and remove quotes from the extracted names
-    % names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
+%% function to check the validity of the pipeline
+function pipelineStatus = checkPipeline(fig,textArea)
 
-    notnames = cellfun(@isempty, names, 'UniformOutput', true);
-    names(notnames) = [];
+    % Save working pipeline to be loaded into VERA and checked
+    currentPath  = fileparts(mfilename('fullpath'));
+    tempProjPath = fullfile(currentPath,'temp/tempProj');
 
-    names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
-    
-    % Check for duplicates
-    duplicate_names = find_duplicates(names);
-    
-    % Display result
-    if ~isempty(duplicate_names)
-        isDuplicated = 1;
+    if ~exist(tempProjPath,'dir')
+        mkdir(tempProjPath);
     else
-        isDuplicated = 0;
+        % delete temporary folder
+        warning off;
+        rmdir(fullfile(tempProjPath,'..'),'s');
+        warning on;
+        % make it fresh
+        mkdir(tempProjPath);
+    end
+
+    tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
+    pipelinePath     = savePipeline(fig,textArea,tempPipelinePath);
+
+
+    % start VERA (would like to change this so pipelines can be checked
+    % without running VERA...)
+    VERAvisiblity    = 'off';
+    VERAhandle       = MainGUI(VERAvisiblity);
+    allFigureHandles = findall(groot,'Type','figure');
+    VERAfig          = allFigureHandles(end);
+
+    % Create dialog boxes when there are warnings or errors
+    errormessage = [];
+    try 
+        % create VERA project to see if the pipeline is viable
+        lastwarn('');
+        createNewProject(VERAhandle,tempProjPath,pipelinePath);
+
+        warnMsg_create = formatWarning();
+
+        if ~isempty(warnMsg_create)
+            warndlg(warnMsg_create);
+
+            % no need to continue testing if we find an issue
+            % close VERA
+            close(VERAfig);
+        
+            % delete temporary folder
+            warning off;
+            rmdir(fullfile(tempProjPath,'..'),'s');
+            warning on;
+
+            uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
+            pipelineStatus = 0;
+
+            return;
+        end
+
+        % configure all components to see if any inputs or outputs are missing
+        lastwarn('');
+        configureAll(VERAhandle);
+
+        warnMsg_configure = formatWarning();
+
+        if ~isempty(warnMsg_configure)
+            warndlg(warnMsg_configure);
+
+            % no need to continue testing if we find an issue
+            % close VERA
+            close(VERAfig);
+        
+            % delete temporary folder
+            warning off;
+            rmdir(fullfile(tempProjPath,'..'),'s');
+            warning on;
+
+            uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
+            pipelineStatus = 0;
+
+            return;
+        end
+    catch me
+        errormessage = me.message;
+        errordlg(errormessage);
+    end
+
+    % Pipeline check results
+    if isempty(warnMsg_create) && isempty(warnMsg_configure) && isempty(errormessage)
+        pipelineStatus = 1;
+        uialert(fig, 'Pipeline check passed!','Pipeline Check Results')
+    else
+        uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
+        pipelineStatus = 0;
+    end
+
+    % sclose VERA
+    close(VERAfig);
+
+    % delete temporary folder
+    warning off;
+    rmdir(fullfile(tempProjPath,'..'),'s');
+    warning on;
+end
+
+% reformat matlab warning for nicer display in warn dialog box
+function warnMsg = formatWarning()
+    warnMsg = lastwarn;
+
+    if ~isempty(warnMsg)
+        % isolate meaningful message
+        [warnMsg, matches] = strsplit(warnMsg,{'Error','</a>'});
+        start   = find(contains(matches,'</a>'),1,'first') + 1;
+        warnMsg = warnMsg{start};
+
+        % remove return lines in warning
+        warnMsg = regexprep(warnMsg,'[\n\r]+',' ');
+
+        % remove leading space
+        warnMsg(1) = [];
     end
 end
 
-% Helper function to find duplicate names
-function duplicates = find_duplicates(names)
-    % Find duplicates by comparing each name with others
-    duplicates = {};
-    seen = {};
-    for i = 1:length(names)
-        name = names{i}{1};
-        if any(strcmp(seen, name))
-            duplicates{end+1} = name;  % Add to duplicates list
-        else
-            seen{end+1} = name;  % Mark this name as seen
-        end
-    end
-end
+% %% Function to ensure there are no duplicate names of components or views
+% function isDuplicated = checkforDuplicateNames(textArea)
+%     % Use a regular expression to extract all 'Name' values from the XML text
+%     pattern = '<Name>"(.*?)"</Name>';  % This regex matches text between <Name>"..."</Name>
+%     names = regexp(textArea.Value, pattern, 'tokens');
+% 
+%     % Flatten the cell array and remove quotes from the extracted names
+%     % names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
+% 
+%     notnames = cellfun(@isempty, names, 'UniformOutput', true);
+%     names(notnames) = [];
+% 
+%     names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
+% 
+%     % Check for duplicates
+%     duplicate_names = find_duplicates(names);
+% 
+%     % Display result
+%     if ~isempty(duplicate_names)
+%         isDuplicated = 1;
+%         for i = 1:length(duplicate_names)
+%             warndlg(['Duplicate component names! Check for multiple components named ', duplicate_names{i}])
+%         end
+%     else
+%         isDuplicated = 0;
+%     end
+% end
+% 
+% % Helper function to find duplicate names
+% function duplicates = find_duplicates(names)
+%     % Find duplicates by comparing each name with others
+%     duplicates = {};
+%     seen = {};
+%     for i = 1:length(names)
+%         name = names{i}{1};
+%         if any(strcmp(seen, name))
+%             duplicates{end+1} = name;  % Add to duplicates list
+%         else
+%             seen{end+1} = name;  % Mark this name as seen
+%         end
+%     end
+% end
 
 %% Function to get all components/views in a given directory
 function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,compOrView)

@@ -25,7 +25,12 @@ classdef MainGUI < handle
     end
     
     methods
-        function obj = MainGUI()
+        function obj = MainGUI(varargin)
+            if nargin > 0
+                figVisibility = varargin{1};
+            else
+                figVisibility = 'on';
+            end
             
             DependencyHandler.Purge();
             obj.componentNodes = containers.Map();
@@ -34,7 +39,8 @@ classdef MainGUI < handle
             'NumberTitle', 'off', ...
             'MenuBar', 'none', ...
             'Toolbar', 'none', ...
-            'HandleVisibility', 'off','CloseRequestFcn',@obj.onClose);
+            'Visible', figVisibility, ...
+            'HandleVisibility', 'on','CloseRequestFcn',@obj.onClose);
             addToolbarExplorationButtons(obj.window);
             cameratoolbar(obj.window,'NoReset');
             if(exist('settings.xml','file'))
@@ -121,6 +127,89 @@ classdef MainGUI < handle
                 
             end
         end
+
+        function createNewProject(obj,varargin)
+            % allow for input folder name to create new project
+            if nargin > 1
+                folder = varargin{1};
+            else
+                %createNewProject callback from createNewProject menu path
+                folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
+            end
+            obj.ProgressBarTool.suspendGUIWithMessage('Creating Project...');
+    
+            obj.ProgressBarTool.ShowProgressBar(0);
+            try
+            if(folder ~= 0)
+                obj.setProjectDefaultPath(folder);
+                if nargin > 2
+                    pplineFile = varargin{2};
+                else
+                    avail_pipelFiles=dir('PipelineDefinitions/*.pwf');
+                    if(length(avail_pipelFiles) == 1)
+                        pplineFile=fullfile(avail_pipelFiles(1).folder,avail_pipelFiles(1).name);
+                    else
+                        %select pipeline
+                        [idx,tf]=listdlg('PromptString','Select Pipeline','SelectionMode','single','ListString',{avail_pipelFiles.name});
+                        if(tf ~= 0)
+                            pplineFile=fullfile(avail_pipelFiles(idx).folder,avail_pipelFiles(idx).name);
+                        else
+                            obj.ProgressBarTool.resumeGUI();
+                            return;
+                        end
+                    end
+                end
+                copyfile(pplineFile,fullfile(folder,'pipeline.pwf'));
+                prj=Project.CreateProjectOnPath(folder,pplineFile);
+                obj.ProjectRunner=Runner.CreateFromProject(prj);
+                obj.createTreeView();
+                obj.createViews(pplineFile,prj);
+                obj.updateTreeView();
+                if ~exist(fullfile(folder,'temp'),'dir')
+                    mkdir(fullfile(folder,'temp'));
+                end
+                
+                obj.fileMenuContent.CloseProject.Enable='on';
+            end
+            catch e
+                warning(getReport(e));
+            end
+            delete(obj.componentMenu);
+            obj.componentMenu=[];
+            obj.ProgressBarTool.resumeGUI();
+             
+        end
+        
+        function configureAll(obj)
+            %configureAll - configure all button callback
+            % configures all 
+            obj.ProgressBarTool.ShowProgressBar(0,'Configuring... ');
+            if(obj.checkResolvedDependencies())
+                for ic=1:length(obj.ProjectRunner.Components)
+                        obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
+                        obj.ProgressBarTool.ShowProgressBar(ic/length(obj.ProjectRunner.Components),'Configuring... ');
+                end
+                obj.updateTreeView();
+                obj.ProgressBarTool.resumeGUI();
+            end
+        end
+
+        function onClose(obj,hob,~)
+            %onClose - close project callback
+            obj.removeTempPath();
+
+            currentPath = fileparts(mfilename('fullpath'));
+            rootPath    = fullfile(currentPath,'..','..');
+            
+            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootPath,'settings.xml'));
+            delete(obj.Views);
+            delete(obj.ProjectRunner);
+            delete(hob);
+            if DependencyHandler.Instance.IsDependency('ProjectPath')
+                DependencyHandler.Instance.RemoveDependency('ProjectPath');
+            end
+            
+        end
     end
     
     methods (Access = protected)
@@ -168,47 +257,6 @@ classdef MainGUI < handle
             end
         end
 
-        function createNewProject(obj)
-            %createNewProject callback from createNewProject menu path
-            folder=uigetdir(obj.getProjectDefaultPath(),'Select Project Folder');
-            obj.ProgressBarTool.suspendGUIWithMessage('Creating Project...');
-    
-            obj.ProgressBarTool.ShowProgressBar(0);
-            try
-            if(folder ~= 0)
-                obj.setProjectDefaultPath(folder);
-                avail_pipelFiles=dir('PipelineDefinitions/*.pwf');
-                if(length(avail_pipelFiles) == 1)
-                    pplineFile=fullfile(avail_pipelFiles(1).folder,avail_pipelFiles(1).name);
-                else
-                    %select pipeline
-                    [idx,tf]=listdlg('PromptString','Select Pipeline','SelectionMode','single','ListString',{avail_pipelFiles.name});
-                    if(tf ~= 0)
-                        pplineFile=fullfile(avail_pipelFiles(idx).folder,avail_pipelFiles(idx).name);
-                    else
-                        obj.ProgressBarTool.resumeGUI();
-                        return;
-                    end
-                end
-                copyfile(pplineFile,fullfile(folder,'pipeline.pwf'));
-                prj=Project.CreateProjectOnPath(folder,pplineFile);
-                obj.ProjectRunner=Runner.CreateFromProject(prj);
-                obj.createTreeView();
-                obj.createViews(pplineFile,prj);
-                obj.updateTreeView();
-                mkdir(fullfile(folder,'temp'));
-                
-                obj.fileMenuContent.CloseProject.Enable='on';
-            end
-            catch e
-                warning(getReport(e));
-            end
-            delete(obj.componentMenu);
-            obj.componentMenu=[];
-            obj.ProgressBarTool.resumeGUI();
-             
-        end
-        
         function updateTreeView(obj)
             %updateTreeView - updates the Component pipeline view
             obj.ProgressBarTool.ShowProgressBar(0,'Updating Views');
@@ -246,33 +294,6 @@ classdef MainGUI < handle
                 DependencyHandler.Instance.RemoveDependency('TempPath');
             end
             
-        end
-        
-        function onClose(obj,hob,~)
-            %onClose - close project callback
-            obj.removeTempPath();
-            DependencyHandler.Instance.SaveDependencyFile('settings.xml');
-            delete(obj.Views);
-            delete(obj.ProjectRunner);
-            delete(hob);
-            if DependencyHandler.Instance.IsDependency('ProjectPath')
-                DependencyHandler.Instance.RemoveDependency('ProjectPath');
-            end
-            
-        end
-        
-        function configureAll(obj)
-            %configureAll - configure all button callback
-            % configures all 
-            obj.ProgressBarTool.ShowProgressBar(0,'Configuring... ');
-            if(obj.checkResolvedDependencies())
-                for ic=1:length(obj.ProjectRunner.Components)
-                        obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
-                        obj.ProgressBarTool.ShowProgressBar(ic/length(obj.ProjectRunner.Components),'Configuring... ');
-                end
-                obj.updateTreeView();
-                obj.ProgressBarTool.resumeGUI();
-            end
         end
         
         function success=runTo(obj,component)
