@@ -142,7 +142,7 @@ classdef EEGElectrodeNames < AComponent
             obj.EEGNames = obj.internalDefinitions;
             
             % visualize
-            if(isempty(obj.EEGNames)) && ~obj.SkipGUI
+            if ~obj.SkipGUI
                 
                 h      = figure('Name',obj.Name);
                 elView = EEGNamesView('Parent',h);
