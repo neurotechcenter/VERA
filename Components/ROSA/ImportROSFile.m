@@ -3,8 +3,8 @@ classdef ImportROSFile < AComponent
     properties
         TrajectoryIdentifier
         ElectrodeDefinitionIdentifier
-        VolumeIdentifier
         ElectrodeDefinition
+        VolumeIdentifier
         History
         InputFilepath char
     end
@@ -12,8 +12,9 @@ classdef ImportROSFile < AComponent
     methods
         function obj = ImportROSFile()
             obj.TrajectoryIdentifier          = 'Trajectory';
-            obj.VolumeIdentifier              = 'ROSAVolume';
             obj.ElectrodeDefinitionIdentifier = 'ElectrodeDefinition';
+            obj.ElectrodeDefinition           = {};
+            obj.VolumeIdentifier              = 'ROSAVolume';
             obj.History                       = {};
             obj.InputFilepath                 = '';
         end
@@ -31,7 +32,7 @@ classdef ImportROSFile < AComponent
         end
 
         function [trajectories,definitions,volume]=Process(obj,optInp)
-            if(nargin > 1) %segmentation path exists
+            if(nargin > 1) 
                 obj.ElectrodeDefinition = optInp;
             else
                 obj.ElectrodeDefinition = [];
