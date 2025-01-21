@@ -14,8 +14,8 @@ classdef FileLoader < AComponent
     methods
         function obj = FileLoader()
             %FileLoader - Constructor
-            obj.Identifier       = '';
-            obj.IdentifierType   = '';
+            obj.Identifier       = 'MRI';
+            obj.IdentifierType   = 'Volume';
             obj.FileTypeWildcard = '*.*';
             obj.InputFilepath    = '';
         end
