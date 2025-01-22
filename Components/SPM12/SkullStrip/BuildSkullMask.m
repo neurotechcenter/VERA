@@ -1,5 +1,6 @@
 classdef BuildSkullMask < AComponent
     %BuildSkullMask Use SPM12 to create a skull mask for skullstripping
+    % Often combined with the ApplyMask component
     
     properties
         MRIIdentifier

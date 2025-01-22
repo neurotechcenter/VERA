@@ -1,6 +1,7 @@
 classdef ApplyMask < AComponent
     %ApplyMask Apply a predefined Mask to an image - requires reslicing of
     %the mask
+    % Often combined with the BuildSkullMask component
     properties
         InputIdentifier
         MaskIdentifier
