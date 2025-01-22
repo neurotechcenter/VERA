@@ -1,5 +1,5 @@
-classdef Inflatible3DView < AView & uix.Grid
-%The `Inflatible3DView` class is a component for visualizing 3D surface models
+classdef Inflatable3DView < AView & uix.Grid
+%The `Inflatable3DView` class is a component for visualizing 3D surface models
 %(such as brain surfaces) along with electrode locations, in an inflatable or
 %projected 3D view. It allows the user to visualize and interact with
 %inflated brain surfaces, along with electrode locations that are mapped onto
@@ -27,7 +27,7 @@ classdef Inflatible3DView < AView & uix.Grid
     end
     
     methods
-        function obj = Inflatible3DView(varargin)
+        function obj = Inflatable3DView(varargin)
             obj.SurfaceIdentifier='Surface';
             obj.SphereIdentifier='InflatedSurface';
             obj.ElectrodeLocationIdentifier='ElectrodeLocation';
