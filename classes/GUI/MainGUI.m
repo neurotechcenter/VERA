@@ -210,6 +210,17 @@ classdef MainGUI < handle
             end
             
         end
+
+        function viewPipelineGraph(obj)
+            if(~isempty(obj.ProjectRunner))
+                figure;
+                graph=obj.ProjectRunner.Project.Pipeline.GetDependencyGraph();
+                plot(graph,'Layout','layered','Sources',obj.ProjectRunner.Project.Pipeline.GetInputComponentNames(),...
+                    'Sinks',obj.ProjectRunner.Project.Pipeline.GetOutputComponentNames(),'EdgeLabel',graph.Edges.Name,'LineWidth',2,...
+                'EdgeFontSize',12,'EdgeFontAngle','normal','NodeFontSize',16,'NodeFontAngle','normal', 'Interpreter', 'none',...
+                'ArrowSize',12);
+            end
+        end
     end
     
     methods (Access = protected)
@@ -522,17 +533,6 @@ classdef MainGUI < handle
            end
         end
         
-        function viewPipelineGraph(obj)
-            if(~isempty(obj.ProjectRunner))
-                figure;
-                graph=obj.ProjectRunner.Project.Pipeline.GetDependencyGraph();
-                plot(graph,'Layout','layered','Sources',obj.ProjectRunner.Project.Pipeline.GetInputComponentNames(),...
-                    'Sinks',obj.ProjectRunner.Project.Pipeline.GetOutputComponentNames(),'EdgeLabel',graph.Edges.Name,'LineWidth',2,...
-                'EdgeFontSize',12,'EdgeFontAngle','normal','NodeFontSize',16,'NodeFontAngle','normal', 'Interpreter', 'none',...
-                'ArrowSize',12);
-            end
-        end
-
     end
     
 end
