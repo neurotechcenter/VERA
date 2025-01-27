@@ -17,7 +17,7 @@ For many of the common pipelines, you will also need:
 
 # Quick Guide
 ## Installation & Startup
-VERA can be used by any MATLAB distribution later than MATLAB 2018b. Required packages include the Computer Vision Toolbox, the Image Processing Toolbox, the MATLAB Report Generator, and the Statistics and Machine Learning Toolbox. For many of the common pipelines, you will also need to install [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (for Windows, use our [Freesurfer4Windows](https://github.com/neurotechcenter/Freesurfer4Windows) installer tool), [SPM12](https://github.com/spm/spm), and the [Neurotechnologies Center Report Generator](https://github.com/neurotechcenter/ReportGenerator/). Download the repository into an empty directory and run *startup_VERA.m*
+VERA can be used by any MATLAB distribution later than MATLAB 2018b. Download the repository into an empty directory and run *startup_VERA.m*
 
 # WIKI
 
