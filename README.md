@@ -3,12 +3,22 @@
 
 VERA was specifically built to solve this problem. The framework allows other tools to be integrated into existing pipelines without changing the localization pipeline.
 
+# Prerequisites
+- **MATLAB** (2018b or later)
+  - [Computer Vision Toolbox](https://www.mathworks.com/products/computer-vision.html)
+  - [Image Processing Toolbox](https://www.mathworks.com/products/image.html)
+  - [MATLAB Report Generator](https://www.mathworks.com/products/report-generator.html)
+  - [Statistics and Machine Learning Toolbox](https://www.mathworks.com/products/statistics.html)
+
+For many of the common pipelines, you will also need:
+  - [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (For Windows, use our [Freesurfer4Windows](https://github.com/neurotechcenter/Freesurfer4Windows) installer tool)
+  - [SPM12](https://github.com/spm/spm)
+  - [Neurotechnologies Center Report Generator](https://github.com/neurotechcenter/ReportGenerator/)
+
 # Quick Guide
 ## Installation & Startup
-VERA can be used by any MatLab distribution later than Matlab 2018b. Download the repository into an empty directory and run *startup_VERA.m*
+VERA can be used by any MATLAB distribution later than MATLAB 2018b. Required packages include the Computer Vision Toolbox, the Image Processing Toolbox, the MATLAB Report Generator, and the Statistics and Machine Learning Toolbox. For many of the common pipelines, you will also need to install [Freesurfer](https://surfer.nmr.mgh.harvard.edu/) (for Windows, use our [Freesurfer4Windows](https://github.com/neurotechcenter/Freesurfer4Windows) installer tool), [SPM12](https://github.com/spm/spm), and the [Neurotechnologies Center Report Generator](https://github.com/neurotechcenter/ReportGenerator/). Download the repository into an empty directory and run *startup_VERA.m*
 
 # WIKI
 
 For more information check out [the Wiki](https://github.com/neurotechcenter/VERA/wiki)
-
-
