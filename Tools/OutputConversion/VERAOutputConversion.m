@@ -23,7 +23,7 @@ end
 load(fullfile(path,file));
 
 if ~exist('electrodeNamesKey', 'var')
-    electrodeNamesKey  = [];          % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
+    electrodeNamesKey  = []; % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
 end
 
 % convert from Legacy to New format
@@ -57,8 +57,12 @@ function [surfaceModel, electrodes] = ConvertLegacyToNew(cortex, annotation, ele
     
     electrodes.Definition           = electrodeDefinition.Definition;           % Implanted grid/shank type, name, NElectrodes, spacing, and volume
     electrodes.DefinitionIdentifier = electrodeDefinition.DefinitionIdentifier; % Number associating individual channels with its implant
-    electrodes.Annotation           = electrodeDefinition.Annotation;           % Results of calculation determining distance from each electrode to each volume label
-    electrodes.Label                = electrodeDefinition.Label;                % Final label, accounting for ReplaceLabels component if used (same as old secondaryLabel)
+    electrodes.Annotation           = electrodeDefinition.Annotation;           % Results of calculation determining the distance from each electrode to each volume (voxel) label.
+                                                                                % The nearest distance to each unique label found is stored.
+    electrodes.Label                = electrodeDefinition.Label;                % Nearest voxel label to the electrode coordinates, accounting for ReplaceLabels component if used.
+                                                                                % If ReplaceLabels is not used, a label for each distance calculation is stored 
+                                                                                % (e.g. if the distance to volume labels and the left hippocampus are calculated, two labels will be stored). 
+                                                                                % (same as old SecondaryLabel)
     electrodes.Name                 = electrodeNames;                           % electrode names
     electrodes.Location             = tala.electrodes;                          % electrode locations (x,y,z)
 end
