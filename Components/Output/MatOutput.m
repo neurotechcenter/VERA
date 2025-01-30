@@ -81,8 +81,12 @@ classdef MatOutput < AComponent
 
             electrodes.Definition           = eDef.Definition;               % Implanted grid/shank type, name, NElectrodes, spacing, and volume
             electrodes.DefinitionIdentifier = eLocs.DefinitionIdentifier;    % Number associating individual electrodes with their implant
-            electrodes.Annotation           = eLocs.Annotation;              % Results of calculation determining distance from each electrode to each volume (voxel) label
-            electrodes.Label                = eLocs.Label;                   % Final label, accounting for ReplaceLabels component if used (same as old secondaryLabel)
+            electrodes.Annotation           = eLocs.Annotation;              % Results of calculation determining the distance from each electrode to each volume (voxel) label.
+                                                                             % The nearest distance to each unique label found is stored.
+            electrodes.Label                = eLocs.Label;                   % Nearest voxel label to the electrode coordinates, accounting for ReplaceLabels component if used.
+                                                                             % If ReplaceLabels is not used, a label for each distance calculation is stored 
+                                                                             % (e.g. if the distance to volume labels and the left hippocampus are calculated, two labels will be stored). 
+                                                                             % (same as old SecondaryLabel)
             electrodes.Name                 = eLocs.GetElectrodeNames(eDef); % name of each electrode based on their association with the ElectrodeDefinition
             electrodes.Location             = eLocs.Location;                % electrode locations (x,y,z)
 
