@@ -63,6 +63,7 @@ classdef MainGUI < handle
             obj.configMenuContent.Settings=uimenu(obj.configMenu,'Label','Settings','MenuSelectedFcn',@(~,~,~) SettingsGUI());
             obj.configMenuContent.ConfigAll=uimenu(obj.configMenu,'Label','Configure all Components','MenuSelectedFcn',@(~,~,~) obj.configureAll());
             obj.configMenuContent.RunAll=uimenu(obj.configMenu,'Label','Run all Components','MenuSelectedFcn',@(~,~,~) obj.runAll());
+            obj.configMenuContent.ReloadAll=uimenu(obj.configMenu,'Label','Reload all Components','MenuSelectedFcn',@(~,~,~) obj.reloadAll());
             obj.configMenuContent.ViewPipeline=uimenu(obj.configMenu,'Label','View Pipeline Graph','MenuSelectedFcn',@(~,~,~) obj.viewPipelineGraph());
             
             obj.pipelineTree.Root.Name='Project';
@@ -71,7 +72,6 @@ classdef MainGUI < handle
             obj.treeNodes.Output=uiw.widget.TreeNode('Name','Output','Parent',obj.pipelineTree.Root);
             warning on;
             obj.ProgressBarTool=UnifiedProgressBar(obj.window);
-
 
         end
         
@@ -113,18 +113,36 @@ classdef MainGUI < handle
 
         function runAll(obj)
             %runAll button callback
-            %run through all components and check which one to best run
-            %next
+            %run through all components and check which one to best run next
             k=obj.ProjectRunner.GetNextReadyComponent();
             while(~isempty(k))
                 obj.runComponent(k,false); %update view if last component
+                obj.ProgressBarTool.resumeGUI();
+            	obj.updateTreeView();
+
                 k2=obj.ProjectRunner.GetNextReadyComponent();
                 if(isempty(k2))
-                	obj.updateTreeView();
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                 end
                 k=k2;
-                
+            end
+        end
+
+        function reloadAll(obj)
+            %reloadAll button callback
+            %reload all components
+            k=obj.ProjectRunner.GetNextReadyComponent();
+            while(~isempty(k))
+                obj.ProgressBarTool.suspendGUIWithMessage(['Reloading ' k]);
+                obj.ProjectRunner.ReloadResults(k);
+                obj.ProgressBarTool.resumeGUI();
+            	obj.updateTreeView();
+
+                k2=obj.ProjectRunner.GetNextReadyComponent();
+                if(isempty(k2))
+                    obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                end
+                k=k2;
             end
         end
 
@@ -332,8 +350,6 @@ classdef MainGUI < handle
             end
         end
         
-
-        
         function createTreeView(obj)
             %createTreeView - delete the Treeview and create a new Tree
             delete(obj.componentMenu);
@@ -367,8 +383,6 @@ classdef MainGUI < handle
 
         end
         
-        
-        
         function cm=buildContextMenu(obj,compName)
                 cm = uicontextmenu(obj.window);
                 obj.addContextEntries(cm,compName);
@@ -387,7 +401,7 @@ classdef MainGUI < handle
         end
         
         function reloadResults(obj,compName)
-            obj.ProgressBarTool.suspendGUIWithMessage(['Reloading Results ' compName]);
+            obj.ProgressBarTool.suspendGUIWithMessage(['Reloading ' compName]);
             obj.ProjectRunner.ReloadResults(compName);
             obj.updateTreeView();
             obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
@@ -496,8 +510,6 @@ classdef MainGUI < handle
   
             end
         end           
-        
-
         
         function createViews(obj,pipeline,prj)
            obj.viewTabs=containers.Map();

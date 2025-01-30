@@ -1,5 +1,5 @@
 classdef Runner < handle
-    %Runner The Runner handles execution of Components from a Project 
+    %Runner The Runner handles execution of Components from a Project
     %   The Runner determines if a Component can be executed or not and the
     %   current status of the component
     %   Status possiblities:
@@ -15,8 +15,8 @@ classdef Runner < handle
         Project Project %Project handled by the Runner
         CurrentPipelineData containers.Map % Available Data at the current completion Status of the Pipeline
     end
-    
-    
+
+
     methods(Static)
         function runner=CreateFromProject(prj)
             %CreateFromProject - Create a new Runner object for a Project
@@ -27,7 +27,7 @@ classdef Runner < handle
             runner.SetProject(prj);
         end
     end
-    
+
     methods
         function obj = Runner()
             obj.Project;
@@ -35,32 +35,32 @@ classdef Runner < handle
             obj.Components = {};
             obj.ComponentResultPath = containers.Map;
         end
-        
+
         function status=GetComponentStatus(obj,name)
             %GetComponentStatus Returns the status of a Component
             % returns Component Status
             status=obj.Project.Pipeline.GetComponent(name).ComponentStatus;
         end
-        
-          function a = get.Components(obj)
-              %get.Components get modifier for Components property
-             a = obj.Project.Pipeline.Components;
-          end
-          
-          function compId=GetNextReadyComponent(obj)
-              %GetNextReadyComponent - Returns a list of components ready
-              %to be executed
-              %returns one Component ready to be executed
-              compId={};
-                for k=obj.Components
-                    if(strcmp(obj.GetComponentStatus(k{1}),'Ready'))
-                        compId=k{1};
-                        return;
-                    end
-                        
+
+        function a = get.Components(obj)
+            %get.Components get modifier for Components property
+            a = obj.Project.Pipeline.Components;
+        end
+
+        function compId=GetNextReadyComponent(obj)
+            %GetNextReadyComponent - Returns a list of components ready
+            %to be executed
+            %returns one Component ready to be executed
+            compId={};
+            for k=obj.Components
+                if(strcmp(obj.GetComponentStatus(k{1}),'Ready'))
+                    compId=k{1};
+                    return;
                 end
-          end
-        
+
+            end
+        end
+
         function SetProject(obj,project)
             %SetProject - Set the Project for the Runner
             if(isObjectTypeOf(project,'Project'))
@@ -82,21 +82,26 @@ classdef Runner < handle
                 error('Cannot set Project, value has to be object of type Project');
             end
         end
-        
+
         function ReloadResults(obj,compName)
             obj.SetComponentStatus(compName,'Completed');
+
+            waitbar(0.3,'Reloading...');
             obj.updateCurrentResults();
+            waitbar(1,'Reloading...');
+
+            obj.updateComponentStatus();
         end
-        
+
         function ConfigureComponent(obj,compName)
             %ConfigureComponent - Run Configuration for a Component
             % If a completed component is reconfigured, it will remain
             % completed
             % compName - name of the Component to be configured
             wasrdy=false;
-             if(strcmp(obj.GetComponentStatus(compName),'Completed'))
-                 wasrdy=true;
-             end
+            if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+                wasrdy=true;
+            end
             try
                 o=obj.Project.Pipeline.GetComponent(compName);
                 o.Initialize();
@@ -114,23 +119,29 @@ classdef Runner < handle
                 obj.updateComponentStatus();
                 error(['Error during initialization of Component: ' e.message]);
             end
-            
+
         end
-        
+
         function ResetComponent(obj,compName)
             %Reset the Status of a component
             %Downgrades a completed component to a ready component and
             %update the Pipeline accordingly
             %See also Pipeline
+            
+            waitbar(0.3,'Resetting...');
+            % obj.ConfigureComponent(compName);
             obj.resetDownstreamCompletionStatus(compName);
+            waitbar(1,'Resetting...');
+
+            % obj.updateComponentStatus();
         end
-        
+
         function inpComp=GetInputComponentNames(obj)
             %GetInputComponentNames - Returns all Input Components
             %An Input Component is defined as a Component which does not
             %require Inputs
             %See also Pipeline, AComponent
-                inpComp=obj.Project.Pipeline.GetInputComponentNames();
+            inpComp=obj.Project.Pipeline.GetInputComponentNames();
         end
 
         function outComp=GetOutputComponentNames(obj)
@@ -138,22 +149,21 @@ classdef Runner < handle
             %An Output Component is defined as a Component which does not
             %produce Outputs
             %See also Pipeline, AComponent
-                outComp=obj.Project.Pipeline.GetOutputComponentNames();
+            outComp=obj.Project.Pipeline.GetOutputComponentNames();
         end
-        
+
         function outComp=GetProcessingComponentNames(obj)
             %GetProcessingComponentNames - Returns all Processing Components
             %A Processing Component is defined as a Component which does
             %require Inputs and produces Outputs
             %See also Pipeline, AComponent
-                outComp=obj.Project.Pipeline.GetProcessingComponentNames();
+            outComp=obj.Project.Pipeline.GetProcessingComponentNames();
         end
-        
+
         function execSequence=GetProcessingSequence(obj,compName)
             execSequence=obj.Project.Pipeline.GetProcessingSequence(compName);
         end
-        
-        
+
         function RunComponent(obj,compName,silent)
             %RunComponent - Executes a component by calling its Process
             %function
@@ -170,11 +180,11 @@ classdef Runner < handle
             end
             localPipeline=containers.Map();
             obj.checkCompName(compName);
-             if(strcmp(obj.GetComponentStatus(compName),'Completed'))
-                    obj.ConfigureComponent(compName);
-                    obj.resetDownstreamCompletionStatus(compName);
-                    obj.updateComponentStatus();
-             end
+            if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+                obj.ConfigureComponent(compName);
+                obj.resetDownstreamCompletionStatus(compName);
+                obj.updateComponentStatus();
+            end
             [ids,req_comps]=inedges(obj.Project.Pipeline.DependencyGraph,compName);
             errStr=[];
             if(~silent)
@@ -205,13 +215,13 @@ classdef Runner < handle
             if(~strcmp(obj.GetComponentStatus(compName),'Ready') && ~strcmp(obj.GetComponentStatus(compName),'Completed'))
                 error('Current component needs to be configured first!');
             end
-                
+
             if(~silent) h=waitbar(0.7,'Gathering Input Data...'); end
             [inp, outp,optInp]=obj.Project.Pipeline.InterfaceInformation(compName);
             inpData=cell(numel(inp),1);
             outpData=cell(numel(outp),1);
             optinpData={};
-            
+
             for i=1:length(inp)
                 if(localPipeline.isKey(inp{i}))
                     inpData{i}=localPipeline(inp{i});
@@ -219,7 +229,7 @@ classdef Runner < handle
                     warning('Requested Component Input is not available!');
                 end
             end
-            
+
             for i=1:length(optInp)
                 optDataComp=obj.Project.Pipeline.FindUpstreamData(compName,optInp{i});
                 if(strcmp(obj.GetComponentStatus(optDataComp),'Completed'))
@@ -230,13 +240,13 @@ classdef Runner < handle
 
 
             end
-            
-           if ~silent h=waitbar(1,'Running...');
-           close(h);
-           end
+
+            if ~silent h=waitbar(1,'Running...');
+                close(h);
+            end
             try
                 o=obj.Project.Pipeline.GetComponent(compName);
-                
+
                 [outpData{:}]=o.Process(inpData{:},optinpData{:});
                 obj.SetComponentStatus(compName,'Completed');
                 savepaths=obj.Project.SaveComponentData(compName,outpData{:});%the result paths are accumulative
@@ -256,11 +266,11 @@ classdef Runner < handle
                 end
             catch me
                 %restore old input data
-                
+
                 warning on;
                 warning(getReport( me, 'extended', 'hyperlinks', 'on' ));
                 obj.SetComponentStatus(compName,'Invalid');
-                
+
             end
             obj.updateComponentStatus();
             obj.updateCurrentResults();
@@ -268,15 +278,15 @@ classdef Runner < handle
                 rethrow(me);
             end
         end
-        
+
     end
-    
+
     methods(Access = protected)
         function reset(obj)
             obj.CurrentPipelineData= containers.Map();
             obj.Project = [];
         end
-        
+
         function SetComponentStatus(obj,name,status)
             %SetComponentStatus - Set the status of a component
             %name - name of the Component
@@ -288,34 +298,34 @@ classdef Runner < handle
                 error([status 'is not an allowed ComponentStatus']);
             end
         end
-        
+
         function resetDownstreamCompletionStatus(obj,compName)
-           %resetDownstreamCompletionStatus - Resets the Completion status
-           %of a component and updates the pipeline
-           
-            if(strcmp(obj.GetComponentStatus(compName),'Completed'))
+            %resetDownstreamCompletionStatus - Resets the Completion status
+            %of a component and updates the pipeline
+
+            if(strcmp(obj.GetComponentStatus(compName),'Completed')) || strcmp(obj.GetComponentStatus(compName),'Ready')
                 obj.SetComponentStatus(compName,'Configured');
                 [~,targComps]=outedges(obj.Project.Pipeline.DependencyGraph,compName);
                 for i=1:length(targComps)
-                    if (strcmp(obj.GetComponentStatus(targComps{i}),'Completed'))
+                    if strcmp(obj.GetComponentStatus(targComps{i}),'Completed') || strcmp(obj.GetComponentStatus(targComps{i}),'Ready')
                         obj.resetDownstreamCompletionStatus(targComps{i});
                     end
                 end
             end
             obj.updateCurrentResults();
         end
-        
+
         function updateCurrentResults(obj)
             %updateCurrentResults - Update all Data
-             complRes=containers.Map();
-             for c=obj.Components
-                 if(strcmp(obj.GetComponentStatus(c{1}),'Completed'))
-                     [~,outp]=obj.Project.Pipeline.InterfaceInformation(c{1});
-                     for res=outp
-                         complRes(res{1})=c{1};
-                     end
-                 end
-             end
+            complRes=containers.Map();
+            for c=obj.Components
+                if(strcmp(obj.GetComponentStatus(c{1}),'Completed'))
+                    [~,outp]=obj.Project.Pipeline.InterfaceInformation(c{1});
+                    for res=outp
+                        complRes(res{1})=c{1};
+                    end
+                end
+            end
             %update SavePaths & objects
             warning on;
             obj.ComponentResultPath=containers.Map();
@@ -330,11 +340,10 @@ classdef Runner < handle
                     obj.resetDownstreamCompletionStatus(complRes(k{1}));
                 end
 
-                
+
             end
         end
-        
-        
+
         function updateComponentStatus(obj)
             %updateComponentStatus - Update all Component Status
             %Descriptors
@@ -351,10 +360,8 @@ classdef Runner < handle
                     obj.SetComponentStatus(k{1},'Ready');
                 end
             end
-           
-            
         end
-        
+
         function checkCompName(obj,name)
             if(~any(strcmp(obj.Project.Pipeline.Components,name)))
                 error([name 'is not a valid Component in this Pipeline']);
