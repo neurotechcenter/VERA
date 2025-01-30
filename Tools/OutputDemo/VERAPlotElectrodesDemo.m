@@ -34,7 +34,7 @@ for i = 1:length(brainmat.electrodes.Label)
     end
 end
 
-electrodeLabels       = cellfun(@(x)x{1},brainmat.electrodes.Label,'UniformOutput',false);          % convert to easier to use cell array
+electrodeLabels       = cellfun(@(x)x{1},brainmat.electrodes.Label,'UniformOutput',false); % convert to easier to use cell array
 uniqueElectrodeLabels = unique(electrodeLabels);
 electrodeColors       = distinguishable_colors(length(uniqueElectrodeLabels));
 electrodeRadius       = 0.75;
@@ -201,7 +201,10 @@ if ~isempty(brainmat.electrodeNamesKey)
     end
     for i = 1:size(brainmat.electrodes.Location,1)
         % Plot electrode names
-        text(brainmat.electrodes.Location(i,1)*1.075, brainmat.electrodes.Location(i,2)*1.075, brainmat.electrodes.Location(i,3)*1.075, eeg_elNames{i},'FontSize',12,'FontWeight','bold','color','b');
+        text(brainmat.electrodes.Location(i,1)*1.075,...
+             brainmat.electrodes.Location(i,2)*1.075,...
+             brainmat.electrodes.Location(i,3)*1.075,...
+             eeg_elNames{i},'FontSize',12,'FontWeight','bold','color','b');
     end
     view(-114,25)
     

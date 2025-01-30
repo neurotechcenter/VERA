@@ -22,7 +22,7 @@ end
 brainmat = load(fullfile(filepath,filename));
 
 elec_radius  = 0.5;
-modelOpacity = 0.2; % Range from 0 to 1
+modelOpacity = 0.05; % Range from 0 to 1
 
 %% Plot implanted electrodes on brain model
 % Create color map from annotations (surface labels)
@@ -46,6 +46,13 @@ alpha(modelOpacity);
 hold on;
 % Plot electrodes in one color
 plotBallsOnVolume(gca,brainmat.tala.electrodes,[],elec_radius);
+for i = 1:size(brainmat.tala.electrodes,1)
+    % Plot electrode names
+    text(brainmat.tala.electrodes(i,1)*1.075,...
+         brainmat.tala.electrodes(i,2)*1.075,...
+         brainmat.tala.electrodes(i,3)*1.075,...
+         num2str(i),'FontSize',12,'FontWeight','bold','color','b');
+end
 
 %% Plot brain model with sticks
 NumImplants = size(brainmat.electrodeDefinition.Definition,1);
