@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="WashU Load Electrodes Pipeline">
+
+    <Component Type="FileLoader">
+        <Name>"CT Loader"</Name>
+        <Identifier>"CT"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+        <InputFilepath>"/Volumes/exFatVolume/Subjects/BJH067/imaging/dicom/CT_BONE/IM-0001-0001-0001.dcm"</InputFilepath>
+    </Component>
+
+    <Component Type="FileLoader">
+        <Name>"MRI Loader"</Name>
+        <Identifier>"MRI"</Identifier>
+        <IdentifierType>"Volume"</IdentifierType>
+        <InputFilepath>"/Volumes/exFatVolume/Subjects/BJH067/imaging/dicom/MRI/IM-0001-0001-0001.dcm"</InputFilepath>
+    </Component>
+
+    <Component Type="ElectrodeDefinitionConfiguration">
+        <Name>"Electrode Definition"</Name>
+        <Identifier>"ElectrodeDefinition"</Identifier>
+        <InputFilepath>"/Volumes/exFatVolume/Subjects/BJH067/notes/ElectrodeDefinition.xlsx"</InputFilepath>
+    </Component>
+
+    <Component Type="ImportROSFile">
+        <Name>"Import ROSA File"</Name>
+        <InputFilepath>"/Volumes/exFatVolume/Subjects/BJH067/notes/executed/"</InputFilepath>
+    </Component>
+
+    <Component Type="LoadFreeviewPointFile">
+        <Name>"Load Electrodes"</Name>
+        <InputFilepath>"/Volumes/exFatVolume/Subjects/BJH067/imaging/electrodes/"</InputFilepath>
+    </Component>
+
+
+
+    <Component Type="MoveRASOrigin2Volume">
+        <Name>"Move RAS Origin"</Name>
+    </Component>
+
+    <Component Type="Coregistration">
+        <Name>"Coregister CT to MRI"</Name>
+    </Component>
+
+    <Component Type="Coregistration">
+	    <Name>"Coregister ROSA Volume"</Name>
+        <CTIdentifier>"ROSAVolume"</CTIdentifier>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+    </Component>
+
+    <Component Type="ElectrodeTransformation">
+        <Name>"Transform ROSA Trajectories"</Name>
+        <TIdentifier>"T_ROSA"</TIdentifier>
+        <ElectrodeLocationIdentifier>"Trajectory"</ElectrodeLocationIdentifier>
+    </Component>
+
+    <Component Type="MayoReface">
+        <Identifier>"MRI"</Identifier>
+        <ImType>"T1"</ImType>
+        <Name>"Reface MRI"</Name>
+    </Component>
+
+    <Component Type="MayoReface">
+        <Identifier>"CT"</Identifier>
+        <ImType>"CT"</ImType>
+        <Name>"Reface CT"</Name>
+    </Component>
+
+    <Component Type="MayoReface">
+        <Identifier>"ROSAVolume"</Identifier>
+        <ImType>"T1"</ImType>
+        <Name>"Reface ROSA"</Name>
+    </Component>
+
+    <Component Type="FreesurferModelGeneration">
+        <Name>"Generate Freesurfer Model"</Name>
+        <AnnotationType>"aparc"</AnnotationType>
+    </Component>
+
+    <Component Type="LoadFreesurferSegmentationVolume">
+        <Name>"Load Freesurfer Segmentation Volume"</Name>
+        <FSVolume>"aparc+aseg"</FSVolume>
+    </Component>
+
+    <Component Type="FreesurferHippocampalSegmentation">
+        <Name>"Load or Generate Hippocampal Subsegmentation"</Name>
+        <VolumeIdentifier>"Hippocampus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="FreesurferThalamusSegmentation">
+        <Name>"Load or Generate Thalamus Subsegmentation"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
+    </Component>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Volume Labels"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Right Hippocampus"</Name>
+		<VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+	</Component>
+
+	<Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Left Hippocampus"</Name>
+		<VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+	</Component>
+
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Thalamus"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    <Component Type="CalculateDistanceToSurfaceLabel">
+        <Name>"Distance to Surface Labels"</Name>
+    </Component>
+
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Unknown Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0]</ReplacementRadius>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Left Hippocampus Surface"</Name>
+        <VolumeIdentifier>"LHippocampus"</VolumeIdentifier>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Right Hippocampus Surface"</Name>
+        <VolumeIdentifier>"RHippocampus"</VolumeIdentifier>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Thalamus Surface"</Name>
+        <VolumeIdentifier>"Thalamus"</VolumeIdentifier>
+        <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+        <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Cingulate Surface"</Name>
+        <VolumeIdentifier>"ASEG"</VolumeIdentifier>
+        <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier> 
+        <LabelNames>["ctx-lh-caudalanteriorcingulate","ctx-lh-isthmuscingulate","ctx-lh-posteriorcingulate","ctx-lh-rostralanteriorcingulate","ctx-rh-caudalanteriorcingulate","ctx-rh-isthmuscingulate","ctx-rh-posteriorcingulate","ctx-rh-rostralanteriorcingulate"]</LabelNames>
+        <LabelIds>[1002,1010,1023,1026,2002,2010,2023,2026]</LabelIds>
+        <Smoothing>3</Smoothing>
+        <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
+    </Component>
+
+    <Component Type="EEGElectrodeNames">
+        <Name>"Generate EEG Electrode Names Key"</Name>
+        <InputFilepath>"/Volumes/exFatVolume/Subjects/BJH067/data/baseline/ECOGS001R01.dat"</InputFilepath>
+    </Component>
+
+
+
+
+    <Component Type="MatOutput">
+        <Name>"Brain"</Name>
+        <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Left Hippocampus"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Right Hippocampus"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Thalamus"</Name>
+        <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+    </Component>
+
+    <Component Type="MatOutput">
+        <Name>"Cingulate"</Name>
+        <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier>
+    </Component>
+    
+    <Component Type="FreesurferDatExport">
+        <Name>"Freesurfer PointSets"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
+    </Component>
+
+
+
+    <Component Type="LoadFSMNIProjection">
+        <Name>"Load MNI Projection"</Name>
+    </Component>
+
+    <Component Type="ElectrodeTransformation">
+        <Name>"Project Electrodes to MNI"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <TIdentifier>"T_MNI"</TIdentifier>
+    </Component>
+
+    <Component Type="SurfaceTransformation">
+        <Name>"Project Surface to MNI"</Name>
+        <TIdentifier>"T_MNI"</TIdentifier>
+    </Component>
+    
+    <Component Type="MatOutput">
+        <Name>"MNI Cortex"</Name>
+    </Component>
+
+
+  
+	
+    <View Type="Model3DView">
+	    <Name>"Cortex 3D View"</Name>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Left Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"LHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+    
+    <View Type="Model3DView">
+        <Name>"Right Hippocampus 3D View"</Name>
+        <SurfaceIdentifier>"RHippocampusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Thalamus 3D View"</Name>
+        <SurfaceIdentifier>"ThalamusSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="Model3DView">
+        <Name>"Cingulate 3D View"</Name>
+        <SurfaceIdentifier>"CingulateSurface"</SurfaceIdentifier>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+    </View>
+
+    <View Type="EEGNamesView">
+        <Name>"EEG Names View"</Name>
+    </View>
+
+    <View Type="SliceViewerView">
+    	<Name>"Slice View"</Name>
+    </View>
+
+    <View Type="ElectrodeLocationTableView">
+        <Name>"Electrode Location Table View"</Name>
+    </View>
+
+    <View Type="ElectrodeDefinitionView">
+        <Name>"Electrode Definition View"</Name>
+    </View>
+
+</PipelineDefinition>
