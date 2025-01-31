@@ -1,4 +1,4 @@
-function PipelineDesigner_v3()
+function PipelineDesigner()
     % The pipeline designer is a tool to load, modify, and save VERA pipelines
 
     mfilePath = fileparts(mfilename('fullpath'));
