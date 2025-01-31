@@ -1,6 +1,5 @@
-function PipelineDesigner()
-    % The pipeline designer is a tool to load, modify, and save VERA 
-    % pipelines
+function PipelineDesigner_v3()
+    % The pipeline designer is a tool to load, modify, and save VERA pipelines
 
     mfilePath = fileparts(mfilename('fullpath'));
 
@@ -9,7 +8,7 @@ function PipelineDesigner()
     addpath(genpath(fullfile(mfilePath,'..','Components')));
     addpath(genpath(fullfile(mfilePath,'..','Dependencies')));
 
-    %java stuff to make sure that the GUI works as expected
+    % %java stuff to make sure that the GUI works as expected
     warning off
     javaaddpath(fullfile(mfilePath,'..','Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.jar'));
     import uiextras.jTree.*;
@@ -33,11 +32,11 @@ function PipelineDesigner()
         'LISTBOX_WIDTH',    390, ...
         'LISTBOX_HEIGHT',   138, ...
         'TEXTAREA_HEIGHT',  230, ...
-        'PIPELINE_WIDTH',   560, ...
-        'PIPELINE_HEIGHT',  750, ...
+        'PIPELINE_WIDTH',   520, ...
+        'PIPELINE_HEIGHT',  465, ...
         'HELP_AREA_HEIGHT', 273, ...
         'HYPERLINK_WIDTH',  400, ...
-        'SPACING',          6 ...
+        'SPACING',          0 ...
         );
     
     % X-coordinates for different sections
@@ -53,7 +52,7 @@ function PipelineDesigner()
         'INPUT_LIST',      632, ...
         'PROCESSING_LIST', 468, ...
         'OUTPUT_LIST',     305, ...
-        'COMPONENT_LABEL', 255, ...
+        'COMPONENT_LABEL', 250, ...
         'HELP_TEXT',       497, ...
         'HELP_LINK',       473, ...
         'BOTTOM',          20 ...
@@ -70,7 +69,25 @@ function PipelineDesigner()
         'ADD_VIEW', struct(...
             'X',      1130, ...
             'Y',      260, ...
-            'WIDTH',  100, ...
+            'WIDTH',  150, ...
+            'HEIGHT', 30 ...
+        ), ...
+        'MOVE_ELEMENT_UP', struct(...
+            'X',      545, ...
+            'Y',      730, ...
+            'WIDTH',  30, ...
+            'HEIGHT', 30 ...
+        ), ...
+        'MOVE_ELEMENT_DOWN', struct(...
+            'X',      545, ...
+            'Y',      690, ...
+            'WIDTH',  30, ...
+            'HEIGHT', 30 ...
+        ), ...
+        'DELETE_ELEMENT', struct(...
+            'X',      545, ...
+            'Y',      650, ...
+            'WIDTH',  30, ...
             'HEIGHT', 30 ...
         ) ...
     );
@@ -88,17 +105,41 @@ function PipelineDesigner()
 
     % Create a menu bar
     filemenu = uimenu(fig, 'Text', 'File');
+    VERAmenu = uimenu(fig, 'Text', 'VERA Tools');
     helpmenu = uimenu(fig, 'Text', 'Help');
     
-    %% Create the TextArea for writing pipeline code
+    %% Create the ListBox for writing pipeline code
      uilabel(fig, ...
         'Position', [UI.X.LEFT_PANEL, UI.Y.TOP, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
         'Text', 'Pipeline', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
     
-    pipelineTextArea = uitextarea(fig, ...
-        'Position', [UI.X.LEFT_PANEL, UI.Y.BOTTOM, UI.COMMON.PIPELINE_WIDTH, UI.COMMON.PIPELINE_HEIGHT], ...
+    % pipelineText = uitextarea(fig, ...
+    %     'Position', [0 0 0 0], ...
+    %     'Value', '', ...
+    %     'FontName', UI.FONT.CODE.NAME, ...
+    %     'FontSize', UI.FONT.CODE.SIZE, ...
+    %     'Editable', 'on');
+
+    pipelineText.Value = [];
+
+    pipelineListBox = uilistbox(fig, ...
+        'Position',  [UI.X.LEFT_PANEL, UI.Y.OUTPUT_LIST, UI.COMMON.PIPELINE_WIDTH, UI.COMMON.PIPELINE_HEIGHT], ...
+        'Items',     {''}, ...
+        'ItemsData', {}, ...
+        'FontName',  UI.FONT.CODE.NAME, ...
+        'FontSize',  UI.FONT.CODE.SIZE);
+
+    %% Create the TextArea for modifying component code
+    uilabel(fig, ...
+        'Position', [UI.X.LEFT_PANEL, UI.Y.COMPONENT_LABEL, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
+        'Text', 'Current Component in Pipeline', ...
+        'FontName', UI.FONT.REGULAR.NAME, ...
+        'FontSize', UI.FONT.REGULAR.SIZE);
+
+    pipelineElementTextArea = uitextarea(fig, ...
+        'Position', [UI.X.LEFT_PANEL, UI.Y.BOTTOM, UI.COMMON.PIPELINE_WIDTH, UI.COMMON.TEXTAREA_HEIGHT], ...
         'Value', '', ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE, ...
@@ -160,7 +201,7 @@ function PipelineDesigner()
     %% Listbox of possible views
     uilabel(fig, ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.OUTPUT_LIST + UI.COMMON.LISTBOX_HEIGHT + UI.COMMON.SPACING, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Available Views', ...
+        'Text', 'Views', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
     
@@ -208,16 +249,19 @@ function PipelineDesigner()
     helpHyperlink.Tooltip = '';
 
     %% Create a Load menu button to load a pipeline from a file
-    uimenu(filemenu, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineTextArea));
+    uimenu(filemenu, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,helpHyperlink));
     
     %% Create a Save menu button to save the pipeline to a file
-    uimenu(filemenu, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineTextArea));
+    uimenu(filemenu, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineListBox));
 
-    %% Create a clear pipeline button
-    uimenu(filemenu, 'Text', 'Clear Pipeline', 'MenuSelectedFcn', @(src, event) confirmAction(@() clearPipeline(pipelineTextArea)));
+    %% Create a clear pipeline menu button
+    uimenu(filemenu, 'Text', 'Clear Pipeline', 'MenuSelectedFcn', @(src, event) confirmAction(@() clearPipeline(pipelineListBox,pipelineElementTextArea)));
 
-    %% Create a Save menu button to save the pipeline to a file
-    uimenu(filemenu, 'Text', 'Check Pipeline', 'MenuSelectedFcn', @(src, event) checkPipeline(fig,pipelineTextArea));
+    %% Create a check pipeline menu button to save the pipeline to a file
+    uimenu(VERAmenu, 'Text', 'Check Pipeline', 'MenuSelectedFcn', @(src, event) checkPipeline(fig,pipelineListBox));
+
+    %% Create a pipeline graph menu button to save the pipeline to a file
+    uimenu(VERAmenu, 'Text', 'View Pipeline Graph', 'MenuSelectedFcn', @(src, event) viewPipelineGraphInDesigner(fig,pipelineListBox));
 
     %% Create a help button to link to the wiki
     uimenu(helpmenu, 'Text', 'VERA Wiki', 'MenuSelectedFcn', @(src, event) web('https://github.com/neurotechcenter/VERA/wiki/PipelineDesigner', '-browser'));
@@ -227,20 +271,43 @@ function PipelineDesigner()
         'Position', [UI.BUTTON.ADD_COMPONENT.X, UI.BUTTON.ADD_COMPONENT.Y, ...
                     UI.BUTTON.ADD_COMPONENT.WIDTH, UI.BUTTON.ADD_COMPONENT.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) AddComponent(pipelineTextArea, componentTextArea));
+        'ButtonPushedFcn', @(btn, event) AddElement(fig, pipelineListBox, componentTextArea, pipelineElementTextArea));
 
     %% Create an Add View button to move current view to the bottom of the pipeline text area
     uibutton(fig, 'push', 'Text', 'Add View', ...
         'Position', [UI.BUTTON.ADD_VIEW.X, UI.BUTTON.ADD_VIEW.Y, ...
                     UI.BUTTON.ADD_VIEW.WIDTH, UI.BUTTON.ADD_VIEW.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) AddView(pipelineTextArea, viewTextArea));
+        'ButtonPushedFcn', @(btn, event) AddElement(fig, pipelineListBox, viewTextArea, pipelineElementTextArea));
+
+    %% Create a Move Element Up button
+    uibutton(fig, 'push', 'Text', '^', ...
+        'Position', [UI.BUTTON.MOVE_ELEMENT_UP.X, UI.BUTTON.MOVE_ELEMENT_UP.Y, ...
+                    UI.BUTTON.MOVE_ELEMENT_UP.WIDTH, UI.BUTTON.MOVE_ELEMENT_UP.HEIGHT], ...
+        'FontSize', UI.FONT.REGULAR.SIZE, ...
+        'ButtonPushedFcn', @(btn, event) MoveElementUp(pipelineListBox,pipelineElementTextArea));
+
+    %% Create a Move Element Down button
+    uibutton(fig, 'push', 'Text', 'v', ...
+        'Position', [UI.BUTTON.MOVE_ELEMENT_DOWN.X, UI.BUTTON.MOVE_ELEMENT_DOWN.Y, ...
+                    UI.BUTTON.MOVE_ELEMENT_DOWN.WIDTH, UI.BUTTON.MOVE_ELEMENT_DOWN.HEIGHT], ...
+        'FontSize', UI.FONT.REGULAR.SIZE, ...
+        'ButtonPushedFcn', @(btn, event) MoveElementDown(pipelineListBox,pipelineElementTextArea));
+
+    %% Create a Delete Element button
+    uibutton(fig, 'push', 'Text', 'x', ...
+        'Position', [UI.BUTTON.DELETE_ELEMENT.X, UI.BUTTON.DELETE_ELEMENT.Y, ...
+                    UI.BUTTON.DELETE_ELEMENT.WIDTH, UI.BUTTON.DELETE_ELEMENT.HEIGHT], ...
+        'FontSize', UI.FONT.REGULAR.SIZE, ...
+        'ButtonPushedFcn', @(btn, event) DeleteElement(pipelineListBox,pipelineElementTextArea));
+
+
     %% On startup, display demo pipeline
     % path_to_demo = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions','SimpleTutorialPipeline.pwf'));
-    % loadPipeline(pipelineTextArea,path_to_demo);
+    % loadPipeline(pipelineListBox,path_to_demo);
     
     %% On startup, display empty pipeline
-    clearPipeline(pipelineTextArea);
+    clearPipeline(pipelineListBox,pipelineElementTextArea);
 
     %% Get all components
     componentParentClasses = {'AComponent'};
@@ -277,6 +344,7 @@ function PipelineDesigner()
 
     %% Populate list of possible views
     viewParentClasses = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'}; % properties to be excluded
+    
     viewPath          = GetFullPath(fullfile(mfilename('fullpath'),'..','..','classes','GUI','Views'));
 
     availableViewsListBox.Items = getAvailableElements(viewPath, viewParentClasses, 'view');
@@ -285,10 +353,19 @@ function PipelineDesigner()
     availableViewsListBox.ValueChangedFcn = @(src,event)...
         viewView(viewTextArea, helpTextArea, helpHyperlink, viewParentClasses, availableViewsListBox.Value);
 
+    %% Modify current pipeline when changing elements of current pipeline component
+    pipelineElementTextArea.ValueChangedFcn = @(src,event)...
+        modifyCurrentPipelineElement(fig,pipelineElementTextArea,pipelineListBox);
+
+    %% Populate currently selected element of pipeline
+    % Update view window to display current component
+    pipelineListBox.ValueChangedFcn = @(src,event)...
+        viewElementOfPipeline(pipelineElementTextArea, pipelineListBox,helpTextArea,helpHyperlink);
+
 end
 
 %% Function to load pipeline from a file
-function loadPipeline(fig,textArea,varargin)
+function loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,helpHyperlink,varargin)
     if ~isempty(varargin)
         [path, file, ext] = fileparts(varargin{1});
         file = [file,ext];
@@ -310,7 +387,7 @@ function loadPipeline(fig,textArea,varargin)
 
         for i = 1:length(emptyCells)
             if emptyCells(i)
-                pipelineContent{i} = '    ';
+                pipelineContent{i} = '';
             end
         end
 
@@ -319,15 +396,26 @@ function loadPipeline(fig,textArea,varargin)
             pipelineContent{i} = regexprep(pipelineContent{i}, '\t', '    ');
         end
 
-        % write pipeline to text area
-        textArea.Value = pipelineContent;
+        % Populate pipeline listbox and element text area
+        [compNames, viewNames, elements] = getCurrentComponents(pipelineContent);
+
+        pipelineListBox.Items     = [compNames'; viewNames'];
+        pipelineListBox.ItemsData = elements;
+
+        pipelineElementTextArea.Value = elements{1};
+
+        % show help of selected element
+        % Need element type to show help
+        elementType = getElementTypes({pipelineListBox.ItemsData{1}});
+        [dependencies, optionalDependencies] = getDependencies(elementType{1});
+        showHelp(helpTextArea,helpHyperlink,elementType{1},dependencies,optionalDependencies);
     else
         uialert(fig, 'Error reading the file.', 'File Error');
     end
 end
 
 %% Function to save pipeline to a file
-function [fullPath] = savePipeline(fig,textArea,varargin)
+function [fullPath] = savePipeline(fig,pipelineListBox,varargin)
     fullPath = [];
 
     % if there is an input file given, assume it comes from the
@@ -345,7 +433,7 @@ function [fullPath] = savePipeline(fig,textArea,varargin)
     % Only check in SavePipeline if SavePipeline is called directly.
     % Not sure if this logic is sound.
     if ~calledFromCheckPipeline
-        pipelineStatus = checkPipeline(fig,textArea);
+        pipelineStatus = checkPipeline(fig,pipelineListBox);
     else
         pipelineStatus = 1;
     end
@@ -365,11 +453,15 @@ function [fullPath] = savePipeline(fig,textArea,varargin)
 
         % write text area to file
         if file ~= 0
+
+            pipelineName = file;
+            pipelineText = createPipeline(pipelineListBox,pipelineName);
+
             fullPath = fullfile(path, file);
             fid = fopen(fullPath, 'wt');
             if fid ~= -1
-                for i = 1:length(textArea.Value)
-                    fprintf(fid, [textArea.Value{i},'\n']);
+                for i = 1:length(pipelineText)
+                    fprintf(fid, [pipelineText{i},'\n']);
                 end
                 fclose(fid);
             else
@@ -389,17 +481,42 @@ function [fullPath] = savePipeline(fig,textArea,varargin)
 end
 
 %% function to clear pipeline
-function clearPipeline(textArea)
-    textArea.Value = {'<?xml version="1.0" encoding="utf-8"?>';
-                              '<PipelineDefinition Name="Pipeline Name">';
-                              '';
-                              '';
-                              '</PipelineDefinition>'};
+function clearPipeline(pipelineListBox, pipelineComponentTextArea)
+    pipelineListBox.Items           = {''};
+    pipelineListBox.ItemsData       = {''};
+    pipelineComponentTextArea.Value = '';
+end
+
+%% Function to create the pipeline text from the pipelineListBox
+function pipelineText = createPipeline(pipelineListBox, pipelineName)
+    pipelineText = {'<?xml version="1.0" encoding="utf-8"?>';
+                    ['<PipelineDefinition Name="',pipelineName,'">'];
+                    '    '
+                    };
+    
+    for i = 1:length(pipelineListBox.ItemsData)
+        pipelineText = [pipelineText;
+                        pipelineListBox.ItemsData{i};
+                        '    '
+                        ];
+    end
+    
+    pipelineText = [
+                    pipelineText;
+                    '</PipelineDefinition>'
+                    ];
 
 end
 
-%% function to check the validity of the pipeline
-function pipelineStatus = checkPipeline(fig,textArea)
+%% Function to check the validity of the pipeline
+function pipelineStatus = checkPipeline(fig,pipelineListBox)
+
+    warnMsg_create    = [];
+    warnMsg_configure = [];
+    errormessage      = [];
+
+    checkingPipelineDlg = uiprogressdlg(fig,'Message','Checking Pipeline...','Title','Checking Pipeline',...
+    'Icon','error','Cancelable','on','Indeterminate','on');
 
     % Save working pipeline to be loaded into VERA and checked
     currentPath  = fileparts(mfilename('fullpath'));
@@ -417,7 +534,7 @@ function pipelineStatus = checkPipeline(fig,textArea)
     end
 
     tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
-    pipelinePath     = savePipeline(fig,textArea,tempPipelinePath);
+    pipelinePath     = savePipeline(fig,pipelineListBox,tempPipelinePath);
 
 
     % start VERA (would like to change this so pipelines can be checked
@@ -428,7 +545,6 @@ function pipelineStatus = checkPipeline(fig,textArea)
     VERAfig          = allFigureHandles(end);
 
     % Create dialog boxes when there are warnings or errors
-    errormessage = [];
     try 
         % create VERA project to see if the pipeline is viable
         lastwarn('');
@@ -491,13 +607,15 @@ function pipelineStatus = checkPipeline(fig,textArea)
         pipelineStatus = 0;
     end
 
-    % sclose VERA
+    % close VERA
     close(VERAfig);
 
     % delete temporary folder
     warning off;
     rmdir(fullfile(tempProjPath,'..'),'s');
     warning on;
+
+    close(checkingPipelineDlg);
 end
 
 % reformat matlab warning for nicer display in warn dialog box
@@ -507,6 +625,12 @@ function warnMsg = formatWarning()
     if ~isempty(warnMsg)
         % isolate meaningful message
         [warnMsg, matches] = strsplit(warnMsg,{'Error','</a>'});
+
+        % Find the name of the element causing the error
+        elementNameStart = find(contains(warnMsg,'errorDocCallback'),1,'first');
+        regexpString =  "(?<=\(')([^']+)(?='\))";
+        elementName = regexp(warnMsg(elementNameStart),regexpString,'match');
+
         start   = find(contains(matches,'</a>'),1,'first') + 1;
         warnMsg = warnMsg{start};
 
@@ -515,54 +639,62 @@ function warnMsg = formatWarning()
 
         % remove leading space
         warnMsg(1) = [];
+
+        warnMsg = [elementName{1}{1}, ': ', warnMsg];
     end
 end
 
-% %% Function to ensure there are no duplicate names of components or views
-% function isDuplicated = checkforDuplicateNames(textArea)
-%     % Use a regular expression to extract all 'Name' values from the XML text
-%     pattern = '<Name>"(.*?)"</Name>';  % This regex matches text between <Name>"..."</Name>
-%     names = regexp(textArea.Value, pattern, 'tokens');
-% 
-%     % Flatten the cell array and remove quotes from the extracted names
-%     % names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
-% 
-%     notnames = cellfun(@isempty, names, 'UniformOutput', true);
-%     names(notnames) = [];
-% 
-%     names = cellfun(@(x) x{1}, names, 'UniformOutput', false);
-% 
-%     % Check for duplicates
-%     duplicate_names = find_duplicates(names);
-% 
-%     % Display result
-%     if ~isempty(duplicate_names)
-%         isDuplicated = 1;
-%         for i = 1:length(duplicate_names)
-%             warndlg(['Duplicate component names! Check for multiple components named ', duplicate_names{i}])
-%         end
-%     else
-%         isDuplicated = 0;
-%     end
-% end
-% 
-% % Helper function to find duplicate names
-% function duplicates = find_duplicates(names)
-%     % Find duplicates by comparing each name with others
-%     duplicates = {};
-%     seen = {};
-%     for i = 1:length(names)
-%         name = names{i}{1};
-%         if any(strcmp(seen, name))
-%             duplicates{end+1} = name;  % Add to duplicates list
-%         else
-%             seen{end+1} = name;  % Mark this name as seen
-%         end
-%     end
-% end
+%% Function to view the pipeline graph
+function viewPipelineGraphInDesigner(fig, pipelineListBox)
+    
+    % check pipeline
+    pipelineStatus = checkPipeline(fig,pipelineListBox);
+
+    if pipelineStatus
+        % Save working pipeline to be loaded into VERA and checked
+        currentPath  = fileparts(mfilename('fullpath'));
+        tempProjPath = fullfile(currentPath,'temp/tempProj');
+    
+        if ~exist(tempProjPath,'dir')
+            mkdir(tempProjPath);
+        else
+            % delete temporary folder
+            warning off;
+            rmdir(fullfile(tempProjPath,'..'),'s');
+            warning on;
+            % make it fresh
+            mkdir(tempProjPath);
+        end
+    
+        tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
+        pipelinePath     = savePipeline(fig,pipelineListBox,tempPipelinePath);
+    
+        % start VERA (would like to change this so pipelines can be checked
+        % without running VERA...)
+        VERAvisiblity    = 'off';
+        VERAhandle       = MainGUI(VERAvisiblity);
+        allFigureHandles = findall(groot,'Type','figure');
+        VERAfig          = allFigureHandles(end);
+
+        % Create a VERA project so we can view the pipeline graph. In
+        % theory this could be done without creating a project, but I don't
+        % know how
+        createNewProject(VERAhandle,tempProjPath,pipelinePath);
+
+        % Create the pipeline graph
+        viewPipelineGraph(VERAhandle);
+
+        % close the VERA figure window (hidden)
+        close(VERAfig);
+
+    end
+end
 
 %% Function to get all components/views in a given directory
 function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,compOrView)
+
+    Names          = {};
+    componentTypes = {};
 
     % set up parentClasses to be used in regular expression
     parentClassesString = [];
@@ -610,7 +742,6 @@ function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,co
     end
 
     % Collect names of components
-    Names = {};
     for i = 1:length(filesInheritingParentClass)
         [~, Name] = fileparts(filesInheritingParentClass(i).name);
         Names{i,1} = Name;
@@ -628,12 +759,311 @@ function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,co
 
 end
 
+%% Function to get component names/types for the current pipeline
+function [compNames, viewNames, elements] = getCurrentComponents(pipelineText)
+    % Initialize variables
+    compNames      = {};
+    componentTypes = {};
+    viewNames      = {};
+    viewTypes      = {};
+    
+    % Process components and views
+    componentStart = [];
+    componentEnd   = [];
+    viewStart      = [];
+    viewEnd        = [];
+    compHasName    = [];
+    viewHasName    = [];
+    
+    % Loop through the pipelineText once and collect data
+    for i = 1:size(pipelineText, 1)
+        line = pipelineText{i};
+        
+        % Check for components
+        if contains(line, '<Component Type="')
+            componentStart(end + 1) = i;
+            matches = regexp(line, '<Component Type="([^"]+)"', 'tokens');
+            if ~isempty(matches)
+                componentTypes{end + 1} = matches{1}{1};
+            end
+
+            if contains(line,'/>')
+                componentEnd(end + 1) = i;
+            end
+
+        elseif contains(line, '</Component>')
+            componentEnd(end + 1) = i;
+        end
+
+    
+        % Check for views
+        if contains(line, '<View Type="')
+            viewStart(end + 1) = i;
+            matches = regexp(line, '<View Type="([^"]+)"', 'tokens');
+            if ~isempty(matches)
+                viewTypes{end + 1} = matches{1}{1};
+            end
+
+            if contains(line,'/>')
+                viewEnd(end + 1) = i;
+            end
+
+        elseif contains(line, '</View>')
+            viewEnd(end + 1) = i;
+        end
+    end
+    
+    % Extract component names
+    for i = 1:length(componentStart)
+        compHasName(i) = false;
+        for j = componentStart(i):componentEnd(i)
+            if contains(pipelineText{j}, '<Name>"')
+                compHasName(i) = true;
+                matches = regexp(pipelineText{j}, '<Name>"([^"]+)"', 'tokens');
+                if ~isempty(matches)
+                    compNames{end + 1} = matches{1}{1};
+                end
+            end
+        end
+        
+        % If no name is found, use the type as the name
+        if ~compHasName(i)
+            compNames{end + 1} = componentTypes{i};
+        end
+    end
+    
+    % Extract view names
+    for i = 1:length(viewStart)
+        viewHasName(i) = false;
+        for j = viewStart(i):viewEnd(i)
+            if contains(pipelineText{j}, '<Name>"')
+                viewHasName(i) = true;
+                matches = regexp(pipelineText{j}, '<Name>"([^"]+)"', 'tokens');
+                if ~isempty(matches)
+                    viewNames{end + 1} = matches{1}{1};
+                end
+            end
+        end
+        
+        % If no name is found, use the type as the name
+        if ~viewHasName(i)
+            viewNames{end + 1} = viewTypes{i};
+        end
+    end 
+
+    % Create struct of components and views
+    elementStart = sort([componentStart, viewStart]);
+    elementEnd   = sort([componentEnd,   viewEnd]);
+    for i = 1:length(elementStart)
+        elements{i} = pipelineText(elementStart(i):elementEnd(i));
+    end
+
+end
+
+%% Function to get names from elements structure
+function elementNames = getElementNames(elements)
+
+    elementNames = {''};
+    
+    % sort through elements to find name. If there is no name, use the
+    % element type as name
+    for i = 1:length(elements)
+        for j = 1:length(elements{i})
+            if contains(elements{i}{j},'<Name>')
+                matches = regexp(elements{i}{j}, '<Name>"([^"]+)"', 'tokens');
+                if ~isempty(matches)
+                    elementNames{i} = matches{1}{1};
+                end
+            else
+                if contains(elements{i}{j},'<Component Type=')
+                    matches = regexp(elements{i}{j}, '<Component Type="([^"]+)"', 'tokens');
+                    if ~isempty(matches)
+                        elementNames{i} = matches{1}{1};
+                    end
+                elseif contains(elements{i}{j},'<View Type=')
+                    matches = regexp(elements{i}{j}, '<View Type="([^"]+)"', 'tokens');
+                    if ~isempty(matches)
+                        elementNames{i} = matches{1}{1};
+                    end
+                end
+            end
+        end
+    end
+
+end
+
+%% Function to get element types
+function elementTypes = getElementTypes(elements)
+
+    elementTypes = {''};
+    
+    % sort through elements to find type
+    for i = 1:length(elements)
+        for j = 1:length(elements{i})
+            if contains(elements{i}{j},'<Component Type=')
+                matches = regexp(elements{i}{j}, '<Component Type="([^"]+)"', 'tokens');
+                if ~isempty(matches)
+                    elementTypes{i} = matches{1}{1};
+                end
+            elseif contains(elements{i}{j},'<View Type=')
+                matches = regexp(elements{i}{j}, '<View Type="([^"]+)"', 'tokens');
+                if ~isempty(matches)
+                    elementTypes{i} = matches{1}{1};
+                end
+            end
+        end
+    end
+
+end
+
+%% Function to inspect the properties of a component or view selected in the pipeline
+function viewElementOfPipeline(textArea,pipelineListBox,helpTextArea,helpHyperlink)
+
+    textArea.Value = pipelineListBox.Value;
+
+    % show help of selected element
+    % Need element type to show help
+    elementType = getElementTypes({pipelineListBox.Value});
+    [dependencies, optionalDependencies] = getDependencies(elementType{1});
+    showHelp(helpTextArea,helpHyperlink,elementType{1},dependencies,optionalDependencies);
+    
+end
+
+%% Function to modify current pipeline when modifying pipeline element text area
+function modifyCurrentPipelineElement(fig,pipelineElementTextArea,pipelineListBox)
+
+    % Testing functionality to check element formatting
+    [isValid, errormsg] = testHTMLFormat(pipelineElementTextArea.Value);
+    if ~isValid
+        uialert(fig,[errormsg, ' Stored anyway, but be cautious.'], 'Warning')
+    end
+
+    % Find currently selected item in ItemsData
+    for i = 1:length(pipelineListBox.ItemsData)
+        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
+            index = i;
+        end
+    end
+
+    % Check if name has been changed to be a duplicate
+    elementName  = getElementNames({pipelineElementTextArea.Value});
+
+    pipelineListBox.Items{index} = char(floor(26*rand(1, 20)) + 65);
+
+    isDuplicated = checkforDuplicateNames(pipelineListBox.Items,elementName);
+
+    pipelineListBox.ItemsData{index} = pipelineElementTextArea.Value;
+    pipelineListBox.Value            = pipelineListBox.ItemsData{index}; 
+    pipelineListBox.Items            = getElementNames(pipelineListBox.ItemsData);
+    
+    if isDuplicated
+        uialert(fig, 'Error: Duplicate Names. Elements cannot have the same name.', 'Duplicate Names');
+        
+        % set item to unavailable name
+        pipelineListBox.Items{index}     = [elementName{1}, ' - Cannot have duplicate name!'];
+    end
+end
+
+%% Function to move element up in listbox and in pipeline text
+function MoveElementUp(pipelineListBox,pipelineElementTextArea)
+
+    % Find currently selected item in ItemsData
+    for i = 1:length(pipelineListBox.ItemsData)
+        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
+            index = i;
+        end
+    end
+
+    if size(pipelineListBox.Items,2) > 1
+        newOrder = 1:length(pipelineListBox.Items);
+        if index ~= 1
+            idx1 = index;
+            idx2 = index-1;
+        else
+            idx1 = index;
+            idx2 = index;
+        end
+        
+        % Perform the swap
+        temp = newOrder(idx1);
+        newOrder(idx1) = newOrder(idx2);
+        newOrder(idx2) = temp;
+        
+
+        pipelineListBox.Items     = pipelineListBox.Items(newOrder);
+        pipelineListBox.ItemsData = pipelineListBox.ItemsData(newOrder);
+
+    end
+
+    pipelineElementTextArea.Value = pipelineListBox.Value;
+
+end
+
+%% Function to move element down in listbox and in pipeline text
+function MoveElementDown(pipelineListBox,pipelineElementTextArea)
+
+    % Find currently selected item in ItemsData
+    for i = 1:length(pipelineListBox.ItemsData)
+        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
+            index = i;
+        end
+    end
+
+    if size(pipelineListBox.Items,2) > 1
+        newOrder = 1:length(pipelineListBox.Items);
+        if index ~= length(pipelineListBox.Items)
+            idx1 = index;
+            idx2 = index+1;
+        else
+            idx1 = index;
+            idx2 = index;
+        end
+        
+        % Perform the swap
+        temp = newOrder(idx1);
+        newOrder(idx1) = newOrder(idx2);
+        newOrder(idx2) = temp;
+        
+        pipelineListBox.Items     = pipelineListBox.Items(newOrder);
+        pipelineListBox.ItemsData = pipelineListBox.ItemsData(newOrder);
+
+    end
+
+    pipelineElementTextArea.Value = pipelineListBox.Value;
+end
+
+%% Function to remove an element from the listbox and pipeline text
+function DeleteElement(pipelineListBox,pipelineElementTextArea)
+
+    % Find currently selected item in ItemsData
+    for i = 1:length(pipelineListBox.ItemsData)
+        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
+            index = i;
+        end
+    end
+
+    if size(pipelineListBox.Items,2) > 1
+        pipelineListBox.Items(index)     = [];
+        pipelineListBox.ItemsData(index) = [];
+        if index > 1
+            pipelineListBox.Value = pipelineListBox.ItemsData{index-1};
+        else
+            pipelineListBox.Value = pipelineListBox.ItemsData{index};
+        end
+    else
+        pipelineListBox.Items     = {''};
+        pipelineListBox.ItemsData = {};
+    end
+
+    pipelineElementTextArea.Value = pipelineListBox.Value;
+end
+
 %% Function to inspect the properties of a component selected in the listbox
 function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentComponent)
     [~,componentName] = fileparts(currentComponent);
     component = eval(componentName);
 
-    % Get the component type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
+    % Get the component type
     componentType = class(component);
 
     % Get the list of properties for the component
@@ -654,7 +1084,7 @@ function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentCompon
 
     % Start building the XML string
     textArea.Value      = {''};
-    textArea.Value{1,1} = [sprintf('    <Component Type="%s">', componentType)];
+    textArea.Value{1,1} = [sprintf('<Component Type="%s">', componentType)];
 
     % Loop through the properties and add them to the XML string
     for i = 1:length(uniqueComponentProperties)
@@ -662,25 +1092,59 @@ function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentCompon
         propValue = component.(uniqueComponentProperties{i});
 
         % Convert the property value to a string if it's not already
-        if ischar(propValue) || isstring(propValue)
+        if isempty(propValue)
+            propValue = '""';
+
+        elseif ischar(propValue) || isstring(propValue)
             propValue = sprintf('"%s"', propValue);
+
+        elseif isnumeric(propValue) && length(propValue) > 1
+            
+            % build a bracketed vector
+            propValue_holder = '[';
+            for j = 1:length(propValue)
+                propValue_holder = [propValue_holder, sprintf('%g', propValue(j)), ',']; 
+            end
+            propValue_holder(end) = []; % remove trailing comma
+            propValue_holder      = [propValue_holder,']'];
+
+            propValue = propValue_holder;
+
         elseif isnumeric(propValue)
-            propValue = sprintf('"%g"', propValue);
+            propValue = sprintf('%g', propValue);
+
         elseif islogical(propValue)
             propValue = sprintf('"%s"', mat2str(propValue));
+
+        elseif iscell(propValue) && length(propValue) > 1
+
+            % build a bracketed array if more than 1 element
+            propValue_holder = '[';
+            for j = 1:length(propValue)
+                propValue_holder = [propValue_holder, sprintf('"%s"', propValue{j}), ',']; 
+            end
+            propValue_holder(end) = []; % remove trailing comma
+            propValue_holder      = [propValue_holder,']'];
+
+            propValue = propValue_holder;
+
+        elseif iscell(propValue)
+            propValue = sprintf('"%s"', propValue{1}); 
+
         else
             propValue = '""';  % For unsupported or complex types
         end
 
         % Add property to XML (with the property name as the tag)
-        textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueComponentProperties{i}, propValue, uniqueComponentProperties{i})];
+        textArea.Value{i+1,1} = [sprintf('    <%s>%s</%s>', uniqueComponentProperties{i}, propValue, uniqueComponentProperties{i})];
     end
 
     % Close the component and XML structure
-    textArea.Value{end+1,1} = '    </Component>';
+    textArea.Value{end+1,1} = '</Component>';
 
-    % show help of selected view
-    showHelp(helpArea, helpHyperlink, currentComponent)
+    % show help of selected component
+    [dependencies, optionalDependencies] = getDependencies(componentName);
+    showHelp(helpArea,helpHyperlink,currentComponent,dependencies,optionalDependencies);
 
 end
 
@@ -710,7 +1174,7 @@ function viewView(textArea,helpArea,helpHyperlink,parentClass,currentView)
 
     % Start building the XML string
     textArea.Value      = {''};
-    textArea.Value{1,1} = [sprintf('    <View Type="%s">', viewType)];
+    textArea.Value{1,1} = [sprintf('<View Type="%s">', viewType)];
 
     % Loop through the properties and add them to the XML string
     for i = 1:length(uniqueViewProperties)
@@ -718,30 +1182,64 @@ function viewView(textArea,helpArea,helpHyperlink,parentClass,currentView)
         propValue = view.(uniqueViewProperties{i});
 
         % Convert the property value to a string if it's not already
-        if ischar(propValue) || isstring(propValue)
+        if isempty(propValue)
+            propValue = '""';
+
+        elseif ischar(propValue) || isstring(propValue)
             propValue = sprintf('"%s"', propValue);
+
+        elseif isnumeric(propValue) && length(propValue) > 1
+            
+            % build a bracketed vector
+            propValue_holder = '[';
+            for j = 1:length(propValue)
+                propValue_holder = [propValue_holder, sprintf('%g', propValue(j)), ',']; 
+            end
+            propValue_holder(end) = []; % remove trailing comma
+            propValue_holder      = [propValue_holder,']'];
+
+            propValue = propValue_holder;
+
         elseif isnumeric(propValue)
-            propValue = sprintf('"%g"', propValue);
+            propValue = sprintf('%g', propValue);
+
         elseif islogical(propValue)
             propValue = sprintf('"%s"', mat2str(propValue));
+
+        elseif iscell(propValue) && length(propValue) > 1
+
+            % build a bracketed array if more than 1 element
+            propValue_holder = '[';
+            for j = 1:length(propValue)
+                propValue_holder = [propValue_holder, sprintf('"%s"', propValue{j}), ',']; 
+            end
+            propValue_holder(end) = []; % remove trailing comma
+            propValue_holder      = [propValue_holder,']'];
+
+            propValue = propValue_holder;
+
+        elseif iscell(propValue)
+            propValue = sprintf('"%s"', propValue{1}); 
+
         else
             propValue = '""';  % For unsupported or complex types
         end
 
         % Add property to XML (with the property name as the tag)
-        textArea.Value{i+1,1} = [sprintf('        <%s>%s</%s>', uniqueViewProperties{i}, propValue, uniqueViewProperties{i})];
+        textArea.Value{i+1,1} = [sprintf('    <%s>%s</%s>', uniqueViewProperties{i}, propValue, uniqueViewProperties{i})];
     end
 
     % Close the view and XML structure
-    textArea.Value{end+1,1} = '    </View>';
+    textArea.Value{end+1,1} = '</View>';
 
     % show help of selected view
-    showHelp(helpArea, helpHyperlink, currentView)
+    [dependencies, optionalDependencies] = getDependencies(viewName);
+    showHelp(helpArea,helpHyperlink,currentView,dependencies,optionalDependencies);
 
 end
 
 %% Help function to display help text
-function showHelp(helpTextArea,helpHyperlink,element)
+function showHelp(helpTextArea,helpHyperlink,element,dependencies,optionalDependencies)
     helpText = help(element);
     
     % find and remove documentation text for formatting
@@ -762,33 +1260,90 @@ function showHelp(helpTextArea,helpHyperlink,element)
     helpText = [helpText, newline, newline, documentation];
     helpText = [helpText, newline, folderName];
 
+    % add dependencies to help text
+    helpText = [helpText, newline, 'Dependencies: ', newline];
+    if ~isempty(dependencies)
+        dependenciesFormatted = [];
+        for i = 1:length(dependencies)
+            dependenciesFormatted = [dependenciesFormatted, dependencies{i}, newline];
+        end
+        helpText = [helpText, dependenciesFormatted];
+    else
+        helpText = [helpText, 'none', newline];
+    end
+
+    % add optional dependencies to help text
+    helpText = [helpText, newline, 'Optional Dependencies: ', newline];
+    if ~isempty(optionalDependencies)
+        optDependenciesFormatted = [];
+        for i = 1:length(optionalDependencies)
+            optDependenciesFormatted = [optDependenciesFormatted, optionalDependencies{i}, newline];
+        end
+        helpText = [helpText, optDependenciesFormatted];
+    else
+        helpText = [helpText, 'none'];
+    end
+
+    % write help text to helpTextArea
+    helpTextArea.Value = helpText;
+
     helpHyperlink.Text    = element;
     helpHyperlink.URL     = ['https://github.com/neurotechcenter/VERA/wiki/', element];
     helpHyperlink.Tooltip = helpHyperlink.URL;
 
-    % write help text to helpTextArea
-    helpTextArea.Value = helpText;
 end
 
-%% Function to move component to bottom of pipeline
-function AddComponent(pipelineTextArea,componentTextArea)
-    pipelineTextArea.Value = [
-                                pipelineTextArea.Value(1:end-2); 
-                                componentTextArea.Value; 
-                                '    '; 
-                                pipelineTextArea.Value(end-1:end)
-                             ];
+%% Function to move component or view to pipeline
+function AddElement(fig,pipelineListBox,elementText,pipelineElementTextArea)
+
+    elementNames       = getElementNames(pipelineListBox.ItemsData);
+    currentElementName = getElementNames({pipelineListBox.Value});
+    elementToAddName   = getElementNames({elementText.Value});
+
+    % Throw an error if there are duplicated elements
+    isDuplicated = checkforDuplicateNames(elementNames,elementToAddName{1});
+    if isDuplicated
+        uialert(fig, 'Error: Duplicate Names. Elements cannot have the same name.', 'Duplicate Names');
+    else
+        % Testing functionality to check element formatting
+        [isValid, errormsg] = testHTMLFormat(elementText.Value);
+        if ~isValid
+            uialert(fig,[errormsg, ' Added anyway, but be cautious.'], 'Warning')
+        end
+
+        % Get index of currently selected element in pipeline ListBox
+        currentIDX = find(strcmp(elementNames,currentElementName),1);
+        
+        % Update Items in listbox
+        pipelineListBox.Items = [
+                                 pipelineListBox.Items{1:currentIDX},...
+                                 elementToAddName,...
+                                 pipelineListBox.Items{currentIDX+1:length(pipelineListBox.Items)}
+                                 ];
+
+        % Update data associated with items
+        if size(pipelineListBox.Items,2) > 1
+            pipelineListBox.ItemsData = {
+                                         pipelineListBox.ItemsData{1:currentIDX},...
+                                         elementText.Value,...
+                                         pipelineListBox.ItemsData{currentIDX+1:length(pipelineListBox.ItemsData)}
+                                         };
+
+            % Update value so added component is selected in listbox
+            pipelineListBox.Value = pipelineListBox.ItemsData{currentIDX+1};
+        else
+            pipelineListBox.ItemsData = {elementText.Value};
+
+            % Update value so added component is selected in listbox
+            pipelineListBox.Value = pipelineListBox.ItemsData{currentIDX};
+        end
+
+        % Update working component text area
+        pipelineElementTextArea.Value = elementText.Value;
+    
+    end
 end
 
-%% Function to move component to bottom of pipeline
-function AddView(pipelineTextArea,viewTextArea)
-    pipelineTextArea.Value = [
-                                pipelineTextArea.Value(1:end-2); 
-                                viewTextArea.Value; 
-                                '    '; 
-                                pipelineTextArea.Value(end-1:end)
-                             ];
-end
 
 %% Function to get component type (input, processing, or output)
 function [componentType] = getComponentType(className)
@@ -833,6 +1388,9 @@ end
 
 % Function to extract inputs and outputs of a component
 function [inputs, outputs] = extractInputsOutputs(className)
+    % A better approach will be to look at
+    % classInfo.PropertyList
+
     % Check for calls to AddInput and AddOutput in the method body
     filePath   = which([className '.m']);
     methodCode = fileread(filePath);
@@ -852,18 +1410,86 @@ function [inputs, outputs] = extractInputsOutputs(className)
     optionalOutputsMatch = regexp(methodCode, optionalOutputPattern, 'match');
     
     % Parse the matched results
-    inputs  = parseAddInputOutput(inputsMatch);
-    outputs = parseAddInputOutput(outputsMatch);
+    inputs  = parseMatchedString(inputsMatch);
+    outputs = parseMatchedString(outputsMatch);
 
-    optionalInputs  = parseAddInputOutput(optionalInputsMatch);
-    optionalOutputs = parseAddInputOutput(optionalOutputsMatch);
+    optionalInputs  = parseMatchedString(optionalInputsMatch);
+    optionalOutputs = parseMatchedString(optionalOutputsMatch);
 
     inputs  = [inputs,  optionalInputs];
     outputs = [outputs, optionalOutputs];
 end
 
-% Function to parse the component for the matched string
-function result = parseAddInputOutput(matches)
+
+%% This function gets the dependencies necessary to run a component
+function [dependencies, optionalDependencies] = getDependencies(className)
+% This function extracts the necessary dependencies of a component
+
+% Check if the class exists
+    if ~exist('className', 'var') || ~ischar(className)
+        error('Class name must be a valid string');
+    end
+    
+    dependencies         = {};
+    optionalDependencies = {};
+    
+    % Get the class definition
+    classInfo = meta.class.fromName(className);
+    
+    % Iterate through the class methods
+    for i = 1:length(classInfo.MethodList)
+        methodName = classInfo.MethodList(i).Name;
+        
+        % Check for GetDependency calls
+        if strcmp(methodName, 'Initialize')
+            % Look at the GetDependency method to get inputs and outputs
+            [dependencies, optionalDependencies] = extractDependencies(className);
+        end
+        
+    end
+
+end
+
+% Function to extract dependencies of a component
+function [dependencies, optionalDependencies] = extractDependencies(className)
+    % Check for calls to GetDependency in the method body
+    filePath   = which([className '.m']);
+    methodCode = fileread(filePath);
+    
+    % Regular expression to find GetDependency calls
+    getDependencyPattern = 'obj.GetDependency\((.*?)\);';
+    reqDependencyPattern = 'obj.RequestDependency\((.*?)\);';
+    optDependencyPattern = 'obj.GetOptionalDependency\((.*?)\);';
+
+    % Extract dependencies
+    getDependenciesMatch = regexp(methodCode, getDependencyPattern, 'match');
+    reqDependenciesMatch = regexp(methodCode, reqDependencyPattern, 'match');
+    optDependenciesMatch = regexp(methodCode, optDependencyPattern, 'match');
+    
+    % Parse the matched results
+    dependencies_get = parseMatchedString(getDependenciesMatch);
+    dependencies_req = parseMatchedString(reqDependenciesMatch);
+    dependencies_opt = parseMatchedString(optDependenciesMatch);
+
+    % This is needed because I am not actually searching the GetDependency
+    % Method, but the entire component code
+    dependencies = [dependencies_get, dependencies_req];
+    dependencies = unique(dependencies);
+
+    optionalDependencies = unique(dependencies_opt);
+
+    % add a note that UbuntuSubsystemPath is a dependency on Windows only
+    dependencies(strcmp(dependencies,'''UbuntuSubsystemPath'''))                 = {'''UbuntuSubsystemPath (Windows)'''};
+    optionalDependencies(strcmp(optionalDependencies,'''UbuntuSubsystemPath''')) = {'''UbuntuSubsystemPath (Windows)'''};
+
+    % TempPath should always be available, so it is not really an external dependency
+    dependencies(strcmp(dependencies,'''TempPath'''))                 = [];
+    optionalDependencies(strcmp(optionalDependencies,'''TempPath''')) = [];
+
+end
+
+%% Function to parse the component for the matched string
+function result = parseMatchedString(matches)
     % Parse the AddInput/Output calls into structured results
     result = {};
     
@@ -871,12 +1497,14 @@ function result = parseAddInputOutput(matches)
         match      = matches{i};
         parts      = strsplit(match, '(');
         object     = strsplit(parts{2},',');
+        object     = strsplit(object{1},')');
         identifier = object{1};
     
         result{end+1} = identifier;
     end
 
 end
+
 
 %% Function to show a confirmation dialog
 function confirmAction(action)
@@ -889,3 +1517,147 @@ function confirmAction(action)
         action();  % Call the action
     end
 end
+
+%% Function to ensure there are no duplicate names of components or views
+function isDuplicated = checkforDuplicateNames(elementList,currentElement)
+    isDuplicated = 0;
+    for i = 1:size(elementList,2)
+        if strcmp(elementList{i},currentElement)
+            isDuplicated = 1;
+        end
+    end
+end
+
+%% Functions to test if component text is formatted correctly
+function [isValid,msg] = testHTMLFormat(inputStr)
+    % Initialize the output to true (assuming valid)
+    isValid = true;
+    msg     = [];
+    
+    % Clean up input string (remove unnecessary newlines and excess spaces)
+    inputStr = strtrim(inputStr);  % Trim any leading/trailing spaces
+    
+    % Check for matching opening and closing tags
+    isValid = checkTagStructure(inputStr);
+    if ~isValid
+        msg = 'Error: Mismatched or missing attribute names.';
+        % disp(msg);
+        return;
+    end
+    
+    % Check for properly quoted attributes (handles multiline attributes)
+    isValid = checkAttributeQuotes(inputStr);
+    if ~isValid
+        msg = 'Error: Missing or mismatched quotation marks or brackets around attribute values.';
+        % disp(msg);
+        return;
+    end
+    
+end
+
+function isValid = checkTagStructure(inputStr)
+    % This function checks that opening and closing tags are properly paired and nested
+    isValid = true;
+    tagStack = {};  % Stack to keep track of opening tags
+    
+    % Regular expression to match all tags (including multi-line tags)
+    tagPattern = '<\s*(\/?\s*\w+)\s*[^>]*>';
+    
+    % Extract all matched tags (opening and closing tags)
+    tags = regexp(inputStr, tagPattern, 'tokens');
+    
+    for i = 1:length(tags)
+        for j = 1:length(tags{i})
+            tag = tags{i}{j};
+            
+            if contains(tag, '/')  % Closing tag
+                if isempty(tagStack)
+                    isValid = false;
+                    return;
+                end
+                lastTag = tagStack{end};
+                if ~strcmp(tag{1}(2:end), lastTag{1})
+                    isValid = false;
+                    return;
+                end
+                tagStack(end) = [];  % Pop the last tag
+            else  % Opening tag
+                tagStack{end+1} = tag;  % Push the tag onto the stack
+            end
+        end
+    end
+    
+    % If the stack is not empty, there are unmatched opening tags
+    if ~isempty(tagStack)
+        isValid = false;
+    end
+end
+
+function isValid = checkAttributeQuotes(inputStr)
+    % This function checks that attribute values are properly quoted ("" or
+    % '') and bracketed ([ ])
+    isValid = true;
+
+    attrPattern = '(?<=[=])\s*([^<>\s]+)(?=>)|(?<=>)\s*([^<>\s]+)(?=<)';
+    
+    % Extract all matched attributes
+    attrs = regexp(inputStr, attrPattern, 'tokens');
+    
+    % Loop over all matched attributes and ensure correct quoting
+    for i = 1:length(attrs)
+        if ~isempty(attrs{i})
+            attr = attrs{i}{1}{1};
+
+            % if it starts with a quote it needs to end with a quote
+            if strcmp(attr(1),'"') && ~strcmp(attr(end),'"')
+                isValid = false;
+                return;
+            end
+
+            % if it ends with a quote it needs to start with a quote
+            if strcmp(attr(end),'"') && ~strcmp(attr(1),'"')
+                isValid = false;
+                return;
+            end
+
+            % if it starts with a bracket it needs to end with a bracket
+            if strcmp(attr(1),'[') && ~strcmp(attr(end),']')
+                isValid = false;
+                return;
+            end
+            % if it ends with a bracket it needs to start with a bracket
+            if strcmp(attr(end),']') && ~strcmp(attr(1),'[')
+                isValid = false;
+                return;
+            end
+
+            % if line starts and ends with bracket, investigate sub attributes
+            if strcmp(attr(1), '[') && strcmp(attr(end), ']')
+                
+                attrSubPattern = '(?<=\[|,)([^,]+)(?=\]|,)';
+                attrSubStrings = regexp(attr, attrSubPattern, 'match');
+
+                for j = 1:length(attrSubStrings)
+                    % if it starts with a quote it needs to end with a quote
+                    if strcmp(attrSubStrings{j}(1),'"') && ~strcmp(attrSubStrings{j}(end),'"')
+                        isValid = false;
+                        return;
+                    end
+        
+                    % if it ends with a quote it needs to start with a quote
+                    if strcmp(attrSubStrings{j}(end),'"') && ~strcmp(attrSubStrings{j}(1),'"')
+                        isValid = false;
+                        return;
+                    end
+                end
+
+            end
+
+            if isempty(attr)
+                isValid = false;
+                return;
+            end
+        end
+    end
+end
+
