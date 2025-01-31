@@ -56,7 +56,7 @@ classdef LabelVolume2Surface < AComponent
 
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
-                    path = obj.GetDependency('Freesurfer');
+                    path = obj.GetOptionalDependency('Freesurfer');
                     addpath(genpath(fullfile(path,'matlab')));
                     warning(['For Component: "',obj.Name,'" no labels provided or label configuration incorrect, trying Freesurfer LUT']);
                     lut_path    = fullfile(path,'FreeSurferColorLUT.txt');
@@ -95,11 +95,11 @@ classdef LabelVolume2Surface < AComponent
                     [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                     [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
                 elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
-                    path     = obj.GetDependency('Freesurfer');
+                    path     = obj.GetOptionalDependency('Freesurfer');
                     lut_path = fullfile(path,'FreeSurferColorLUT.txt');
                     [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
                 elseif(strcmp(obj.LoadLUTFile,'thomas')) 
-                    path     = obj.GetDependency('Thomas');
+                    path     = obj.GetOptionalDependency('Thomas');
                     lut_path = fullfile(path,'CustomAtlas.ctbl');
                     [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
                 end

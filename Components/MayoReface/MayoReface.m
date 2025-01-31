@@ -1,5 +1,9 @@
 classdef MayoReface < AComponent
-    % The MayoReface component applies the mri_reface refacing algorithm
+    % The MayoReface component applies the mri_reface refacing algorithm.
+    % Note that for Windows computers and intel macs, a docker container of
+    %this project is available. There is no docker image available for arm
+    %macs, so the dependencies (Matlab runtime R2022a (MCRv912), ANTs, and 
+    %nifty_reg) will have to be installed individually
     properties
         Identifier
         ImType

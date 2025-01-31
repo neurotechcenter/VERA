@@ -125,9 +125,17 @@ classdef (Abstract) AComponent < Serializable
             % Dependencies
             path=obj.GetDependency('TempPath');
         end
+
         function d=GetDependency(~,name)
             % GetDependency - Tries to resolve and return a Dependency
             % See also DependencyHandler
+            d=DependencyHandler.Instance.GetDependency(name);
+        end
+
+        function d=GetOptionalDependency(~,name)
+            % GetOptionalDependency - Tries to resolve and return a Dependency
+            % See also DependencyHandler
+            % This exists to make it easier to search through GetDependency calls
             d=DependencyHandler.Instance.GetDependency(name);
         end
         
