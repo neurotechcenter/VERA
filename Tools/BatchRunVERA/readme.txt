@@ -1,7 +1,7 @@
 BatchRunVERA: Automated Multi-Project Execution Script
 ------------------------------------------------------
 
-The BatchRunVERA script is designed to automate the execution of multiple VERA (Versatile Electrode localization fRAmework) projects in sequence without requiring user input during the process. This allows for efficient processing of multiple subjects in a single run.
+The BatchRunVERA script (found in VERA/Tools/BatchRunVERA) is designed to automate the execution of multiple VERA (Versatile Electrode localization fRAmework) projects in sequence without requiring user input during the process. This allows for efficient processing of multiple subjects in a single run.
 
 Requirements
 ------------
@@ -54,25 +54,28 @@ Example Directory Structure
 To help visualize the organization of your project folders, here’s a typical structure:
 
 /Subject_Imaging
-  /data
-    BCI2000File.dat
-  /imaging
-    /dicom
-      /ct
-      /mri
-    /electrodes
-      .dat files
-  /notes
-    /ROSA_executed
-      .ros file
-      /dicom
-      /RAS_data
+    /Subject1
+        /data
+            BCI2000File.dat
+        /imaging
+            /dicom
+            /ct
+            /mri
+        /electrodes
+            .dat files
+        /notes
+            ElectrodeDefinition.xlsx
+            ElectrodeNamesKey.xlsx
+            /ROSA_executed
+                .ros file
+                /dicom
+                /RAS_data
 
 /VERA_Projects
-  /VERA_Subject1
-	pipeline.pwf
-  /VERA_Subject2
-	pipeline.pwf
+    /VERA_Subject1
+        pipeline.pwf
+    /VERA_Subject2
+        pipeline.pwf
 
 - Each Subject folder contains a pipeline configuration file (pipeline.pwf) that points to the relevant imaging data paths for that subject.
 
