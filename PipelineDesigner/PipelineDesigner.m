@@ -539,10 +539,27 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
 
     % start VERA (would like to change this so pipelines can be checked
     % without running VERA...)
-    VERAvisiblity    = 'off';
-    VERAhandle       = MainGUI(VERAvisiblity);
+    VERAvisiblity = 'off';
+    VERAhandle    = MainGUI(VERAvisiblity);
+
+    % Sort through existing figures and hide the newest VERA figure (used
+    % for checking the pipeline)
+    % This preserves any open VERA windows
     allFigureHandles = findall(groot,'Type','figure');
-    VERAfig          = allFigureHandles(end);
+    for i = 1:length(allFigureHandles)
+        FigureNames{i} = allFigureHandles(i).Name;
+    end
+    for i = 1:length(FigureNames)
+        if contains(FigureNames{i},'VERA')
+            FigureNumbers(i) = allFigureHandles(i).Number;
+        else
+            FigureNumbers(i) = 0;
+        end
+    end
+
+    [~,VERAfigIDX] = max(FigureNumbers);
+
+    VERAfig = allFigureHandles(VERAfigIDX);
 
     % Create dialog boxes when there are warnings or errors
     try 
