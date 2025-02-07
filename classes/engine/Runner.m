@@ -103,7 +103,8 @@ classdef Runner < handle
                 wasrdy=true;
             end
             try
-                % introduced by James
+                % introduced by James. This will fail in the case where 
+                % something was populated in the pipeline, then was removed
                 checkComponentContents(obj, compName);
                 
                 o=obj.Project.Pipeline.GetComponent(compName);
@@ -140,8 +141,9 @@ classdef Runner < handle
         end
 
         function checkComponentContents(obj, compName)
-            % Check if the pipeline file has changed and provide a warning
-            % if it has
+            % Check if the pipeline file has changed and provide a warning if it has
+            % This will fail in the case where something was populated in the pipeline,
+            % then was removed
             cobj = obj.Project.Pipeline.GetComponent(compName);
 
             if ~contains(cobj.ComponentStatus,'Completed')
@@ -150,36 +152,30 @@ classdef Runner < handle
                 ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
                 cobj_fromPipeline = ppline.GetComponent(compName);
 
-                props = properties(cobj);
+                props_cobj = properties(cobj);
 
-                % These properties are necessarily different and can be ignored
-                props(contains(props,'ComponentPath'))   = [];
-                props(contains(props,'ComponentStatus')) = [];
-
-                for i = 1:length(props)
-                    % Compare character and numeric properties directly
-                    if ischar(cobj.(props{i})) || isnumeric(cobj.(props{i}))
-                        if ~isequal(cobj.(props{i}),cobj_fromPipeline.(props{i}))
-                            warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                                '" folder in project folder and reopen project to resolve!'])
-                            break;
-                        end
-                    % if the property is a cell, compare the lengths
-                    elseif iscell(cobj.(props{i})) && length(cobj.(props{i})) ~= length(cobj_fromPipeline.(props{i}))
-                        warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                                '" folder in project folder and reopen project to resolve!'])
-                            break;
-                    % if the lengths are the same, compare the contents
-                    elseif iscell(cobj.(props{i}))
-                        for j = 1:length(cobj.(props{i}))
-                            if ~isequal(cobj.(props{i}){j},cobj_fromPipeline.(props{i}){j})
-                                warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                                    '" folder in project folder and reopen project to resolve!'])
-                                break;
-                            end
-                        end
+                % if it is empty in the pipeline, ignore it?
+                props_fromPipeline = properties(cobj_fromPipeline);
+                remidx = [];
+                for i = 1:length(props_fromPipeline)
+                    if isempty(cobj_fromPipeline.(props_fromPipeline{i}))
+                        remidx = [remidx i];
                     end
                 end
+                props_cobj(remidx) = [];
+
+                % These properties are necessarily different and can be ignored
+                props_cobj(contains(props_cobj,'ComponentPath'))   = [];
+                props_cobj(contains(props_cobj,'ComponentStatus')) = [];
+
+                for i = 1:length(props_cobj)
+                    if ~isequal(cobj.(props_cobj{i}),cobj_fromPipeline.(props_cobj{i}))
+                        warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                            '" folder in project folder and reopen project to resolve!'])
+                        break;
+                    end
+                end
+
             end
 
         end
