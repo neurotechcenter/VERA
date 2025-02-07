@@ -1,4 +1,4 @@
-function [nii_path] = createTempNifti(inPath,tempPath,freesurferPath)
+function nii_path = createTempNifti(inPath,tempPath,freesurferPath)
 %createTempNifti create a temporary nifti file using Freesurfers
 %mri_convert
 %  inpath - path of the file wanting to convert
@@ -15,8 +15,8 @@ freesurferPath=strrep(freesurferPath,'\','/');
 nii_path=fullfile(tempPath,[temp_name '.nii']);
 convert_script_path=fullfile(fileparts(fileparts(mfilename('fullpath'))),'scripts','convert_to_nii.sh');
 if(ismac || isunix)
-    system(['chmod +x ''' convert_script_path ''''],'-echo');
-    system([convert_script_path ' ''' freesurferPath ''' ''' ...
+    [status, cmdout] = system(['chmod +x ''' convert_script_path ''''],'-echo');
+    [status, cmdout] = system([convert_script_path ' ''' freesurferPath ''' ''' ...
     inPath ''' ''' ...
     nii_path ''''],'-echo');
 else
@@ -25,11 +25,15 @@ else
     w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
     w_dicom_path=convertToUbuntuSubsystemPath(inPath,subsyspath);
     w_nii_path=convertToUbuntuSubsystemPath(nii_path,subsyspath);
-    systemWSL(['chmod +x ''' w_convert_script_path ''''],'-echo');
+    [status, cmdout] = systemWSL(['chmod +x ''' w_convert_script_path ''''],'-echo');
     %system(['bash -c '' chmod +x ' w_xfrm_matrix_path ''''],'-echo');
-    systemWSL(['''' w_convert_script_path ''' ''' w_freesurferPath ''' ''' ...
+    [status, cmdout] = systemWSL(['''' w_convert_script_path ''' ''' w_freesurferPath ''' ''' ...
     w_dicom_path ''' ''' ...
     w_nii_path ''''],'-echo'); 
+end
+
+if status
+    errordlg(cmdout)
 end
 
 end
