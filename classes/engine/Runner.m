@@ -142,24 +142,43 @@ classdef Runner < handle
         function checkComponentContents(obj, compName)
             % Check if the pipeline file has changed and provide a warning
             % if it has
-            projPath   = obj.Project.Path;
-            pplineFile = fullfile(projPath,'pipeline.pwf');
-            ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
-            cobj_fromPipeline = ppline.GetComponent(compName);
-
             cobj = obj.Project.Pipeline.GetComponent(compName);
 
-            props = properties(cobj);
+            if ~contains(cobj.ComponentStatus,'Completed')
+                projPath   = obj.Project.Path;
+                pplineFile = fullfile(projPath,'pipeline.pwf');
+                ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
+                cobj_fromPipeline = ppline.GetComponent(compName);
 
-            % These properties are necessarily different and can be ignored
-            props(contains(props,'ComponentPath'))   = [];
-            props(contains(props,'ComponentStatus')) = [];
+                props = properties(cobj);
 
-            for i = 1:length(props)
-                if ~isequal(cobj.(props{i}),cobj_fromPipeline.(props{i}))
-                    warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                        '" folder in project folder and reopen project to resolve!'])
-                    break;
+                % These properties are necessarily different and can be ignored
+                props(contains(props,'ComponentPath'))   = [];
+                props(contains(props,'ComponentStatus')) = [];
+
+                for i = 1:length(props)
+                    % Compare character and numeric properties directly
+                    if ischar(cobj.(props{i})) || isnumeric(cobj.(props{i}))
+                        if ~isequal(cobj.(props{i}),cobj_fromPipeline.(props{i}))
+                            warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                                '" folder in project folder and reopen project to resolve!'])
+                            break;
+                        end
+                    % if the property is a cell, compare the lengths
+                    elseif iscell(cobj.(props{i})) && length(cobj.(props{i})) ~= length(cobj_fromPipeline.(props{i}))
+                        warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                                '" folder in project folder and reopen project to resolve!'])
+                            break;
+                    % if the lengths are the same, compare the contents
+                    elseif iscell(cobj.(props{i}))
+                        for j = 1:length(cobj.(props{i}))
+                            if ~isequal(cobj.(props{i}){j},cobj_fromPipeline.(props{i}){j})
+                                warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                                    '" folder in project folder and reopen project to resolve!'])
+                                break;
+                            end
+                        end
+                    end
                 end
             end
 
