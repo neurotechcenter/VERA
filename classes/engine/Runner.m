@@ -103,6 +103,9 @@ classdef Runner < handle
                 wasrdy=true;
             end
             try
+                % introduced by James
+                checkComponentContents(obj, compName);
+                
                 o=obj.Project.Pipeline.GetComponent(compName);
                 o.Initialize();
                 obj.SetComponentStatus(compName,'Configured');
@@ -134,6 +137,32 @@ classdef Runner < handle
             waitbar(1,'Resetting...');
 
             % obj.updateComponentStatus();
+        end
+
+        function checkComponentContents(obj, compName)
+            % Check if the pipeline file has changed and provide a warning
+            % if it has
+            projPath   = obj.Project.Path;
+            pplineFile = fullfile(projPath,'pipeline.pwf');
+            ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
+            cobj_fromPipeline = ppline.GetComponent(compName);
+
+            cobj = obj.Project.Pipeline.GetComponent(compName);
+
+            props = properties(cobj);
+
+            % These properties are necessarily different and can be ignored
+            props(contains(props,'ComponentPath'))   = [];
+            props(contains(props,'ComponentStatus')) = [];
+
+            for i = 1:length(props)
+                if ~isequal(cobj.(props{i}),cobj_fromPipeline.(props{i}))
+                    warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                        '" folder in project folder and reopen project to resolve!'])
+                    break;
+                end
+            end
+
         end
 
         function inpComp=GetInputComponentNames(obj)
