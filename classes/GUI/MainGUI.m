@@ -21,6 +21,7 @@ classdef MainGUI < handle
         componentNodes containers.Map
         componentMenu
         ProgressBarTool
+        checkPipelineContent
 
     end
     
@@ -31,6 +32,8 @@ classdef MainGUI < handle
             else
                 figVisibility = 'on';
             end
+
+            obj.checkPipelineContent = 'on';
             
             DependencyHandler.Purge();
             obj.componentNodes = containers.Map();
@@ -46,32 +49,35 @@ classdef MainGUI < handle
             if(exist('settings.xml','file'))
                 DependencyHandler.Instance.LoadDependencyFile('settings.xml');
             end
-            obj.viewTabs=containers.Map();
-            obj.hBox=uix.HBoxFlex('Parent',obj.window);
-            obj.pipelineTree=uiw.widget.Tree('Parent',obj.hBox,'MouseClickedCallback',@obj.treeClick);
-            obj.mainView=uitabgroup('Parent',obj.hBox);
-            obj.hBox.Widths=[200 -1];
+            obj.viewTabs     = containers.Map();
+            obj.hBox         = uix.HBoxFlex('Parent',    obj.window);
+            obj.pipelineTree = uiw.widget.Tree('Parent', obj.hBox,'MouseClickedCallback',@obj.treeClick);
+            obj.mainView     = uitabgroup('Parent',      obj.hBox);
+            obj.hBox.Widths  = [200 -1];
             % empty views
             
-            obj.fileMenu=uimenu(obj.window,'Label','File');
-            obj.fileMenuContent.OpenPipelineDesigner=uimenu(obj.fileMenu,'Label','Open Pipeline Designer','MenuSelectedFcn',@(~,~,~)PipelineDesigner);
-            obj.fileMenuContent.NewProject=uimenu(obj.fileMenu,'Label','New Project','MenuSelectedFcn',@(~,~,~)obj.createNewProject);
-            obj.fileMenuContent.OpenProject=uimenu(obj.fileMenu,'Label','Open Project','MenuSelectedFcn',@obj.openProject);
-            obj.fileMenuContent.CloseProject=uimenu(obj.fileMenu,'Label','Close Project','Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
+            obj.fileMenu                             = uimenu(obj.window,'Label','File');
+            obj.fileMenuContent.OpenPipelineDesigner = uimenu(obj.fileMenu,'Label','Open Pipeline Designer', 'MenuSelectedFcn',@(~,~,~)PipelineDesigner);
+            obj.fileMenuContent.NewProject           = uimenu(obj.fileMenu,'Label','New Project',            'MenuSelectedFcn',@(~,~,~)obj.createNewProject);
+            obj.fileMenuContent.OpenProject          = uimenu(obj.fileMenu,'Label','Open Project',           'MenuSelectedFcn',@obj.openProject);
+            obj.fileMenuContent.CloseProject         = uimenu(obj.fileMenu,'Label','Close Project',          'Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
             
-            obj.configMenu=uimenu(obj.window,'Label','Configuration');
-            obj.configMenuContent.Settings=uimenu(obj.configMenu,'Label','Settings','MenuSelectedFcn',@(~,~,~) SettingsGUI());
-            obj.configMenuContent.ConfigAll=uimenu(obj.configMenu,'Label','Configure all Components','MenuSelectedFcn',@(~,~,~) obj.configureAll());
-            obj.configMenuContent.RunAll=uimenu(obj.configMenu,'Label','Run all Components','MenuSelectedFcn',@(~,~,~) obj.runAll());
-            obj.configMenuContent.ReloadAll=uimenu(obj.configMenu,'Label','Reload all Components','MenuSelectedFcn',@(~,~,~) obj.reloadAll());
-            obj.configMenuContent.ViewPipeline=uimenu(obj.configMenu,'Label','View Pipeline Graph','MenuSelectedFcn',@(~,~,~) obj.viewPipelineGraph());
+            obj.configMenu                             = uimenu(obj.window,'Label','Configuration');
+            obj.configMenuContent.Settings             = uimenu(obj.configMenu,'Label','Settings',                 'MenuSelectedFcn',@(~,~,~) SettingsGUI());
+            obj.configMenuContent.ConfigAll            = uimenu(obj.configMenu,'Label','Configure all Components', 'MenuSelectedFcn',@(~,~,~) obj.configureAll());
+            obj.configMenuContent.RunAll               = uimenu(obj.configMenu,'Label','Run all Components',       'MenuSelectedFcn',@(~,~,~) obj.runAll());
+            obj.configMenuContent.ReloadAll            = uimenu(obj.configMenu,'Label','Reload all Components',    'MenuSelectedFcn',@(~,~,~) obj.reloadAll());
+            obj.configMenuContent.ViewPipeline         = uimenu(obj.configMenu,'Label','View Pipeline Graph',      'MenuSelectedFcn',@(~,~,~) obj.viewPipelineGraph());
+            obj.configMenuContent.pipelineContentCheck = uimenu(obj.configMenu,'Label','Pipeline Content Check','Checked','on','MenuSelectedFcn',@(~,~,~)obj.pipelineContentCheck());
             
-            obj.pipelineTree.Root.Name='Project';
-            obj.treeNodes.Input=uiw.widget.TreeNode('Name','Input','Parent',obj.pipelineTree.Root,'UserData',0);
-            obj.treeNodes.Processing=uiw.widget.TreeNode('Name','Processing','Parent',obj.pipelineTree.Root);
-            obj.treeNodes.Output=uiw.widget.TreeNode('Name','Output','Parent',obj.pipelineTree.Root);
+            obj.pipelineTree.Root.Name = 'Project';
+            obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input',      'Parent',obj.pipelineTree.Root,'UserData',0);
+            obj.treeNodes.Processing   = uiw.widget.TreeNode('Name','Processing', 'Parent',obj.pipelineTree.Root);
+            obj.treeNodes.Output       = uiw.widget.TreeNode('Name','Output',     'Parent',obj.pipelineTree.Root);
+            
             warning on;
-            obj.ProgressBarTool=UnifiedProgressBar(obj.window);
+            
+            obj.ProgressBarTool = UnifiedProgressBar(obj.window);
 
         end
         
@@ -237,6 +243,16 @@ classdef MainGUI < handle
                     'Sinks',obj.ProjectRunner.Project.Pipeline.GetOutputComponentNames(),'EdgeLabel',graph.Edges.Name,'LineWidth',2,...
                 'EdgeFontSize',12,'EdgeFontAngle','normal','NodeFontSize',16,'NodeFontAngle','normal', 'Interpreter', 'none',...
                 'ArrowSize',12);
+            end
+        end
+
+        function pipelineContentCheck(obj,~)
+            if strcmp(obj.checkPipelineContent,'on')
+                obj.checkPipelineContent = 'off';
+                obj.configMenuContent.pipelineContentCheck.Checked = 'off';
+            else
+                obj.checkPipelineContent = 'on';
+                obj.configMenuContent.pipelineContentCheck.Checked = 'on';
             end
         end
     end
@@ -428,6 +444,12 @@ classdef MainGUI < handle
             vo=obj.componentNodes(compName);
             try
                 obj.ProgressBarTool.suspendGUIWithMessage({'Running configuration for ' compName});
+                
+                % This will fail in the case where something was populated in the pipeline, then was removed
+                if strcmp(obj.checkPipelineContent,'on')
+                    obj.ProjectRunner.checkComponentContents(compName);
+                end
+
                 obj.ProjectRunner.ConfigureComponent(compName);
                 vo.TooltipString='';
             catch e

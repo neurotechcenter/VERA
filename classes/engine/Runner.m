@@ -102,11 +102,7 @@ classdef Runner < handle
             if(strcmp(obj.GetComponentStatus(compName),'Completed'))
                 wasrdy=true;
             end
-            try
-                % introduced by James. This will fail in the case where 
-                % something was populated in the pipeline, then was removed
-                checkComponentContents(obj, compName);
-                
+            try 
                 o=obj.Project.Pipeline.GetComponent(compName);
                 o.Initialize();
                 obj.SetComponentStatus(compName,'Configured');
@@ -141,40 +137,93 @@ classdef Runner < handle
         end
 
         function checkComponentContents(obj, compName)
-            % Check if the pipeline file has changed and provide a warning if it has
+            % Check if the pipeline file has changed and provide a warning
+            % if it has.
             % This will fail in the case where something was populated in the pipeline,
-            % then was removed
-            cobj = obj.Project.Pipeline.GetComponent(compName);
+            % then was removed from the pipeline
 
-            if ~contains(cobj.ComponentStatus,'Completed')
+            currentComponent_fromProject = obj.Project.Pipeline.GetComponent(compName);
+
+            if ~contains(currentComponent_fromProject.ComponentStatus,'Completed')
                 projPath   = obj.Project.Path;
                 pplineFile = fullfile(projPath,'pipeline.pwf');
-                ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
-                cobj_fromPipeline = ppline.GetComponent(compName);
 
-                props_cobj = properties(cobj);
+                % look at only properties that are defined in the pipeline file directly
+                ppline = xml2struct(pplineFile);
 
-                % if it is empty in the pipeline, ignore it?
-                props_fromPipeline = properties(cobj_fromPipeline);
-                remidx = [];
-                for i = 1:length(props_fromPipeline)
-                    if isempty(cobj_fromPipeline.(props_fromPipeline{i}))
-                        remidx = [remidx i];
+                % current component index in pipeline file
+                for i = 1:length(ppline.PipelineDefinition{1}.Component)
+                    if contains(ppline.PipelineDefinition{1}.Component{i}.Name{1}.Text,compName)
+                        idx = i;
                     end
                 end
-                props_cobj(remidx) = [];
+                currentComponent_fromPipeline = ppline.PipelineDefinition{1}.Component{idx};
+                
+                % Get list of properties to investigate
+                ppline_fieldnames = fieldnames(currentComponent_fromPipeline);
 
-                % These properties are necessarily different and can be ignored
-                props_cobj(contains(props_cobj,'ComponentPath'))   = [];
-                props_cobj(contains(props_cobj,'ComponentStatus')) = [];
+                % Remove attributes
+                currentComponent_fromPipeline = rmfield(currentComponent_fromPipeline, 'Attributes');
+                Attr_idx = find(contains(ppline_fieldnames,'Attributes'));
+                ppline_fieldnames(Attr_idx) = [];
 
-                for i = 1:length(props_cobj)
-                    if ~isequal(cobj.(props_cobj{i}),cobj_fromPipeline.(props_cobj{i}))
+                % Check if component properties are identical to those
+                % defined in the pipeline file
+                for i = 1:length(ppline_fieldnames)
+                    % Convert active component properties to comparable string
+                    ActivePropToCompare = currentComponent_fromProject.(ppline_fieldnames{i});
+                    if iscell(ActivePropToCompare)
+                        ActivePropToCompare = ['[', strjoin(ActivePropToCompare, ','), ']'];
+                    elseif isnumeric(ActivePropToCompare) && length(ActivePropToCompare) > 1
+                        ActivePropToCompare = ['[', sprintf('%d,', ActivePropToCompare)];
+                        ActivePropToCompare = [ActivePropToCompare(1:end-1), ']'];
+                    elseif isnumeric(ActivePropToCompare)
+                        ActivePropToCompare = sprintf('%d', ActivePropToCompare);
+                    end
+
+                    % Strip quotes from pipeline properties
+                    pplinePropToCompare = currentComponent_fromPipeline.(ppline_fieldnames{i}){1}.Text;
+                    pplinePropToCompare = strrep(pplinePropToCompare, '"', '');
+
+                    % Strip spaces from pipeline properties
+                    pplinePropToCompare = strrep(pplinePropToCompare, ', ', ',');
+
+                    % Produce warning if the pipeline differs from the
+                    % componentInformation
+                    if ~isequal(ActivePropToCompare,pplinePropToCompare)
                         warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
                             '" folder in project folder and reopen project to resolve!'])
                         break;
                     end
                 end
+
+                % old approach
+                % ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
+                % cobj_fromPipeline = ppline.GetComponent(compName);
+                % 
+                % props_cobj = properties(cobj);
+                % 
+                % % if it is empty in the pipeline, ignore it?
+                % props_fromPipeline = properties(cobj_fromPipeline);
+                % remidx = [];
+                % for i = 1:length(props_fromPipeline)
+                %     if isempty(cobj_fromPipeline.(props_fromPipeline{i}))
+                %         remidx = [remidx i];
+                %     end
+                % end
+                % props_cobj(remidx) = [];
+                % 
+                % % These properties are necessarily different and can be ignored
+                % props_cobj(contains(props_cobj,'ComponentPath'))   = [];
+                % props_cobj(contains(props_cobj,'ComponentStatus')) = [];
+                % 
+                % for i = 1:length(props_cobj)
+                %     if ~isequal(cobj.(props_cobj{i}),cobj_fromPipeline.(props_cobj{i}))
+                %         warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                %             '" folder in project folder and reopen project to resolve!'])
+                %         break;
+                %     end
+                % end
 
             end
 
