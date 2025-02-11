@@ -34,9 +34,9 @@ classdef FileLoader < AComponent
 
             obj.AddOutput(obj.Identifier,obj.IdentifierType);
 
-            if strcmp(obj.Name,'FileLoader')
-                obj.Name=[obj.Identifier 'Loader'];
-            end
+            % if strcmp(obj.Name,'FileLoader')
+            %     obj.Name=[obj.Identifier 'Loader'];
+            % end
         end
         function Initialize(obj)
             % Initialize
