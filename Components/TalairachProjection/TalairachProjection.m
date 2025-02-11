@@ -11,6 +11,7 @@ classdef TalairachProjection < AComponent
         AC
         PC
         MidSag
+        TIdentifier
         ProjectionType
         AdditionalSurfaceIdentifiers
         AdditionalSurfaceOutIdentifiers
@@ -23,7 +24,7 @@ classdef TalairachProjection < AComponent
             obj.AC=[];
             obj.PC=[];
             obj.MidSag=[];
-            obj.MidSag=[];
+            obj.TIdentifier='TalairachT';
             obj.MRIIdentifier='MRI';
             obj.SurfaceIdentifier='Surface';
             obj.SurfaceOutIdentifier='TalairachSurface';
@@ -40,6 +41,7 @@ classdef TalairachProjection < AComponent
             obj.AddInput(obj.ElectrodeLocationIdentifier,'ElectrodeLocation')
             obj.AddOutput(obj.SurfaceOutIdentifier,'Surface');
             obj.AddOutput(obj.ElectrodeLocationOutIdentifier,'ElectrodeLocation')
+            obj.AddOutput(obj.TIdentifier,'TransformationMatrix');
             for i=1:length(obj.AdditionalSurfaceIdentifiers)
                 obj.AddInput(obj.AdditionalSurfaceIdentifiers{i},'Surface');
                 obj.AddOutput(obj.AdditionalSurfaceOutIdentifiers{i},'Surface');
@@ -63,12 +65,15 @@ classdef TalairachProjection < AComponent
             
             varargout{1}=obj.CreateOutput(obj.ElectrodeLocationOutIdentifier);
             varargout{1}.DefinitionIdentifier=eLocs.DefinitionIdentifier;
-            [varargout{2}.Model,varargout{1}.Location]=projectToStandard(surf.Model,eLocs.Location,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],obj.ProjectionType);
+            varargout{3}=obj.CreateOutput(obj.TIdentifier);
+            [varargout{2}.Model,varargout{1}.Location,~,varargout{3}.T]=projectToStandard(surf.Model,eLocs.Location,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],obj.ProjectionType);
             for i=1:length(obj.AdditionalSurfaceIdentifiers)
                 varargout{2+i}=obj.CreateOutput(obj.AdditionalSurfaceIdentifiers{i},varargin{i});
-                [~,varargout{2+i}.Model.vert]=projectToStandard(surf.Model,varargout{2+i}.Model.vert,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],obj.ProjectionType);
+                [~,varargout{2+i}.Model.vert,~,varargout{3}.T]=projectToStandard(surf.Model,varargout{2+i}.Model.vert,[obj.AC(:)'; obj.PC(:)'; obj.MidSag(:)'],obj.ProjectionType);
             end
-            
+
+            T = varargout{3}.T;
+            save(fullfile(obj.ComponentPath,'xfrm_matrix.txt'),'T','-ascii')
         end
     end
 end
