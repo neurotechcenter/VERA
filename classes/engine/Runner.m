@@ -153,8 +153,14 @@ classdef Runner < handle
 
                 % current component index in pipeline file
                 for i = 1:length(ppline.PipelineDefinition{1}.Component)
-                    if contains(ppline.PipelineDefinition{1}.Component{i}.Name{1}.Text,compName)
-                        idx = i;
+                    if isfield(ppline.PipelineDefinition{1}.Component{i},'Name')
+                        if contains(ppline.PipelineDefinition{1}.Component{i}.Name{1}.Text,compName)
+                            idx = i;
+                        end
+                    else
+                        if contains(ppline.PipelineDefinition{1}.Component{i}.Attributes.Type,compName)
+                            idx = i;
+                        end
                     end
                 end
                 currentComponent_fromPipeline = ppline.PipelineDefinition{1}.Component{idx};
@@ -162,69 +168,60 @@ classdef Runner < handle
                 % Get list of properties to investigate
                 ppline_fieldnames = fieldnames(currentComponent_fromPipeline);
 
-                % Remove attributes
-                currentComponent_fromPipeline = rmfield(currentComponent_fromPipeline, 'Attributes');
-                Attr_idx = find(contains(ppline_fieldnames,'Attributes'));
-                ppline_fieldnames(Attr_idx) = [];
+                % if any properties are defined for this componet in the pipeline file
+                if ~contains(ppline_fieldnames,'Text')
+                    currentComponent_fromPipeline = rmfield(currentComponent_fromPipeline, 'Attributes');
+                    Attr_idx = find(contains(ppline_fieldnames,'Attributes'));
+                    ppline_fieldnames(Attr_idx) = [];
 
-                % Check if component properties are identical to those
-                % defined in the pipeline file
-                for i = 1:length(ppline_fieldnames)
-                    % Convert active component properties to comparable string
-                    ActivePropToCompare = currentComponent_fromProject.(ppline_fieldnames{i});
-                    if iscell(ActivePropToCompare)
-                        ActivePropToCompare = ['[', strjoin(ActivePropToCompare, ','), ']'];
-                    elseif isnumeric(ActivePropToCompare) && length(ActivePropToCompare) > 1
-                        ActivePropToCompare = ['[', sprintf('%d,', ActivePropToCompare)];
-                        ActivePropToCompare = [ActivePropToCompare(1:end-1), ']'];
-                    elseif isnumeric(ActivePropToCompare)
-                        ActivePropToCompare = sprintf('%d', ActivePropToCompare);
+                    % Check if component properties are identical to those
+                    % defined in the pipeline file
+                    for i = 1:length(ppline_fieldnames)
+                        % Convert active component properties to comparable string
+                        ActivePropToCompare = currentComponent_fromProject.(ppline_fieldnames{i});
+                        if isempty(ActivePropToCompare)
+                            ActivePropToCompare = char([]);
+                        elseif iscell(ActivePropToCompare)
+                            ActivePropToCompare = ['[', strjoin(ActivePropToCompare, ','), ']'];
+                        elseif isnumeric(ActivePropToCompare) && length(ActivePropToCompare) > 1
+                            ActivePropToCompare = ['[', sprintf('%d,', ActivePropToCompare)];
+                            ActivePropToCompare = [ActivePropToCompare(1:end-1), ']'];
+                        elseif isnumeric(ActivePropToCompare)
+                            ActivePropToCompare = sprintf('%d', ActivePropToCompare);
+                        end
+    
+                        % Strip quotes from pipeline properties
+                        pplinePropToCompare = currentComponent_fromPipeline.(ppline_fieldnames{i}){1}.Text;
+                        pplinePropToCompare = strrep(pplinePropToCompare, '"', '');
+    
+                        % Strip spaces from pipeline properties
+                        pplinePropToCompare = strrep(pplinePropToCompare, ', ', ',');
+    
+                        % Produce warning if the pipeline differs from the
+                        % componentInformation
+                        if ~isequal(ActivePropToCompare,pplinePropToCompare)
+                            warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
+                                '" folder in project folder and reopen project to resolve!'])
+                            break;
+                        end
                     end
+                else
+                    % if no properties are defined, just check that the
+                    % type is correct
+                    currentComponent_fromPipeline = rmfield(currentComponent_fromPipeline, 'Text');
+                    Attr_idx = find(contains(ppline_fieldnames,'Text'));
+                    ppline_fieldnames(Attr_idx) = [];
 
-                    % Strip quotes from pipeline properties
-                    pplinePropToCompare = currentComponent_fromPipeline.(ppline_fieldnames{i}){1}.Text;
-                    pplinePropToCompare = strrep(pplinePropToCompare, '"', '');
-
-                    % Strip spaces from pipeline properties
-                    pplinePropToCompare = strrep(pplinePropToCompare, ', ', ',');
+                    ActivePropToCompare = currentComponent_fromProject.Name;
+                    pplinePropToCompare = currentComponent_fromPipeline.Attributes.Type;
 
                     % Produce warning if the pipeline differs from the
                     % componentInformation
                     if ~isequal(ActivePropToCompare,pplinePropToCompare)
                         warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
                             '" folder in project folder and reopen project to resolve!'])
-                        break;
                     end
                 end
-
-                % old approach
-                % ppline     = obj.Project.Pipeline.CreateFromPipelineDefinition(pplineFile);
-                % cobj_fromPipeline = ppline.GetComponent(compName);
-                % 
-                % props_cobj = properties(cobj);
-                % 
-                % % if it is empty in the pipeline, ignore it?
-                % props_fromPipeline = properties(cobj_fromPipeline);
-                % remidx = [];
-                % for i = 1:length(props_fromPipeline)
-                %     if isempty(cobj_fromPipeline.(props_fromPipeline{i}))
-                %         remidx = [remidx i];
-                %     end
-                % end
-                % props_cobj(remidx) = [];
-                % 
-                % % These properties are necessarily different and can be ignored
-                % props_cobj(contains(props_cobj,'ComponentPath'))   = [];
-                % props_cobj(contains(props_cobj,'ComponentStatus')) = [];
-                % 
-                % for i = 1:length(props_cobj)
-                %     if ~isequal(cobj.(props_cobj{i}),cobj_fromPipeline.(props_cobj{i}))
-                %         warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                %             '" folder in project folder and reopen project to resolve!'])
-                %         break;
-                %     end
-                % end
-
             end
 
         end
