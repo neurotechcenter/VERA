@@ -205,7 +205,7 @@ classdef Runner < handle
                         % componentInformation
                         if ~isequal(ActivePropToCompare,pplinePropToCompare)
                             warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                                '" folder in project folder and reopen project to resolve!'])
+                                '" folder in project folder and reopen project to resolve!'],'Pipeline Content Check')
                             break;
                         end
                     end
@@ -223,7 +223,7 @@ classdef Runner < handle
                     % componentInformation
                     if ~isequal(ActivePropToCompare,pplinePropToCompare)
                         warndlg(['Warning! Contents of "' compName '" changed in pipeline file! Delete "' compName...
-                            '" folder in project folder and reopen project to resolve!'])
+                            '" folder in project folder and reopen project to resolve!'],'Pipeline Content Check')
                     end
                 end
             end
