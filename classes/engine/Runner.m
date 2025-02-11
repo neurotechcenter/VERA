@@ -144,7 +144,7 @@ classdef Runner < handle
 
             currentComponent_fromProject = obj.Project.Pipeline.GetComponent(compName);
 
-            if ~contains(currentComponent_fromProject.ComponentStatus,'Completed')
+            if ~strcmp(currentComponent_fromProject.ComponentStatus,'Completed')
                 projPath   = obj.Project.Path;
                 pplineFile = fullfile(projPath,'pipeline.pwf');
 
@@ -154,11 +154,15 @@ classdef Runner < handle
                 % current component index in pipeline file
                 for i = 1:length(ppline.PipelineDefinition{1}.Component)
                     if isfield(ppline.PipelineDefinition{1}.Component{i},'Name')
-                        if contains(ppline.PipelineDefinition{1}.Component{i}.Name{1}.Text,compName)
+                        compToCheck = ppline.PipelineDefinition{1}.Component{i}.Name{1}.Text;
+                        compToCheck = strrep(compToCheck, '"', '');
+                        if strcmp(compToCheck,compName)
                             idx = i;
                         end
                     else
-                        if contains(ppline.PipelineDefinition{1}.Component{i}.Attributes.Type,compName)
+                        compToCheck = ppline.PipelineDefinition{1}.Component{i}.Attributes.Type;
+                        compToCheck = strrep(compToCheck, '"', '');
+                        if strcmp(compToCheck,compName)
                             idx = i;
                         end
                     end
@@ -169,9 +173,9 @@ classdef Runner < handle
                 ppline_fieldnames = fieldnames(currentComponent_fromPipeline);
 
                 % if any properties are defined for this componet in the pipeline file
-                if ~contains(ppline_fieldnames,'Text')
+                if ~strcmp(ppline_fieldnames,'Text')
                     currentComponent_fromPipeline = rmfield(currentComponent_fromPipeline, 'Attributes');
-                    Attr_idx = find(contains(ppline_fieldnames,'Attributes'));
+                    Attr_idx = find(strcmp(ppline_fieldnames,'Attributes'));
                     ppline_fieldnames(Attr_idx) = [];
 
                     % Check if component properties are identical to those
@@ -209,7 +213,7 @@ classdef Runner < handle
                     % if no properties are defined, just check that the
                     % type is correct
                     currentComponent_fromPipeline = rmfield(currentComponent_fromPipeline, 'Text');
-                    Attr_idx = find(contains(ppline_fieldnames,'Text'));
+                    Attr_idx = find(strcmp(ppline_fieldnames,'Text'));
                     ppline_fieldnames(Attr_idx) = [];
 
                     ActivePropToCompare = currentComponent_fromProject.Name;
