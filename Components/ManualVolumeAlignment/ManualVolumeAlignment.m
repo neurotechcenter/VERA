@@ -23,7 +23,7 @@ classdef ManualVolumeAlignment < AComponent
             obj.MidSag=[];
             obj.MidSag=[];
             obj.VolumeIdentifier='CT';
-            obj.TIdentifier='T';
+            obj.TIdentifier='TManual';
             
         end
         
