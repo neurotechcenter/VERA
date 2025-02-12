@@ -55,7 +55,19 @@ classdef XfrmLoader < AComponent
                 error([obj.TIdentifier ' selection aborted']);
             else
                 out   = obj.CreateOutput(obj.TIdentifier);
-                out.T = load(fullfile(path,file));
+
+                [~, filename, ext] = fileparts(file);
+                if strcmp(ext,'.txt')
+                    T = load(fullfile(path,file));
+                elseif strcmp(ext,'.mat')
+                    strctT = load(fullfile(path,file));
+                    fields = fieldnames(strctT);
+
+                    T = strctT.(fields{1});
+                else
+                    error([obj.TIdentifier ' selection aborted. Unknown file type']);
+                end
+                out.T = T;
             end
 
         end
