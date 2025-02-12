@@ -78,6 +78,11 @@ classdef MayoReface < AComponent
             mri_refacePath = obj.GetDependency('mri_reface');
             outputpath     = fullfile(obj.ComponentPath,'Data');
 
+            if contains(outputpath,' ')
+                error(['Error! This component does not work if the project path contains any spaces. ',...
+                    'Remove any spaces from the project path and try again.'])
+            end
+
             if ismac
                 [~,result] = system('uname -v');
                 is_arm_mac = any(strfind(result,'ARM64'));
