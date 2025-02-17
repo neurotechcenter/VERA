@@ -37,7 +37,12 @@ classdef CalculateDistanceToSurfaceLabel < AComponent
 
             [annotation_remap,cmap,names,name_id] = createColormapFromAnnotations(surf);
             annotationIds                         = [surf.AnnotationLabel.Identifier];
-            radius                                = str2num(obj.Radius);
+            
+            if isnumeric(obj.Radius)
+                radius = obj.Radius;
+            else
+                radius = str2double(obj.Radius);
+            end
 
             f = waitbar(0,'Calculating Distance from Electrode to Labels');
             for i = 1:length(annotationIds)
