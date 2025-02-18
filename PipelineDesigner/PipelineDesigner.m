@@ -1,4 +1,4 @@
-function PipelineDesigner()
+function PipelineDesigner(varargin)
     % The pipeline designer is a tool to load, modify, and save VERA pipelines
 
     mfilePath = fileparts(mfilename('fullpath'));
@@ -13,6 +13,12 @@ function PipelineDesigner()
     javaaddpath(fullfile(mfilePath,'..','Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.jar'));
     import uiextras.jTree.*;
     warning on
+
+    if ~isempty(varargin)
+        startupPipelineFile = varargin{1};
+    else
+        startupPipelineFile = [];
+    end
 
     %% UI Layout Constants
     UI = struct();
@@ -252,7 +258,7 @@ function PipelineDesigner()
     uimenu(filemenu, 'Text', 'Load Pipeline', 'MenuSelectedFcn', @(src, event) loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,helpHyperlink));
     
     %% Create a Save menu button to save the pipeline to a file
-    uimenu(filemenu, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineListBox));
+    uimenu(filemenu, 'Text', 'Save Pipeline', 'MenuSelectedFcn', @(src, event) savePipeline(fig,pipelineListBox,startupPipelineFile));
 
     %% Create a clear pipeline menu button
     uimenu(filemenu, 'Text', 'Clear Pipeline', 'MenuSelectedFcn', @(src, event) confirmAction(@() clearPipeline(pipelineListBox,pipelineElementTextArea)));
@@ -300,14 +306,13 @@ function PipelineDesigner()
                     UI.BUTTON.DELETE_ELEMENT.WIDTH, UI.BUTTON.DELETE_ELEMENT.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
         'ButtonPushedFcn', @(btn, event) DeleteElement(pipelineListBox,pipelineElementTextArea));
-
-
-    %% On startup, display demo pipeline
-    % path_to_demo = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions','SimpleTutorialPipeline.pwf'));
-    % loadPipeline(pipelineListBox,path_to_demo);
     
-    %% On startup, display empty pipeline
-    clearPipeline(pipelineListBox,pipelineElementTextArea);
+    %% On startup either display empty pipeline or pipeline of current VERA project
+    if ~isempty(startupPipelineFile)
+        loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,helpHyperlink,startupPipelineFile);
+    else
+        clearPipeline(pipelineListBox,pipelineElementTextArea);
+    end
 
     %% Get all components
     componentParentClasses = {'AComponent'};
@@ -415,13 +420,13 @@ function loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,h
 end
 
 %% Function to save pipeline to a file
-function [fullPath] = savePipeline(fig,pipelineListBox,varargin)
+function [fullPath] = savePipeline(fig,pipelineListBox,startupPipelineFile,varargin)
     fullPath = [];
 
     % if there is an input file given, assume it comes from the
     % checkPipeline function. This is used to avoid recursively checking
     % the pipeline when using the 'check pipeline' file dialog
-    if nargin > 2
+    if nargin > 3
         inputFilePath = varargin{1};
         calledFromCheckPipeline = 1;
     else
@@ -447,7 +452,11 @@ function [fullPath] = savePipeline(fig,pipelineListBox,varargin)
             [path, file, ext] = fileparts(inputFilePath);
             file = [file, ext];
         else
-            [file, path] = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
+            if ~isempty(startupPipelineFile)
+                [file, path] = uiputfile(startupPipelineFile, 'Save pipeline file');
+            else
+                [file, path] = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
+            end
         end
         fig.Visible = 'on'; % Show the main window
 
@@ -534,7 +543,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
     end
 
     tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
-    pipelinePath     = savePipeline(fig,pipelineListBox,tempPipelinePath);
+    pipelinePath     = savePipeline(fig,pipelineListBox,[],tempPipelinePath);
 
 
     % start VERA (would like to change this so pipelines can be checked
@@ -684,7 +693,7 @@ function viewPipelineGraphInDesigner(fig, pipelineListBox)
         end
     
         tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
-        pipelinePath     = savePipeline(fig,pipelineListBox,tempPipelinePath);
+        pipelinePath     = savePipeline(fig,pipelineListBox,[],tempPipelinePath);
     
         % start VERA (would like to change this so pipelines can be checked
         % without running VERA...)

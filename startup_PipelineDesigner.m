@@ -1,7 +1,6 @@
 % Startup VERA Pipeline Designer through this script
 
 %Clear matlab environment
-close all;
 clearvars;
 clc;
 
@@ -17,7 +16,5 @@ javaaddpath('Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.ja
 import uiextras.jTree.*;
 warning on
 
-
 %startup GUI
-guihandle=PipelineDesigner();
-addToolbarExplorationButtons(guihandle);
+PipelineDesigner();

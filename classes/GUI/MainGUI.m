@@ -55,9 +55,9 @@ classdef MainGUI < handle
             obj.mainView     = uitabgroup('Parent',      obj.hBox);
             obj.hBox.Widths  = [200 -1];
             % empty views
-            
+
             obj.fileMenu                             = uimenu(obj.window,'Label','File');
-            obj.fileMenuContent.OpenPipelineDesigner = uimenu(obj.fileMenu,'Label','Open Pipeline Designer', 'MenuSelectedFcn',@(~,~,~)PipelineDesigner);
+            obj.fileMenuContent.OpenPipelineDesigner = uimenu(obj.fileMenu,'Label','Open Pipeline Designer', 'MenuSelectedFcn',@(~,~,~) obj.openPipelineDesigner);
             obj.fileMenuContent.NewProject           = uimenu(obj.fileMenu,'Label','New Project',            'MenuSelectedFcn',@(~,~,~)obj.createNewProject);
             obj.fileMenuContent.OpenProject          = uimenu(obj.fileMenu,'Label','Open Project',           'MenuSelectedFcn',@obj.openProject);
             obj.fileMenuContent.CloseProject         = uimenu(obj.fileMenu,'Label','Close Project',          'Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
@@ -254,6 +254,16 @@ classdef MainGUI < handle
                 obj.checkPipelineContent = 'on';
                 obj.configMenuContent.pipelineContentCheck.Checked = 'on';
             end
+        end
+
+        function openPipelineDesigner(obj)
+            if isprop(obj.ProjectRunner, 'Project')
+                pipelinePath = fullfile(obj.ProjectRunner.Project.Path,'pipeline.pwf');
+            else
+                pipelinePath = [];
+
+            end
+            PipelineDesigner(pipelinePath)
         end
     end
     
