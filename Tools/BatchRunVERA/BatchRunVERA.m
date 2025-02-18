@@ -19,7 +19,7 @@ cd(VERArootpath);
 VERAVisibility = 'on';
 
 % Start VERA first because it clears all variables
-guihandle      = startup_VERA(VERAVisibility);
+guihandle = startup_VERA(VERAVisibility);
 
 %% Subjects to run
 projectFolderDir = '/path/to/VERA/Project/Folders';
