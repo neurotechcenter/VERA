@@ -4,7 +4,6 @@ function guihandle = startup_VERA(varargin)
         figVisibility = varargin{1};
     else
         %Clear matlab environment
-        close all;
         clear;
         clc;
     
