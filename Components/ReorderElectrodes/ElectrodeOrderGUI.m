@@ -242,8 +242,8 @@ classdef ElectrodeOrderGUI < uix.Grid & handle
 %                     set(gca,'xdir','reverse');
 %                 end
                 
-                sortMap=zeros(length(elLoc),1);
-                labelMap=zeros(length(elLoc),1);
+                sortMap=zeros(size(elLoc,1),1);
+                labelMap=zeros(size(elLoc,1),1);
                 searchI=1;
                 while(any(sortMap == 0) && ishandle(f))
                     title(['Please select Electrode number ' num2str(searchI)]);
