@@ -93,10 +93,18 @@ classdef ImportROSFile < AComponent
                         % Moving nifti 0/0/0 to center of image to match ROSA coordinate
                         % space
                         info = load_nii(fullfile(outpath,['orig_' nm '.nii']));
-                        img_size=size(info.img)/2;
-                        info.hdr.hist.srow_x(4)  = -info.hdr.dime.pixdim(2)*img_size(1);
-                        info.hdr.hist.srow_y(4)  = -info.hdr.dime.pixdim(3)*img_size(2);
-                        info.hdr.hist.srow_z(4)  = -info.hdr.dime.pixdim(4)*img_size(3);
+                        
+                        % old
+                        img_size = size(info.img)/2;
+                        info.hdr.hist.srow_x(4) = -info.hdr.dime.pixdim(2)*img_size(1);
+                        info.hdr.hist.srow_y(4) = -info.hdr.dime.pixdim(3)*img_size(2);
+                        info.hdr.hist.srow_z(4) = -info.hdr.dime.pixdim(4)*img_size(3);
+
+                        % new - accounts for zero indexing in ROSA coordinates
+                        % info.hdr.hist.srow_x(4) = -info.hdr.dime.pixdim(2)*(img_size(1)-1);
+                        % info.hdr.hist.srow_y(4) = -info.hdr.dime.pixdim(3)*(img_size(2)-1);
+                        % info.hdr.hist.srow_z(4) = -info.hdr.dime.pixdim(4)*(img_size(3)-1);
+
                         info.hdr.hist.sform_code = 1; %set sform 1 so that changes are applied later on
                         %image is not yet in RAS space, so we will delete the orig_ later
                         %to avoid confusion
@@ -139,15 +147,23 @@ classdef ImportROSFile < AComponent
 
             for ii = 1:length(rosa_parsed.Trajectories)
                 traj_tosave = [rosa_parsed.Trajectories(ii).start 1;rosa_parsed.Trajectories(ii).end 1];
+
+                % added by James to try to account for zero indexing
+                % traj_tosave(:,1:3) = traj_tosave(:,1:3)-1;
+
                 traj_tosave = (rot2ras*traj_tosave')';
                 traj_tosave = traj_tosave(:,1:3);
+
+                % used to be flipped - not sure why. This should set the
+                % inner most point on the trajectory as index 1
                 if(pdist([rosa_parsed.Trajectories(ii).start; 0 0 0]) < pdist([rosa_parsed.Trajectories(ii).end; 0 0 0]))
-                    ras_projected.Trajectories(ii).start = traj_tosave(2,:);
-                    ras_projected.Trajectories(ii).end   = traj_tosave(1,:);
-                else
                     ras_projected.Trajectories(ii).start = traj_tosave(1,:);
                     ras_projected.Trajectories(ii).end   = traj_tosave(2,:);
+                else
+                    ras_projected.Trajectories(ii).start = traj_tosave(2,:);
+                    ras_projected.Trajectories(ii).end   = traj_tosave(1,:);
                 end
+
                 % definitions.Definition(ii).Type   = 'Depth';
                 % definitions.Definition(ii).Volume = 30;
                 % 
