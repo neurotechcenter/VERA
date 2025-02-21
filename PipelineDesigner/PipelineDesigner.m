@@ -658,15 +658,21 @@ function warnMsg = formatWarning()
         elementName = regexp(warnMsg(elementNameStart),regexpString,'match');
 
         start   = find(contains(matches,'</a>'),1,'first') + 1;
-        warnMsg = warnMsg{start};
+        if ~isempty(start)
+            warnMsg = warnMsg{start};
+        end
 
         % remove return lines in warning
         warnMsg = regexprep(warnMsg,'[\n\r]+',' ');
 
         % remove leading space
-        warnMsg(1) = [];
+        if isspace(warnMsg(1))
+            warnMsg(1) = [];
+        end
 
-        warnMsg = [elementName{1}{1}, ': ', warnMsg];
+        if ~isempty(elementName)
+            warnMsg = [elementName{1}{1}, ': ', warnMsg];
+        end
     end
 end
 

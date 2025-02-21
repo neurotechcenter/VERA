@@ -26,7 +26,7 @@ classdef LabelVolume2Surface < AComponent
             obj.ignoreList{end+1}  = 'internalIds';
             obj.ignoreList{end+1}  = 'LabelNames';
             obj.Smoothing          = [];
-            obj.LoadLUTFile        = "false";
+            obj.LoadLUTFile        = 'false';
             obj.Prefix             = '';
         end
 
@@ -52,15 +52,16 @@ classdef LabelVolume2Surface < AComponent
                 return;
             elseif(strcmp(obj.LoadLUTFile,'thomas'))
                 return;
+            else
+                path = obj.GetOptionalDependency('Freesurfer');
+                addpath(genpath(fullfile(path,'matlab')));
+                fprintf(['For Component: "',obj.Name,'"\nno labels provided or label configuration incorrect,\ntrying Freesurfer LUT\n\n']);
+                lut_path    = fullfile(path,'FreeSurferColorLUT.txt');
+                [code, lut] = loadLUTFile(lut_path);
             end
 
             if(isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
                 try
-                    path = obj.GetOptionalDependency('Freesurfer');
-                    addpath(genpath(fullfile(path,'matlab')));
-                    warning(['For Component: "',obj.Name,'" no labels provided or label configuration incorrect, trying Freesurfer LUT']);
-                    lut_path    = fullfile(path,'FreeSurferColorLUT.txt');
-                    [code, lut] = loadLUTFile(lut_path);
                     if(isempty(obj.LabelIds))
                         obj.internalIds = code;
                     else
