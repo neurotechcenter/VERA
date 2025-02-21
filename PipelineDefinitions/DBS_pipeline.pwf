@@ -58,8 +58,8 @@
     <Component Type="ReplaceLabels">
         <Name>"Replace Labels"</Name>
         <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex","ctx-rh-insula","ctx-lh-insula"]</ReplaceableLabels>
-        <ReplacementRadius>[0,0,3,3,1,1,1,1,1,1,10,10,1,1]</ReplacementRadius>
+        <ReplaceableLabels>["Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,3,3,1,1,10,10]</ReplacementRadius>
     </Component>
     
     <Component Type="ReplaceLabels">
