@@ -3,12 +3,14 @@ classdef NiiOutput < AComponent
     %function
     properties
         VolumeIdentifier
+        RASResliceFlag
         SavePathIdentifier char
     end
     
     methods
         function obj = NiiOutput()
             obj.VolumeIdentifier   = 'MRI';
+            obj.RASResliceFlag     = 1;
             obj.SavePathIdentifier = 'default';
         end
         
@@ -54,6 +56,11 @@ classdef NiiOutput < AComponent
             % create save folder if it doesn't exist
             if ~isfolder(path)
                 mkdir(path)
+            end
+
+            % Reslice volume to be in RAS coordinates using same pixel size
+            if obj.RASResliceFlag
+                vol = vol.GetRasSlicedVolume(vol.Image.hdr.dime.pixdim(2:4),1);
             end
             
             if(isfield(vol.Image,'untouch') && vol.Image.untouch == 1)
