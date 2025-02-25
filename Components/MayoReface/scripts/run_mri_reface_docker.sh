@@ -1,4 +1,33 @@
 #!/bin/bash
+
+# Function to create a directory and check if it was successful, then set permissions
+create_and_set_permissions() {
+    local dir_path=$1
+    mkdir -p "$dir_path"
+    if [ ! -d "$dir_path" ]; then
+        echo "Error: Failed to create directory ${dir_path}."
+        exit 1
+    fi
+    chmod 777 "$dir_path"
+    if [ $? -ne 0 ]; then
+        echo "Error setting permissions on ${dir_path}."
+        exit 1
+    else
+        echo "Permissions set correctly on ${dir_path}."
+    fi
+}
+
+# Function to get the absolute path of a directory using realpath or equivalent
+get_absolute_path() {
+    local dir_path=$1
+    if command -v realpath > /dev/null; then
+        realpath "$dir_path"
+    else
+        # If realpath is not available, use an alternative method
+        (cd "$dir_path" > /dev/null 2>&1 && pwd) || { echo "Error: Unable to access directory $dir_path"; exit 1; }
+    fi
+}
+
 exe_name=$0
 exe_dir=`dirname "$0"`
 
@@ -42,32 +71,41 @@ then
     exit 65;
 fi
 
-outdir=$(readlink -f $2)
-if [ ! -w $outdir ] #make sure <output> exists and is writable
-then
-  if [ ! -d $outdir ]; then
-      mkdir -p $outdir
-  else
-      echo "Output directory $outdir is not writable."
-      exit 1
-  fi
+# Convert second script argument (supposedly output directory) to absolute path
+outdir=$(get_absolute_path "$2")
+
+# Ensure output directory exists and is writable
+create_and_set_permissions "$outdir"
+if [ ! -w "$outdir" ]; then
+    echo "Output directory $outdir is not writable."
+    exit 1
 fi
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf -- "$tmpdir"' EXIT
-mkdir $tmpdir/inputs
-input_tmp=$tmpdir/inputs
-mkdir $tmpdir/outputs
-output_tmp=$tmpdir/outputs
-mkdir $tmpdir/regmask
-reg_dir=$tmpdir/regmask
-chmod =777 -R $tmpdir
+
+# Create necessary subdirectories and check their creation
+create_and_set_permissions "$tmpdir/inputs"
+input_tmp="$tmpdir/inputs"
+
+create_and_set_permissions "$tmpdir/outputs"
+output_tmp="$tmpdir/outputs"
+
+create_and_set_permissions "$tmpdir/regmask"
+reg_dir="$tmpdir/regmask"
+
+# Output the directory paths for verification
+echo "Temporary directory: $tmpdir"
+echo "Input directory: $input_tmp"
+echo "Output directory: $output_tmp"
+echo "Registration mask directory: $reg_dir"
 
 if [ -d $1 ] #check if input is a directory
 then
-    mkdir $input_tmp/$(basename $(readlink -f $1))
-    cp -r $1/* $input_tmp/$(basename $(readlink -f $1))
-    input=$input_tmp/$(basename $(readlink -f $1))
+    input_basename=$(basename "$(get_absolute_path "$1")")
+    create_and_set_permissions "$input_tmp/$input_basename"
+    cp -r $1/* "$input_tmp/$input_basename"
+    input="$input_tmp/$input_basename"
 else
     IFS=',' read -a imgs <<< "$1"
     if [ ${#imgs[@]} -eq 1 ] #splitting by comma didn't do anything, try semicolon
@@ -95,7 +133,6 @@ done
 
 docker run --mount type=bind,src\=$tmpdir,target=$tmpdir mri_reface run_mri_reface.sh $input $output_tmp ${input_array[@]:2 }
 
-cp -r $output_tmp/* $outdir
+cp -r "$output_tmp"/* "$outdir" || (echo "Error copying results to ${outdir}" && exit 1)
 
-exit
-
+exit 0
