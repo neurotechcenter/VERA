@@ -144,11 +144,15 @@ classdef MainGUI < handle
                 obj.ProgressBarTool.resumeGUI();
             	obj.updateTreeView();
 
-                k2=obj.ProjectRunner.GetNextReadyComponent();
+                k2 = obj.ProjectRunner.GetNextReadyComponent();
+                if strcmp(k,k2)
+                    break;
+                end
+                
                 if(isempty(k2))
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                 end
-                k=k2;
+                k = k2;
             end
         end
 
