@@ -150,7 +150,7 @@ classdef MayoReface < AComponent
                 shellcmd = ['' w_mri_reface_script ' ' w_volpath ' ' w_outputpath...
                                 ' -imType ' obj.ImType ' -saveQCRenders 0' ''];
                             
-                stat = systemWSL(shellcmd,'-echo');
+                [stat,cmdout] = systemWSL(shellcmd,'-echo');
                 
             elseif ismac && ~is_arm_mac
                 mri_reface_script = fullfile(fileparts(mfilename('fullpath')), 'scripts', 'run_mri_reface_docker.sh');
@@ -160,7 +160,7 @@ classdef MayoReface < AComponent
                 shellcmd = ['' mri_reface_script ' ' vol.Path ' ' outputpath...
                                 ' -imType ' obj.ImType ' -saveQCRenders 0' ''];
                 
-                stat = system(shellcmd,'-echo');
+                [stat,cmdout] = system(shellcmd,'-echo');
                 
             else
                 mri_reface_script = fullfile(fileparts(mfilename('fullpath')), 'scripts', 'run_mri_reface_ARM_Mac.sh');
@@ -175,11 +175,11 @@ classdef MayoReface < AComponent
                                 mri_refacePath ' ' MCRv912path ' ' ANTpath ' ' nifty_regpath...
                                 ' -imType ' obj.ImType ' -saveQCRenders 0' ''];
 
-                stat = system(shellcmd,'-echo');
+                [stat,cmdout] = system(shellcmd,'-echo');
             end
             
             if stat ~= 0
-                error('Refacing was not completed. Check that dependencies are properly installed and configured in the settings.')
+                error(['Refacing was not completed. Check that dependencies are properly installed and configured in the settings.\n', cmdout])
             else
                 % Replace the original volume file so there is no identified
                 % image still stored in the VERA project folder
