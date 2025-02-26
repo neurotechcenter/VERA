@@ -181,6 +181,14 @@ classdef Runner < handle
                     % Check if component properties are identical to those
                     % defined in the pipeline file
                     for i = 1:length(ppline_fieldnames)
+    
+                        % Strip quotes from pipeline properties
+                        pplinePropToCompare = currentComponent_fromPipeline.(ppline_fieldnames{i}){1}.Text;
+                        pplinePropToCompare = strrep(pplinePropToCompare, '"', '');
+    
+                        % Strip spaces from pipeline properties
+                        pplinePropToCompare = strrep(pplinePropToCompare, ', ', ',');
+
                         % Convert active component properties to comparable string
                         ActivePropToCompare = currentComponent_fromProject.(ppline_fieldnames{i});
                         if isempty(ActivePropToCompare)
@@ -193,13 +201,10 @@ classdef Runner < handle
                         elseif isnumeric(ActivePropToCompare)
                             ActivePropToCompare = sprintf('%d', ActivePropToCompare);
                         end
-    
-                        % Strip quotes from pipeline properties
-                        pplinePropToCompare = currentComponent_fromPipeline.(ppline_fieldnames{i}){1}.Text;
-                        pplinePropToCompare = strrep(pplinePropToCompare, '"', '');
-    
-                        % Strip spaces from pipeline properties
-                        pplinePropToCompare = strrep(pplinePropToCompare, ', ', ',');
+
+                        if contains(pplinePropToCompare,'[') && ~contains(ActivePropToCompare,'[')
+                            ActivePropToCompare = ['[', ActivePropToCompare, ']'];
+                        end
     
                         % Produce warning if the pipeline differs from the
                         % componentInformation
