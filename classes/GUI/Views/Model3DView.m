@@ -110,8 +110,10 @@ classdef Model3DView < AView & uix.Grid
                             end
                         end
                     end
-                    cb=colorbar(obj.axModel,'FontSize',12,'location','east','TickLabelInterpreter','none','Ticks',1:length(name_id));
-                    cb=colorbar(obj.axModel,'Ticks',linspace(1.5,length(name_id)+0.5,length(name_id)+1),'Limits',[min(name_id) max(name_id)],'TickLabels',names,'FontSize',12,'location','east','TickLabelInterpreter','none');
+                    if length(names) < 100 % color bars that are too long are illegible anyway
+                        cb=colorbar(obj.axModel,'FontSize',12,'location','east','TickLabelInterpreter','none','Ticks',1:length(name_id));
+                        cb=colorbar(obj.axModel,'Ticks',linspace(1.5,length(name_id)+0.5,length(name_id)+1),'Limits',[min(name_id) max(name_id)],'TickLabels',names,'FontSize',12,'location','east','TickLabelInterpreter','none');
+                    end
                     % set(cb,'TickLabelInterpreter','none')
                     close(pbar);
                 end
