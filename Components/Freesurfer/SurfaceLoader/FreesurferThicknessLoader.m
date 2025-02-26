@@ -4,12 +4,14 @@ classdef FreesurferThicknessLoader < AComponent
     
     properties
         SegmentationPathIdentifier
+        ThicknessRoundDecimal
         SurfaceIdentifier
     end
     
     methods
         function obj = FreesurferThicknessLoader()
             obj.SegmentationPathIdentifier = 'SegmentationPath';
+            obj.ThicknessRoundDecimal      = 2;
             obj.SurfaceIdentifier          = 'thickness';
         end
 
@@ -75,7 +77,23 @@ classdef FreesurferThicknessLoader < AComponent
             tkr2ras       = vox2ras/(vox2rastkr);
     
             surf.Model      = transformPial(mergePials(lh_pial,rh_pial),tkr2ras);
-            surf.Annotation = [lhThickness;rhThickness];
+
+            Annotation      = [lhThickness;rhThickness];
+            surf.Annotation = 10^obj.ThicknessRoundDecimal*round(Annotation,obj.ThicknessRoundDecimal);
+
+            % Annotation Label
+            sortedAnnot = sort(Annotation);
+            for i = 1:length(Annotation)
+                names{i} = num2str(sortedAnnot(i));
+            end
+
+            u_identifiers = 10^obj.ThicknessRoundDecimal*round(sortedAnnot,obj.ThicknessRoundDecimal);
+
+            [u_identifiers,ia] = unique(u_identifiers);
+            names              = names(ia);
+            u_colortable       = hot(length(names));
+
+            surf.AnnotationLabel = struct('Name',names','Identifier',num2cell(u_identifiers),'PreferredColor',num2cell(u_colortable,2));
 
         end
     end
