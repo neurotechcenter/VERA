@@ -82,12 +82,12 @@ classdef FreesurferThicknessLoader < AComponent
             surf.Annotation = 10^obj.ThicknessRoundDecimal*round(Annotation,obj.ThicknessRoundDecimal);
 
             % Annotation Label
-            sortedAnnot = sort(Annotation);
-            for i = 1:length(Annotation)
-                names{i} = num2str(sortedAnnot(i));
+            sortedAnnot = sort(surf.Annotation);
+            for i = 1:length(surf.Annotation)
+                names{i} = num2str(sortedAnnot(i)/10^obj.ThicknessRoundDecimal);
             end
 
-            u_identifiers = 10^obj.ThicknessRoundDecimal*round(sortedAnnot,obj.ThicknessRoundDecimal);
+            u_identifiers = sortedAnnot;
 
             [u_identifiers,ia] = unique(u_identifiers);
             names              = names(ia);
