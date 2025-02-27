@@ -60,6 +60,7 @@ classdef MainGUI < handle
             obj.fileMenuContent.OpenPipelineDesigner = uimenu(obj.fileMenu,'Label','Open Pipeline Designer', 'MenuSelectedFcn',@(~,~,~) obj.openPipelineDesigner);
             obj.fileMenuContent.NewProject           = uimenu(obj.fileMenu,'Label','New Project',            'MenuSelectedFcn',@(~,~,~)obj.createNewProject);
             obj.fileMenuContent.OpenProject          = uimenu(obj.fileMenu,'Label','Open Project',           'MenuSelectedFcn',@obj.openProject);
+            obj.fileMenuContent.ReopenProject        = uimenu(obj.fileMenu,'Label','Reopen Project',         'MenuSelectedFcn',@obj.reopenProject);
             obj.fileMenuContent.CloseProject         = uimenu(obj.fileMenu,'Label','Close Project',          'Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
             
             obj.configMenu                             = uimenu(obj.window,'Label','Configuration');
@@ -115,6 +116,38 @@ classdef MainGUI < handle
             delete(obj.componentMenu);
             obj.componentMenu=[];
             obj.ProgressBarTool.resumeGUI();
+        end
+
+        function reopenProject(obj,~,~)
+            if isprop(obj.ProjectRunner,'Project')
+                folder = obj.ProjectRunner.Project.Path;
+
+                obj.ProgressBarTool.suspendGUIWithMessage('Opening Project...');
+                try
+                    if(folder ~= 0)
+                        obj.setProjectDefaultPath(folder);
+                        obj.closeProject();
+                        
+                        [prj,pplFile]=Project.OpenProjectFromPath(folder);
+                        obj.ProjectRunner=Runner.CreateFromProject(prj);
+                        obj.createTreeView();
+                        obj.createViews(pplFile,prj);
+                        obj.configureAll();
+                        %obj.updateTreeView();
+                        %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                        obj.fileMenuContent.CloseProject.Enable='on';
+                        obj.ProgressBarTool.resumeGUI();
+                    end
+    
+                catch e
+                    warning(getReport(e,'extended'));
+                end
+                delete(obj.componentMenu);
+                obj.componentMenu=[];
+                obj.ProgressBarTool.resumeGUI();
+            else
+                error('Cannot reopen project! No project is currently open!')
+            end
         end
 
         function runAll(obj)
