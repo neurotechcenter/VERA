@@ -5,7 +5,6 @@ classdef TwoPointElectrodeDefinition  < AComponent
     properties
         Identifier char % Identifier of Output Data, Default is 'ElectrodeDefinition'
         TwoPointIdentifier
-        ElectrodeDefinition % Electrode Definitions
     end
 
     methods
@@ -13,7 +12,6 @@ classdef TwoPointElectrodeDefinition  < AComponent
             %ElectrodeDefinitionConfiguration - Constructor
             obj.Identifier          = 'ElectrodeDefinition';
             obj.TwoPointIdentifier  = 'ElectrodeDefinition_2Points';
-            obj.ElectrodeDefinition = [];
         end
 
         function Publish(obj)
