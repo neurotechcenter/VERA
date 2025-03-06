@@ -44,10 +44,12 @@ classdef LoadDicomHeader < AComponent
 
                 % Open a file load dialog if you can't find the path
                 if ~exist(path,'folder')
-                    [~,path] = uigetfile('*.dcm',['Please select ' obj.Identifier]);
+                    [file,path] = uigetfile('*.dcm',['Please select ' obj.Identifier]);
+                    [path,~,ext] = fileparts(fullfile(path,file));
                 end
             else
-                [~,path] = uigetfile('*.dcm',['Please select ' obj.Identifier]);
+                [file,path] = uigetfile('*.dcm',['Please select ' obj.Identifier]);
+                [path,~,ext] = fileparts(fullfile(path,file));
             end
             
             out = obj.CreateOutput(obj.Identifier);
