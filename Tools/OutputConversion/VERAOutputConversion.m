@@ -2,7 +2,6 @@
 % the new format, or the opposite
 
 clear;
-close;
 clc;
 
 % Add VERA dependencies to path
