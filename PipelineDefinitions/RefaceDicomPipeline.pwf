@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineDefinition Name="RefaceDicomPipeline.pwf">
+    
+<Component Type="FileLoader">
+    <Identifier>"MRI"</Identifier>
+    <IdentifierType>"Volume"</IdentifierType>
+    <FileTypeWildcard>"*.*"</FileTypeWildcard>
+    <Name>"MRI Loader"</Name>
+</Component>
+    
+<Component Type="LoadDicomHeader">
+    <Identifier>"MRIHeader"</Identifier>
+    <InputFilepath>""</InputFilepath>
+    <Anonymize>1</Anonymize>
+    <Name>"Load MRI Dicom Header"</Name>
+</Component>
+    
+<Component Type="MayoReface">
+    <Identifier>"MRI"</Identifier>
+    <ImType>"T1"</ImType>
+    <Name>"Reface MRI"</Name>
+</Component>
+    
+<Component Type="DicomOutput">
+    <VolumeIdentifier>"MRI"</VolumeIdentifier>
+    <HeaderIdentifier>"MRIHeader"</HeaderIdentifier>
+    <SavePathIdentifier>"default"</SavePathIdentifier>
+    <Name>"MRI Dicom Output"</Name>
+</Component>
+    
+<View Type="SliceViewerView">
+    <Name>"Slice Viewer"</Name>
+</View>
+    
+</PipelineDefinition>
