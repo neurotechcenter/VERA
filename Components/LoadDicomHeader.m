@@ -43,7 +43,7 @@ classdef LoadDicomHeader < AComponent
                 end
 
                 % Open a file load dialog if you can't find the path
-                if ~exist(path,'folder')
+                if ~isfolder(path)
                     [file,path] = uigetfile('*.dcm',['Please select ' obj.Identifier]);
                     [path,~,ext] = fileparts(fullfile(path,file));
                 end
@@ -59,7 +59,7 @@ classdef LoadDicomHeader < AComponent
                 d = dir(fullfile(path,'*.dcm'));
                 for i = 1:length(d)
                     info = out.ExtractDicomHeader(fullfile(path,d(i).name));
-
+                    
                     if obj.Anonymize
                         info = out.AnonymizeDicom(info);
                     end
