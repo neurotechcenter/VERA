@@ -2,10 +2,13 @@ classdef DicomOutput < AComponent
     %DicomOutput Creates a .dcm files as Output of VERA using Matlab's
     %dicomwrite function. This is paired with the LoadDicomHeader component
     %to save the dicom header information
+    % If starting with nifti files, use the CreateDicomHeader component to
+    % create the header and enable the CreatedHeader flag
     properties
         VolumeIdentifier
         HeaderIdentifier
         SavePathIdentifier char
+        CreatedHeader
     end
     
     methods
@@ -13,6 +16,7 @@ classdef DicomOutput < AComponent
             obj.VolumeIdentifier   = 'MRI';
             obj.HeaderIdentifier   = 'MRIHeader';
             obj.SavePathIdentifier = 'default';
+            obj.CreatedHeader      = 0;
         end
         
         function Publish(obj)
@@ -58,19 +62,21 @@ classdef DicomOutput < AComponent
                     delete(fullfile(d(i).folder,d(i).name))
                 end
             end
-
-            outputDir = fullfile(path);
             
-            img = vol.Image.img;
-
             % Account for MATLAB's transpose of NifTi files
+            img = vol.Image.img;
             img = permute(img, [1 3 2]);
             img = flip(img,2);
             img = flip(img,3);
 
+            % Not sure why this is necessary
+            if obj.CreatedHeader
+                img = flip(img,1);
+            end
+
             for i = 1:size(img,1)
                 slice = squeeze(img(i, :, :));
-                dicomFileName = sprintf('%s/slice_%03d.dcm', outputDir, i);
+                dicomFileName = sprintf('%s/slice_%03d.dcm', fullfile(path), i);
 
                 % Write the slice to a DICOM file
                 dicomwrite(slice, dicomFileName, dcmheader.Header(i),'CreateMode','Copy');
