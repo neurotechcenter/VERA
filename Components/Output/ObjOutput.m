@@ -81,8 +81,9 @@ classdef ObjOutput < AComponent
           
 
             % Popup stating where file was saved
-            message = {'File saved as:',GetFullPath(fullfile(path,[file,ext]))};
-            obj.VERAMessageBox(message);
+            message    = {'File saved as:',GetFullPath(fullfile(path,[file,ext]))};
+            msgBoxSize = [350, 125];
+            obj.VERAMessageBox(message,msgBoxSize);
         end
         
     end

@@ -223,7 +223,7 @@ classdef (Abstract) AComponent < Serializable
             end
         end
 
-        function VERAMessageBox(obj,message)
+        function VERAMessageBox(obj,message,msgBoxSize)
             monitorPositions = get(0, 'MonitorPositions');
             mainMonitor = monitorPositions(1, :);
 
@@ -235,20 +235,18 @@ classdef (Abstract) AComponent < Serializable
             centerX = mainMonitor(1) + mainMonitorWidth / 2;
             centerY = mainMonitor(2) + mainMonitorHeight / 2;
 
-            boxSize = [350 150];
-            boxFig    = uifigure('Name',obj.Name,'Position',[centerX-boxSize(1)/2 centerY-boxSize(2)/2 boxSize]);
+            boxFig    = uifigure('Name',obj.Name,'Position',[centerX-msgBoxSize(1)/2 centerY-msgBoxSize(2)/2 msgBoxSize]);
 
             % Create a label for the message
             uilabel(boxFig, ...
                 'Text',                message, ...
-                'Position',            [10 90 340 60], ...
+                'Position',            [10, 10, msgBoxSize(1)-10, msgBoxSize(2)], ... % [left, bottom, width, height]
                 'WordWrap',            'on', ...
                 'HorizontalAlignment', 'center', ...
-                'VerticalAlignment',   'center', ...
                 'FontSize',            12);
         
             % Create an OK button that closes the dialog
-            uibutton(boxFig,'Text','OK','Position',[125 20 100 30], ...
+            uibutton(boxFig,'Text','OK','Position',[(msgBoxSize(1)-100)/2, 10, 100 30], ...
                 'ButtonPushedFcn',@(btn, event) close(boxFig));
         end
     end

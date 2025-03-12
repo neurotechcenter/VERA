@@ -124,8 +124,9 @@ classdef MatOutputLegacy < AComponent
                 'electrodeLabels','LabelName','annotation','SecondaryLabel','electrodeNamesKey');
 
             % Popup stating where file was saved
-            message = {'File saved as:',GetFullPath(fullfile(path,file))};
-            obj.VERAMessageBox(message);
+            message    = {'File saved as:',GetFullPath(fullfile(path,file))};
+            msgBoxSize = [350, 125];
+            obj.VERAMessageBox(message,msgBoxSize);
         end
         
         function [labelId,labelName] = findLabels(~,elocs,surf)
