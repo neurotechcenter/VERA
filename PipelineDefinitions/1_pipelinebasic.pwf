@@ -33,7 +33,7 @@
 
     <Component Type="Coregistration">
         <Name>"Coregister ROSA Volume"</Name>
-        <CTIdentifier>"ROSAVolume"</CTIdentifier>
+        <CoregistrationIdentifier>"ROSAVolume"</CoregistrationIdentifier>
         <TIdentifier>"T_ROSA"</TIdentifier>
     </Component>
 
