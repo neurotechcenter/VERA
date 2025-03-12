@@ -60,7 +60,8 @@ classdef SurfaceOutput < AComponent
             write_surf(fullfile(path,file),surf.Model.vert,surf.Model.tri);
 
             % Popup stating where file was saved
-            msgbox(['File saved as: ',GetFullPath(fullfile(path,file))],['"',obj.Name,'" file saved'])
+            message = {'File saved as:',GetFullPath(fullfile(path,file))};
+            obj.VERAMessageBox(message);
         end
         
     end

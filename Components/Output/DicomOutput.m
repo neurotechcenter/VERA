@@ -83,7 +83,9 @@ classdef DicomOutput < AComponent
             end
 
             % Popup stating where file was saved
-            msgbox(['Files saved to: ',GetFullPath(path)],['"',obj.Name,'" files saved'])
+            message = {'Files saved to:',GetFullPath(path)};
+            obj.VERAMessageBox(message);
+
         end
         
     end

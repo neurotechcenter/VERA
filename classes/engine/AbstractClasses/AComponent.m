@@ -222,6 +222,35 @@ classdef (Abstract) AComponent < Serializable
                 error('Requested Output is not part of this Component, All Outputs have to be defined during the Publish phase');
             end
         end
+
+        function VERAMessageBox(obj,message)
+            monitorPositions = get(0, 'MonitorPositions');
+            mainMonitor = monitorPositions(1, :);
+
+            % Extract width and height of the primary monitor
+            mainMonitorWidth  = mainMonitor(3);
+            mainMonitorHeight = mainMonitor(4);
+            
+            % Calculate the center of the primary monitor
+            centerX = mainMonitor(1) + mainMonitorWidth / 2;
+            centerY = mainMonitor(2) + mainMonitorHeight / 2;
+
+            boxSize = [350 150];
+            boxFig    = uifigure('Name',obj.Name,'Position',[centerX-boxSize(1)/2 centerY-boxSize(2)/2 boxSize]);
+
+            % Create a label for the message
+            uilabel(boxFig, ...
+                'Text',                message, ...
+                'Position',            [10 90 340 60], ...
+                'WordWrap',            'on', ...
+                'HorizontalAlignment', 'center', ...
+                'VerticalAlignment',   'center', ...
+                'FontSize',            12);
+        
+            % Create an OK button that closes the dialog
+            uibutton(boxFig,'Text','OK','Position',[125 20 100 30], ...
+                'ButtonPushedFcn',@(btn, event) close(boxFig));
+        end
     end
 end
 

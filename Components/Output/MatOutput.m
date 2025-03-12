@@ -95,7 +95,8 @@ classdef MatOutput < AComponent
             save(fullfile(path,file),'surfaceModel','electrodes','electrodeNamesKey');
 
             % Popup stating where file was saved
-            msgbox(['File saved as: ',GetFullPath(fullfile(path,file))],['"',obj.Name,'" file saved'])
+            message = {'File saved as:',GetFullPath(fullfile(path,file))};
+            obj.VERAMessageBox(message);
         end
 
     end
