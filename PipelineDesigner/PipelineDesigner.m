@@ -374,7 +374,7 @@ function PipelineDesigner(varargin)
         viewElementOfPipeline(pipelineElementTextArea, pipelineListBox,helpTextArea,helpHyperlink);
 
     %% Create button to open component/view code in MATLAB editor
-    selectedElement = availableInputComponentsListBox.Value;
+    selectedElement = '';
 
     addlistener(availableInputComponentsListBox,      'ValueChanged', @(src,event) updateSelectedElement(src));
     addlistener(availableProcessingComponentsListBox, 'ValueChanged', @(src,event) updateSelectedElement(src));
@@ -394,7 +394,7 @@ function PipelineDesigner(varargin)
             edit(selectedElement);
         else
             % Display a warning if the file does not exist
-            uialert(fig, ['File ', selectedElement, ' does not exist.'], 'File Not Found');
+            uialert(fig, ['File "', selectedElement, '" does not exist.'], 'File Not Found');
         end
     end
     
