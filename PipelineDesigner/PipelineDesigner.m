@@ -1114,6 +1114,21 @@ function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentCompon
     uniqueComponentProperties = setdiff(props,parentClassNames,'stable');
     uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
 
+    % Remove dependent properties as both cannot be used in the component
+    % e.g. MRIIdentifer and CoregistrationIdentifier in Coregistration.m
+    mc = metaclass(component);
+    remDependentIDX = [];
+    iter = 1;
+    for i = 1:length(mc.PropertyList)
+        prop = mc.PropertyList(i);
+        if prop.Dependent && any(ismember(uniqueComponentProperties,prop.Name)) &&...
+                (strcmp(prop.GetAccess, 'public') || strcmp(prop.SetAccess, 'public'))
+            remDependentIDX(iter) = i;
+            iter = iter + 1;
+        end
+    end
+    uniqueComponentProperties(ismember(uniqueComponentProperties,props(remDependentIDX))) = [];
+
     % Start building the XML string
     textArea.Value      = {''};
     textArea.Value{1,1} = [sprintf('<Component Type="%s">', componentType)];
@@ -1203,6 +1218,21 @@ function viewView(textArea,helpArea,helpHyperlink,parentClass,currentView)
 
     uniqueViewProperties = setdiff(props,parentClassNames,'stable');
     uniqueViewProperties = [uniqueViewProperties; 'Name']; % add back Name
+
+    % Remove dependent properties as both cannot be used in the component
+    % e.g. MRIIdentifer and CoregistrationIdentifier in Coregistration.m
+    mc = metaclass(view);
+    remDependentIDX = [];
+    iter = 1;
+    for i = 1:length(mc.PropertyList)
+        prop = mc.PropertyList(i);
+        if prop.Dependent && any(ismember(uniqueViewProperties,prop.Name)) &&...
+                (strcmp(prop.GetAccess, 'public') || strcmp(prop.SetAccess, 'public'))
+            remDependentIDX(iter) = i;
+            iter = iter + 1;
+        end
+    end
+    uniqueViewProperties(ismember(uniqueViewProperties,props(remDependentIDX))) = [];
 
     % Start building the XML string
     textArea.Value      = {''};
