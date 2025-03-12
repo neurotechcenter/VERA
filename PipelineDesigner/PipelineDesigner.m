@@ -40,7 +40,7 @@ function PipelineDesigner(varargin)
         'TEXTAREA_HEIGHT',  230, ...
         'PIPELINE_WIDTH',   520, ...
         'PIPELINE_HEIGHT',  465, ...
-        'HELP_AREA_HEIGHT', 273, ...
+        'HELP_AREA_HEIGHT', 243, ...
         'HYPERLINK_WIDTH',  400, ...
         'SPACING',          0 ...
         );
@@ -59,8 +59,8 @@ function PipelineDesigner(varargin)
         'PROCESSING_LIST', 468, ...
         'OUTPUT_LIST',     305, ...
         'COMPONENT_LABEL', 250, ...
-        'HELP_TEXT',       497, ...
-        'HELP_LINK',       473, ...
+        'HELP_TEXT',       527, ...
+        'HELP_LINK',       468, ...
         'BOTTOM',          20 ...
     );
 
@@ -95,7 +95,13 @@ function PipelineDesigner(varargin)
             'Y',      650, ...
             'WIDTH',  30, ...
             'HEIGHT', 30 ...
-        ) ...
+        ), ...
+        'EDITOR_OPEN', struct(...
+            'X',      990, ...
+            'Y',      490, ...
+            'WIDTH',  150, ...
+            'HEIGHT', 30 ...
+        ) ...   
     );
 
     % Font settings
@@ -366,6 +372,40 @@ function PipelineDesigner(varargin)
     % Update view window to display current component
     pipelineListBox.ValueChangedFcn = @(src,event)...
         viewElementOfPipeline(pipelineElementTextArea, pipelineListBox,helpTextArea,helpHyperlink);
+
+    %% Create button to open component/view code in MATLAB editor
+    selectedElement = availableInputComponentsListBox.Value;
+
+    addlistener(availableInputComponentsListBox,      'ValueChanged', @(src,event) updateSelectedElement(src));
+    addlistener(availableProcessingComponentsListBox, 'ValueChanged', @(src,event) updateSelectedElement(src));
+    addlistener(availableOutputComponentsListBox,     'ValueChanged', @(src,event) updateSelectedElement(src));
+    addlistener(availableViewsListBox,                'ValueChanged', @(src,event) updateSelectedElement(src));
+    addlistener(pipelineListBox,                      'ValueChanged', @(src,event) updateSelectedElement_fromPipeline(src));
+
+    uibutton(fig, 'push', 'Text', 'Open in Editor', ...
+        'Position', [UI.BUTTON.EDITOR_OPEN.X, UI.BUTTON.EDITOR_OPEN.Y, ...
+                    UI.BUTTON.EDITOR_OPEN.WIDTH, UI.BUTTON.EDITOR_OPEN.HEIGHT], ...
+        'FontSize', UI.FONT.REGULAR.SIZE, ...
+        'ButtonPushedFcn', @(btn, event) OpenInEditor(fig));
+
+    % Function to open the most recent file (active in help text area) in the matlab editor
+    function OpenInEditor(fig,~)
+        if exist(selectedElement, 'file') == 2
+            edit(selectedElement);
+        else
+            % Display a warning if the file does not exist
+            uialert(fig, ['File ', selectedElement, ' does not exist.'], 'File Not Found');
+        end
+    end
+    
+    function updateSelectedElement(src,~)
+        selectedElement = src.Value;
+    end
+
+    function updateSelectedElement_fromPipeline(src,~)
+        selectedElement_cell = getElementTypes({src.Value});
+        selectedElement      = selectedElement_cell{1};
+    end
 
 end
 
@@ -1192,7 +1232,6 @@ function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentCompon
     % show help of selected component
     [dependencies, optionalDependencies] = getDependencies(componentName);
     showHelp(helpArea,helpHyperlink,currentComponent,dependencies,optionalDependencies);
-
 end
 
 %% Function to inspect the properties of a view selected in the listbox
@@ -1406,7 +1445,6 @@ function AddElement(fig,pipelineListBox,elementText,pipelineElementTextArea)
     end
 end
 
-
 %% Function to get component type (input, processing, or output)
 function [componentType] = getComponentType(className)
     % This function examines a given class to determine its type.
@@ -1481,7 +1519,6 @@ function [inputs, outputs] = extractInputsOutputs(className)
     inputs  = [inputs,  optionalInputs];
     outputs = [outputs, optionalOutputs];
 end
-
 
 %% This function gets the dependencies necessary to run a component
 function [dependencies, optionalDependencies] = getDependencies(className)
@@ -1566,7 +1603,6 @@ function result = parseMatchedString(matches)
     end
 
 end
-
 
 %% Function to show a confirmation dialog
 function confirmAction(action)
