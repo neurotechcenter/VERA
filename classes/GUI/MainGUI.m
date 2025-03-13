@@ -47,7 +47,8 @@ classdef MainGUI < handle
             addToolbarExplorationButtons(obj.window);
             cameratoolbar(obj.window,'NoReset');
             if(exist('settings.xml','file'))
-                DependencyHandler.Instance.LoadDependencyFile('settings.xml');
+                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+                DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
             end
             obj.viewTabs     = containers.Map();
             obj.hBox         = uix.HBoxFlex('Parent',    obj.window);
@@ -206,7 +207,8 @@ classdef MainGUI < handle
                 if nargin > 2
                     pplineFile = varargin{2};
                 else
-                    avail_pipelFiles=dir('PipelineDefinitions/*.pwf');
+                    rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+                    avail_pipelFiles=dir(fullfile(rootpath,'PipelineDefinitions/*.pwf'));
                     if(length(avail_pipelFiles) == 1)
                         pplineFile=fullfile(avail_pipelFiles(1).folder,avail_pipelFiles(1).name);
                     else
@@ -355,15 +357,16 @@ classdef MainGUI < handle
             for v=values(obj.componentNodes)
                 obj.ProgressBarTool.IncreaseProgressBar(1/length(obj.componentNodes));
                 cName=v{1}.UserData;
+                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
                 switch (obj.ProjectRunner.GetComponentStatus(cName))
                     case 'Invalid'
-                        setIcon(v{1},'./Icons/error.png');
+                        setIcon(v{1},fullfile(rootpath,'/Icons/error.png'));
                     case 'Configured'
-                        setIcon(v{1},'./Icons/configured1.png');
+                        setIcon(v{1},fullfile(rootpath,'/Icons/configured1.png'));
                     case 'Ready'
-                        setIcon(v{1},'./Icons/ready_1.png');
+                        setIcon(v{1},fullfile(rootpath,'/Icons/ready_1.png'));
                     case 'Completed'
-                        setIcon(v{1},'./Icons/success.png');
+                        setIcon(v{1},fullfile(rootpath,'/Icons/success.png'));
                 end
             end
             drawnow();
