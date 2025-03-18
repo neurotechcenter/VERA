@@ -196,10 +196,10 @@ classdef Runner < handle
                         elseif iscell(ActivePropToCompare)
                             ActivePropToCompare = ['[', strjoin(ActivePropToCompare, ','), ']'];
                         elseif isnumeric(ActivePropToCompare) && length(ActivePropToCompare) > 1
-                            ActivePropToCompare = ['[', sprintf('%d,', ActivePropToCompare)];
+                            ActivePropToCompare = ['[', sprintf('%g,', ActivePropToCompare)];
                             ActivePropToCompare = [ActivePropToCompare(1:end-1), ']'];
                         elseif isnumeric(ActivePropToCompare)
-                            ActivePropToCompare = sprintf('%d', ActivePropToCompare);
+                            ActivePropToCompare = sprintf('%g', ActivePropToCompare);
                         end
 
                         if contains(pplinePropToCompare,'[') && ~contains(ActivePropToCompare,'[')
