@@ -42,6 +42,8 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                 return;
             elseif(strcmp(obj.LoadLUTFile,'thomas'))
                 return;
+            elseif exist(obj.LoadLUTFile,'file')
+                return;
             else
                 path=obj.GetOptionalDependency('Freesurfer');
                 addpath(genpath(fullfile(path,'matlab')));
@@ -80,18 +82,27 @@ classdef CalculateDistanceToVolumeLabel < AComponent
         end
 
         function out=Process(obj,vol,elLocs)
-            if(strcmp(obj.LoadLUTFile,'true'))
+            if strcmp(obj.LoadLUTFile,'true')
                 [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                 [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
-            elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
+            elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
                 path     = obj.GetOptionalDependency('Freesurfer');
                 lut_path = fullfile(path,'FreeSurferColorLUT.txt');
                 [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
-            elseif(strcmp(obj.LoadLUTFile,'thomas'))
+            elseif strcmp(obj.LoadLUTFile,'thomas')
                 path     = obj.GetOptionalDependency('Thomas');
                 lut_path = fullfile(path,'CustomAtlas.ctbl');
                 [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
+            elseif exist(obj.LoadLUTFile,'file')
+                if isAbsolutePath(obj.LoadLUTFile)
+                    [path,file,ext] = fileparts(obj.LoadLUTFile);
+                else
+                    [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.LoadLUTFile));
+                end
+                lut_path = fullfile(path,[file,ext]);
+                [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
             end
+
             % James added to deal with THOMAS lookup table
             if isa(obj.internalLabels,'char')
                 obj.internalLabels = cellstr(obj.internalLabels);
