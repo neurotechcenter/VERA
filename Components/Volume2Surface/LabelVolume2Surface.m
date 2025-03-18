@@ -8,6 +8,7 @@ classdef LabelVolume2Surface < AComponent
         LabelIds
         LabelNames
         Smoothing
+        IsoValue
         LoadLUTFile
         Prefix
     end
@@ -25,7 +26,8 @@ classdef LabelVolume2Surface < AComponent
             obj.LabelNames         = {};
             obj.ignoreList{end+1}  = 'internalIds';
             obj.ignoreList{end+1}  = 'LabelNames';
-            obj.Smoothing          = [];
+            obj.Smoothing          = 3;
+            obj.IsoValue           = 0.1;
             obj.LoadLUTFile        = 'false';
             obj.Prefix             = '';
         end
@@ -46,11 +48,13 @@ classdef LabelVolume2Surface < AComponent
                 obj.internalLabels = obj.LabelNames;
             end
 
-            if(strcmp(obj.LoadLUTFile,'true'))
+            if strcmp(obj.LoadLUTFile,'true')
                 return;
-            elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
+            elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
                 return;
-            elseif(strcmp(obj.LoadLUTFile,'thomas'))
+            elseif strcmp(obj.LoadLUTFile,'thomas')
+                return;
+            elseif exist(obj.LoadLUTFile,'file')
                 return;
             else
                 path = obj.GetOptionalDependency('Freesurfer');
@@ -92,17 +96,25 @@ classdef LabelVolume2Surface < AComponent
 
         function surf=Process(obj,vol)
             if (isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
-                if(strcmp(obj.LoadLUTFile,'true'))
-                    [file,path]=uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
-                    [obj.internalIds,obj.internalLabels]=loadLUTFile(fullfile(path,file));
-                elseif(strcmp(obj.LoadLUTFile,'FreeSurferColorLUT'))
+                if strcmp(obj.LoadLUTFile,'true')
+                    [file,path] = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
+                    [obj.internalIds,obj.internalLabels] = loadLUTFile(fullfile(path,file));
+                elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
                     path     = obj.GetOptionalDependency('Freesurfer');
                     lut_path = fullfile(path,'FreeSurferColorLUT.txt');
-                    [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
-                elseif(strcmp(obj.LoadLUTFile,'thomas')) 
+                    [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
+                elseif strcmp(obj.LoadLUTFile,'thomas')
                     path     = obj.GetOptionalDependency('Thomas');
                     lut_path = fullfile(path,'CustomAtlas.ctbl');
-                    [obj.internalIds,obj.internalLabels]=loadLUTFile(lut_path);
+                    [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
+                elseif exist(obj.LoadLUTFile,'file')
+                    if isAbsolutePath(obj.LoadLUTFile)
+                        [path,file,ext] = fileparts(obj.LoadLUTFile);
+                    else
+                        [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.LoadLUTFile));
+                    end
+                    lut_path = fullfile(path,[file,ext]);
+                    [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
                 end
             end
             % James added to deal with THOMAS lookup table
@@ -126,7 +138,7 @@ classdef LabelVolume2Surface < AComponent
                         binaryVol = smooth3(binaryVol,'box',obj.Smoothing);
                     end
 
-                    [tri,vert] = isosurface(x,y,z,binaryVol,0.1); % James set the last input, isovalue. Not sure what is the appropriate value here
+                    [tri,vert] = isosurface(x,y,z,binaryVol,obj.IsoValue); % James set the last input, isovalue. Not sure what is the appropriate value here
 
                     % original
                     % tri      = tri + size(vert_tot, 1);
@@ -145,7 +157,8 @@ classdef LabelVolume2Surface < AComponent
                     end
 
                     if ~isempty(vert) && newisoval
-                        warndlg(['Warning! Unable to generate surface for ',num2str(obj.internalIds(i)),', ', obj.internalLabels{i}, ' at isovalue of 0.1. ' ...
+                        warndlg(['Warning! Unable to generate surface for ',num2str(obj.internalIds(i)),', ', obj.internalLabels{i},...
+                            ' at isovalue of ',num2str(obj.IsoValue),'. ' ...
                             'Surface generated at different isovalue.']);
                     end
 
