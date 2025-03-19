@@ -1179,8 +1179,14 @@ function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentCompon
         propValue = component.(uniqueComponentProperties{i});
 
         % Convert the property value to a string if it's not already
-        if isempty(propValue)
+        if ischar(propValue) && isempty(propValue)
             propValue = '""';
+
+        elseif isnumeric(propValue) && isempty(propValue)
+            propValue = '[]';
+
+        elseif iscell(propValue) && isempty(propValue)
+            propValue = '[""]';
 
         elseif ischar(propValue) || isstring(propValue)
             propValue = sprintf('"%s"', propValue);
