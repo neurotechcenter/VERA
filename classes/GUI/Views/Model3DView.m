@@ -74,10 +74,13 @@ classdef Model3DView < AView & uix.Grid
                     pbar=waitbar(0,'Creating 3D Model...');
                     
                     % append gray bar between surface and electrodes on colorbar
+                    barflag = 0;
                     if ~isempty(obj.ElectrodeLocationIdentifier)
-                        barflag = 1;
-                    else
-                        barflag = 0;
+                        if isprop(obj.AvailableData(obj.ElectrodeLocationIdentifier),'Location')
+                            if ~isempty(obj.AvailableData(obj.ElectrodeLocationIdentifier).Location)
+                                barflag = 1;
+                            end
+                        end
                     end
                     
                     [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface,barflag);
