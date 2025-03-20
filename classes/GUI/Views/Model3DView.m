@@ -72,7 +72,15 @@ classdef Model3DView < AView & uix.Grid
                     % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3) ,'Parent',obj.axModel,settings{:});
                 elseif(~isempty(surface.Model) && ~isempty(surface.Annotation))
                     pbar=waitbar(0,'Creating 3D Model...');
-                    [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface);
+                    
+                    % append gray bar between surface and electrodes on colorbar
+                    if ~isempty(obj.ElectrodeLocationIdentifier)
+                        barflag = 1;
+                    else
+                        barflag = 0;
+                    end
+                    
+                    [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface,barflag);
 
                     obj.vSurf=plot3DModel(obj.axModel,surface.Model,annotation_remap);
                     % trisurf(surface.Model.tri, surface.Model.vert(:, 1), surface.Model.vert(:, 2), surface.Model.vert(:, 3),annotation_remap ,'Parent',obj.axModel,settings{:});
