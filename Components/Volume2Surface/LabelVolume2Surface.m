@@ -41,7 +41,6 @@ classdef LabelVolume2Surface < AComponent
 
         end
 
-
         function Initialize(obj)
             if ~isempty(obj.LabelIds) && (length(obj.LabelIds) == length(obj.LabelNames))
                 obj.internalIds    = obj.LabelIds;
@@ -95,39 +94,66 @@ classdef LabelVolume2Surface < AComponent
         end
 
         function surf=Process(obj,vol)
-            if (isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
-                if strcmp(obj.LoadLUTFile,'true')
-                    [file,path] = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
-                    [obj.internalIds,obj.internalLabels] = loadLUTFile(fullfile(path,file));
-                elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
-                    path     = obj.GetOptionalDependency('Freesurfer');
-                    lut_path = fullfile(path,'FreeSurferColorLUT.txt');
-                    [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
-                elseif strcmp(obj.LoadLUTFile,'thomas')
-                    path     = obj.GetOptionalDependency('Thomas');
-                    lut_path = fullfile(path,'CustomAtlas.ctbl');
-                    [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
-                elseif exist(obj.LoadLUTFile,'file')
-                    if isAbsolutePath(obj.LoadLUTFile)
-                        [path,file,ext] = fileparts(obj.LoadLUTFile);
-                    else
-                        [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.LoadLUTFile));
-                    end
-                    lut_path = fullfile(path,[file,ext]);
-                    [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
-                end
-            end
-            % James added to deal with THOMAS lookup table
-            if isa(obj.internalLabels,'char')
-                obj.internalLabels = cellstr(obj.internalLabels);
-            end
 
             surf = obj.CreateOutput(obj.SurfaceIdentifier);
+
+            if strcmp(obj.LoadLUTFile,'true')
+                [file,path] = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
+                [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(fullfile(path,file));
+            elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
+                path     = obj.GetOptionalDependency('Freesurfer');
+                lut_path = fullfile(path,'FreeSurferColorLUT.txt');
+                [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(lut_path);
+            elseif strcmp(obj.LoadLUTFile,'thomas')
+                path     = obj.GetOptionalDependency('Thomas');
+                lut_path = fullfile(path,'CustomAtlas.ctbl');
+                [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(lut_path);
+            elseif exist(obj.LoadLUTFile,'file')
+                if isAbsolutePath(obj.LoadLUTFile)
+                    [path,file,ext] = fileparts(obj.LoadLUTFile);
+                else
+                    [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.LoadLUTFile));
+                end
+                lut_path = fullfile(path,[file,ext]);
+                [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(lut_path);
+            end
+
+            if isa(LUT_Labels,'char')
+                LUT_Labels = cellstr(LUT_Labels);
+            end
+
+            % Use the whole lookup table for the volume if no labelIds are provided
+            if (isempty(obj.LabelIds) || (length(obj.LabelIds) ~= length(obj.LabelNames)))
+                obj.internalIds    = LUT_Ids;
+                obj.internalLabels = LUT_Labels;
+            end
+
+            % unknown labels mess with the color table. Not sure why.
+            remidx = [];
+            for i = 1:length(obj.internalLabels)
+                if strcmp(obj.internalLabels{i},'Unknown') || strcmp(obj.internalLabels{i},'unknown')
+                    remidx = [remidx, i];
+                end
+            end
+            obj.internalIds(remidx)    = [];
+            obj.internalLabels(remidx) = [];
+
+            % Set color of surface to preferred colors in lookup table. If
+            % they don't exist, make up colors
+            if exist('rgbv','var')
+                if ~isempty(rgbv)
+                    [~,~,linenum] = intersect(obj.internalIds,LUT_Ids,'stable');
+                    colmap        = rgbv(linenum,1:3)./255;
+                else
+                    colmap        = distinguishable_colors(length(obj.internalIds));
+                end
+            else
+                colmap = distinguishable_colors(length(obj.internalIds));
+            end
 
             tri_tot         = [];
             vert_tot        = [];
             surf.Annotation = [];
-            colmap          = distinguishable_colors(length(obj.internalIds));
             ii = 1;
             for i = 1:length(obj.internalIds)
                 binaryVol = zeros(size(vol.Image.img));
