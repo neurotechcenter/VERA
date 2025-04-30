@@ -4,7 +4,7 @@ classdef EEGElectrodeNames < AComponent
     properties
         ElectrodeDefinitionIdentifier % Electrode Definitions
         ElectrodeLocationIdentifier   % Electrode Locations
-        EEGNamesIdentifier            % EEG Names
+        EEGNamesIdentifier            % EEG Names 
         FileTypeWildcard char         % Wildcard Definition
         InputFilepath char            % Load file path
         SkipGUI
@@ -12,6 +12,7 @@ classdef EEGElectrodeNames < AComponent
 
     properties
         EEGNames
+        % columnNames
         internalDefinitions
     end
     
@@ -22,6 +23,7 @@ classdef EEGElectrodeNames < AComponent
             obj.EEGNamesIdentifier            = 'EEGNames';
             obj.FileTypeWildcard              = '*.*';
             obj.EEGNames                      = [];
+            % obj.columnNames                   = {'EEG Names','VERA Names','EEG Numbers','VERA Numbers'};
             obj.internalDefinitions           = [];
             obj.InputFilepath                 = '';
             obj.SkipGUI                       = 0;
@@ -100,19 +102,25 @@ classdef EEGElectrodeNames < AComponent
                     end
                 end
                 
+                for i = 1:size(eLocs.Location,1)
+                    VERA_shankNames_long{i,1} = eDef.Definition(eLocs.DefinitionIdentifier(i)).Name;
+                    VERA_numEl_long(i)        = find(find(eLocs.DefinitionIdentifier == eLocs.DefinitionIdentifier(i)) == i);
+
+                    VERA_elNames{i,1} = [VERA_shankNames_long{i,1}, num2str(VERA_numEl_long(i))];
+                end
+
+                VERA_shankNames = unique(VERA_shankNames_long,'stable');
+
                 for i = 1:size(eDef.Definition,1)
-                    VERA_shankNames{i,1} = eDef.Definition(i).Name;
-                    VERA_numEl(i)        = eDef.Definition(i).NElectrodes;
+                    defNames{i,1} = eDef.Definition(i).Name;
                 end
 
-                VERA_elNames = [];
-                for i = 1:size(VERA_shankNames,1)
-                    for ii = 1:VERA_numEl(i)
-                        VERA_elNames = [VERA_elNames;{[VERA_shankNames{i} num2str(ii)]}];
-                    end
+                for i = 1:length(VERA_shankNames)
+                    idx = find(strcmp(defNames, VERA_shankNames{i}));
+                    VERA_numEl(i) = eDef.Definition(idx).NElectrodes;
                 end
 
-                elNameKey = GetElNameKey(obj,VERA_elNames,VERA_shankNames,VERA_numEl,eeg_elNames);
+                [elNameKey] = GetElNameKey(obj,VERA_elNames,VERA_shankNames,VERA_numEl,eeg_elNames);
 
             % if an excel file is selected
             elseif strcmp(answer,'Excel')
@@ -125,13 +133,17 @@ classdef EEGElectrodeNames < AComponent
                 else
                     T = readtable(fullfile(path,file));
                     
-                    eeg_elNames  = T.Var2(2:end);
-                    VERA_elNames = T.Var8(2:end);
+                    eeg_elNames  = T.Var1(2:end);
+                    VERA_elNames = T.Var2(2:end);
+                    eeg_elNums   = T.Var3(2:end);
+                    VERA_elNums  = T.Var4(2:end);
 
-                    elNameKey = struct('EEGNames',[],'VERANames',[]);
+                    elNameKey = struct('EEGNames',[],'VERANames',[],'EEGNumbers',[],'VERANumbers',[]);
                     for i = 1:size(eeg_elNames,1)
-                        elNameKey(i).EEGNames  = eeg_elNames{i,1};
-                        elNameKey(i).VERANames = VERA_elNames{i,1};
+                        elNameKey(i).EEGNames    = eeg_elNames{i,1};
+                        elNameKey(i).VERANames   = VERA_elNames{i,1};
+                        elNameKey(i).EEGNumbers  = eeg_elNums{i,1};
+                        elNameKey(i).VERANumbers = VERA_elNums{i,1};
                     end
                 end
             end
@@ -143,9 +155,8 @@ classdef EEGElectrodeNames < AComponent
             
             % visualize
             if ~obj.SkipGUI
-                
                 h      = figure('Name',obj.Name);
-                elView = EEGNamesView('Parent',h);
+                elView = EEGNamesView(h,obj.EEGNames);
                 elView.SetComponent(obj);
                 uiwait(h);
             end
@@ -211,29 +222,39 @@ classdef EEGElectrodeNames < AComponent
             % Create electrode naming key
 
             % Find intersection
-            % need better than intersect. For loop w/ strcmp
             [~,eeg_idx,vera_idx] = intersect(eeg_elNames_normalized,VERA_elNames_normalized,'stable');
-              
-            % VERA electrode locations that were actually recorded from
-            VERA_elNames_recorded = VERA_elNames(vera_idx);
-
-            % elNameKey should relate EEG electrode names to original VERA electrode names
-            hldr            = cell(size(eeg_elNames,1),2);
-            for i = 1:size(eeg_elNames)
-                hldr(i,:) = {'',''};
+            
+            % Table sorted in order of VERA electrodes
+            hldr = cell(size(VERA_elNames,1),4);
+            for i = 1:size(VERA_elNames)
+                hldr(i,:) = {'','','',''};
             end
-            hldr(:,1)       = eeg_elNames;
-            hldr(eeg_idx,2) = VERA_elNames_recorded;
+
+            % EEG Names
+            hldr(vera_idx,1) = eeg_elNames(eeg_idx);
+
+            % VERA Names
+            hldr(:,2) = VERA_elNames;
+
+            % EEG Numbers
+            for i = 1:length(vera_idx)
+                hldr{vera_idx(i),3} = num2str(eeg_idx(i));
+            end
+
+            % VERA Numbers
+            for i = 1:length(VERA_elNames)
+                hldr{i,4} = num2str(i);
+            end
 
             for i = 1:size(hldr,1)
-                elNameKey(i) = struct('EEGNames',hldr{i,1},'VERANames',hldr{i,2});
+                elNameKey(i) = struct('EEGNames',hldr{i,1},'VERANames',hldr{i,2},'EEGNumbers',hldr{i,3},'VERANumbers',hldr{i,4});
             end
 
             % Empty counter (number of missed electrodes) can be used to
             % compare performance
             emptyctr = 0;
             for i = 1:length(elNameKey)
-                if isempty(elNameKey(i).VERANames)
+                if isempty(elNameKey(i).EEGNames)
                     emptyctr = emptyctr + 1;
                 end
             end

@@ -16,10 +16,22 @@ classdef EEGNamesView < uix.Grid & AView & IComponentView
     methods
         function obj = EEGNamesView(varargin)
 
+            obj.EEGElectrodeNamesIdentifier = 'EEGNames';
+
+            if nargin > 1 
+                columnNames  = fieldnames(varargin{1,2})';
+                columnFormat = repmat({'char'}, 1, length(columnNames));
+                colEditable  = true(1,length(columnNames));
+            else
+                columnNames  = {'EEG Names','VERA Names','EEG Numbers','VERA Numbers'};
+                columnFormat = {'char','char','char','char'};
+                colEditable  = [true,true,true,true];
+            end
+
             obj.EEGNamesTable = uitable('Parent', obj,...
-                'ColumnName',       {'EEG Electrode Names','VERA Electrode Names'},...
-                'ColumnFormat',     {'char','char'},...
-                'ColumnEditable',   [true,true],...
+                'ColumnName',       columnNames,...
+                'ColumnFormat',     columnFormat,...
+                'ColumnEditable',   colEditable,...
                 'CellEditCallback', @(~,~)obj.compUpdate());
 
             obj.buttonGrid         = uix.Grid('Parent',obj);
@@ -29,13 +41,14 @@ classdef EEGNamesView < uix.Grid & AView & IComponentView
             obj.buttonGrid.Heights = [-1];
             addlistener(obj.EEGNamesTable,'Data','PostSet',@(~,~)obj.compUpdate);
 
-            obj.EEGElectrodeNamesIdentifier = 'EEGNames';
             obj.Heights = [-1,20];
             obj.Widths  = [-1];
 
             obj.disableChanges();
             try
-                uix.set(obj, varargin{:})
+                if nargin > 1
+                    uix.set(obj, 'Parent', varargin{1})
+                end
             catch e
                 delete(obj)
                 e.throwAsCaller()
@@ -67,19 +80,24 @@ classdef EEGNamesView < uix.Grid & AView & IComponentView
             comp = obj.GetComponent();
             tbl  = {};
             
-            if(~isempty(comp))
+            if ~isempty(comp)
                 obj.enableChanges();
                 elNames = comp.EEGNames;
             else
                 obj.disableChanges();
-                elNames = [];
+                elNames = '';
                 if(obj.AvailableData.isKey(obj.EEGElectrodeNamesIdentifier))
                     elNames = obj.AvailableData(obj.EEGElectrodeNamesIdentifier).Definition;
                 end
             end
 
-            for ie = 1:length(elNames)
-                tbl(end+1,:) = {elNames(ie).EEGNames,elNames(ie).VERANames};
+            if ~isempty(elNames)
+                fn = fieldnames(elNames);
+                for i = 1:length(fn)
+                    for ie = 1:length(elNames)
+                        tbl(ie,i) = {elNames(ie).(fn{i})};
+                    end
+                end
             end
 
             obj.EEGNamesTable.Data = tbl;
@@ -97,8 +115,14 @@ classdef EEGNamesView < uix.Grid & AView & IComponentView
                 if(isempty(tbl))
                     comp.EEGNames = [];
                 else
-                    for i = 1:size(tbl,1)
-                        dt(i) = struct('EEGNames',tbl{i,1},'VERANames',tbl{i,2});
+                    fn = fieldnames(comp.EEGNames);
+                    for i = 1:length(fn)
+                        dt.(fn{i}) = {};
+                    end
+                    for i = 1:length(fn)
+                        for j = 1:size(tbl,1)
+                            dt(j).(fn{i}) = tbl{j,i};
+                        end
                     end
 
                     comp.EEGNames = dt;
