@@ -184,6 +184,10 @@ classdef MayoReface < AComponent
                 % Replace the original volume file so there is no identified
                 % image still stored in the VERA project folder
                 outputfile = fullfile(outputpath,[obj.Identifier,'_deFaced.nii']);
+
+                if ~exist(outputfile,'file')
+                    error('Refaced output file was not created. Check that dependencies are properly installed and configured in the settings.\n');
+                end
                 
                 filelist = dir(fullfile(obj.ComponentPath,'..','**',['*',obj.Identifier,'.nii']));
                 
