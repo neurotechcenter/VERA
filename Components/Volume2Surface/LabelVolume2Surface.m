@@ -97,7 +97,10 @@ classdef LabelVolume2Surface < AComponent
         function surf=Process(obj,vol)
 
             surf = obj.CreateOutput(obj.SurfaceIdentifier);
-
+            
+            LUT_Ids    = [];
+            LUT_Labels = [];
+            rgbv       = [];
             if strcmp(obj.LoadLUTFile,'true')
                 [file,path] = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                 [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(fullfile(path,file));
