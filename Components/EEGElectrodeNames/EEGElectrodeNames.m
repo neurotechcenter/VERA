@@ -133,10 +133,10 @@ classdef EEGElectrodeNames < AComponent
                 else
                     T = readtable(fullfile(path,file));
                     
-                    eeg_elNames  = T.Var1(2:end);
-                    VERA_elNames = T.Var2(2:end);
-                    eeg_elNums   = T.Var3(2:end);
-                    VERA_elNums  = T.Var4(2:end);
+                    eeg_elNames  = T.EEGNames(2:end);
+                    VERA_elNames = T.VERANames(2:end);
+                    eeg_elNums   = T.EEGNumbers(2:end);
+                    VERA_elNums  = T.VERANumbers(2:end);
 
                     elNameKey = struct('EEGNames',[],'VERANames',[],'EEGNumbers',[],'VERANumbers',[]);
                     for i = 1:size(eeg_elNames,1)
