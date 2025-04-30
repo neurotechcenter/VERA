@@ -146,6 +146,8 @@ classdef EEGElectrodeNames < AComponent
                         elNameKey(i).VERANumbers = VERA_elNums{i,1};
                     end
                 end
+            else
+                error([obj.EEGNamesIdentifier ' selection aborted']);
             end
         
             obj.internalDefinitions = elNameKey;
