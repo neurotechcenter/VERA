@@ -168,15 +168,8 @@ classdef LabelVolume2Surface < AComponent
                         binaryVol = smooth3(binaryVol,'box',obj.Smoothing);
                     end
 
-                    [tri,vert] = isosurface(x,y,z,binaryVol,obj.IsoValue); % James set the last input, isovalue. Not sure what is the appropriate value here
-
-                    % original
-                    % tri      = tri + size(vert_tot, 1);
-                    % vert     = [vert(:,2) vert(:,1) vert(:,3)];
-                    % vert_tot = [vert_tot; vert];
-                    % tri_tot  = [tri_tot;  tri];
-
-                    % Another James change to add the if statement...
+                    [tri,vert] = isosurface(x,y,z,binaryVol,obj.IsoValue); 
+                    
                     tri     = tri + size(vert_tot, 1);
                     tri_tot = [tri_tot;  tri];
 
