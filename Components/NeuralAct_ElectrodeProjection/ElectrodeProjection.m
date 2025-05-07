@@ -84,7 +84,7 @@ classdef ElectrodeProjection < AComponent
                 else
                     for i=1:size(electrodes.Location,1)
                         idx=electrodes.DefinitionIdentifier(i);
-                        if(any(strcmp(definitions.Definition(idx).Type,{'Grid','Strip'})))
+                        if(any(strcmp(definitions.Definition(idx).Type,{'Grid','Strip (Projectable)'})))
                             substr.electrodes(end+1,:)=electrodes.Location(i,:);
                             substr.origIdx(end+1)=i;
                         end

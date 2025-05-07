@@ -21,7 +21,7 @@ classdef ElectrodeDefinition < AData
     end
 
     properties(Constant)
-        ElectrodeTypes ={'Micro','Grid','Strip','Depth','DBS','Medtronic 3387','Medtronic 3389','Boston Vercise Directional'} %Available Electrode Types
+        ElectrodeTypes ={'Micro','Grid','Strip (Projectable)','Strip','Depth','GND','DBS','Medtronic 3387','Medtronic 3389','Boston Vercise Directional'} %Available Electrode Types
     end
     
     methods
