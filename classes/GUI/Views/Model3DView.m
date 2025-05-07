@@ -74,15 +74,17 @@ classdef Model3DView < AView & uix.Grid
                     pbar=waitbar(0,'Creating 3D Model...');
                     
                     % append gray bar between surface and electrodes on colorbar
-                    barflag = 0;
-                    if ~isempty(obj.ElectrodeLocationIdentifier)
-                        if isprop(obj.AvailableData(obj.ElectrodeLocationIdentifier),'Location')
-                            if ~isempty(obj.AvailableData(obj.ElectrodeLocationIdentifier).Location)
-                                barflag = 1;
-                            end
-                        end
-                    end
-                    
+                    % not sure why, but when barflag=0 it messes up the
+                    % color map of the 3D model
+                    % barflag = 0;
+                    % if obj.AvailableData.isKey(obj.ElectrodeLocationIdentifier)
+                    %     if isprop(obj.AvailableData(obj.ElectrodeLocationIdentifier),'Location')
+                    %         if ~isempty(obj.AvailableData(obj.ElectrodeLocationIdentifier).Location)
+                    %             barflag = 1;
+                    %         end
+                    %     end
+                    % end
+                    barflag = 1;
                     [annotation_remap,cmap,names,name_id]=createColormapFromAnnotations(surface,barflag);
 
                     obj.vSurf=plot3DModel(obj.axModel,surface.Model,annotation_remap);
