@@ -132,7 +132,11 @@ classdef Volume < AData & IFileLoader
                 [spath,~,ext]=fileparts(path);
                 if(any(strcmpi(ext,{'.dcm','.dicom','','.IMA'})))
                     dicm2nii(spath,tpath,0);
+
                     path=dir(fullfile(tpath,'*.nii'));
+                    if isempty(path)
+                        error('NIfTI file could not be created from DICOM files! This may be due to corrupt or duplicated DICOM files.');
+                    end
 
                     % remove . files from options (mac files)
                     remfile = [];
@@ -154,16 +158,18 @@ classdef Volume < AData & IFileLoader
                         end
                     end
                     path=fullfile(path.folder,path.name);
-            end
-            try
-                obj.Image=load_nii(path,[],[],[],[],[],0);
-                obj.Path=path;
+                end
+                
+                try
+                    obj.Image=load_nii(path,[],[],[],[],[],0);
+                    obj.Path=path;
+                catch e
+                    fprintf(e.message);
+                    obj.Image=load_untouch_nii(path,[],[],[],[],[]);
+                    obj.Path=path;    
+                end
             catch e
-                fprintf(e.message);
-                obj.Image=load_untouch_nii(path,[],[],[],[],[]);
-                obj.Path=path;    
-            end
-            catch
+                errordlg(e.message);
             end
             rmdir(tpath,'s'); %ensure that temp folder is deleted
                % [nii.img,nii.XYZ ]=spm_read_vols(nii);
