@@ -37,6 +37,9 @@ classdef FreesurferDeface < AComponent
 
         function vol = Process(obj,vol)
 
+            waitbar_parts = 3;
+            f = waitbar(0,'Calculating Defaced Volume');
+
             freesurferPath = obj.GetDependency('Freesurfer');
 
             pathtoTalMixSkull = fullfile(freesurferPath, 'average', 'talairach_mixed_with_skull.gca');
@@ -54,6 +57,8 @@ classdef FreesurferDeface < AComponent
                 w_mri_deface_script = convertToUbuntuSubsystemPath(mri_deface_script, subsyspath);
 
                 systemWSL(['chmod +x ''' w_mri_deface_script ''''],'-echo');
+
+                waitbar(1/waitbar_parts,f);
                 
                 shellcmd = ['''' w_mri_deface_script ''' ''' w_freesurferPath ''' ''' w_volpath ''' ''' ...
                 w_pathtoTalMixSkull ''' ''' w_pathtoFace ''' ''' w_volpath ''''];
@@ -62,12 +67,16 @@ classdef FreesurferDeface < AComponent
                 
             else
                 systemWSL(['chmod +x ''' mri_deface_script ''''],'-echo');
+
+                waitbar(1/waitbar_parts,f);
                 
                 shellcmd = ['''' mri_deface_script ''' ''' freesurferPath ''' ''' vol.Path ''' ''' ...
                 pathtoTalMixSkull ''' ''' pathtoFace ''' ''' vol.Path ''''];
                 
                 stat = systemWSL(shellcmd,'-echo');
             end
+
+            waitbar(2/waitbar_parts,f);
             
             if stat ~= 0
                 disp('Problem with defacing')
@@ -85,6 +94,9 @@ classdef FreesurferDeface < AComponent
             
             % This is so the defaced volume is used in further VERA processing
             vol.LoadFromFile(vol.Path);
+
+            waitbar(1,f);
+            close(f);
 
         end
     end

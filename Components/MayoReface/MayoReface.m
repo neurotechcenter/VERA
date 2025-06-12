@@ -74,6 +74,9 @@ classdef MayoReface < AComponent
         end
 
         function vol = Process(obj,vol)
+            
+            waitbar_parts = 4;
+            f = waitbar(0,'Calculating Refaced Volume');
 
             mri_refacePath = obj.GetDependency('mri_reface');
             outputpath     = fullfile(obj.ComponentPath,'Data');
@@ -133,6 +136,8 @@ classdef MayoReface < AComponent
                     system(['docker load < ' dockerImage]);
                 end
             end
+
+            waitbar(1/waitbar_parts,f);
             
 
             %% EXECUTE call
@@ -146,6 +151,8 @@ classdef MayoReface < AComponent
                 w_mri_reface_script = convertToUbuntuSubsystemPath(mri_reface_script, subsyspath);
                 
                 systemWSL(['chmod +x ''' w_mri_reface_script ''''], '-echo');
+
+                waitbar(2/waitbar_parts,f);
                 
                 shellcmd = ['' w_mri_reface_script ' ' w_volpath ' ' w_outputpath...
                                 ' -imType ' obj.ImType ' -saveQCRenders 0' ''];
@@ -156,6 +163,8 @@ classdef MayoReface < AComponent
                 mri_reface_script = fullfile(fileparts(mfilename('fullpath')), 'scripts', 'run_mri_reface_docker.sh');
 
                 system(['chmod +x ''' mri_reface_script ''''], '-echo');
+
+                waitbar(2/waitbar_parts,f);
                 
                 shellcmd = ['' mri_reface_script ' ' vol.Path ' ' outputpath...
                                 ' -imType ' obj.ImType ' -saveQCRenders 0' ''];
@@ -166,6 +175,8 @@ classdef MayoReface < AComponent
                 mri_reface_script = fullfile(fileparts(mfilename('fullpath')), 'scripts', 'run_mri_reface_ARM_Mac.sh');
 
                 system(['chmod +x ''' mri_reface_script ''''], '-echo');
+
+                waitbar(2/waitbar_parts,f);
                 
                 MCRv912path   = obj.GetDependency('MCRv912');
                 ANTpath       = obj.GetDependency('ANT');
@@ -177,6 +188,8 @@ classdef MayoReface < AComponent
 
                 [stat,cmdout] = system(shellcmd,'-echo');
             end
+
+            waitbar(3/waitbar_parts,f);
             
             if stat ~= 0
                 error(['Refacing was not completed. Check that dependencies are properly installed and configured in the settings.\n', cmdout])
@@ -205,6 +218,8 @@ classdef MayoReface < AComponent
                 delete(fullfile(outputpath, [obj.Identifier, '_to_MCALT_FaceTemplate_Warp.nii']));
             end
 
+            waitbar(1,f);
+            close(f);
         end
     end
 end
