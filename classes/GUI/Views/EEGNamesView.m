@@ -20,11 +20,12 @@ classdef EEGNamesView < uix.Grid & AView & IComponentView
 
             if nargin > 1 
                 columnNames  = fieldnames(varargin{1,2})';
-                columnFormat = repmat({'char'}, 1, length(columnNames));
+                % columnFormat = repmat({'char'}, 1, length(columnNames));
+                columnFormat = {'char','char','numeric','numeric'};
                 colEditable  = true(1,length(columnNames));
             else
                 columnNames  = {'EEG Names','VERA Names','EEG Numbers','VERA Numbers'};
-                columnFormat = {'char','char','char','char'};
+                columnFormat = {'char','char','numeric','numeric'};
                 colEditable  = [true,true,true,true];
             end
 

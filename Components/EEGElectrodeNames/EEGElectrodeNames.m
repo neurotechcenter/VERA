@@ -133,17 +133,47 @@ classdef EEGElectrodeNames < AComponent
                 else
                     T = readtable(fullfile(path,file));
                     
-                    eeg_elNames  = T.EEGNames(2:end);
-                    VERA_elNames = T.VERANames(2:end);
-                    eeg_elNums   = T.EEGNumbers(2:end);
-                    VERA_elNums  = T.VERANumbers(2:end);
+                    eeg_elNames  = T.EEGNames;
+                    VERA_elNames = T.VERANames;
+                    eeg_elNums   = T.EEGNumbers;
+                    VERA_elNums  = T.VERANumbers;
 
+                    % Need the number of contacts identified with VERA to
+                    % match the number of rows in the excel table
+                    numVERAelecs = size(eLocs.DefinitionIdentifier,1);
+                    if numVERAelecs ~= size(VERA_elNums,1)
+                        error('Number of rows in table does not match number of identified contacts in VERA');
+                    end
+
+                    % Format table contents to channel names are strings
+                    % and channel numbers are doubles
                     elNameKey = struct('EEGNames',[],'VERANames',[],'EEGNumbers',[],'VERANumbers',[]);
                     for i = 1:size(eeg_elNames,1)
-                        elNameKey(i).EEGNames    = eeg_elNames{i,1};
-                        elNameKey(i).VERANames   = VERA_elNames{i,1};
-                        elNameKey(i).EEGNumbers  = eeg_elNums{i,1};
-                        elNameKey(i).VERANumbers = VERA_elNums{i,1};
+                        if isnumeric(eeg_elNames(i))
+                            eeg_elNames_cell(i,1) = cellstr(num2str(eeg_elNames(i)));
+                        else
+                            eeg_elNames_cell(i,1) = eeg_elNames(i);
+                        end
+                        if isnumeric(VERA_elNames(i))
+                            VERA_elNames_cell(i,1) = cellstr(num2str(VERA_elNames(i)));
+                        else
+                            VERA_elNames_cell(i,1) = VERA_elNames(i);
+                        end
+                        if ~isnumeric(eeg_elNums(i))
+                            eeg_elNums_dbl(i,1) = str2double(eeg_elNums(i));
+                        else
+                            eeg_elNums_dbl(i,1) = eeg_elNums(i);
+                        end
+                        if ~isnumeric(VERA_elNums(i))
+                            VERA_elNums_dbl(i,1) = str2double(VERA_elNums(i));
+                        else
+                            VERA_elNums_dbl(i,1) = VERA_elNums(i);
+                        end
+
+                        elNameKey(i).EEGNames    = eeg_elNames_cell{i,1};
+                        elNameKey(i).VERANames   = VERA_elNames_cell{i,1};
+                        elNameKey(i).EEGNumbers  = eeg_elNums_dbl(i,1);
+                        elNameKey(i).VERANumbers = VERA_elNums_dbl(i,1);
                     end
                 end
             else
