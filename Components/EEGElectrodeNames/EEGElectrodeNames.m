@@ -147,7 +147,7 @@ classdef EEGElectrodeNames < AComponent
 
                     % Format table contents to channel names are strings
                     % and channel numbers are doubles
-                    elNameKey = struct('EEGNames',[],'VERANames',[],'EEGNumbers',[],'VERANumbers',[]);
+                    elNameKey = struct('Select',false,'EEGNames',[],'VERANames',[],'EEGNumbers',[],'VERANumbers',[]);
                     for i = 1:size(eeg_elNames,1)
                         if isnumeric(eeg_elNames(i))
                             eeg_elNames_cell(i,1) = cellstr(num2str(eeg_elNames(i)));
@@ -160,16 +160,21 @@ classdef EEGElectrodeNames < AComponent
                             VERA_elNames_cell(i,1) = VERA_elNames(i);
                         end
                         if ~isnumeric(eeg_elNums(i))
+                            eeg_elNums(i)       = strrep(eeg_elNums(i), '"',  '');
+                            eeg_elNums(i)       = strrep(eeg_elNums(i), '''', '');
                             eeg_elNums_dbl(i,1) = str2double(eeg_elNums(i));
                         else
                             eeg_elNums_dbl(i,1) = eeg_elNums(i);
                         end
                         if ~isnumeric(VERA_elNums(i))
+                            VERA_elNums(i)       = strrep(VERA_elNums(i), '"',  '');
+                            VERA_elNums(i)       = strrep(VERA_elNums(i), '''', '');
                             VERA_elNums_dbl(i,1) = str2double(VERA_elNums(i));
                         else
                             VERA_elNums_dbl(i,1) = VERA_elNums(i);
                         end
 
+                        elNameKey(i).Select      = false;
                         elNameKey(i).EEGNames    = eeg_elNames_cell{i,1};
                         elNameKey(i).VERANames   = VERA_elNames_cell{i,1};
                         elNameKey(i).EEGNumbers  = eeg_elNums_dbl(i,1);
@@ -193,7 +198,18 @@ classdef EEGElectrodeNames < AComponent
                 uiwait(h);
             end
             
-            out.Definition = obj.EEGNames;
+            EEGNames_excludeSelected = struct();
+            fields = fieldnames(obj.EEGNames);
+            for i = 1:length(fields)
+                fieldName = fields{i};
+                for j = 1:size(obj.EEGNames,2)
+                    if ~strcmp(fieldName, 'Select')
+                        EEGNames_excludeSelected(j).(fieldName) = obj.EEGNames(j).(fieldName);
+                    end
+                end
+            end
+
+            out.Definition = EEGNames_excludeSelected;
 
         end
 
@@ -270,16 +286,18 @@ classdef EEGElectrodeNames < AComponent
 
             % EEG Numbers
             for i = 1:length(vera_idx)
-                hldr{vera_idx(i),3} = num2str(eeg_idx(i));
+                % hldr{vera_idx(i),3} = num2str(eeg_idx(i));
+                hldr{vera_idx(i),3} = eeg_idx(i);
             end
 
             % VERA Numbers
             for i = 1:length(VERA_elNames)
-                hldr{i,4} = num2str(i);
+                % hldr{i,4} = num2str(i);
+                hldr{i,4} = i;
             end
 
             for i = 1:size(hldr,1)
-                elNameKey(i) = struct('EEGNames',hldr{i,1},'VERANames',hldr{i,2},'EEGNumbers',hldr{i,3},'VERANumbers',hldr{i,4});
+                elNameKey(i) = struct('Select',false,'EEGNames',hldr{i,1},'VERANames',hldr{i,2},'EEGNumbers',hldr{i,3},'VERANumbers',hldr{i,4});
             end
 
             % Empty counter (number of missed electrodes) can be used to
