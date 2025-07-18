@@ -17,12 +17,13 @@ classdef EEGNamesView < uix.Grid & AView & IComponentView
         function obj = EEGNamesView(varargin)
 
             obj.EEGElectrodeNamesIdentifier = 'EEGNames';
-
-            if nargin > 1 
-                columnNames  = ['Select', fieldnames(varargin{1,2})'];
-                % columnFormat = repmat({'char'}, 1, length(columnNames));
-                columnFormat = {'logical','char','char','numeric','numeric'};
-                colEditable  = true(1,length(columnNames));
+            
+            % If called by vera main gui, have 4
+            % columns, if called by interactive window, have 5
+            if nargin == 0
+                columnNames  = {'EEG Names','VERA Names','EEG Numbers','VERA Numbers'};
+                columnFormat = {'char','char','numeric','numeric'};
+                colEditable  = [true,true,true,true];
             else
                 columnNames  = {'Select','EEG Names','VERA Names','EEG Numbers','VERA Numbers'};
                 columnFormat = {'logical','char','char','numeric','numeric'};

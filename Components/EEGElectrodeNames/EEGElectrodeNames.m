@@ -23,7 +23,6 @@ classdef EEGElectrodeNames < AComponent
             obj.EEGNamesIdentifier            = 'EEGNames';
             obj.FileTypeWildcard              = '*.*';
             obj.EEGNames                      = [];
-            % obj.columnNames                   = {'EEG Names','VERA Names','EEG Numbers','VERA Numbers'};
             obj.internalDefinitions           = [];
             obj.InputFilepath                 = '';
             obj.SkipGUI                       = 0;
@@ -198,6 +197,7 @@ classdef EEGElectrodeNames < AComponent
                 uiwait(h);
             end
             
+            % Strips out the Select field name from the structure
             EEGNames_excludeSelected = struct();
             fields = fieldnames(obj.EEGNames);
             for i = 1:length(fields)
