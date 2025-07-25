@@ -261,10 +261,10 @@ classdef MainGUI < handle
             %onClose - close project callback
             obj.removeTempPath();
 
-            currentPath = fileparts(mfilename('fullpath'));
-            rootPath    = fullfile(currentPath,'..','..');
-            
-            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootPath,'settings.xml'));
+            if(exist('settings.xml','file'))
+                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+                DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
+            end
             delete(obj.Views);
             delete(obj.ProjectRunner);
             delete(hob);
@@ -318,20 +318,25 @@ classdef MainGUI < handle
             
             for v=values(obj.componentNodes)
                 delete(v{1});
-  
             end
-            %obj.ProgressBarTool.ShowProgressBar(obj,30);
-            obj.componentNodes=containers.Map();
-            for v=values(obj.viewTabs)
-                delete(v{1});
 
+            %obj.ProgressBarTool.ShowProgressBar(obj,30);
+            obj.componentNodes = containers.Map();
+            for v = values(obj.viewTabs)
+                delete(v{1});
             end
-            obj.viewTabs=containers.Map();
-            obj.fileMenuContent.CloseProject.Enable='off';
+
+            if(exist('settings.xml','file'))
+                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+                DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
+            end
+
+            obj.viewTabs = containers.Map();
+            obj.fileMenuContent.CloseProject.Enable = 'off';
             obj.removeTempPath();
-            obj.pipelineTree.Root.Name='Project';
+            obj.pipelineTree.Root.Name = 'Project';
             delete(obj.componentMenu);
-            obj.componentMenu=[];
+            obj.componentMenu = [];
 
         end
         
