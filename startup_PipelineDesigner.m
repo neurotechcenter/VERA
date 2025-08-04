@@ -17,4 +17,9 @@ import uiextras.jTree.*;
 warning on
 
 %startup GUI
+f = waitbar(0.3,'Opening Pipeline Designer...');
+
 PipelineDesigner();
+
+waitbar(1,f);
+close(f);

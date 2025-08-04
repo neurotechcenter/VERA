@@ -302,7 +302,13 @@ classdef MainGUI < handle
                 pipelinePath = [];
 
             end
-            PipelineDesigner(pipelinePath)
+            
+            f = waitbar(0.3,'Opening Pipeline Designer...');
+
+            PipelineDesigner(pipelinePath);
+
+            waitbar(1,f);
+            close(f);
         end
     end
     
