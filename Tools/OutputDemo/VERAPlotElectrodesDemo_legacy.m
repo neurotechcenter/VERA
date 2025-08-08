@@ -53,10 +53,12 @@ for i = 1:size(brainmat.tala.electrodes,1)
          brainmat.tala.electrodes(i,3)*1.075,...
          num2str(i),'FontSize',12,'FontWeight','bold','color','b');
 end
+view(-114,25)
 
 %% Plot brain model with sticks
+fixedOrder  = unique(brainmat.electrodeDefinition.DefinitionIdentifier,'stable');
 NumImplants = size(brainmat.electrodeDefinition.Definition,1);
-NumElecs    = [brainmat.electrodeDefinition.Definition.NElectrodes];
+NumElecs    = [brainmat.electrodeDefinition.Definition(fixedOrder).NElectrodes];
 implantcmap = jet(NumImplants);
 
 figure;
@@ -72,8 +74,9 @@ for i = 1:NumImplants
 
     elecCtr = elecCtr + NumElecs(i);
 end
+view(-114,25)
 colormap([0.5 0.5 0.5;implantcmap]); 
-cb = colorbar('Ticks',[0:NumImplants]+1.5,'TickLabels',{'cortex',brainmat.electrodeDefinition.Definition.Name});
+cb = colorbar('Ticks',[0:NumImplants]+1.5,'TickLabels',{'cortex',brainmat.electrodeDefinition.Definition(fixedOrder).Name});
 clim([1 NumImplants+2])
 cb.TickLabelInterpreter = 'none';
 
