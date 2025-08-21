@@ -18,12 +18,6 @@
         <IdentifierType>"Volume"</IdentifierType>
     </Component>
 
-    <Component Type="FileLoader">
-        <Name>"FGATIR Loader"</Name>
-        <Identifier>"FGATIR"</Identifier>
-        <IdentifierType>"Volume"</IdentifierType>
-    </Component>
-
     <Component Type="ImportFreesurferSegmentation">
         <Name>"Load Freesurfer Segmentation Folder"</Name>
     </Component>
@@ -44,23 +38,12 @@
         <Name>"Move RAS Origin CT"</Name>
     </Component>
 
-    <Component Type="MoveRASOrigin2Volume">
-        <Name>"Move RAS Origin FGATIR"</Name>
-        <VolumeIdentifier1>"FGATIR"</VolumeIdentifier1>
-        <VolumeIdentifier2>"MRI"</VolumeIdentifier2>
-    </Component>
-
     <Component Type="Coregistration">
         <Name>"Coregister CT to MRI"</Name>
     </Component>
 
-    <Component Type="Coregistration">
-        <Name>"Coregister FGATIR to T1"</Name>
-        <CoregistrationIdentifier>"FGATIR"</CoregistrationIdentifier>
-    </Component>
-
-    <Component Type="DBSLeadDetection">
-        <Name>"DBS Lead Detection"</Name>
+    <Component Type="MatlabElectrodeSelection">
+        <Name>"MATLAB Electrode Selection"</Name>
     </Component>
 
     <Component Type="FreesurferElectrodeLocalization">
@@ -72,163 +55,90 @@
     </Component>
 
     <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation T1"</Name>
+        <Name>"Thomas Segmentation"</Name>
         <MRIIdentifier>"MRI"</MRIIdentifier>
-        <LeftVolumeIdentifier>"LThomasVolumeT1"</LeftVolumeIdentifier>
-        <RightVolumeIdentifier>"RThomasVolumeT1"</RightVolumeIdentifier>
+        <LeftVolumeIdentifier>"LThomasVolume"</LeftVolumeIdentifier>
+        <RightVolumeIdentifier>"RThomasVolume"</RightVolumeIdentifier>
     </Component>
-
-    <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation FGATIR"</Name>
-        <MRIIdentifier>"FGATIR"</MRIIdentifier>
-        <LeftVolumeIdentifier>"LThomasVolumeFGATIR"</LeftVolumeIdentifier>
-        <RightVolumeIdentifier>"RThomasVolumeFGATIR"</RightVolumeIdentifier>
-    </Component>
-
-
-
-
 
     <Component Type="CalculateDistanceToVolumeLabel">
         <Name>"Distance to Freesurfer Labels"</Name>
         <VolumeIdentifier>"ASEG"</VolumeIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ElectrodeLocationIdentifierOut>"ElectrodeLocationASEG"</ElectrodeLocationIdentifierOut>
         <LoadLUTFile>"FreeSurferColorLUT"</LoadLUTFile>
     </Component>
 
-    <Component Type="ReplaceLabels">
-        <Name>"Replace Labels ASEG"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationASEG"</ElectrodeLocationIdentifier>
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Left Thomas Labels"</Name>
+        <VolumeIdentifier>"LThomasVolume"</VolumeIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
     </Component>
 
+    <Component Type="CalculateDistanceToVolumeLabel">
+        <Name>"Distance to Right Thomas Labels"</Name>
+        <VolumeIdentifier>"RThomasVolume"</VolumeIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
+    </Component>
+
+    <Component Type="CalculateDistanceToSurfaceLabel">
+        <Name>"Distance to Surface Labels"</Name>
+    </Component>
+
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Background","Unknown","unknown","Right-Cerebral-White-Matter","Left-Cerebral-White-Matter","Right-Hippocampus","Left-Hippocampus","Right-Amygdala","Left-Amygdala","Right-Thalamus","Left-Thalamus","Right-Cerebral-Cortex","Left-Cerebral-Cortex"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0,0,3,3,1,1,1,1,2,2,10,10]</ReplacementRadius>
+    </Component>
+    
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Unknown Labels"</Name>
+        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
+        <ReplaceableLabels>["Unknown","unknown"]</ReplaceableLabels>
+        <ReplacementRadius>[0,0]</ReplacementRadius>
+    </Component>
+
+    <Component Type="ReplaceLabels">
+        <Name>"Replace Background Label"</Name>
+        <ReplaceableLabels>["Background"]</ReplaceableLabels>
+        <ReplacementRadius>[0]</ReplacementRadius>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Left Thalamus Surface"</Name>
+        <VolumeIdentifier>"LThomasVolume"</VolumeIdentifier>
+        <SurfaceIdentifier>"LThalamusSurface"</SurfaceIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
+        <Smoothing>3</Smoothing>
+    </Component>
+
+    <Component Type="LabelVolume2Surface">
+        <Name>"Generate Right Thalamus Surface"</Name>
+        <VolumeIdentifier>"RThomasVolume"</VolumeIdentifier>
+        <SurfaceIdentifier>"RThalamusSurface"</SurfaceIdentifier>
+        <LoadLUTFile>"thomas"</LoadLUTFile>
+        <Smoothing>3</Smoothing>
+    </Component>
+
+
+
+
     <Component Type="MatOutput">
-        <Name>"Cortex"</Name>
+        <Name>"Brain"</Name>
         <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationASEG"</ElectrodeLocationIdentifier>
-        <SavePathIdentifier>"DataOutput/brain.mat"</SavePathIdentifier>
-    </Component>
-
-
-
-
-    <Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to Left Thomas T1 Labels"</Name>
-        <VolumeIdentifier>"LThomasVolumeT1"</VolumeIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ElectrodeLocationIdentifierOut>"ElectrodeLocationT1"</ElectrodeLocationIdentifierOut>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-    </Component>
-
-    <Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to Right Thomas T1 Labels"</Name>
-        <VolumeIdentifier>"RThomasVolumeT1"</VolumeIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
-        <ElectrodeLocationIdentifierOut>"ElectrodeLocationT1"</ElectrodeLocationIdentifierOut>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-    </Component>
-
-    <Component Type="ReplaceLabels">
-        <Name>"Replace Labels Thomas T1"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["Background"]</ReplaceableLabels>
-        <ReplacementRadius>[0]</ReplacementRadius>
-    </Component>
-
-    <Component Type="LabelVolume2Surface">
-        <Name>"Generate Left Thalamus T1 Surface"</Name>
-        <VolumeIdentifier>"LThomasVolumeT1"</VolumeIdentifier>
-        <SurfaceIdentifier>"LThalamusSurfaceT1"</SurfaceIdentifier>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-        <Smoothing>3</Smoothing>
-    </Component>
-
-    <Component Type="LabelVolume2Surface">
-        <Name>"Generate Right Thalamus T1 Surface"</Name>
-        <VolumeIdentifier>"RThomasVolumeT1"</VolumeIdentifier>
-        <SurfaceIdentifier>"RThalamusSurfaceT1"</SurfaceIdentifier>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-        <Smoothing>3</Smoothing>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Left Thalamus T1"</Name>
-        <SurfaceIdentifier>"LThalamusSurfaceT1"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
-        <SavePathIdentifier>"DataOutput/LThalamusT1.mat"</SavePathIdentifier>
+        <Name>"Left Thalamus"</Name>
+        <SurfaceIdentifier>"LThalamusSurface"</SurfaceIdentifier>
     </Component>
 
     <Component Type="MatOutput">
-        <Name>"Right Thalamus T1"</Name>
-        <SurfaceIdentifier>"RThalamusSurfaceT1"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
-        <SavePathIdentifier>"DataOutput/RThalamusT1.mat"</SavePathIdentifier>
+        <Name>"Right Thalamus"</Name>
+        <SurfaceIdentifier>"RThalamusSurface"</SurfaceIdentifier>
     </Component>
-
-
-
-
-    <Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to Left Thomas FGATIR Labels"</Name>
-        <VolumeIdentifier>"LThomasVolumeFGATIR"</VolumeIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ElectrodeLocationIdentifierOut>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifierOut>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-    </Component>
-
-    <Component Type="CalculateDistanceToVolumeLabel">
-        <Name>"Distance to Right Thomas FGATIR Labels"</Name>
-        <VolumeIdentifier>"RThomasVolumeFGATIR"</VolumeIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
-        <ElectrodeLocationIdentifierOut>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifierOut>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-    </Component>
-
-    <Component Type="ReplaceLabels">
-        <Name>"Replace Labels Thomas FGATIR"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
-        <ReplaceableLabels>["Background"]</ReplaceableLabels>
-        <ReplacementRadius>[0]</ReplacementRadius>
-    </Component>
-
-    <Component Type="LabelVolume2Surface">
-        <Name>"Generate Left Thalamus FGATIR Surface"</Name>
-        <VolumeIdentifier>"LThomasVolumeFGATIR"</VolumeIdentifier>
-        <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-        <Smoothing>3</Smoothing>
-    </Component>
-
-    <Component Type="LabelVolume2Surface">
-        <Name>"Generate Right Thalamus FGATIR Surface"</Name>
-        <VolumeIdentifier>"RThomasVolumeFGATIR"</VolumeIdentifier>
-        <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
-        <LoadLUTFile>"thomas"</LoadLUTFile>
-        <Smoothing>3</Smoothing>
-    </Component>
-
-    <Component Type="MatOutput">
-        <Name>"Left Thalamus FGATIR"</Name>
-        <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
-        <SavePathIdentifier>"DataOutput/LThalamusFGATIR.mat"</SavePathIdentifier>
-    </Component>
-
-    <Component Type="MatOutput">
-        <Name>"Right Thalamus FGATIR"</Name>
-        <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
-        <SavePathIdentifier>"DataOutput/RThalamusFGATIR.mat"</SavePathIdentifier>
-    </Component>
-
-
-
 
     <Component Type="FreesurferDatExport">
         <Name>"Write Freesurfer PointSet Files"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocation"</ElectrodeLocationIdentifier>
-        <ElectrodeDefinitionIdentifier>"ElectrodeDefinition"</ElectrodeDefinitionIdentifier>
-        <SavePathIdentifier>"DataOutput/Electrodes"</SavePathIdentifier>
     </Component>
 
 
@@ -237,31 +147,16 @@
     <View Type="Model3DView">
         <Name>"Cortex 3D View"</Name>
         <SurfaceIdentifier>"Surface"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationASEG"</ElectrodeLocationIdentifier>
     </View>
 
     <View Type="Model3DView">
-        <Name>"Left Thalamus T1 3D View"</Name>
-        <SurfaceIdentifier>"LThalamusSurfaceT1"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
+        <Name>"Left Thalamus 3D View"</Name>
+        <SurfaceIdentifier>"LThalamusSurface"</SurfaceIdentifier>
     </View>
 
     <View Type="Model3DView">
-        <Name>"Right Thalamus T1 3D View"</Name>
-        <SurfaceIdentifier>"RThalamusSurfaceT1"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
-    </View>
-
-    <View Type="Model3DView">
-        <Name>"Left Thalamus FGATIR 3D View"</Name>
-        <SurfaceIdentifier>"LThalamusSurfaceFGATIR"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
-    </View>
-
-    <View Type="Model3DView">
-        <Name>"Right Thalamus FGATIR 3D View"</Name>
-        <SurfaceIdentifier>"RThalamusSurfaceFGATIR"</SurfaceIdentifier>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
+        <Name>"Right Thalamus 3D View"</Name>
+        <SurfaceIdentifier>"RThalamusSurface"</SurfaceIdentifier>
     </View>
 
     <View Type="SliceViewerView">
@@ -269,18 +164,7 @@
     </View>
 
     <View Type="ElectrodeLocationTableView">
-        <Name>"Electrode Location Table View ASEG"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationASEG"</ElectrodeLocationIdentifier>
-    </View>
-
-    <View Type="ElectrodeLocationTableView">
-        <Name>"Electrode Location Table View Thomas T1"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationT1"</ElectrodeLocationIdentifier>
-    </View>
-
-    <View Type="ElectrodeLocationTableView">
-        <Name>"Electrode Location Table View Thomas FGATIR"</Name>
-        <ElectrodeLocationIdentifier>"ElectrodeLocationFGATIR"</ElectrodeLocationIdentifier>
+        <Name>"Electrode Location Table View"</Name>
     </View>
 
     <View Type="ElectrodeDefinitionView">
