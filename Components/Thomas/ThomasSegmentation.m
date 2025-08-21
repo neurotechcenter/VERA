@@ -121,22 +121,22 @@ classdef ThomasSegmentation < AComponent
 
             end
 
-            Lvolout          = obj.CreateOutput(obj.LeftVolumeIdentifier);
-            nii_path         = fullfile(segmentationPath,'left','thomasfull.nii.gz');
-            nii_path_reslice = fullfile(segmentationPath,'left','thomasfull_reslice.nii.gz');
+            Lvolout           = obj.CreateOutput(obj.LeftVolumeIdentifier);
+            Lnii_path         = fullfile(segmentationPath,'left','thomasfull.nii.gz');
+            Lnii_path_reslice = fullfile(segmentationPath,'left','thomasfull_reslice.nii.gz');
 
-            reslice_nii(nii_path,nii_path_reslice); % needed to reslice because the tolerance of 0 is too low for FGATIR image
+            reslice_nii(Lnii_path,Lnii_path_reslice); % needed to reslice because the tolerance of 0 is too low for FGATIR image
 
-            Lvolout.LoadFromFile(nii_path_reslice);
+            Lvolout.LoadFromFile(Lnii_path_reslice);
 
 
-            Rvolout          = obj.CreateOutput(obj.RightVolumeIdentifier);
-            nii_path         = fullfile(segmentationPath,'right','thomasrfull.nii.gz');
-            nii_path_reslice = fullfile(segmentationPath,'right','thomasfull_reslice.nii.gz');
+            Rvolout           = obj.CreateOutput(obj.RightVolumeIdentifier);
+            Rnii_path         = fullfile(segmentationPath,'right','thomasrfull.nii.gz');
+            Rnii_path_reslice = fullfile(segmentationPath,'right','thomasfull_reslice.nii.gz');
 
-            reslice_nii(nii_path,nii_path_reslice);
+            reslice_nii(Rnii_path,Rnii_path_reslice);
 
-            Rvolout.LoadFromFile(nii_path_reslice);
+            Rvolout.LoadFromFile(Rnii_path_reslice);
 
 
             pathInfo      = obj.CreateOutput(obj.SegmentationPathIdentifier);
