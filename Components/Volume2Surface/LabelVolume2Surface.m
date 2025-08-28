@@ -102,15 +102,16 @@ classdef LabelVolume2Surface < AComponent
             LUT_Labels = [];
             rgbv       = [];
             if strcmp(obj.LoadLUTFile,'true')
-                [file,path] = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
+                [file,path]               = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                 [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(fullfile(path,file));
             elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
-                path     = obj.GetOptionalDependency('Freesurfer');
-                lut_path = fullfile(path,'FreeSurferColorLUT.txt');
+                path                      = obj.GetOptionalDependency('Freesurfer');
+                lut_path                  = fullfile(path,'FreeSurferColorLUT.txt');
                 [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(lut_path);
             elseif strcmp(obj.LoadLUTFile,'thomas')
-                path     = obj.GetOptionalDependency('Thomas');
-                lut_path = fullfile(path,'CustomAtlas.ctbl');
+                % path     = obj.GetOptionalDependency('Thomas'); % hipsthomasdocker removed the atlas so a copy was placed in VERA/Components/ThomasSegmentation
+                % lut_path = fullfile(path,'CustomAtlas.ctbl');
+                lut_path                  = which('ThomasAtlas.ctbl');
                 [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(lut_path);
             elseif exist(obj.LoadLUTFile,'file')
                 if isAbsolutePath(obj.LoadLUTFile)
@@ -118,7 +119,7 @@ classdef LabelVolume2Surface < AComponent
                 else
                     [path,file,ext] = fileparts(fullfile(obj.ComponentPath,'..',obj.LoadLUTFile));
                 end
-                lut_path = fullfile(path,[file,ext]);
+                lut_path                  = fullfile(path,[file,ext]);
                 [LUT_Ids,LUT_Labels,rgbv] = loadLUTFile(lut_path);
             end
 

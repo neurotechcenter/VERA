@@ -85,15 +85,16 @@ classdef CalculateDistanceToVolumeLabel < AComponent
 
         function out = Process(obj,vol,elLocs)
             if strcmp(obj.LoadLUTFile,'true')
-                [file,path] = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
+                [file,path]                          = uigetfile({'*.*'},'Select LUT'); % uigetfile extension filter is broken on MacOS, so allowing all file types
                 [obj.internalIds,obj.internalLabels] = loadLUTFile(fullfile(path,file));
             elseif strcmp(obj.LoadLUTFile,'FreeSurferColorLUT')
-                path     = obj.GetOptionalDependency('Freesurfer');
-                lut_path = fullfile(path,'FreeSurferColorLUT.txt');
+                path                                 = obj.GetOptionalDependency('Freesurfer');
+                lut_path                             = fullfile(path,'FreeSurferColorLUT.txt');
                 [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
             elseif strcmp(obj.LoadLUTFile,'thomas')
-                path     = obj.GetOptionalDependency('Thomas');
-                lut_path = fullfile(path,'CustomAtlas.ctbl');
+                % path     = obj.GetOptionalDependency('Thomas'); % hipsthomasdocker removed the atlas so a copy was placed in VERA/Components/ThomasSegmentation
+                % lut_path = fullfile(path,'CustomAtlas.ctbl');
+                lut_path                             = which('ThomasAtlas.ctbl');
                 [obj.internalIds,obj.internalLabels] = loadLUTFile(lut_path);
             elseif exist(obj.LoadLUTFile,'file')
                 if isAbsolutePath(obj.LoadLUTFile)
