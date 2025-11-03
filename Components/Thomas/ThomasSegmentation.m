@@ -1,5 +1,6 @@
 classdef ThomasSegmentation < AComponent
-    % ThomasSegmentation Run Thomas segmentation within VERA
+    % ThomasSegmentation Run Thomas thalamic segmentation within VERA
+    % MRIIdentifier can be MRI or FGATIR
 
     properties
         MRIIdentifier     % Input MRI Data Identifier
@@ -21,13 +22,10 @@ classdef ThomasSegmentation < AComponent
             obj.AddOutput(obj.LeftVolumeIdentifier,       'Volume');
             obj.AddOutput(obj.RightVolumeIdentifier,      'Volume');
             obj.AddOutput(obj.SegmentationPathIdentifier, 'PathInformation');
-            obj.RequestDependency('Thomas','folder');
-            obj.RequestDependency('Docker','file');
+            obj.RequestDependency('Docker', 'file');
         end
 
         function Initialize(obj)
-            thomaspath = obj.GetDependency('Thomas');
-            addpath(thomaspath);
             
             dockerpath = obj.GetDependency('Docker');
             if ispc
@@ -46,38 +44,37 @@ classdef ThomasSegmentation < AComponent
             end
         end
 
-        function [Lvolout,Rvolout,pathInfo] = Process(obj,mri)
+        function [Lvolout, Rvolout, pathInfo] = Process(obj, mri)
             segmentationFolder                 = obj.ComponentPath;
             mri_path                           = GetFullPath(mri.Path);
             [imageFolder, imageName, imageExt] = fileparts(mri_path);
             imageName                          = [imageName, imageExt];
-            ThomasPath                         = obj.GetDependency('Thomas');
             DockerPath                         = obj.GetDependency('Docker');
             
             if ispc
-                subsyspath  = obj.GetDependency('UbuntuSubsystemPath');
+                subsyspath    = obj.GetDependency('UbuntuSubsystemPath');
                 w_imageFolder = convertToUbuntuSubsystemPath(imageFolder, subsyspath);
             end
 
             if ispc
                 if strcmp(obj.MRIIdentifier,'MRI')
                     % T1
-                    docker_script = ['docker run -v ',w_imageFolder,':',w_imageFolder,' -w ',w_imageFolder,...
-                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
+                    docker_script = ['docker run --rm --name sthomas -v ', w_imageFolder, ':', w_imageFolder, ' -w ', w_imageFolder,...
+                        ' anagrammarian/sthomas hipsthomas.sh -v -t1 -i ', imageName];
                 elseif strcmp(obj.MRIIdentifier,'FGATIR')
                     % WMn/FGATIR
-                    docker_script = ['docker run -v ',w_imageFolder,':',w_imageFolder,' -w ',w_imageFolder,...
-                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
+                    docker_script = ['docker run --rm --name sthomas -v ', w_imageFolder, ':', w_imageFolder, ' -w ', w_imageFolder,...
+                        ' anagrammarian/sthomas hipsthomas.sh -v -i ', imageName];
                 end
             else
                 if strcmp(obj.MRIIdentifier,'MRI')
                     % T1
-                    docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
-                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,' -t1 -big"'];
+                    docker_script = ['docker run -it --rm --name sthomas -v ', imageFolder, ':', imageFolder, ' -w ', imageFolder,...
+                        ' anagrammarian/sthomas hipsthomas.sh -v -t1 -i ', imageName];
                 elseif strcmp(obj.MRIIdentifier,'FGATIR')
                     % WMn/FGATIR
-                    docker_script = ['docker run -v ',imageFolder,':',imageFolder,' -w ',imageFolder,...
-                        ' --user $(id -u):$(id -g) --rm -t anagrammarian/thomasmerged bash -c "hipsthomas_csh -i ',imageName,'"'];
+                    docker_script = ['docker run -it --rm --name sthomas -v ', imageFolder, ':', imageFolder, ' -w ', imageFolder,...
+                        ' anagrammarian/sthomas hipsthomas.sh -v -i ', imageName];
                 end
             end
             
@@ -86,14 +83,17 @@ classdef ThomasSegmentation < AComponent
             if(~exist(segmentationPath,'dir') ||...
                     (exist(segmentationPath,'dir') && strcmp(questdlg('Found an Existing Thomas Segmentation Folder! Do you want to rerun the Segmentation?','Rerun Segmentation?','Yes','No','No'),'Yes')))
                 disp('Running Thomas segmentation, this might take a few hours, get a coffee...');
-                if(exist(segmentationPath,'dir'))
-                    rmdir(segmentationPath,'s');
+                if(exist(segmentationPath, 'dir'))
+                    rmdir(segmentationPath, 's');
+                    mkdir(segmentationPath);
+                else
+                    mkdir(segmentationPath);
                 end
 
                 % what happens if docker isn't installed?
                 % Run docker from terminal instead of app?
                 if ispc
-                    system(['"',DockerPath,'"']);
+                    system(['"', DockerPath, '"']);
                 else
                     system('open -a docker');
                 end
@@ -103,42 +103,42 @@ classdef ThomasSegmentation < AComponent
 
                 % Check docker image
                 % This will check if usr/local/bin is on the system path
-                dockerImage = 'anagrammarian/thomasmerged:latest';
+                dockerImage = 'anagrammarian/sthomas:latest';
                 checkDocker(dockerImage);
 
                 % run docker
                 if ispc
-                    systemWSL(docker_script,'-echo');
+                    systemWSL(docker_script, '-echo');
                 else
-                    system(docker_script,'-echo');
+                    system(docker_script, '-echo');
                 end
 
                 % Move Thomas files to correct location
-                movefile(fullfile(imageFolder,'left'),  fullfile(segmentationPath,'left'))
-                movefile(fullfile(imageFolder,'right'), fullfile(segmentationPath,'right'))
-                movefile(fullfile(imageFolder,'temp'),  fullfile(segmentationPath,'temp'))
-                movefile(fullfile(imageFolder,'tempr'), fullfile(segmentationPath,'tempr'))
-
+                movefile(fullfile(imageFolder, 'left'),                     fullfile(segmentationPath, 'left'))
+                movefile(fullfile(imageFolder, 'right'),                    fullfile(segmentationPath, 'right'))
+                movefile(fullfile(imageFolder, 'sthomas_LR_labels.nii.gz'), fullfile(segmentationPath, 'sthomas_LR_labels.nii.gz'))
+                movefile(fullfile(imageFolder, 'sthomas_LR_labels.png'),    fullfile(segmentationPath, 'sthomas_LR_labels.png'))
             end
 
+            % Left
             Lvolout           = obj.CreateOutput(obj.LeftVolumeIdentifier);
-            Lnii_path         = fullfile(segmentationPath,'left','thomasfull.nii.gz');
-            Lnii_path_reslice = fullfile(segmentationPath,'left','thomasfull_reslice.nii.gz');
+            Lnii_path         = fullfile(segmentationPath, 'left', 'thomasfull_L.nii.gz');
+            Lnii_path_reslice = fullfile(segmentationPath, 'left', 'thomasfull_L_reslice.nii.gz');
 
-            reslice_nii(Lnii_path,Lnii_path_reslice); % needed to reslice because the tolerance of 0 is too low for FGATIR image
+            reslice_nii(Lnii_path, Lnii_path_reslice); % needed to reslice because the tolerance of 0 is too low for FGATIR image
 
             Lvolout.LoadFromFile(Lnii_path_reslice);
 
-
+            % Right
             Rvolout           = obj.CreateOutput(obj.RightVolumeIdentifier);
-            Rnii_path         = fullfile(segmentationPath,'right','thomasrfull.nii.gz');
-            Rnii_path_reslice = fullfile(segmentationPath,'right','thomasfull_reslice.nii.gz');
+            Rnii_path         = fullfile(segmentationPath, 'right', 'thomasfull_R.nii.gz');
+            Rnii_path_reslice = fullfile(segmentationPath, 'right', 'thomasfull_R_reslice.nii.gz');
 
-            reslice_nii(Rnii_path,Rnii_path_reslice);
+            reslice_nii(Rnii_path, Rnii_path_reslice);
 
             Rvolout.LoadFromFile(Rnii_path_reslice);
 
-
+            % Path
             pathInfo      = obj.CreateOutput(obj.SegmentationPathIdentifier);
             pathInfo.Path = segmentationPath;
 
