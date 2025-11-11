@@ -54,8 +54,8 @@
         <Name>"Reorder Electrodes"</Name>
     </Component>
 
-    <Component Type="ThomasSegmentation">
-        <Name>"Thomas Segmentation"</Name>
+    <Component Type="GenerateThomasSegmentation">
+        <Name>"Generate Thomas Segmentation"</Name>
         <MRIIdentifier>"MRI"</MRIIdentifier>
         <LeftVolumeIdentifier>"LThomasVolume"</LeftVolumeIdentifier>
         <RightVolumeIdentifier>"RThomasVolume"</RightVolumeIdentifier>

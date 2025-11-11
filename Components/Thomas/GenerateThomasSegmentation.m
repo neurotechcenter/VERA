@@ -1,5 +1,5 @@
-classdef ThomasSegmentation < AComponent
-    % ThomasSegmentation Run Thomas thalamic segmentation within VERA
+classdef GenerateThomasSegmentation < AComponent
+    % GenerateThomasSegmentation Run Thomas thalamic segmentation within VERA
     % MRIIdentifier can be MRI or FGATIR
 
     properties
@@ -10,7 +10,7 @@ classdef ThomasSegmentation < AComponent
     end
 
     methods
-        function obj = ThomasSegmentation()
+        function obj = GenerateThomasSegmentation()
             obj.MRIIdentifier              = 'MRI';
             obj.LeftVolumeIdentifier       = 'LThomasVolume';
             obj.RightVolumeIdentifier      = 'RThomasVolume';
