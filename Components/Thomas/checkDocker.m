@@ -11,14 +11,16 @@ dockerPath = findBinPath('docker');
 if isempty(dockerPath)
     if ismac
         % /usr/local/bin might not be in the system path env on macOS
-        error(sprintf(['docker not found!\nIf it''s already installed, ', ...
+        errorMsg = sprintf(['Docker not found!\nIf it''s already installed, ', ...
             'please run the line below in your terminal (NOT MATLAB Command Window!) and reboot:\n', ...
-            'sudo launchctl config user path /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin']));
+            'sudo launchctl config user path /usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin']);
+        error(errorMsg);
     else
-        error('docker not found!');
+        errorMsg = 'Docker not found!';
+        error(errorMsg);
     end
 else
-    fprintf('docker found: %sdocker\n', [dockerPath, filesep]);
+    fprintf('Docker found: %sdocker\n', [dockerPath, filesep]);
 end
 
 % Check docker image

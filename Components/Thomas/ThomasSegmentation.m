@@ -108,9 +108,15 @@ classdef ThomasSegmentation < AComponent
 
                 % run docker
                 if ispc
-                    systemWSL(docker_script, '-echo');
+                    [status, cmdout] = systemWSL(docker_script, '-echo');
                 else
-                    system(docker_script, '-echo');
+                    [status, cmdout] = system(docker_script, '-echo');
+                end
+
+                if status
+                    rmdir(segmentationPath, 's');
+                    errorMsg = sprintf(['Error! Thomas segmentation not generated.\n\n', cmdout]);
+                    error(errorMsg);
                 end
 
                 % Move Thomas files to correct location
