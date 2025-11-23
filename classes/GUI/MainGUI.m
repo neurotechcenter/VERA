@@ -51,6 +51,7 @@ classdef MainGUI < handle
             if exist(fullfile(rootpath,'settings.xml'),'file')
                 DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
             end
+
             obj.viewTabs     = containers.Map();
             obj.hBox         = uix.HBoxFlex('Parent',    obj.window);
             obj.pipelineTree = uiw.widget.Tree('Parent', obj.hBox,'MouseClickedCallback',@obj.treeClick);
@@ -263,9 +264,8 @@ classdef MainGUI < handle
             obj.removeTempPath();
 
             rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-            if exist(fullfile(rootpath,'settings.xml'),'file')
-                DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
-            end
+            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
+
             delete(obj.Views);
             delete(obj.ProjectRunner);
             delete(hob);
@@ -334,9 +334,7 @@ classdef MainGUI < handle
             end
 
             rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-            if exist(fullfile(rootpath,'settings.xml'),'file')
-                DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
-            end
+            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
 
             obj.viewTabs = containers.Map();
             obj.fileMenuContent.CloseProject.Enable = 'off';
