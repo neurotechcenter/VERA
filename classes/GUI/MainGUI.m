@@ -46,8 +46,9 @@ classdef MainGUI < handle
             'HandleVisibility', 'on','CloseRequestFcn',@obj.onClose);
             addToolbarExplorationButtons(obj.window);
             cameratoolbar(obj.window,'NoReset');
-            if(exist('settings.xml','file'))
-                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+
+            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+            if exist(fullfile(rootpath,'settings.xml'),'file')
                 DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
             end
             obj.viewTabs     = containers.Map();
@@ -261,9 +262,9 @@ classdef MainGUI < handle
             %onClose - close project callback
             obj.removeTempPath();
 
-            if(exist('settings.xml','file'))
-                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-                DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
+            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+            if exist(fullfile(rootpath,'settings.xml'),'file')
+                DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
             end
             delete(obj.Views);
             delete(obj.ProjectRunner);
@@ -332,9 +333,9 @@ classdef MainGUI < handle
                 delete(v{1});
             end
 
-            if(exist('settings.xml','file'))
-                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-                DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
+            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+            if exist(fullfile(rootpath,'settings.xml'),'file')
+                DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
             end
 
             obj.viewTabs = containers.Map();
