@@ -321,7 +321,7 @@ function PipelineDesigner(varargin)
     end
 
     %% Get all components
-    componentParentClasses = {'AComponent'};
+    componentParentClasses = {'AComponent','AFSSubsegmentation'};
     componentPath          = GetFullPath(fullfile(mfilename('fullpath'),'..','..','Components'));
 
     [AvailableComponents, componentTypes] = getAvailableElements(componentPath, componentParentClasses, 'component');
@@ -1142,15 +1142,26 @@ function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentCompon
     props = properties(component);
 
     % Get the properties of the parent class(es)
+    % iter = 1;
+    % for i = 1:length(parentClass)
+    %     parentClassProps = meta.class.fromName(parentClass{i});
+    %     for j = 1:length(parentClassProps.PropertyList) 
+    %         parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
+    %         iter = iter + 1;
+    %     end
+    % end
+
+    % Only worry about properties from AComponent, ignoring any other input
+    % parent classes
+    parentClassProps = meta.class.fromName(parentClass{1});
     iter = 1;
-    for i = 1:length(parentClass)
-        parentClassProps = meta.class.fromName(parentClass{i});
-        for j = 1:length(parentClassProps.PropertyList) 
-            parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
-            iter = iter + 1;
-        end
+    for i = 1:length(parentClassProps.PropertyList) 
+        parentClassNames{iter,1} = parentClassProps.PropertyList(i).Name;
+        iter = iter + 1;
     end
 
+    % Trying to exclude parent properties that are not set in the
+    % component. This causes problems when using inherited class properties
     uniqueComponentProperties = setdiff(props,parentClassNames,'stable');
     uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
 
@@ -1468,6 +1479,8 @@ function [componentType] = getComponentType(className)
     
     % Get the class definition
     classInfo = meta.class.fromName(className);
+    superclassInfo = classInfo.SuperclassList;
+    superclassName = superclassInfo.Name;
     
     % Iterate through the class methods
     for i = 1:length(classInfo.MethodList)
@@ -1476,7 +1489,12 @@ function [componentType] = getComponentType(className)
         % Check for AddInput and AddOutput methods
         if strcmp(methodName, 'Publish')
             % Look at the Publish method to get inputs and outputs
-            [inputs, outputs] = extractInputsOutputs(className);
+            [inputs, outputs] = extractInputsOutputs(className,classInfo);
+
+            if isempty(inputs) && isempty(outputs)
+                % Check the super class in case of inheritance (this is clunky)
+                [inputs, outputs] = extractInputsOutputs(superclassName,superclassInfo);
+            end
         end
         
     end
@@ -1493,9 +1511,9 @@ function [componentType] = getComponentType(className)
 end
 
 % Function to extract inputs and outputs of a component
-function [inputs, outputs] = extractInputsOutputs(className)
-    % A better approach will be to look at
-    % classInfo.PropertyList
+function [inputs, outputs] = extractInputsOutputs(className,classInfo)
+    % A better approach might be to look at
+    % {classInfo.PropertyList.Name}'
 
     % Check for calls to AddInput and AddOutput in the method body
     filePath   = which([className '.m']);
