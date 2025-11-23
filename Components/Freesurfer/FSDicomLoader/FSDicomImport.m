@@ -9,11 +9,12 @@ classdef FSDicomImport < AComponent
     
     methods
         function obj = FSDicomImport()
-
+            obj.Identifier = 'MRI';
         end
         
         function Publish(obj)
             obj.AddOutput(obj.Identifier,'Volume');
+
             obj.RequestDependency('Freesurfer','folder');
             if(ispc)
                 obj.RequestDependency('UbuntuSubsystemPath','folder');
@@ -21,7 +22,8 @@ classdef FSDicomImport < AComponent
         end
         
         function Initialize(obj)
-            path=obj.GetDependency('Freesurfer');
+            obj.GetDependency('Freesurfer');
+            
             if(ispc)
                 obj.GetDependency('UbuntuSubsystemPath');
                if(system('WHERE bash >nul 2>nul echo %ERRORLEVEL%') == 1)
@@ -33,16 +35,17 @@ classdef FSDicomImport < AComponent
         end
         
         function out = Process(obj)
-            [file,path]=uigetfile('*.*',['Please select ' obj.Identifier]);
+            [file,path] = uigetfile('*.*',['Please select ' obj.Identifier]);
              if isequal(file,0)
                  error([obj.Identifier ' selection aborted']);
              end
-            dicom_path=fullfile(path,file);
+            dicom_path = fullfile(path,file);
 
-            
-            out=obj.CreateOutput(obj.Identifier);
-            freesurferPath=obj.GetDependency('Freesurfer');
-            nii_path=createTempNifti(dicom_path,obj.GetDependency('TempPath'),freesurferPath);
+            out            = obj.CreateOutput(obj.Identifier);
+
+            freesurferPath = obj.GetDependency('Freesurfer');
+            nii_path       = createTempNifti(dicom_path,obj.GetDependency('TempPath'),freesurferPath);
+
             out.LoadFromFile(nii_path);
             delete(nii_path);
             
