@@ -178,7 +178,7 @@ classdef ImportROSFile < AComponent
             volume.LoadFromFile(ras_projected.displays{1});
             if isempty(obj.ElectrodeDefinition)
                 obj.ElectrodeDefinition = definitions.Definition;
-                h = figure;
+                h = figure('Name',obj.Name,'Position',[200,150,700,500]);
                 elView = ElectrodeDefinitionView('Parent',h);
                 elView.SetComponent(obj);
                 uiwait(h);
@@ -190,9 +190,10 @@ classdef ImportROSFile < AComponent
                     if(strcmp(cmd,'Add'))
                     elseif(strcmp(cmd,'Delete'))
                         for i_traj = 1:length(val)
-                            trajectories.Location(trajectories.DefinitionIdentifier == val(i),:)           = [];
-                            trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier == val(i)) = [];
-                            trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i))  = trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i)) -1;
+                            trajectories.Location(trajectories.DefinitionIdentifier == val(i_traj),:)           = [];
+                            trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier == val(i_traj)) = [];
+                            trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i_traj))  = trajectories.DefinitionIdentifier(trajectories.DefinitionIdentifier > val(i_traj)) -1;
+                            val = val - 1;
                         end
                     elseif(strcmp(cmd,'Update'))
                     else
@@ -206,8 +207,16 @@ classdef ImportROSFile < AComponent
                 for i = 1:length(obj.ElectrodeDefinition)
                     for f = 1:length(field)
                         if(isempty(obj.ElectrodeDefinition(i).(field{f})))
-                            error([field{f} ' is missing values!']);
+                            warndlg([field{f} ' is missing values!']);
+                            stopNow = 1;
+                            break;
+                        else
+                            stopNow = 0;
                         end
+                    end
+
+                    if stopNow
+                        break;
                     end
                 end
             end
