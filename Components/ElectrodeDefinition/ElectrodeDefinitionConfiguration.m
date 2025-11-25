@@ -71,7 +71,7 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
             if isempty(obj.ElectrodeDefinition)
                 obj.ElectrodeDefinition = obj.internalDefinitions;
 
-                h      = figure('Name',obj.Name);
+                h      = figure('Name',obj.Name,'Position',[200,150,700,500]);
                 elView = ElectrodeDefinitionView('Parent',h);
                 elView.SetComponent(obj);
 
@@ -84,8 +84,16 @@ classdef ElectrodeDefinitionConfiguration  < AComponent
                 for i = 1:length(obj.ElectrodeDefinition)
                     for f = 1:length(field)
                         if isempty(obj.ElectrodeDefinition(i).(field{f}))
-                            error([field{f} ' is missing values!']);
+                            warndlg([field{f} ' is missing values!']);
+                            stopNow = 1;
+                            break;
+                        else
+                            stopNow = 0;
                         end
+                    end
+
+                    if stopNow
+                        break;
                     end
                 end
 
