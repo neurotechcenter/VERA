@@ -147,13 +147,27 @@ classdef FreesurferElectrodeLocalization < AComponent
             fprintf(fileID,shellcmd);
             fclose(fileID);
             if(ispc)
-                systemWSL(['chmod +x ''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
-                %system(['chmod -R +x ' freesurferPath],'-echo');
-                systemWSL(['''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
+                [status,cmdout] = systemWSL(['chmod +x ''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
+                % [status,cmdout] = system(['chmod -R +x ' freesurferPath],'-echo');
+                if status ~= 0
+                    error(['Error Running Freeview: ',cmdout]);
+                end
+
+                [status,cmdout] = systemWSL(['''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
+                if status ~= 0
+                    error(cmdout);
+                end
+
             else
-                system(['chmod +x ''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
-                %system(['chmod -R +x ' freesurferPath],'-echo');
-                system(['''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
+                [status,cmdout] = system(['chmod +x ''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
+                % [status,cmdout] = system(['chmod -R +x ' freesurferPath],'-echo');
+                if status ~= 0
+                    error(cmdout);
+                end
+                [status,cmdout] = system(['''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
+                if status ~= 0
+                    error(cmdout);
+                end
             end
             %read waypoint files 
             electrodes=obj.CreateOutput(obj.ElectrodeLocationIdentifier);
