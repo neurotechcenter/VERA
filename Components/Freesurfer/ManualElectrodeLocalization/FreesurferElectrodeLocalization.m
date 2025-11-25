@@ -155,18 +155,18 @@ classdef FreesurferElectrodeLocalization < AComponent
 
                 [status,cmdout] = systemWSL(['''' convertToUbuntuSubsystemPath(fullfile(compPath,'runFreeview.sh'),subsyspath) ''''],'-echo');
                 if status ~= 0
-                    error(cmdout);
+                    error(['Error Running Freeview: ',cmdout]);
                 end
 
             else
                 [status,cmdout] = system(['chmod +x ''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
                 % [status,cmdout] = system(['chmod -R +x ' freesurferPath],'-echo');
                 if status ~= 0
-                    error(cmdout);
+                    error(['Error Running Freeview: ',cmdout]);
                 end
                 [status,cmdout] = system(['''' fullfile(compPath,'runFreeview.sh') ''''],'-echo');
                 if status ~= 0
-                    error(cmdout);
+                    error(['Error Running Freeview: ',cmdout]);
                 end
             end
             %read waypoint files 
