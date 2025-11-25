@@ -241,7 +241,7 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             v2=linep(2,:);
             d=[];%calculate how close electrodes are on a line
             a = v1 - v2;
-            for ii=1:size(centroids) 
+            for ii=1:size(centroids,1) 
                 b = centroids(ii,:) - v2;
                 c = v1 -centroids(ii,:);
                 angle_av2=atan2(norm(cross(a,b)),dot(a,b));
