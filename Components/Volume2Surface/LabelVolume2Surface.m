@@ -208,7 +208,7 @@ classdef LabelVolume2Surface < AComponent
             end
 
             if ~any(any(vert_tot)) || ~any(any(tri_tot)) % volume does not exist
-                errordlg(['Error: Volume does not exist! Check that the specified LabelNames and LabelIds are correct ',...
+                error(['Error: Volume does not exist! Check that the specified LabelNames and LabelIds are correct ',...
                                 'and that these volume labels exist in the VolumeIdentifier.'],'Volume does not exist!');
             else
                 surf.Model.vert = vol.Vox2Ras(vert_tot);
