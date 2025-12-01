@@ -21,16 +21,17 @@ classdef ElectrodeDefinition < AData
     end
 
     properties(Constant)
-        ElectrodeTypes ={'Micro','Grid','Strip (Projectable)','Strip','Depth','GND','DBS','Medtronic 3387','Medtronic 3389','Boston Vercise Directional'} %Available Electrode Types
+        ElectrodeTypes ={'Micro','Grid','Strip (Projectable)','Strip','Depth','Depth (DIXI)','Depth (Adtech)','Depth (PMT)',...
+            'GND','DBS','Medtronic 3387','Medtronic 3389','Boston Vercise Directional'} %Available Electrode Types
     end
     
     methods
         function obj = ElectrodeDefinition()
             %ElectrodeDefinition Constructor
-            obj.Definition=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{});
+            obj.Definition=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{},'PlanningLength',{});
         end
 
-        function defIdx=AddDefinition(obj,type,name,N,spacing,vol)
+        function defIdx=AddDefinition(obj,type,name,N,spacing,vol,planninglength)
             %AddDefinition - Adds a new definition to the definition struct
             % type - type of electrodes as defined by ElectrodeTypes
             % name - name of the electrode definition
@@ -40,14 +41,14 @@ classdef ElectrodeDefinition < AData
             if(~any(strcmp(type,obj.ElectrodeTypes)))
                 error('Adding non-existing type');
             end
-            obj.Definition(end+1)=struct('Type',type,'Name',name,'NElectrodes',N,'Spacing',spacing,'Volume',vol);
+            obj.Definition(end+1)=struct('Type',type,'Name',name,'NElectrodes',N,'Spacing',spacing,'Volume',vol,'PlanningLength',planninglength);
             defIdx=length(obj.Definition);
         end
         
         function grps=GetGroupedDefinitions(obj)
             %GetGroupedDefinitions Groups Electrode Definitions together if identical 
             defBuff=obj.Definition;
-            grps=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{},'Id',{});
+            grps=struct('Type',{},'Name',{},'NElectrodes',{},'Spacing',{},'Volume',{},'Id',{},'PlanningLength',{});
             ids=1:length(obj.Definition);
             while(~isempty(defBuff))
                 newgrp.Name={defBuff(1).Name};
@@ -55,6 +56,7 @@ classdef ElectrodeDefinition < AData
                 newgrp.NElectrodes=defBuff(1).NElectrodes;
                 newgrp.Spacing=defBuff(1).Spacing;
                 newgrp.Volume=defBuff(1).Volume;
+                newgrp.PlanningLength=defBuff(1).PlanningLength;
                 newgrp.Id=ids(1);
                 defBuff(1)=[];
                 ids(1)=[];
@@ -63,7 +65,8 @@ classdef ElectrodeDefinition < AData
                     if(strcmp(newgrp.Type,defBuff(iGrp).Type) && ...
                        newgrp.NElectrodes==defBuff(iGrp).NElectrodes && ...
                        newgrp.Spacing==defBuff(iGrp).Spacing && ...
-                       newgrp.Volume==defBuff(iGrp).Volume)
+                       newgrp.Volume==defBuff(iGrp).Volume && ...
+                       newgrp.PlanningLength==defBuff(iGrp).PlanningLength)
                    
                        newgrp.Id(end+1)=ids(iGrp);
                        newgrp.Name{end+1}=defBuff(iGrp).Name;

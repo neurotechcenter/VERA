@@ -16,9 +16,9 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
         function obj = ElectrodeDefinitionView(varargin)
 
              obj.gridDefinitionTable=uitable('Parent',obj,...
-                 'ColumnName',{'Select','Type','Name','# of electrodes','Spacing (mm)','Electrode Volume (mm3)'},...
-                 'ColumnFormat',{'logical',ElectrodeDefinition.ElectrodeTypes,'char','numeric','numeric','numeric'},...
-                 'ColumnEditable',[true,true,true,true,true,true],...
+                 'ColumnName',{'Select','Type','Name','# of electrodes','Spacing (mm)','Electrode Volume (mm3)','Planning Length (mm)'},...
+                 'ColumnFormat',{'logical',ElectrodeDefinition.ElectrodeTypes,'char','numeric','numeric','numeric','numeric'},...
+                 'ColumnEditable',[true,true,true,true,true,true,true],...
                  'CellEditCallback',@(~,~)obj.compUpdate());
 
              obj.buttonGrid=uix.Grid('Parent',obj);
@@ -75,7 +75,7 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
 
             end
             for ie=1:length(elDef)
-                tbl(end+1,:)={false,elDef(ie).Type,elDef(ie).Name,elDef(ie).NElectrodes,elDef(ie).Spacing,elDef(ie).Volume};
+                tbl(end+1,:)={false,elDef(ie).Type,elDef(ie).Name,elDef(ie).NElectrodes,elDef(ie).Spacing,elDef(ie).Volume,elDef(ie).PlanningLength};
             end
             obj.gridDefinitionTable.Data=tbl;
             if(isprop(comp,'History'))
@@ -92,7 +92,7 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                     comp.ElectrodeDefinition=[];
                 else
                     for i=1:size(tbl,1)
-                        dt(i)=struct('Type',tbl{i,2},'Name',tbl{i,3},'NElectrodes',tbl{i,4},'Spacing',tbl{i,5},'Volume',tbl{i,6});
+                        dt(i)=struct('Type',tbl{i,2},'Name',tbl{i,3},'NElectrodes',tbl{i,4},'Spacing',tbl{i,5},'Volume',tbl{i,6},'PlanningLength',tbl{i,7});
                     end
                     comp.ElectrodeDefinition=dt;
                 end
@@ -106,12 +106,10 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
             comp=obj.GetComponent();
             tbl=obj.gridDefinitionTable.Data;
             if(isempty(tbl))
-                tbl=cell(1,6);
+                tbl=cell(1,7);
                 tbl{1,1}=false;
             else
-                % tbl(end+1,:)={false,[],'',[],[],[]};
-                % James changed
-                tbl(end+1,:)={false,'','',[],[],[]};
+                tbl(end+1,:)={false,'','',[],[],[],[]};
             end
             obj.gridDefinitionTable.Data=tbl;
              if(isprop(comp,'History'))
