@@ -81,7 +81,8 @@ function [ hk ] = header_key(fid)
 	%                     volumes are the same size. 
 
     v6 = version;
-    if str2num(v6(1))<6
+    newStr = split(v6,'.') ;
+    if str2num(newStr{1})<6
        directchar = '*char';
     else
        directchar = 'uchar=>char';

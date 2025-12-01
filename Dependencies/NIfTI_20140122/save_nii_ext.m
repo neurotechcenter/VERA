@@ -31,7 +31,7 @@ function write_ext(ext, fid)
    for i=1:ext.num_ext
       fwrite(fid, ext.section(i).esize, 'int32');
       fwrite(fid, ext.section(i).ecode, 'int32');
-      fwrite(fid, ext.section(i).edata, 'uchar');
+      fwrite(fid, uint8(ext.section(i).edata), 'uchar');
    end
 
    return;                                      % write_ext
