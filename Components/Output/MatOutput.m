@@ -8,22 +8,25 @@ classdef MatOutput < AComponent
         SurfaceIdentifier
         SavePathIdentifier char
         EEGNamesIdentifier
+        ICLocalizationResultsIdentifier
     end
 
     methods
         function obj = MatOutput()
-            obj.ElectrodeLocationIdentifier   = 'ElectrodeLocation';
-            obj.ElectrodeDefinitionIdentifier = 'ElectrodeDefinition';
-            obj.SurfaceIdentifier             = 'Surface';
-            obj.SavePathIdentifier            = 'default';
-            obj.EEGNamesIdentifier            = 'EEGNames';
+            obj.ElectrodeLocationIdentifier     = 'ElectrodeLocation';
+            obj.ElectrodeDefinitionIdentifier   = 'ElectrodeDefinition';
+            obj.SurfaceIdentifier               = 'Surface';
+            obj.SavePathIdentifier              = 'default';
+            obj.EEGNamesIdentifier              = 'EEGNames';
+            obj.ICLocalizationResultsIdentifier = 'IntracranialContactLocalizationResults';
         end
 
         function Publish(obj)
-            obj.AddInput(obj.ElectrodeLocationIdentifier,   'ElectrodeLocation');
-            obj.AddInput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition');
-            obj.AddInput(obj.SurfaceIdentifier,             'Surface');
-            obj.AddOptionalInput(obj.EEGNamesIdentifier,    'ElectrodeDefinition'); 
+            obj.AddInput(obj.ElectrodeLocationIdentifier,             'ElectrodeLocation');
+            obj.AddInput(obj.ElectrodeDefinitionIdentifier,           'ElectrodeDefinition');
+            obj.AddInput(obj.SurfaceIdentifier,                       'Surface');
+            obj.AddOptionalInput(obj.EEGNamesIdentifier,              'ElectrodeDefinition'); 
+            obj.AddOptionalInput(obj.ICLocalizationResultsIdentifier, 'GenericDataStruct'); 
         end
 
         function Initialize(obj)
@@ -66,16 +69,25 @@ classdef MatOutput < AComponent
                 mkdir(path)
             end
 
-            if ~isempty(varargin)
-                elecNamesKey.Definition = varargin{1,2}.Definition;
-            else
-                elecNamesKey.Definition = [];
+            % optional inputs
+            varargoutNames = {};
+            idx_EEGNames   = find(strcmp(varargin, obj.EEGNamesIdentifier));
+            idx_ICLresults = find(strcmp(varargin, obj.ICLocalizationResultsIdentifier));
+
+            if ~isempty(idx_EEGNames) 
+                electrodeNamesKey     = varargin{1,idx_EEGNames+1}.Definition;   % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)      
+                varargoutNames{end+1} = 'electrodeNamesKey';
+            end
+
+            if ~isempty(idx_ICLresults) 
+                ICLocalizationResults = varargin{1,idx_ICLresults+1}.DataStruct; % Results structures from the intracortical contact localization method
+                varargoutNames{end+1} = 'ICLocalizationResults';
             end
 
             surfaceModel.Model              = surf.Model;                    % Contains vert (x,y,z points) and tri (triangle triangulation vector) to create the 3D model
-            % specified through SurfaceIdentifier in VERA. Additionally, it also contains triId and vertId,
-            % which allows you to distinguish between the left (1) and right (2) hemisphere if your data
-            % comes from a freesurfer Surface.
+                                                                             % specified through SurfaceIdentifier in VERA. Additionally, it also contains triId and vertId,
+                                                                             % which allows you to distinguish between the left (1) and right (2) hemisphere if your data
+                                                                             % comes from a freesurfer Surface.
             surfaceModel.Annotation         = surf.Annotation;               % Identifier number associating each vertice of a surface with a given annotation
             surfaceModel.AnnotationLabel    = surf.AnnotationLabel;          % Surface annotation map connecting identifier values with annotation
 
@@ -90,9 +102,8 @@ classdef MatOutput < AComponent
             electrodes.Name                 = eLocs.GetElectrodeNames(eDef); % name of each electrode based on their association with the ElectrodeDefinition
             electrodes.Location             = eLocs.Location;                % electrode locations (x,y,z)
 
-            electrodeNamesKey               = elecNamesKey.Definition;       % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
-
-            save(fullfile(path,file),'surfaceModel','electrodes','electrodeNamesKey');
+            % Save
+            save(fullfile(path,file),'surfaceModel','electrodes',varargoutNames{:});
 
             % Popup stating where file was saved
             message    = {'File saved as:',GetFullPath(fullfile(path,file))};
