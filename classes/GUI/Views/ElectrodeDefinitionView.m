@@ -74,6 +74,14 @@ classdef ElectrodeDefinitionView < uix.Grid & AView & IComponentView
                 end
 
             end
+
+            % This helps preserve backwards compatibility
+            if ~isfield(elDef,'PlanningLength')
+                for i = 1:length(elDef)
+                    elDef(i).PlanningLength = [];
+                end
+            end
+
             for ie=1:length(elDef)
                 tbl(end+1,:)={false,elDef(ie).Type,elDef(ie).Name,elDef(ie).NElectrodes,elDef(ie).Spacing,elDef(ie).Volume,elDef(ie).PlanningLength};
             end
