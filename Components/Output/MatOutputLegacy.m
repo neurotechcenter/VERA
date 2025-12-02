@@ -7,22 +7,25 @@ classdef MatOutputLegacy < AComponent
         SurfaceIdentifier
         SavePathIdentifier char
         EEGNamesIdentifier
+        ICLocalizationResultsIdentifier
     end
     
     methods
         function obj = MatOutputLegacy()
-            obj.ElectrodeLocationIdentifier   = 'ElectrodeLocation';
-            obj.ElectrodeDefinitionIdentifier = 'ElectrodeDefinition';
-            obj.SurfaceIdentifier             = 'Surface';
-            obj.SavePathIdentifier            = 'default';
-            obj.EEGNamesIdentifier            = 'EEGNames';
+            obj.ElectrodeLocationIdentifier     = 'ElectrodeLocation';
+            obj.ElectrodeDefinitionIdentifier   = 'ElectrodeDefinition';
+            obj.SurfaceIdentifier               = 'Surface';
+            obj.SavePathIdentifier              = 'default';
+            obj.EEGNamesIdentifier              = 'EEGNames';
+            obj.ICLocalizationResultsIdentifier = 'IntracranialContactLocalizationResults';
         end
         
         function Publish(obj)
-            obj.AddInput(obj.ElectrodeLocationIdentifier,   'ElectrodeLocation');
-            obj.AddInput(obj.ElectrodeDefinitionIdentifier, 'ElectrodeDefinition');
-            obj.AddInput(obj.SurfaceIdentifier,             'Surface');
-            obj.AddOptionalInput(obj.EEGNamesIdentifier,    'ElectrodeDefinition');             
+            obj.AddInput(obj.ElectrodeLocationIdentifier,             'ElectrodeLocation');
+            obj.AddInput(obj.ElectrodeDefinitionIdentifier,           'ElectrodeDefinition');
+            obj.AddInput(obj.SurfaceIdentifier,                       'Surface');
+            obj.AddOptionalInput(obj.EEGNamesIdentifier,              'ElectrodeDefinition');  
+            obj.AddOptionalInput(obj.ICLocalizationResultsIdentifier, 'GenericDataStruct');            
         end
         
         function Initialize(obj)
@@ -65,10 +68,19 @@ classdef MatOutputLegacy < AComponent
                 mkdir(path)
             end
 
-            if ~isempty(varargin)
-                elecNamesKey.Definition = varargin{1,2}.Definition;
-            else
-                elecNamesKey.Definition = [];
+            % optional inputs
+            varargoutNames = {};
+            idx_EEGNames   = find(strcmp(varargin, obj.EEGNamesIdentifier));
+            idx_ICLresults = find(strcmp(varargin, obj.ICLocalizationResultsIdentifier));
+
+            if ~isempty(idx_EEGNames) 
+                electrodeNamesKey     = varargin{1,idx_EEGNames+1}.Definition;   % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)      
+                varargoutNames{end+1} = 'electrodeNamesKey';
+            end
+
+            if ~isempty(idx_ICLresults) 
+                ICLocalizationResults = varargin{1,idx_ICLresults+1}.DataStruct; % Results structures from the intracortical contact localization method
+                varargoutNames{end+1} = 'ICLocalizationResults';
             end
     
             % surface model
@@ -115,13 +127,9 @@ classdef MatOutputLegacy < AComponent
             vcontribs = [];
             ix        = 1;
 
-            % Key relating EEG recorded electrode names (from amplifier) to VERA electrode names (from VERA Electrode Definition/ROSA)
-            electrodeNamesKey = elecNamesKey.Definition;
-
-
             % save file 
             save(fullfile(path,file),'cortex','ix','tala','viewstruct','electrodeNames','cmapstruct','vcontribs','electrodeDefinition',...
-                'electrodeLabels','LabelName','annotation','SecondaryLabel','electrodeNamesKey');
+                'electrodeLabels','LabelName','annotation','SecondaryLabel',varargoutNames{:});
 
             % Popup stating where file was saved
             message    = {'File saved as:',GetFullPath(fullfile(path,file))};
