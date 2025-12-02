@@ -1,41 +1,38 @@
 classdef IntracranialContactLocalization < AComponent
     %IntracranialContactLocalization automated pipeline for estimating 
-    %intracranial electrode location based on CT images and manufacture 
+    %intracranial electrode location based on CT images and manufacturer 
     %information of the electrode lead
     
     properties
-        MRIIdentifier                       % Identifier for MRI
-        CTIdentifier                        % Identifier for CT
-        ElectrodeDefinitionIdentifier       % Identifier for ElectrodeDefinition Data
-        ElectrodeLocationIdentifier         % Identifier for Electrode Locations
-        TrajectoryIdentifier                % Identifier for ROSA trajectory
-        SegmentationPathIdentifier          % Path to Freesurfer segmentation folder
-        ICLocalizationResultsPathIdentifier % Path to results folder
+        CTIdentifier                    % Identifier for CT
+        ElectrodeDefinitionIdentifier   % Identifier for ElectrodeDefinition Data
+        ElectrodeLocationIdentifier     % Identifier for Electrode Locations
+        TrajectoryIdentifier            % Identifier for ROSA trajectory
+        SegmentationPathIdentifier      % Path to Freesurfer segmentation folder
+        ICLocalizationResultsIdentifier % Identifier for data structure of results
         
     end
     
     methods
         function obj = IntracranialContactLocalization()
-            obj.CTIdentifier                        = 'CT';
-            obj.ElectrodeDefinitionIdentifier       = 'ElectrodeDefinition';
-            obj.ElectrodeLocationIdentifier         = 'ElectrodeLocation';
-            obj.TrajectoryIdentifier                = 'Trajectory';
-            obj.SegmentationPathIdentifier          = 'SegmentationPath';
-            obj.ICLocalizationResultsPathIdentifier = 'IntracranialContactLocalizationResultsPath';
+            obj.CTIdentifier                    = 'CT';
+            obj.ElectrodeDefinitionIdentifier   = 'ElectrodeDefinition';
+            obj.ElectrodeLocationIdentifier     = 'ElectrodeLocation';
+            obj.TrajectoryIdentifier            = 'Trajectory';
+            obj.SegmentationPathIdentifier      = 'SegmentationPath';
+            obj.ICLocalizationResultsIdentifier = 'IntracranialContactLocalizationResults';
         end
         
         function Publish(obj)
-            obj.AddInput(obj.CTIdentifier,                         'Volume');
-            obj.AddInput(obj.ElectrodeDefinitionIdentifier,        'ElectrodeDefinition');
-            obj.AddInput(obj.TrajectoryIdentifier,                 'ElectrodeLocation');
-            obj.AddInput(obj.SegmentationPathIdentifier,           'PathInformation');
+            obj.AddInput(obj.CTIdentifier,                     'Volume');
+            obj.AddInput(obj.ElectrodeDefinitionIdentifier,    'ElectrodeDefinition');
+            obj.AddInput(obj.TrajectoryIdentifier,             'ElectrodeLocation');
+            obj.AddInput(obj.SegmentationPathIdentifier,       'PathInformation');
 
-            obj.AddOutput(obj.ElectrodeLocationIdentifier,         'ElectrodeLocation');
-            obj.AddOutput(obj.ICLocalizationResultsPathIdentifier, 'PathInformation');
+            obj.AddOutput(obj.ElectrodeLocationIdentifier,     'ElectrodeLocation');
+            obj.AddOutput(obj.ICLocalizationResultsIdentifier, 'GenericDataStruct');
 
             obj.RequestDependency('Freesurfer', 'folder');
-            % obj.RequestDependency('SPM12',      'folder');
-            % obj.RequestDependency('BCI2000mex', 'folder');
             obj.RequestDependency('IntracranialContactLocalization', 'folder');
 
             if(ispc)
@@ -48,17 +45,11 @@ classdef IntracranialContactLocalization < AComponent
             addpath(fullfile(path,'matlab'));
             addpath(fullfile(path,'fsfast','toolbox'));
 
-            % path = obj.GetDependency('SPM12');
-            % addpath(path);
-            % 
-            % path = obj.GetDependency('BCI2000mex');
-            % addpath(genpath(path));
-
             path = obj.GetDependency('IntracranialContactLocalization');
             addpath(genpath(path));
         end
         
-        function [out, result_path] = Process(obj,ct,def,traj,segpath)
+        function [out,ICLresult] = Process(obj,ct,def,traj,segpath)
 
             curr_dir               = obj.ComponentPath;
             fspath                 = obj.GetDependency('Freesurfer');
@@ -115,7 +106,6 @@ classdef IntracranialContactLocalization < AComponent
                 end
             end
 
-
             % ct_volume_registered_to_mri
             im.ct_volume_registered_to_mri = MRIread(ct.Path);
 
@@ -143,14 +133,15 @@ classdef IntracranialContactLocalization < AComponent
                 'freesurfer_matlab_path',freesurfer_matlab_path, 'freesurfer_fsfast_path', freesurfer_fsfast_path, 'bm_path', bm_path,...
                 'electrode_manufacture', electrode_manufacture);
 
+            ICLresult                            = obj.CreateOutput(obj.ICLocalizationResultsIdentifier);
+            ICLresult.DataStruct.contact_tbl     = contact_tbl;
+            ICLresult.DataStruct.shank_model_all = shank_model_all;
+
             out = obj.CreateOutput(obj.ElectrodeLocationIdentifier);
             for i = 1:length(shank_model_all)
                 out.Location             = [out.Location; shank_model_all(i).contact_centers];
                 out.DefinitionIdentifier = [out.DefinitionIdentifier; i*ones(size(shank_model_all(i).contact_centers,1),1)];
             end
-
-            result_path      = obj.CreateOutput(obj.ICLocalizationResultsPathIdentifier);
-            result_path.Path = curr_dir;
 
         end
     end
