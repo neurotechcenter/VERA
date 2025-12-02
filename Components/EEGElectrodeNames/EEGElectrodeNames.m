@@ -274,7 +274,7 @@ classdef EEGElectrodeNames < AComponent
             
             % Table sorted in order of VERA electrodes
             hldr = cell(size(VERA_elNames,1),4);
-            for i = 1:size(VERA_elNames)
+            for i = 1:size(VERA_elNames,1)
                 hldr(i,:) = {'','','',''};
             end
 

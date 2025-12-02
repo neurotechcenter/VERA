@@ -223,7 +223,7 @@ classdef EEGElectrodeNames_legacy < AComponent
 
             % elNameKey should relate EEG electrode names to original VERA electrode names
             hldr = cell(size(eeg_elNames,1),2);
-            for i = 1:size(eeg_elNames)
+            for i = 1:size(eeg_elNames,1)
                 hldr(i,:) = {'',''};
             end
             hldr(:,1)       = eeg_elNames;
