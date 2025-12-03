@@ -64,7 +64,11 @@ classdef IntracranialContactLocalization < AComponent
             [~,subj_id] = fileparts(projectpath);
 
             % Path to brain mask
-            bm_path = fullfile(projectpath,segpath.Path,'mri','brainmask.auto.mgz');
+            if ispc
+                bm_path = fullfile(projectpath,segpath.Path,'mri','brainmask.auto.mgh');
+            else
+                bm_path = fullfile(projectpath,segpath.Path,'mri','brainmask.auto.mgz');
+            end
 
             % Check if any information is missing from the electrode definition
             hasEmpty = false;
