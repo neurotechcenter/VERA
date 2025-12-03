@@ -30,7 +30,7 @@ classdef (Abstract) AFSSubsegmentation < AComponent
         end
 
         function Initialize(obj)
-            path=obj.GetDependency('Freesurfer');
+            path = obj.GetDependency('Freesurfer');
             addpath(fullfile(path,'matlab'));
             if(ispc)
                 obj.GetDependency('UbuntuSubsystemPath');
@@ -42,81 +42,98 @@ classdef (Abstract) AFSSubsegmentation < AComponent
             end
         end
 
-        function varargout=Process(obj,optInp)
+        function varargout = Process(obj,optInp)
             if(nargin > 1) %segmentation path exists
-                segmentationPath=optInp.Path;
-                comPath=fileparts(obj.ComponentPath);
-                segmentationPath=fullfile(comPath,segmentationPath); %create full path
+                segmentationPath   = optInp.Path;
+                comPath            = fileparts(obj.ComponentPath);
+                segmentationPath   = fullfile(comPath,segmentationPath); %create full path
                 segmentationFolder = [];
             else
-                segmentationPath=uigetdir([],'Please select Freesurfer Segmentation');
+                segmentationPath = uigetdir([],'Please select Freesurfer Segmentation');
                 if(isempty(segmentationPath))
                     error('No path selected!');
                 end
             end
-            LfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.LVolumeName));
-            RfileName=obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.RVolumeName));
+            LfileName = obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.LVolumeName));
+            RfileName = obj.resolveFileNamedir(fullfile(segmentationPath,'mri',obj.RVolumeName));
 
-            freesurferPath=obj.GetDependency('Freesurfer');
+            freesurferPath = obj.GetDependency('Freesurfer');
+
             if(isempty(LfileName) || isempty(RfileName))
                 
-                recon_script=fullfile(fileparts(fileparts(mfilename('fullpath'))),'scripts',obj.ShellScriptName);
-                [segmentationPath,segmentationFolder]=fileparts(segmentationPath);
+                recon_script = fullfile(fileparts(fileparts(mfilename('fullpath'))),'scripts',obj.ShellScriptName);
+                [segmentationPath,segmentationFolder] = fileparts(segmentationPath);
+                
                 if(ispc)
-                    subsyspath=obj.GetDependency('UbuntuSubsystemPath');
-                    wsl_segm_path=convertToUbuntuSubsystemPath(segmentationPath,subsyspath);
-                    wsl_recon_script=convertToUbuntuSubsystemPath(recon_script,subsyspath);
-                    w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
-                    systemWSL(['chmod +x ''' wsl_recon_script ''''],'-echo');
-                    shellcmd=['''' wsl_recon_script ''' ''' w_freesurferPath ''' ''' ...
+                    subsyspath       = obj.GetDependency('UbuntuSubsystemPath');
+                    wsl_segm_path    = convertToUbuntuSubsystemPath(segmentationPath,subsyspath);
+                    wsl_recon_script = convertToUbuntuSubsystemPath(recon_script,subsyspath);
+                    w_freesurferPath = convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
+
+                    [status,cmdout] = systemWSL(['chmod +x ''' wsl_recon_script ''''],'-echo');
+                    if status ~= 0
+                        error(['Error Generating Freesurfer Subsegmentation: ',cmdout]);
+                    end
+
+                    shellcmd = ['''' wsl_recon_script ''' ''' w_freesurferPath ''' ''' ...
                     wsl_segm_path ''' ' ...
                     '''' segmentationFolder ''''];
-                    systemWSL(shellcmd,'-echo');
+                    [status,cmdout] = systemWSL(shellcmd,'-echo');
+                    if status ~= 0
+                        error(['Error Generating Freesurfer Subsegmentation: ',cmdout]);
+                    end
                 else
-                    system(['chmod +x ''' recon_script ''''],'-echo');
-                    shellcmd=['''' recon_script ''' ''' freesurferPath ''' ''' ...
+                    [status,cmdout] = system(['chmod +x ''' recon_script ''''],'-echo');
+                    if status ~= 0
+                        error(['Error Generating Freesurfer Subsegmentation: ',cmdout]);
+                    end
+
+                    shellcmd = ['''' recon_script ''' ''' freesurferPath ''' ''' ...
                     segmentationPath ''' ''' segmentationFolder ''''];
-                    system(shellcmd,'-echo');
+                    [status,cmdout] = system(shellcmd,'-echo');
+                    if status ~= 0
+                        error(['Error Generating Freesurfer Subsegmentation: ',cmdout]);
+                    end
                 end
             end
-            LfileName=obj.resolveFileNamedir(fullfile(segmentationPath,segmentationFolder,'mri',obj.LVolumeName));% Modified by James to add segmentationFolder to path
-            RfileName=obj.resolveFileNamedir(fullfile(segmentationPath,segmentationFolder,'mri',obj.RVolumeName));
+            LfileName = obj.resolveFileNamedir(fullfile(segmentationPath,segmentationFolder,'mri',obj.LVolumeName));% Modified by James to add segmentationFolder to path
+            RfileName = obj.resolveFileNamedir(fullfile(segmentationPath,segmentationFolder,'mri',obj.RVolumeName));
             if(isempty(LfileName) || isempty(RfileName))
                 error('Error - no output files generated after running segmentation!');
             end
             if(strcmp(obj.LVolumeName,obj.RVolumeName))
-                nii_path=createTempNifti(fullfile(LfileName.folder,LfileName.name),obj.GetDependency('TempPath'),freesurferPath);
-                varargout{1}=obj.CreateOutput(obj.VolumeIdentifier);
+                nii_path     = createTempNifti(fullfile(LfileName.folder,LfileName.name),obj.GetDependency('TempPath'),freesurferPath);
+                varargout{1} = obj.CreateOutput(obj.VolumeIdentifier);
                 varargout{1}.LoadFromFile(nii_path);
                 delete(nii_path);
             else
-                nii_path=createTempNifti(fullfile(LfileName.folder,LfileName.name),obj.GetDependency('TempPath'),freesurferPath);
-                varargout{1}=obj.CreateOutput(['L' obj.VolumeIdentifier]);
+                nii_path     = createTempNifti(fullfile(LfileName.folder,LfileName.name),obj.GetDependency('TempPath'),freesurferPath);
+                varargout{1} = obj.CreateOutput(['L' obj.VolumeIdentifier]);
                 varargout{1}.LoadFromFile(nii_path);
                 delete(nii_path);
-                nii_path=createTempNifti(fullfile(RfileName.folder,RfileName.name),obj.GetDependency('TempPath'),freesurferPath);
-                varargout{2}=obj.CreateOutput(['R' obj.VolumeIdentifier]);
+                nii_path     = createTempNifti(fullfile(RfileName.folder,RfileName.name),obj.GetDependency('TempPath'),freesurferPath);
+                varargout{2} = obj.CreateOutput(['R' obj.VolumeIdentifier]);
                 varargout{2}.LoadFromFile(nii_path);   
                 delete(nii_path);
             end
         end
 
-        function dirout=resolveFileNamedir(obj,fpath)
+        function dirout = resolveFileNamedir(obj,fpath)
             
             if(contains(fpath,'?'))
-                [~,name,ext]=fileparts(fpath);
-                fname_search=strrep(fpath,'?','*');
-                dirout=dir(fname_search);
-                delList=[];
-                for i=1:length(dirout)
+                [~,name,ext] = fileparts(fpath);
+                fname_search = strrep(fpath,'?','*');
+                dirout  = dir(fname_search);
+                delList = [];
+                for i = 1:length(dirout)
                     if(length(dirout(i).name) ~= length(name)+length(ext))
-                        delList(end+1)=i;
+                        delList(end+1) = i;
                     end
                 end
-                dirout(delList)=[];
+                dirout(delList) = [];
                 
             else
-                dirout=dir(fpath);
+                dirout = dir(fpath);
             end
 
         end
