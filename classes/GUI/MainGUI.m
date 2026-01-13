@@ -75,7 +75,7 @@ classdef MainGUI < handle
             obj.configMenuContent.pipelineContentCheck = uimenu(obj.configMenu,'Label','Pipeline Content Check','Checked','on','MenuSelectedFcn',@(~,~,~)obj.pipelineContentCheck());
             
             obj.pipelineTree.Root.Name = 'Project';
-            obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input',      'Parent',obj.pipelineTree.Root,'UserData',0);
+            obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input',      'Parent',obj.pipelineTree.Root); % ,'UserData',0
             obj.treeNodes.Processing   = uiw.widget.TreeNode('Name','Processing', 'Parent',obj.pipelineTree.Root);
             obj.treeNodes.Output       = uiw.widget.TreeNode('Name','Output',     'Parent',obj.pipelineTree.Root);
             
