@@ -1,6 +1,6 @@
 classdef GenerateThomasSegmentation < AComponent
     % GenerateThomasSegmentation Run Thomas thalamic segmentation within VERA
-    % MRIIdentifier can be MRI or FGATIR
+    % MRIIdentifier can be T1 MRI or FGATIR
 
     properties
         MRIIdentifier     % Input MRI Data Identifier
@@ -22,16 +22,18 @@ classdef GenerateThomasSegmentation < AComponent
             obj.AddOutput(obj.LeftVolumeIdentifier,       'Volume');
             obj.AddOutput(obj.RightVolumeIdentifier,      'Volume');
             obj.AddOutput(obj.SegmentationPathIdentifier, 'PathInformation');
+
             obj.RequestDependency('Docker', 'file');
         end
 
         function Initialize(obj)
             
-            dockerpath = obj.GetDependency('Docker');
+            dockerexe = obj.GetDependency('Docker');
             if ispc
-                addpath(['"' dockerpath '"']);
-            else
+                dockerpath = fileparts(dockerexe);
                 addpath(dockerpath);
+            else
+                addpath(dockerexe);
             end
             
             if(ispc)
@@ -46,11 +48,12 @@ classdef GenerateThomasSegmentation < AComponent
 
         function [Lvolout, Rvolout, pathInfo] = Process(obj, mri)
             segmentationFolder                 = obj.ComponentPath;
+            segmentationPath                   = fullfile(segmentationFolder,'Segmentation');
             mri_path                           = GetFullPath(mri.Path);
             [imageFolder, imageName, imageExt] = fileparts(mri_path);
             imageName                          = [imageName, imageExt];
             DockerPath                         = obj.GetDependency('Docker');
-            
+
             if ispc
                 subsyspath    = obj.GetDependency('UbuntuSubsystemPath');
                 w_imageFolder = convertToUbuntuSubsystemPath(imageFolder, subsyspath);
@@ -58,27 +61,42 @@ classdef GenerateThomasSegmentation < AComponent
 
             if ispc
                 if strcmp(obj.MRIIdentifier,'MRI')
-                    % T1
-                    docker_script = ['docker run --rm --name sthomas -v ', w_imageFolder, ':', w_imageFolder, ' -w ', w_imageFolder,...
-                        ' anagrammarian/sthomas hipsthomas.sh -v -t1 -i ', imageName];
+                    % PC T1
+                    docker_script = sprintf([ 'time docker run --rm --name sthomas ' ...
+                                                '-v "%s":/data ' ...
+                                                '-w /data ' ...
+                                                'anagrammarian/sthomas hipsthomas.sh -v -t1 ' ...
+                                                '-i /data/%s' ], ...
+                                                w_imageFolder, imageName);
                 elseif strcmp(obj.MRIIdentifier,'FGATIR')
-                    % WMn/FGATIR
-                    docker_script = ['docker run --rm --name sthomas -v ', w_imageFolder, ':', w_imageFolder, ' -w ', w_imageFolder,...
-                        ' anagrammarian/sthomas hipsthomas.sh -v -i ', imageName];
+                    % PC WMn/FGATIR
+                    docker_script = sprintf([ 'time docker run --rm --name sthomas ' ...
+                                                '-v "%s":/data ' ...
+                                                '-w /data ' ...
+                                                'anagrammarian/sthomas hipsthomas.sh -v ' ...
+                                                '-i /data/%s' ], ...
+                                                w_imageFolder, imageName);
                 end
             else
                 if strcmp(obj.MRIIdentifier,'MRI')
-                    % T1
-                    docker_script = ['docker run -it --rm --name sthomas -v ', imageFolder, ':', imageFolder, ' -w ', imageFolder,...
-                        ' anagrammarian/sthomas hipsthomas.sh -v -t1 -i ', imageName];
+                    % Mac T1
+                    docker_script = sprintf([ 'time docker run -it --rm --name sthomas ' ...
+                                                '-v "%s":/data ' ...
+                                                '-w /data ' ...
+                                                'anagrammarian/sthomas hipsthomas.sh -v -t1 ' ...
+                                                '-i /data/%s' ], ...
+                                                imageFolder, imageName);
+
                 elseif strcmp(obj.MRIIdentifier,'FGATIR')
-                    % WMn/FGATIR
-                    docker_script = ['docker run -it --rm --name sthomas -v ', imageFolder, ':', imageFolder, ' -w ', imageFolder,...
-                        ' anagrammarian/sthomas hipsthomas.sh -v -i ', imageName];
+                    % Mac WMn/FGATIR
+                    docker_script = sprintf([ 'time docker run -it --rm --name sthomas ' ...
+                                                '-v "%s":/data ' ...
+                                                '-w /data ' ...
+                                                'anagrammarian/sthomas hipsthomas.sh -v ' ...
+                                                '-i /data/%s' ], ...
+                                                imageFolder, imageName);
                 end
             end
-            
-            segmentationPath = fullfile(segmentationFolder,'Segmentation');
 
             if(~exist(segmentationPath,'dir') ||...
                     (exist(segmentationPath,'dir') && strcmp(questdlg('Found an Existing Thomas Segmentation Folder! Do you want to rerun the Segmentation?','Rerun Segmentation?','Yes','No','No'),'Yes')))
