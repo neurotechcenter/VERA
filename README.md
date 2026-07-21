@@ -19,6 +19,12 @@ For many of the common pipelines, you will also need:
 ## Installation & Startup
 VERA can be used by any MATLAB distribution later than MATLAB 2018b. Download the repository into an empty directory and run *startup_VERA.m*
 
+## Common Issues
+- In newer versions of MATLAB, Java-based GUI rendering has changed. 
+- If you encounter a JAVA error such as:
+        "Error using javaObjectEDT No class com.mathworks.consulting.widgets.tree.TreeNode can be located on the Java class path"
+- install the [Widgets Toolbox - Compatibility Support](https://www.mathworks.com/matlabcentral/fileexchange/66235-widgets-toolbox-compatibility-support) from MATLAB add-ons. 
+
 # WIKI
 
 For more information check out [the Wiki](https://github.com/neurotechcenter/VERA/wiki)
