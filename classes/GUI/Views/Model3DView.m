@@ -64,6 +64,16 @@ classdef Model3DView < AView & uix.Grid
             end
             surface=obj.AvailableData(obj.SurfaceIdentifier);
             hold(obj.axModel,'off');
+            % hold('off') alone does not clear existing plotted objects -
+            % plot3DModel/plotBallsOnVolume/text/colorbar below all add
+            % new graphics objects to axModel rather than replacing
+            % existing ones, so without this every AvailableData update
+            % (i.e. every reload) left the previous render's surface,
+            % electrode markers, and colorbar in place and stacked a full
+            % new copy on top - unbounded memory growth on repeated
+            % reloads of an already-rendered project.
+            delete(obj.axModel.Children);
+            obj.vSurf=[];
 
             if(~isempty(surface))
 
