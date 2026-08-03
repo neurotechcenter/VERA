@@ -29,8 +29,25 @@ try
        
 catch e
        % disp(e.message);
-        f=getoriginalFunHandle();
-        h=f(x,whichbar, varargin{:});
+        if isdeployed
+            % getoriginalFunHandle()'s which()/cd()-based lookup of the
+            % real builtin waitbar is unreliable in the compiled/CTF
+            % environment (path resolution for p-coded functions doesn't
+            % behave like interactive MATLAB) and can hang indefinitely,
+            % driving memory/swap usage up without ever returning - this
+            % is hit whenever no UnifiedProgressbar is currently
+            % registered, e.g. Runner methods (ResetComponent,
+            % RunComponent, etc.) called without a preceding
+            % suspendGUIWithMessage. Skip the risky fallback entirely and
+            % hand back a harmless invisible dummy handle instead.
+            h=figure('Visible','off');
+            if ~ishandle(whichbar)
+                h.UserData=whichbar;
+            end
+        else
+            f=getoriginalFunHandle();
+            h=f(x,whichbar, varargin{:});
+        end
 end
 end
 

@@ -11,7 +11,7 @@ grd=uix.VBox('Parent',f);
 %%create configured component info:
 outstring="\textbf{"+ string(class(comp))+  "} ";
 outstring=[outstring "\newline "];
-outstring=[outstring help('comp')];
+outstring=[outstring getComponentHelpText(comp)];
 
 annotation(uix.ScrollingPanel('Parent',grd),'textbox','Interpreter','latex','string','','BackgroundColor','w','FontSize',15,...
                 'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','left','VerticalAlignment','top','EdgeColor','w', ...
@@ -101,5 +101,30 @@ end
 
 function str=makeStringLatexComplient(str)
         str=strrep(str,'_','\_');
+end
+
+function helpText=getComponentHelpText(comp)
+    % help() itself is on MATLAB Compiler's non-deployable exclusion list
+    % (same limitation PipelineDesigner.m's showHelp() works around) - use
+    % the text captured at compile time in the Pipeline Designer manifest
+    % instead, since components are scanned into it under the same class
+    % names regardless of entry point (MainGUI or Pipeline Designer).
+    if isdeployed
+        helpText='';
+        manifestPath=fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), ...
+            'PipelineDesigner','PipelineDesignerManifest.mat');
+        if exist(manifestPath,'file')
+            loaded=load(manifestPath,'manifest');
+            className=class(comp);
+            if isKey(loaded.manifest.elementInfo,className)
+                info=loaded.manifest.elementInfo(className);
+                if isfield(info,'helpText')
+                    helpText=info.helpText;
+                end
+            end
+        end
+    else
+        helpText=help('comp');
+    end
 end
 
