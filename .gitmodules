@@ -1,0 +1,3 @@
+[submodule "StandaloneBuild"]
+	path = StandaloneBuild
+	url = https://github.com/neurotechcenter/VERA-StandaloneBuild.git
