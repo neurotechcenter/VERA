@@ -129,11 +129,25 @@ classdef Runner < handle
             %See also Pipeline
             
             waitbar(0.3,'Resetting...');
-            % obj.ConfigureComponent(compName);
             obj.resetDownstreamCompletionStatus(compName);
+            % resetDownstreamCompletionStatus used to call updateCurrentResults()
+            % at the end of every recursive invocation - i.e. once per downstream
+            % component - each time reloading the data of every still-Completed
+            % component from disk. For an early pipeline component with many
+            % downstream dependents this caused repeated, compounding disk
+            % reloads that exhausted memory/swap before "Run All" even started.
+            % It's now called exactly once, here, after the cascade completes.
+            obj.updateCurrentResults();
+            % resetDownstreamCompletionStatus leaves reset components at
+            % 'Configured', not 'Ready' - this promotes anything whose
+            % dependencies are already satisfied to 'Ready'. Without it,
+            % GetNextReadyComponent() (used by runAll/"Run All Components")
+            % never finds a just-reset component, since it only matches
+            % status 'Ready' exactly - the component silently never runs
+            % via "Run All", even though running it directly still works
+            % (that path doesn't filter by status).
+            obj.updateComponentStatus();
             waitbar(1,'Resetting...');
-
-            % obj.updateComponentStatus();
         end
 
         function checkComponentContents(obj, compName)
@@ -306,7 +320,9 @@ classdef Runner < handle
                     end
 
                 end
-                h=waitbar(i/length(req_comps),h);
+                if(~silent)
+                    h=waitbar(i/length(req_comps),h);
+                end
             end
             if(~compValid)
                 error([compName 'requires the Output(s) from ' errStr ' first!']);
@@ -411,7 +427,6 @@ classdef Runner < handle
                     end
                 end
             end
-            obj.updateCurrentResults();
         end
 
         function updateCurrentResults(obj)

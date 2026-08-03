@@ -178,7 +178,9 @@ classdef Project < handle
             DependencyHandler.Instance.CreateAndSetDependency('ProjectPath',projPath,'internal');
             DependencyHandler.Instance.CreateAndSetDependency('TempPath',fullfile(projPath,'temp'),'internal');
             pplineFile=fullfile(projPath,'pipeline.pwf');
-            pbar=waitbar(0,'Initializing project...');
+            if(~silent)
+                pbar=waitbar(0,'Initializing project...');
+            end
             [esc,projName] = fileparts(projPath);
             ppline=Pipeline.CreateFromPipelineDefinition(pplineFile);
             prj=Project();
@@ -200,10 +202,14 @@ classdef Project < handle
                     end
                 end
                 i=i+1;
-                pbar=waitbar(i/length(ppline.Components),pbar);
+                if(~silent)
+                    pbar=waitbar(i/length(ppline.Components),pbar);
+                end
             end
-            close(pbar);
-            
+            if(~silent)
+                close(pbar);
+            end
+
             end
         end
       

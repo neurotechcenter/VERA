@@ -51,7 +51,21 @@ classdef Serializable < handle
             for i=1:numel(p)
                 if(~isempty(obj.(p{i})))
                     if(~isa(obj.(p{i}),'char') && isObjectTypeOf(obj.(p{i}),'Serializable'))
-                        settingel=obj.(p{i}).Serialize(docNode);
+                        % Serialize the nested object, but re-home its
+                        % content under an element named after the
+                        % property (p{i}) rather than the nested object's
+                        % own nodeName (e.g. AData always uses 'Data').
+                        % Otherwise the property name is lost on save and
+                        % Deserialize cannot map the element back to a
+                        % property - and multiple Serializable-valued
+                        % properties on the same object would collide on
+                        % the same tag name.
+                        childData=obj.(p{i}).Serialize(docNode);
+                        settingel=docNode.createElement(p{i});
+                        settingel.setAttribute('Type',char(childData.getAttribute('Type')));
+                        while childData.hasChildNodes()
+                            settingel.appendChild(childData.getFirstChild());
+                        end
                     else
                         settingel=docNode.createElement(p{i});
                         settingel.appendChild(docNode.createTextNode(jsonencode(obj.(p{i}))));
