@@ -24,7 +24,11 @@ classdef ImportFreesurferSegmentation < AComponent
 
         function [outPath]=Process(obj)
             if ~isempty(obj.InputFilepath)
-                segmentationPath = fullfile(obj.ComponentPath,'..',obj.InputFilepath);
+                if isAbsolutePath(obj.InputFilepath)
+                    segmentationPath = obj.InputFilepath;
+                else
+                    segmentationPath = fullfile(obj.ComponentPath,'..',obj.InputFilepath);
+                end
 
                 % Open a file load dialog if you can't find the path
                 if ~exist(segmentationPath,'dir')

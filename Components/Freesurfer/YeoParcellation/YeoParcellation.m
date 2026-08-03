@@ -23,7 +23,9 @@ classdef YeoParcellation < AComponent
 
         function Initialize(obj)
             path = obj.GetDependency('Freesurfer');
-            addpath(fullfile(path,'matlab'));
+            if ~isdeployed
+                addpath(fullfile(path,'matlab'));
+            end
 
             if(ispc)
                 obj.GetDependency('UbuntuSubsystemPath');

@@ -27,7 +27,9 @@ classdef DBSLeadDetection < AComponent
 
         function Initialize(obj)
             pacer_path=obj.GetDependency('PaCER');
-            addpath(genpath(pacer_path));
+            if ~isdeployed
+                addpath(genpath(pacer_path));
+            end
 
         end
 

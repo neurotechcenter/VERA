@@ -48,7 +48,9 @@ classdef LabelVolume2Surface < AComponent
             end
 
             path = obj.GetOptionalDependency('Freesurfer');
-            addpath(genpath(fullfile(path,'matlab')));
+            if ~isdeployed
+                addpath(genpath(fullfile(path,'matlab')));
+            end
 
             if strcmp(obj.LoadLUTFile,'true')
                 return;

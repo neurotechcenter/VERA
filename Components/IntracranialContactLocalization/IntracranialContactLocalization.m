@@ -42,11 +42,15 @@ classdef IntracranialContactLocalization < AComponent
         
         function Initialize(obj)
             path = obj.GetDependency('Freesurfer');
-            addpath(fullfile(path,'matlab'));
-            addpath(fullfile(path,'fsfast','toolbox'));
+            if ~isdeployed
+                addpath(fullfile(path,'matlab'));
+                addpath(fullfile(path,'fsfast','toolbox'));
+            end
 
             path = obj.GetDependency('IntracranialContactLocalization');
-            addpath(genpath(path));
+            if ~isdeployed
+                addpath(genpath(path));
+            end
         end
         
         function [out,ICLresult] = Process(obj,ct,def,traj,segpath)
@@ -56,8 +60,10 @@ classdef IntracranialContactLocalization < AComponent
             freesurfer_matlab_path = fullfile(fspath,'matlab');
             freesurfer_fsfast_path = fullfile(fspath,'fsfast','toolbox');
 
-            addpath(genpath(freesurfer_matlab_path));
-            addpath(genpath(freesurfer_fsfast_path));
+            if ~isdeployed
+                addpath(genpath(freesurfer_matlab_path));
+                addpath(genpath(freesurfer_fsfast_path));
+            end
 
             % subject ID
             projectpath = fileparts(obj.ComponentPath);

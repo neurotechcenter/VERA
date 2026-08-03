@@ -45,7 +45,9 @@ classdef MayoReface < AComponent
 
         function Initialize(obj)
             mri_refacePath = obj.GetDependency('mri_reface');
-            addpath(mri_refacePath);
+            if ~isdeployed
+                addpath(mri_refacePath);
+            end
 
             if ismac
                 [~,result] = system('uname -v');
@@ -57,7 +59,9 @@ classdef MayoReface < AComponent
             % if PC or intel mac, use Docker image
             if ispc
                 dockerpath = obj.GetDependency('Docker');
-                addpath(fileparts(dockerpath));
+                if ~isdeployed
+                    addpath(fileparts(dockerpath));
+                end
 
                 obj.GetDependency('UbuntuSubsystemPath');
                 if(system('WHERE bash >nul 2>nul echo %ERRORLEVEL%') == 1)
@@ -68,7 +72,9 @@ classdef MayoReface < AComponent
 
             elseif ismac && ~is_arm_mac
                 dockerpath = obj.GetDependency('Docker');
-                addpath(fileparts(dockerpath));
+                if ~isdeployed
+                    addpath(fileparts(dockerpath));
+                end
             end
             
         end

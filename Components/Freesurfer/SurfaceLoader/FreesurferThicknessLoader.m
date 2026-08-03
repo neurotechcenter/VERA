@@ -25,7 +25,9 @@ classdef FreesurferThicknessLoader < AComponent
         end
         function Initialize(obj)
             path = obj.GetDependency('Freesurfer');
-            addpath(fullfile(path,'fsfast','toolbox'));
+            if ~isdeployed
+                addpath(fullfile(path,'fsfast','toolbox'));
+            end
             if(ispc)
                 obj.GetDependency('UbuntuSubsystemPath');
                if(system('WHERE bash >nul 2>nul echo %ERRORLEVEL%') == 1)

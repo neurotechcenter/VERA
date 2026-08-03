@@ -26,7 +26,9 @@ classdef ReportGenerator < AComponent
         end
 
         function Initialize(obj)
-            addpath(obj.GetDependency('ReportGenerator'));
+            if ~isdeployed
+                addpath(obj.GetDependency('ReportGenerator'));
+            end
         end
 
         function [] = Process(obj,image,surf,elDef,eLocs)

@@ -48,7 +48,9 @@ classdef CalculateDistanceToVolumeLabel < AComponent
                 return;
             else
                 path = obj.GetOptionalDependency('Freesurfer');
-                addpath(genpath(fullfile(path,'matlab')));
+                if ~isdeployed
+                    addpath(genpath(fullfile(path,'matlab')));
+                end
                 fprintf(['For Component: "',obj.Name,'"\nno labels provided or label configuration incorrect,\ntrying Freesurfer LUT\n\n']);
                 lut_path    = fullfile(path,'FreeSurferColorLUT.txt');
                 [code, lut] = loadLUTFile(lut_path);

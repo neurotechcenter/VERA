@@ -22,7 +22,9 @@ classdef BuildSkullMask < AComponent
         
         
         function Initialize(obj)
-            addpath(obj.GetDependency('SPM12'));
+            if ~isdeployed
+                addpath(obj.GetDependency('SPM12'));
+            end
         end
         
         function [mask,T]=Process(obj,mri)

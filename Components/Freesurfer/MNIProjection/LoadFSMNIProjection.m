@@ -21,7 +21,9 @@ classdef LoadFSMNIProjection < AComponent
         
         function Initialize(obj)
             path=obj.GetDependency('Freesurfer');
-            addpath(fullfile(path,'matlab'));
+            if ~isdeployed
+                addpath(fullfile(path,'matlab'));
+            end
         end
         
         function T=Process(obj,optInp)

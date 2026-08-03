@@ -24,8 +24,10 @@ classdef AlignToMNISpace < AComponent
 
         function Initialize(obj)
             path=obj.GetDependency('SPM12');
-            addpath((path));
-             addpath(genpath(fullfile(path,'matlabbatch')));
+            if ~isdeployed
+                addpath((path));
+                addpath(genpath(fullfile(path,'matlabbatch')));
+            end
         end
 
         function [mni,T]=Process(obj,mri)

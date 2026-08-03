@@ -29,11 +29,13 @@ classdef GenerateThomasSegmentation < AComponent
         function Initialize(obj)
             
             dockerexe = obj.GetDependency('Docker');
-            if ispc
-                dockerpath = fileparts(dockerexe);
-                addpath(dockerpath);
-            else
-                addpath(dockerexe);
+            if ~isdeployed
+                if ispc
+                    dockerpath = fileparts(dockerexe);
+                    addpath(dockerpath);
+                else
+                    addpath(dockerexe);
+                end
             end
             
             if(ispc)

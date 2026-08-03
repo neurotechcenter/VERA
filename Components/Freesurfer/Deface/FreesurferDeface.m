@@ -22,7 +22,9 @@ classdef FreesurferDeface < AComponent
 
         function Initialize(obj)
             freesurferPath = obj.GetDependency('Freesurfer');
-            addpath(freesurferPath);
+            if ~isdeployed
+                addpath(freesurferPath);
+            end
             
             if(ispc)
                 obj.GetDependency('UbuntuSubsystemPath');

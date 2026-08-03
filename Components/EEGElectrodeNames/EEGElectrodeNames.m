@@ -40,7 +40,9 @@ classdef EEGElectrodeNames < AComponent
 
         function Initialize(obj)
             bci2000mex_path = obj.GetDependency('BCI2000mex');
-            addpath(genpath(bci2000mex_path));
+            if ~isdeployed
+                addpath(genpath(bci2000mex_path));
+            end
 
             obj.internalDefinitions = obj.EEGNames;
             obj.EEGNames            = [];

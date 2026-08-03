@@ -25,7 +25,9 @@ classdef LoadBIDSDataInformationPaulk < AComponent
         
         function Initialize(obj)
             path=obj.GetDependency('BIDS');
-            addpath(genpath(path));
+            if ~isdeployed
+                addpath(genpath(path));
+            end
         end
 
         function [mri,eldef,ellocs]=Process(obj)

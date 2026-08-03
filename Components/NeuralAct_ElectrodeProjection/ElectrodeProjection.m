@@ -25,7 +25,9 @@ classdef ElectrodeProjection < AComponent
         end
         function Initialize(obj)
             path=obj.GetDependency('NeuralAct');
-            addpath(genpath(path));
+            if ~isdeployed
+                addpath(genpath(path));
+            end
             if(~any(strcmp(obj.ProjectToHemisphere,{'True', 'False'})))
                 error('rojectToHemisphere has to be set to either True or False!');
             end

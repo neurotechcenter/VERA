@@ -20,7 +20,9 @@ classdef SPM12FileLoader < FileLoader
         
         function Initialize(obj)
             path=obj.GetDependency('SPM12');
-            addpath(path);
+            if ~isdeployed
+                addpath(path);
+            end
             Initialize@FileLoader(obj);
         end
         

@@ -46,7 +46,9 @@ classdef Coregistration < AComponent
         end
         function Initialize(obj)
             path = obj.GetDependency('SPM12');
-            addpath(path);
+            if ~isdeployed
+                addpath(path);
+            end
 
         end
 
