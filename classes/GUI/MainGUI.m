@@ -15,8 +15,10 @@ classdef MainGUI < handle
         mainView
         fileMenu
         configMenu
+        multiSubjectMenu
         fileMenuContent
         configMenuContent
+        multiSubjectMenuContent
         viewTabs containers.Map
         componentNodes containers.Map
         componentMenu
@@ -34,7 +36,7 @@ classdef MainGUI < handle
             end
 
             obj.checkPipelineContent = 'on';
-            
+
             DependencyHandler.Purge();
             obj.componentNodes = containers.Map();
             warning off;
@@ -52,6 +54,20 @@ classdef MainGUI < handle
                 DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
             end
 
+            % Register the VERA_SuperModel companion tool (a standalone
+            % multi-subject viewer, not part of the pipeline itself) as a
+            % configurable dependency so its install location shows up
+            % under Configuration > Settings even before it has ever been
+            % set. See also launchSuperModelViewer. SettingsGUI's table
+            % leaves an unresolved dependency's Value cell blank, so give
+            % it a visible placeholder ('.') rather than nothing - '.' is
+            % treated as "not actually configured" by
+            % refreshSuperModelAvailability, not a real install path.
+            DependencyHandler.Instance.PostDepencenyRequest('VERA_SuperModel','folder');
+            if ~DependencyHandler.Instance.IsDependency('VERA_SuperModel')
+                DependencyHandler.Instance.SetDependency('VERA_SuperModel','.');
+            end
+
             obj.viewTabs     = containers.Map();
             obj.hBox         = uix.HBoxFlex('Parent',    obj.window);
             obj.pipelineTree = uiw.widget.Tree('Parent', obj.hBox,'MouseClickedCallback',@obj.treeClick);
@@ -65,26 +81,31 @@ classdef MainGUI < handle
             obj.fileMenuContent.OpenProject          = uimenu(obj.fileMenu,'Label','Open Project',           'MenuSelectedFcn',@obj.openProject);
             obj.fileMenuContent.ReopenProject        = uimenu(obj.fileMenu,'Label','Reopen Project',         'MenuSelectedFcn',@obj.reopenProject);
             obj.fileMenuContent.CloseProject         = uimenu(obj.fileMenu,'Label','Close Project',          'Enable','off','MenuSelectedFcn',@(~,~,~)obj.closeProject);
-            
+
             obj.configMenu                             = uimenu(obj.window,'Label','Configuration');
-            obj.configMenuContent.Settings             = uimenu(obj.configMenu,'Label','Settings',                 'MenuSelectedFcn',@(~,~,~) SettingsGUI());
+            obj.configMenuContent.Settings             = uimenu(obj.configMenu,'Label','Settings',                 'MenuSelectedFcn',@(~,~,~) obj.openSettings());
             obj.configMenuContent.ConfigAll            = uimenu(obj.configMenu,'Label','Configure all Components', 'MenuSelectedFcn',@(~,~,~) obj.configureAll());
             obj.configMenuContent.RunAll               = uimenu(obj.configMenu,'Label','Run all Components',       'MenuSelectedFcn',@(~,~,~) obj.runAll());
             obj.configMenuContent.ReloadAll            = uimenu(obj.configMenu,'Label','Reload all Components',    'MenuSelectedFcn',@(~,~,~) obj.reloadAll());
             obj.configMenuContent.ViewPipeline         = uimenu(obj.configMenu,'Label','View Pipeline Graph',      'MenuSelectedFcn',@(~,~,~) obj.viewPipelineGraph());
             obj.configMenuContent.pipelineContentCheck = uimenu(obj.configMenu,'Label','Pipeline Content Check','Checked','on','MenuSelectedFcn',@(~,~,~)obj.pipelineContentCheck());
-            
+
+            obj.multiSubjectMenu                          = uimenu(obj.window,'Label','Multi Subject');
+            obj.multiSubjectMenuContent.LaunchSuperModel  = uimenu(obj.multiSubjectMenu,'Label','Launch Multi-Subject Viewer...', 'Enable','off','MenuSelectedFcn',@(~,~,~) obj.launchSuperModelViewer);
+            obj.multiSubjectMenuContent.PrepareSuperModel = uimenu(obj.multiSubjectMenu,'Label','Prepare Project for Multi-Subject Viewer...', 'Enable','off','MenuSelectedFcn',@(~,~,~)obj.prepareForSuperModelViewer());
+            obj.refreshSuperModelAvailability();
+
             obj.pipelineTree.Root.Name = 'Project';
             obj.treeNodes.Input        = uiw.widget.TreeNode('Name','Input',      'Parent',obj.pipelineTree.Root); % ,'UserData',0
             obj.treeNodes.Processing   = uiw.widget.TreeNode('Name','Processing', 'Parent',obj.pipelineTree.Root);
             obj.treeNodes.Output       = uiw.widget.TreeNode('Name','Output',     'Parent',obj.pipelineTree.Root);
             
             warning on;
-            
+
             obj.ProgressBarTool = UnifiedProgressBar(obj.window);
 
         end
-        
+
     end
 
     methods (Access = public)
@@ -101,7 +122,7 @@ classdef MainGUI < handle
                 if(folder ~= 0)
                     obj.setProjectDefaultPath(folder);
                     obj.closeProject();
-                    
+
                     [prj,pplFile]=Project.OpenProjectFromPath(folder);
                     obj.ProjectRunner=Runner.CreateFromProject(prj);
                     obj.createTreeView();
@@ -110,10 +131,12 @@ classdef MainGUI < handle
                     %obj.updateTreeView();
                     %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                     obj.fileMenuContent.CloseProject.Enable='on';
+                    obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
                     obj.ProgressBarTool.resumeGUI();
                 end
 
             catch e
+                VERAErrorLog('openProject', e);
                 warning(getReport(e,'extended'));
             end
             delete(obj.componentMenu);
@@ -139,9 +162,10 @@ classdef MainGUI < handle
                         %obj.updateTreeView();
                         %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                         obj.fileMenuContent.CloseProject.Enable='on';
+                        obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
                         obj.ProgressBarTool.resumeGUI();
                     end
-    
+
                 catch e
                     warning(getReport(e,'extended'));
                 end
@@ -165,6 +189,7 @@ classdef MainGUI < handle
                 k2=obj.ProjectRunner.GetNextReadyComponent();
                 if(isempty(k2))
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                    drawnow;
                 end
                 k=k2;
             end
@@ -187,6 +212,7 @@ classdef MainGUI < handle
                 
                 if(isempty(k2))
                     obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                    drawnow; 
                 end
                 k = k2;
             end
@@ -235,6 +261,7 @@ classdef MainGUI < handle
                 end
                 
                 obj.fileMenuContent.CloseProject.Enable='on';
+                obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
             end
             catch e
                 warning(getReport(e));
@@ -303,13 +330,234 @@ classdef MainGUI < handle
                 pipelinePath = [];
 
             end
-            
+
+            if isdeployed
+                % Calling PipelineDesigner(...) in-process here hangs and
+                % consumes runaway memory in the deployed app - appears to
+                % be MATLAB Compiler's lazy p-code resolution for a
+                % first-time call into a different top-level bundled
+                % folder from deep inside an already-large, already-running
+                % app, never completing. Launch the standalone
+                % PipelineDesigner.app (shipped as a sibling to this app)
+                % as its own OS process instead - it inherits this
+                % process's already-working runtime environment
+                % (DYLD_LIBRARY_PATH etc.) since system() child processes
+                % inherit the parent's environment.
+                try
+                    appBundle = fileparts(fileparts(fileparts(ctfroot))); % .../MainGUI.app
+                    appsDir   = fileparts(appBundle);                     % shared build output dir
+                    pdAppPath = fullfile(appsDir,'PipelineDesigner.app');
+                    if ~exist(pdAppPath,'dir')
+                        error('PipelineDesigner.app not found next to this app (expected at %s)', pdAppPath);
+                    end
+                    % Launch via macOS's "open" rather than exec'ing the
+                    % bundled binary directly with a manually-built
+                    % DYLD_LIBRARY_PATH: system() invokes commands through
+                    % /bin/sh -c, and macOS strips/ignores DYLD_* env vars
+                    % across that exec boundary for these binaries (a
+                    % restricted-binary/SIP behavior), so the direct-exec
+                    % form reliably failed to find its own runtime
+                    % libraries when launched this way. "open" resolves
+                    % everything through the app bundle itself and doesn't
+                    % depend on inherited DYLD_LIBRARY_PATH at all.
+                    %
+                    % "open --args" does not reliably deliver argv to this
+                    % app's varargin (confirmed empty even with "open -n"
+                    % forcing a fresh process) - use a small handoff file
+                    % instead, which PipelineDesigner checks for at startup
+                    % (see loadStartupPipelineFromHandoff in PipelineDesigner.m).
+                    if ~isempty(pipelinePath)
+                        handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
+                        hfid = fopen(handoffFile, 'w');
+                        fprintf(hfid, '%s', pipelinePath);
+                        fclose(hfid);
+                    end
+                    cmd = sprintf('open -a "%s"', pdAppPath);
+                    system(cmd);
+                catch e
+                    VERAErrorLog('openPipelineDesigner', e);
+                    errordlg(sprintf('Could not launch Pipeline Designer: %s', e.message));
+                end
+                return;
+            end
+
             f = waitbar(0.3,'Opening Pipeline Designer...');
 
-            PipelineDesigner(pipelinePath);
+            try
+                PipelineDesigner(pipelinePath);
+            catch e
+                VERAErrorLog('openPipelineDesigner', e);
+                errordlg(sprintf('Could not open Pipeline Designer: %s\n\n(Full details logged to VERA_error_log.txt in your home folder.)', e.message));
+            end
 
             waitbar(1,f);
             close(f);
+        end
+
+        function openSettings(obj)
+            %openSettings - "Settings" menu callback. Opens SettingsGUI
+            %and refreshes dependency-gated menu items (e.g. the
+            %Multi-Subject Viewer launcher) once that window is closed,
+            %since Dependency values can change while it's open.
+            settingsGUI = SettingsGUI();
+            addlistener(settingsGUI.Parent, 'ObjectBeingDestroyed', @(~,~) obj.refreshSuperModelAvailability());
+        end
+
+        function refreshSuperModelAvailability(obj)
+            %refreshSuperModelAvailability - Gray out the entire "Multi
+            %Subject" dropdown when the optional VERA_SuperModel
+            %Dependency isn't actually configured/found, since none of
+            %its menu items (Launch or Prepare) are useful without it.
+            %VERA_SuperModel is a standalone companion tool, not required
+            %for any part of the pipeline - everything else in VERA works
+            %normally whether or not it is set. '.' is the unresolved
+            %placeholder value (see constructor) - never treated as
+            %configured, even though it technically is an existing dir.
+            available = DependencyHandler.Instance.IsDependency('VERA_SuperModel') && ...
+                ~strcmp(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'.') && ...
+                exist(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'dir');
+            if available
+                obj.multiSubjectMenu.Enable = 'on';
+                % LaunchSuperModel's own Enable is independent of whether
+                % a project is open, so it can turn straight on here.
+                % PrepareSuperModel still needs a project open first -
+                % leave its Enable state to openProject/closeProject.
+                obj.multiSubjectMenuContent.LaunchSuperModel.Enable = 'on';
+                tooltipText = '';
+            else
+                obj.multiSubjectMenu.Enable = 'off';
+                obj.multiSubjectMenuContent.LaunchSuperModel.Enable = 'off';
+                tooltipText = ['VERA_SuperModel is not configured. Get it from ' ...
+                    'https://github.com/gtzook/VERA_SuperModel and set its install folder under Configuration > Settings.'];
+            end
+            % uimenu's Tooltip property is only supported under a
+            % uifigure - obj.window is a legacy figure() window, so this
+            % throws there. Not worth the whole MainGUI constructor
+            % failing over a hover tooltip - skip it if unsupported.
+            try
+                obj.multiSubjectMenu.Tooltip = tooltipText;
+                obj.multiSubjectMenuContent.LaunchSuperModel.Tooltip = tooltipText;
+            catch
+            end
+        end
+
+        function launchSuperModelViewer(obj)
+            %launchSuperModelViewer - "Launch Multi-Subject Viewer..."
+            %menu callback. Launches VERA_SuperModel, a standalone
+            %companion tool (separate repo) for viewing electrodes from
+            %several already-processed VERA projects together on one
+            %shared brain surface. Not part of VERA's own pipeline - its
+            %install location is resolved as a 'folder' Dependency,
+            %configurable under Configuration > Settings.
+            if ~DependencyHandler.Instance.IsDependency('VERA_SuperModel') || ...
+                    strcmp(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'.')
+                % '.' is the unresolved placeholder value set in the
+                % constructor - see refreshSuperModelAvailability.
+                warndlg('VERA_SuperModel is not configured yet. Set its install folder under Configuration > Settings, then try again.', ...
+                    'Launch Multi-Subject Viewer');
+                return;
+            end
+
+            superModelPath = DependencyHandler.Instance.GetDependency('VERA_SuperModel');
+            if ~exist(superModelPath,'dir')
+                warndlg(sprintf('The configured VERA_SuperModel folder does not exist:\n%s', superModelPath), ...
+                    'Launch Multi-Subject Viewer');
+                return;
+            end
+            if ~exist(fullfile(superModelPath,'launch_viewer.m'),'file')
+                warndlg(sprintf('launch_viewer.m was not found in the configured VERA_SuperModel folder:\n%s', superModelPath), ...
+                    'Launch Multi-Subject Viewer');
+                return;
+            end
+
+            % launch_viewer.m uses paths relative to its own folder (e.g.
+            % addpath(genpath('FileFunctions')), a relative javaaddpath),
+            % so it needs to run with that folder as the working
+            % directory - restore the caller's directory afterward.
+            currentDir = pwd;
+            cleanupObj = onCleanup(@() cd(currentDir)); %#ok<NASGU>
+            cd(superModelPath);
+            if ~isdeployed
+                addpath(superModelPath);
+            end
+
+            % VERA_SuperModel's own folder picker (selectProjectFolders.m)
+            % calls a raw Swing JFileChooser method synchronously, which
+            % MATLAB auto-delegates to the AWT Event Dispatch Thread and
+            % reports with a harmless but noisy warning - suppress just
+            % for this call rather than editing that file.
+            warnState = warning('off','all');
+            cleanupWarn = onCleanup(@() warning(warnState)); %#ok<NASGU>
+            launch_viewer();
+        end
+
+        function prepareForSuperModelViewer(obj)
+            %prepareForSuperModelViewer - "Prepare Project for
+            %Multi-Subject Viewer..." menu callback.
+            %
+            %VERA_SuperModel (see launchSuperModelViewer) always looks
+            %for a fixed file name - DataOutput/MNIbrain.mat - inside
+            %each project folder it's pointed at. VERA itself lets output
+            %component names (and therefore their saved .mat file names,
+            %see MatOutput.m) be customized per pipeline, so there is no
+            %way to guarantee that fixed name is used directly. Rather
+            %than changing VERA_SuperModel to match VERA's naming, this
+            %copies whichever DataOutput .mat file the user picks to that
+            %fixed name, so VERA_SuperModel's own unmodified file
+            %selection logic finds what it expects. No changes to
+            %VERA_SuperModel are required.
+            if ~isprop(obj.ProjectRunner,'Project') || isempty(obj.ProjectRunner.Project)
+                warndlg('No project is currently open.', 'Prepare Project for Multi-Subject Viewer');
+                return;
+            end
+
+            dataOutputDir = fullfile(obj.ProjectRunner.Project.Path,'DataOutput');
+            if ~exist(dataOutputDir,'dir')
+                warndlg(sprintf('No DataOutput folder found for this project:\n%s', dataOutputDir), ...
+                    'Prepare Project for Multi-Subject Viewer');
+                return;
+            end
+
+            [file,path] = uigetfile(fullfile(dataOutputDir,'*.mat'), ...
+                'Select the output .mat file to use for the Multi-Subject Viewer (e.g. a Brain/MNI Cortex output)');
+            if isequal(file,0)
+                return;
+            end
+            sourceFile = fullfile(path,file);
+
+            varNames = {whos('-file',sourceFile).name};
+            if ~any(strcmp(varNames,'surfaceModel'))
+                warndlg(sprintf('"%s" does not contain a surfaceModel variable - select a Brain/MNI Cortex (or similar) output file.', file), ...
+                    'Prepare Project for Multi-Subject Viewer');
+                return;
+            end
+            if ~any(strcmp(varNames,'electrodes'))
+                % VERA_SuperModel's loadSubj() unconditionally does
+                % elDef.Definition = electrodes.Definition right after
+                % load(data,'electrodes') - since load() silently warns
+                % rather than erroring when a variable isn't in the file,
+                % a surface-only .mat here would make the viewer crash
+                % with "Unrecognized variable 'electrodes'" once this
+                % subject is loaded, not just show the surface. Refuse
+                % rather than copy a file that is guaranteed to break it.
+                warndlg(sprintf(['"%s" has no electrodes variable, so the Multi-Subject Viewer would fail to load it.\n\n' ...
+                    'Add an Electrode Definition/Location input to this output component in the pipeline (so it saves electrodes alongside surfaceModel), then try again.'], file), ...
+                    'Prepare Project for Multi-Subject Viewer');
+                return;
+            end
+
+            destFile = fullfile(dataOutputDir,'MNIbrain.mat');
+            if exist(destFile,'file')
+                answer = questdlg('MNIbrain.mat already exists in this project''s DataOutput folder. Overwrite it?', ...
+                    'Prepare Project for Multi-Subject Viewer','Overwrite','Cancel','Cancel');
+                if ~strcmp(answer,'Overwrite')
+                    return;
+                end
+            end
+
+            copyfile(sourceFile, destFile);
+            msgbox(sprintf('Copied to:\n%s\n\nThis project is now ready to be selected in the Multi-Subject Viewer.', destFile), ...
+                'Prepare Project for Multi-Subject Viewer');
         end
     end
     
@@ -338,6 +586,7 @@ classdef MainGUI < handle
 
             obj.viewTabs = containers.Map();
             obj.fileMenuContent.CloseProject.Enable = 'off';
+            obj.multiSubjectMenuContent.PrepareSuperModel.Enable = 'off';
             obj.removeTempPath();
             obj.pipelineTree.Root.Name = 'Project';
             delete(obj.componentMenu);
@@ -520,10 +769,11 @@ classdef MainGUI < handle
                 obj.updateTreeView();
                 obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                 obj.ProgressBarTool.resumeGUI();
+                drawnow; 
             end
-            
+
         end
-        
+
         function success=runComponent(obj,compName,updateView)
             if(~exist('updateView','var'))
                 updateView=false;
@@ -547,10 +797,11 @@ classdef MainGUI < handle
             if(updateView)
                 obj.updateTreeView();
                 obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
+                drawnow; 
             end
             obj.ProgressBarTool.resumeGUI();
         end
-        
+
         function treeClick(obj,a,b)
             if(isprop(b,'Nodes') && any(isprop(b.Nodes,'UserData')) && ~isempty(b.Nodes.UserData))
                 switch b.SelectionType
