@@ -51,8 +51,14 @@ classdef MatlabElectrodeSelectionGUI < uix.HBoxFlex
             %set(obj.uiGrid,'BackgroundColor','k');
             obj.Widths=[100 -1];
             obj.ax3D=axes('Parent',obj.uiGrid,'Units','normalized','Color','k');
-            obj.slMinThresh=uicontrol('Parent',obj.uiGrid,'Style','slider','Min',0,'Max',1,'Value',1,'SliderStep',[1 1],'Callback',@obj.setMinThresh);
-            obj.slBrainAlpha=uicontrol('Parent',obj.uiGrid,'Style','slider','Min',0,'Max',1,'Value',0.1,'SliderStep',[1/100 1/100],'Callback',@obj.setBrainAlpha);
+            hbThresh=uix.HBox('Parent',obj.uiGrid);
+            uicontrol('Parent',hbThresh,'Style','text','String','Threshold:','HorizontalAlignment','right');
+            obj.slMinThresh=uicontrol('Parent',hbThresh,'Style','slider','Min',0,'Max',1,'Value',1,'SliderStep',[1 1],'Callback',@obj.setMinThresh);
+            hbThresh.Widths=[70 -1];
+            hbAlpha=uix.HBox('Parent',obj.uiGrid);
+            uicontrol('Parent',hbAlpha,'Style','text','String','Brain Opacity:','HorizontalAlignment','right');
+            obj.slBrainAlpha=uicontrol('Parent',hbAlpha,'Style','slider','Min',0,'Max',1,'Value',0.1,'SliderStep',[1/100 1/100],'Callback',@obj.setBrainAlpha);
+            hbAlpha.Widths=[70 -1];
             obj.uiGrid.Heights=[-1,18,18];
             obj.elLocations=ElectrodeLocation();
             obj.elPatches={};
