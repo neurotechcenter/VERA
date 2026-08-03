@@ -46,7 +46,6 @@ classdef MainGUI < handle
             'Toolbar', 'none', ...
             'Visible', figVisibility, ...
             'HandleVisibility', 'on','CloseRequestFcn',@obj.onClose);
-            addToolbarExplorationButtons(obj.window);
             cameratoolbar(obj.window,'NoReset');
 
             rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
