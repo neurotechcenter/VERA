@@ -1,23 +1,61 @@
 function PipelineDesigner(varargin)
     % The pipeline designer is a tool to load, modify, and save VERA pipelines
-
     mfilePath = fileparts(mfilename('fullpath'));
 
-    addpath(genpath(fullfile(mfilePath,'..')));
-    addpath(genpath(fullfile(mfilePath,'..','classes')));
-    addpath(genpath(fullfile(mfilePath,'..','Components')));
-    addpath(genpath(fullfile(mfilePath,'..','Dependencies')));
+    if ~isdeployed
+        addpath(genpath(fullfile(mfilePath,'..')));
+        addpath(genpath(fullfile(mfilePath,'..','classes')));
+        addpath(genpath(fullfile(mfilePath,'..','Components')));
+        addpath(genpath(fullfile(mfilePath,'..','Dependencies')));
+    end
 
     % %java stuff to make sure that the GUI works as expected
     warning off
-    javaaddpath(fullfile(mfilePath,'..','Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.jar'));
+    if ~isdeployed
+        javaaddpath(fullfile(mfilePath,'..','Dependencies/Widgets Toolbox/resource/MathWorksConsultingWidgets.jar'));
+    end
     import uiextras.jTree.*;
     warning on
+
+    % Build-time-only mode: MATLAB Compiler bundles every .m file as
+    % encrypted p-code, so fileread() on a component's own source (used
+    % throughout this file to discover components/views and extract
+    % their inputs/outputs/dependencies/help text via regex) returns
+    % garbage in the deployed app. This mode runs in normal MATLAB before
+    % compiling, while source is still readable, and precomputes
+    % everything into a manifest file that the deployed app loads instead
+    % of scanning source at runtime. See loadManifestOnce/getAvailableElements/
+    % getDependencies/getInputsOutputs/showHelp for the deployed-mode side.
+    if ~isempty(varargin) && ischar(varargin{1}) && strcmp(varargin{1},'BuildManifest')
+        buildPipelineDesignerManifest(mfilePath, varargin{2});
+        return;
+    end
 
     if ~isempty(varargin)
         startupPipelineFile = varargin{1};
     else
         startupPipelineFile = [];
+    end
+
+    % MainGUI's "Open Pipeline Designer" menu launches the standalone app
+    % via "open -a" (needed for the GUI/rendering engine to initialize
+    % correctly when spawned from another already-running deployed app -
+    % see MainGUI's openPipelineDesigner) - but "open --args" does not
+    % reliably deliver argv to varargin here, so fall back to a small
+    % handoff file MainGUI writes right before calling "open".
+    if isempty(startupPipelineFile)
+        handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
+        if exist(handoffFile, 'file')
+            try
+                handoffContent = strtrim(fileread(handoffFile));
+                delete(handoffFile);
+                if ~isempty(handoffContent) && exist(handoffContent, 'file')
+                    startupPipelineFile = handoffContent;
+                end
+            catch he
+                VERAErrorLog('PipelineDesigner', he);
+            end
+        end
     end
 
     %% UI Layout Constants
@@ -127,15 +165,6 @@ function PipelineDesigner(varargin)
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
     
-    % pipelineText = uitextarea(fig, ...
-    %     'Position', [0 0 0 0], ...
-    %     'Value', '', ...
-    %     'FontName', UI.FONT.CODE.NAME, ...
-    %     'FontSize', UI.FONT.CODE.SIZE, ...
-    %     'Editable', 'on');
-
-    pipelineText.Value = [];
-
     pipelineListBox = uilistbox(fig, ...
         'Position',  [UI.X.LEFT_PANEL, UI.Y.OUTPUT_LIST, UI.COMMON.PIPELINE_WIDTH, UI.COMMON.PIPELINE_HEIGHT], ...
         'Items',     {''}, ...
@@ -325,7 +354,7 @@ function PipelineDesigner(varargin)
     componentPath          = GetFullPath(fullfile(mfilename('fullpath'),'..','..','Components'));
 
     [AvailableComponents, componentTypes] = getAvailableElements(componentPath, componentParentClasses, 'component');
-    
+
     %% Populate list of possible Input components
     inputIDXs = contains(componentTypes,'Input');
     
@@ -390,7 +419,12 @@ function PipelineDesigner(varargin)
 
     % Function to open the most recent file (active in help text area) in the matlab editor
     function OpenInEditor(fig,~)
-        if exist(selectedElement, 'file') == 2
+        if isdeployed
+            % edit() opens the MATLAB source editor, which doesn't exist
+            % in a deployed app (and edit.m is itself on MATLAB
+            % Compiler's non-deployable exclusion list)
+            uialert(fig, 'Opening source in the MATLAB editor is not available in the standalone app.', 'Not Available');
+        elseif exist(selectedElement, 'file') == 2
             edit(selectedElement);
         else
             % Display a warning if the file does not exist
@@ -440,7 +474,6 @@ function loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,h
         for i = 1:length(pipelineContent)
             pipelineContent{i} = regexprep(pipelineContent{i}, '\t', '    ');
         end
-
         % Populate pipeline listbox and element text area
         [compNames, viewNames, elements] = getCurrentComponents(pipelineContent);
 
@@ -486,19 +519,24 @@ function [fullPath] = savePipeline(fig,pipelineListBox,startupPipelineFile,varar
     if pipelineStatus
         defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
 
-        % get save path
-        fig.Visible = 'off'; % Hide the main window
+        % get save path. Only toggle the main window's visibility around
+        % the uiputfile dialog itself (not unconditionally) - a deployed
+        % standalone app terminates the instant zero figures are visible,
+        % and toggling Visible off with nothing else visible yet (as
+        % happens when called with a pre-supplied inputFilePath, e.g.
+        % from checkPipeline) risked hitting that window count race.
         if ~isempty(inputFilePath)
             [path, file, ext] = fileparts(inputFilePath);
             file = [file, ext];
         else
+            fig.Visible = 'off'; % Hide the main window
             if ~isempty(startupPipelineFile)
                 [file, path] = uiputfile(startupPipelineFile, 'Save pipeline file');
             else
                 [file, path] = uiputfile(fullfile(defaultSavePath,'*.pwf'), 'Save pipeline file');
             end
+            fig.Visible = 'on'; % Show the main window
         end
-        fig.Visible = 'on'; % Show the main window
 
         % write text area to file
         if file ~= 0
@@ -563,55 +601,46 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
     warnMsg_create    = [];
     warnMsg_configure = [];
     errormessage      = [];
+    VERAfig           = [];
 
     checkingPipelineDlg = uiprogressdlg(fig,'Message','Checking Pipeline...','Title','Checking Pipeline',...
     'Icon','error','Cancelable','on','Indeterminate','on');
 
     % Save working pipeline to be loaded into VERA and checked
-    currentPath  = fileparts(mfilename('fullpath'));
-    tempProjPath = fullfile(currentPath,'temp/tempProj');
-
-    if ~exist(tempProjPath,'dir')
-        mkdir(tempProjPath);
-    else
-        % delete temporary folder
-        warning off;
-        rmdir(fullfile(tempProjPath,'..'),'s');
-        warning on;
-        % make it fresh
-        mkdir(tempProjPath);
-    end
+    tempProjPath = setupTempProject();
 
     tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
     pipelinePath     = savePipeline(fig,pipelineListBox,[],tempPipelinePath);
 
+    % Create dialog boxes when there are warnings or errors. Everything
+    % from here on (including constructing MainGUI) is inside this try -
+    % previously MainGUI(...) below ran unprotected, so a crash there
+    % would silently kill the check with no dialog and no way to see why.
+    try
+        % start VERA (would like to change this so pipelines can be checked
+        % without running VERA...)
+        VERAvisiblity = 'off';
+        VERAhandle    = MainGUI(VERAvisiblity);
 
-    % start VERA (would like to change this so pipelines can be checked
-    % without running VERA...)
-    VERAvisiblity = 'off';
-    VERAhandle    = MainGUI(VERAvisiblity);
-
-    % Sort through existing figures and hide the newest VERA figure (used
-    % for checking the pipeline)
-    % This preserves any open VERA windows
-    allFigureHandles = findall(groot,'Type','figure');
-    for i = 1:length(allFigureHandles)
-        FigureNames{i} = allFigureHandles(i).Name;
-    end
-    for i = 1:length(FigureNames)
-        if contains(FigureNames{i},'VERA')
-            FigureNumbers(i) = allFigureHandles(i).Number;
-        else
-            FigureNumbers(i) = 0;
+        % Sort through existing figures and hide the newest VERA figure (used
+        % for checking the pipeline)
+        % This preserves any open VERA windows
+        allFigureHandles = findall(groot,'Type','figure');
+        for i = 1:length(allFigureHandles)
+            FigureNames{i} = allFigureHandles(i).Name;
         end
-    end
+        for i = 1:length(FigureNames)
+            if contains(FigureNames{i},'VERA')
+                FigureNumbers(i) = allFigureHandles(i).Number;
+            else
+                FigureNumbers(i) = 0;
+            end
+        end
 
-    [~,VERAfigIDX] = max(FigureNumbers);
+        [~,VERAfigIDX] = max(FigureNumbers);
 
-    VERAfig = allFigureHandles(VERAfigIDX);
+        VERAfig = allFigureHandles(VERAfigIDX);
 
-    % Create dialog boxes when there are warnings or errors
-    try 
         % create VERA project to see if the pipeline is viable
         lastwarn('');
         createNewProject(VERAhandle,tempProjPath,pipelinePath);
@@ -626,9 +655,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
             close(VERAfig);
         
             % delete temporary folder
-            warning off;
-            rmdir(fullfile(tempProjPath,'..'),'s');
-            warning on;
+            cleanupTempProject(tempProjPath);
 
             uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
             pipelineStatus = 0;
@@ -650,9 +677,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
             close(VERAfig);
         
             % delete temporary folder
-            warning off;
-            rmdir(fullfile(tempProjPath,'..'),'s');
-            warning on;
+            cleanupTempProject(tempProjPath);
 
             uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
             pipelineStatus = 0;
@@ -661,7 +686,9 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         end
     catch me
         errormessage = me.message;
-        errordlg(errormessage);
+        VERAErrorLog('PipelineDesigner checkPipeline', me);
+        errordlg(sprintf('%s\n\n(Full details logged to %s in your home folder.)', ...
+            errormessage, 'VERA_error_log.txt'));
     end
 
     % Pipeline check results
@@ -673,13 +700,13 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         pipelineStatus = 0;
     end
 
-    % close VERA
-    close(VERAfig);
+    % close VERA (may never have been created if MainGUI(...) itself threw)
+    if ~isempty(VERAfig) && isvalid(VERAfig)
+        close(VERAfig);
+    end
 
     % delete temporary folder
-    warning off;
-    rmdir(fullfile(tempProjPath,'..'),'s');
-    warning on;
+    cleanupTempProject(tempProjPath);
 
     close(checkingPipelineDlg);
 end
@@ -688,31 +715,51 @@ end
 function warnMsg = formatWarning()
     warnMsg = lastwarn;
 
-    if ~isempty(warnMsg)
-        % isolate meaningful message
-        [warnMsg, matches] = strsplit(warnMsg,{'Error','</a>'});
+    if isempty(warnMsg)
+        return;
+    end
 
-        % Find the name of the element causing the error
-        elementNameStart = find(contains(warnMsg,'errorDocCallback'),1,'first');
-        regexpString =  "(?<=\(')([^']+)(?='\))";
-        elementName = regexp(warnMsg(elementNameStart),regexpString,'match');
+    % Warnings only contain '<a href="matlab:...">...</a>'-style
+    % hyperlink markup when hotlinks are enabled (an interactive desktop
+    % session) - a deployed app has no Command Window, so hyperlinks are
+    % off and this markup is simply absent. Handle both cases explicitly
+    % rather than assuming the hyperlinked form, which previously left
+    % warnMsg as a cell array (from strsplit) instead of char whenever
+    % hyperlinks were off, crashing the next line (isspace on a cell).
+    try
+        if contains(warnMsg, '</a>')
+            [parts, matches] = strsplit(warnMsg,{'Error','</a>'});
 
-        start   = find(contains(matches,'</a>'),1,'first') + 1;
-        if ~isempty(start)
-            warnMsg = warnMsg{start};
+            % Find the name of the element causing the error
+            elementNameStart = find(contains(parts,'errorDocCallback'),1,'first');
+            regexpString =  "(?<=\(')([^']+)(?='\))";
+            elementName = regexp(parts(elementNameStart),regexpString,'match');
+
+            start = find(contains(matches,'</a>'),1,'first') + 1;
+            if ~isempty(start) && start <= numel(parts)
+                warnMsg = parts{start};
+            else
+                warnMsg = strjoin(parts, ' ');
+            end
+        else
+            elementName = {};
         end
 
         % remove return lines in warning
         warnMsg = regexprep(warnMsg,'[\n\r]+',' ');
 
         % remove leading space
-        if isspace(warnMsg(1))
+        if ~isempty(warnMsg) && isspace(warnMsg(1))
             warnMsg(1) = [];
         end
 
-        if ~isempty(elementName)
+        if exist('elementName','var') && ~isempty(elementName) && ~isempty(elementName{1})
             warnMsg = [elementName{1}{1}, ': ', warnMsg];
         end
+    catch
+        % Formatting is best-effort - fall back to the raw warning rather
+        % than losing the whole pipeline-check result to a parsing bug
+        warnMsg = lastwarn;
     end
 end
 
@@ -724,56 +771,105 @@ function viewPipelineGraphInDesigner(fig, pipelineListBox)
 
     if pipelineStatus
         % Save working pipeline to be loaded into VERA and checked
-        currentPath  = fileparts(mfilename('fullpath'));
-        tempProjPath = fullfile(currentPath,'temp/tempProj');
-    
-        if ~exist(tempProjPath,'dir')
-            mkdir(tempProjPath);
-        else
-            % delete temporary folder
-            warning off;
-            rmdir(fullfile(tempProjPath,'..'),'s');
-            warning on;
-            % make it fresh
-            mkdir(tempProjPath);
-        end
-    
+        tempProjPath = setupTempProject();
+
         tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
         pipelinePath     = savePipeline(fig,pipelineListBox,[],tempPipelinePath);
-    
-        % start VERA (would like to change this so pipelines can be checked
-        % without running VERA...)
-        VERAvisiblity    = 'off';
-        VERAhandle       = MainGUI(VERAvisiblity);
-        allFigureHandles = findall(groot,'Type','figure');
-        VERAfig          = allFigureHandles(end);
 
-        % Create a VERA project so we can view the pipeline graph. In
-        % theory this could be done without creating a project, but I don't
-        % know how
-        createNewProject(VERAhandle,tempProjPath,pipelinePath);
+        VERAfig = [];
+        try
+            % start VERA (would like to change this so pipelines can be checked
+            % without running VERA...)
+            VERAvisiblity    = 'off';
+            VERAhandle       = MainGUI(VERAvisiblity);
 
-        % Create the pipeline graph
-        viewPipelineGraph(VERAhandle);
+            % Find MainGUI's own window by Name, not by assuming it's
+            % allFigureHandles(end) - findall's ordering isn't guaranteed
+            % to put the just-created figure last, and picking the wrong
+            % one here previously closed PipelineDesigner's own visible
+            % window instead, which terminates the whole deployed app
+            % (MATLAB Compiler standalone apps exit once zero figures are
+            % visible). Same lookup checkPipeline already uses below.
+            allFigureHandles = findall(groot,'Type','figure');
+            figNames = cell(1,numel(allFigureHandles));
+            for i = 1:numel(allFigureHandles)
+                figNames{i} = allFigureHandles(i).Name;
+            end
+            veraFigIdx = find(strcmp(figNames,'VERA'),1,'last');
+            if ~isempty(veraFigIdx)
+                VERAfig = allFigureHandles(veraFigIdx);
+            end
 
-        % close the VERA figure window (hidden)
-        close(VERAfig);
+            % Create a VERA project so we can view the pipeline graph. In
+            % theory this could be done without creating a project, but I don't
+            % know how
+            createNewProject(VERAhandle,tempProjPath,pipelinePath);
 
+            % Create the pipeline graph
+            viewPipelineGraph(VERAhandle);
+        catch me
+            VERAErrorLog('PipelineDesigner viewPipelineGraphInDesigner', me);
+            errordlg(sprintf('%s\n\n(Full details logged to %s in your home folder.)', ...
+                me.message, 'VERA_error_log.txt'));
+        end
+
+        % close the VERA figure window (hidden), if it got created
+        if ~isempty(VERAfig) && isvalid(VERAfig)
+            close(VERAfig);
+        end
+
+        % delete temporary folder
+        cleanupTempProject(tempProjPath);
     end
 end
 
 %% Function to get all components/views in a given directory
 function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,compOrView)
 
+    % Scanning every .m file under dirPath (and, per component, re-reading
+    % its source again in getComponentType) is expensive and dirPath is
+    % scanned fresh every time the designer is opened. Cache per session,
+    % keyed on the call arguments.
+    persistent elementCache
+    if isempty(elementCache)
+        elementCache = containers.Map();
+    end
+
+    % Deliberately excludes dirPath from the key: dirPath is an absolute
+    % path that differs between build time and the deployed app's
+    % extracted CTF location, but each (parentClasses,compOrView)
+    % combination only ever maps to one dirPath in this app anyway.
+    cacheKey = strjoin({strjoin(parentClasses,','), compOrView}, '|');
+    if isKey(elementCache, cacheKey)
+        cached          = elementCache(cacheKey);
+        Names           = cached.Names;
+        componentTypes  = cached.componentTypes;
+        return;
+    end
+
+    % Deployed apps can't fileread() their own bundled .m source (MATLAB
+    % Compiler ships it as encrypted p-code) - the scan below would find
+    % nothing. Load the manifest precomputed at compile time instead.
+    if isdeployed
+        m = loadManifestOnce();
+        if strcmp(compOrView,'component')
+            Names          = m.compNames;
+            componentTypes = m.compTypes;
+        else
+            Names          = m.viewNames;
+            componentTypes = {};
+        end
+        cached.Names          = Names;
+        cached.componentTypes = componentTypes;
+        elementCache(cacheKey) = cached;
+        return;
+    end
+
     Names          = {};
     componentTypes = {};
 
     % set up parentClasses to be used in regular expression
-    parentClassesString = [];
-    for i = 1:length(parentClasses)
-        parentClassesString = [parentClassesString,  parentClasses{i}, '|'];
-    end
-    parentClassesString(end) = [];
+    parentClassesString = strjoin(parentClasses, '|');
 
     % Get all subdirectories, including the root directory
     allSubdirs = genpath(dirPath);
@@ -829,163 +925,133 @@ function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,co
         componentTypes = {};
     end
 
+    cached.Names          = Names;
+    cached.componentTypes = componentTypes;
+    elementCache(cacheKey) = cached;
+
 end
 
 %% Function to get component names/types for the current pipeline
 function [compNames, viewNames, elements] = getCurrentComponents(pipelineText)
-    % Initialize variables
-    compNames      = {};
-    componentTypes = {};
-    viewNames      = {};
-    viewTypes      = {};
-    
-    % Process components and views
+    % Locate the line ranges of each Component/View block. Boundary
+    % detection stays line-based (rather than a full-document XML parse)
+    % so that each block's exact original text is preserved verbatim for
+    % round-tripping through the editable text areas.
     componentStart = [];
     componentEnd   = [];
     viewStart      = [];
     viewEnd        = [];
-    compHasName    = [];
-    viewHasName    = [];
-    
-    % Loop through the pipelineText once and collect data
+
     for i = 1:size(pipelineText, 1)
         line = pipelineText{i};
-        
-        % Check for components
+
         if contains(line, '<Component Type="')
             componentStart(end + 1) = i;
-            matches = regexp(line, '<Component Type="([^"]+)"', 'tokens');
-            if ~isempty(matches)
-                componentTypes{end + 1} = matches{1}{1};
-            end
-
             if contains(line,'/>')
                 componentEnd(end + 1) = i;
             end
-
         elseif contains(line, '</Component>')
             componentEnd(end + 1) = i;
         end
 
-    
-        % Check for views
         if contains(line, '<View Type="')
             viewStart(end + 1) = i;
-            matches = regexp(line, '<View Type="([^"]+)"', 'tokens');
-            if ~isempty(matches)
-                viewTypes{end + 1} = matches{1}{1};
-            end
-
             if contains(line,'/>')
                 viewEnd(end + 1) = i;
             end
-
         elseif contains(line, '</View>')
             viewEnd(end + 1) = i;
         end
     end
-    
-    % Extract component names
-    for i = 1:length(componentStart)
-        compHasName(i) = false;
-        for j = componentStart(i):componentEnd(i)
-            if contains(pipelineText{j}, '<Name>"')
-                compHasName(i) = true;
-                matches = regexp(pipelineText{j}, '<Name>"([^"]+)"', 'tokens');
-                if ~isempty(matches)
-                    compNames{end + 1} = matches{1}{1};
-                end
-            end
-        end
-        
-        % If no name is found, use the type as the name
-        if ~compHasName(i)
-            compNames{end + 1} = componentTypes{i};
-        end
-    end
-    
-    % Extract view names
-    for i = 1:length(viewStart)
-        viewHasName(i) = false;
-        for j = viewStart(i):viewEnd(i)
-            if contains(pipelineText{j}, '<Name>"')
-                viewHasName(i) = true;
-                matches = regexp(pipelineText{j}, '<Name>"([^"]+)"', 'tokens');
-                if ~isempty(matches)
-                    viewNames{end + 1} = matches{1}{1};
-                end
-            end
-        end
-        
-        % If no name is found, use the type as the name
-        if ~viewHasName(i)
-            viewNames{end + 1} = viewTypes{i};
-        end
-    end 
 
-    % Create struct of components and views
+    % Extract each component/view's raw text block
     elementStart = sort([componentStart, viewStart]);
     elementEnd   = sort([componentEnd,   viewEnd]);
+    elements     = {};
     for i = 1:length(elementStart)
         elements{i} = pipelineText(elementStart(i):elementEnd(i));
     end
 
+    % Derive names via real XML parsing of each block (see getElementNames),
+    % then split back out by whether each block was a Component or a View
+    elementNames = getElementNames(elements);
+    isComponent  = ismember(elementStart, componentStart);
+
+    compNames = elementNames(isComponent);
+    viewNames = elementNames(~isComponent);
 end
 
 %% Function to get names from elements structure
 function elementNames = getElementNames(elements)
-
     elementNames = {''};
-    
+
     % sort through elements to find name. If there is no name, use the
     % element type as name
     for i = 1:length(elements)
-        for j = 1:length(elements{i})
-            if contains(elements{i}{j},'<Name>')
-                matches = regexp(elements{i}{j}, '<Name>"([^"]+)"', 'tokens');
-                if ~isempty(matches)
-                    elementNames{i} = matches{1}{1};
-                end
-            else
-                if contains(elements{i}{j},'<Component Type=')
-                    matches = regexp(elements{i}{j}, '<Component Type="([^"]+)"', 'tokens');
-                    if ~isempty(matches)
-                        elementNames{i} = matches{1}{1};
-                    end
-                elseif contains(elements{i}{j},'<View Type=')
-                    matches = regexp(elements{i}{j}, '<View Type="([^"]+)"', 'tokens');
-                    if ~isempty(matches)
-                        elementNames{i} = matches{1}{1};
-                    end
-                end
-            end
-        end
+        [name, ~] = parseElementNameAndType(elements{i});
+        elementNames{i} = name;
     end
-
 end
 
 %% Function to get element types
 function elementTypes = getElementTypes(elements)
-
     elementTypes = {''};
-    
+
     % sort through elements to find type
     for i = 1:length(elements)
-        for j = 1:length(elements{i})
-            if contains(elements{i}{j},'<Component Type=')
-                matches = regexp(elements{i}{j}, '<Component Type="([^"]+)"', 'tokens');
-                if ~isempty(matches)
-                    elementTypes{i} = matches{1}{1};
-                end
-            elseif contains(elements{i}{j},'<View Type=')
-                matches = regexp(elements{i}{j}, '<View Type="([^"]+)"', 'tokens');
-                if ~isempty(matches)
-                    elementTypes{i} = matches{1}{1};
-                end
-            end
-        end
+        [~, type] = parseElementNameAndType(elements{i});
+        elementTypes{i} = type;
+    end
+end
+
+%% Function to extract the Name and Type of a Component/View XML block
+function [name, type] = parseElementNameAndType(elementLines)
+    name = '';
+    type = '';
+
+    % Guard against empty/blank blocks (e.g. an empty pipelineListBox
+    % selection) before attempting a real XML parse - an empty document
+    % is not valid XML and the JVM's default XML error handler prints
+    % straight to stderr ("Premature end of file"), which try/catch does
+    % not silence even though the error itself is caught
+    if isempty(strtrim(strjoin(cellstr(elementLines), '')))
+        return;
     end
 
+    try
+        doc  = parseXMLString(elementLines);
+        root = doc.getDocumentElement();
+
+        type = char(root.getAttribute('Type'));
+
+        nameNodes = root.getElementsByTagName('Name');
+        if nameNodes.getLength() > 0
+            name = stripValueQuotes(char(nameNodes.item(0).getTextContent()));
+        end
+    catch
+        % Malformed block - leave name/type empty, caller falls back to type
+    end
+
+    if isempty(name)
+        name = type;
+    end
+end
+
+%% Function to parse a Component/View XML fragment in memory (no file I/O)
+function doc = parseXMLString(xmlLines)
+    xmlText = strjoin(cellstr(xmlLines), newline);
+
+    factory  = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+    builder  = factory.newDocumentBuilder();
+    inSource = org.xml.sax.InputSource(java.io.StringReader(xmlText));
+    doc      = builder.parse(inSource);
+end
+
+%% Function to strip the literal quote characters VERA stores around string values
+function s = stripValueQuotes(s)
+    if length(s) >= 2 && s(1) == '"' && s(end) == '"'
+        s = s(2:end-1);
+    end
 end
 
 %% Function to inspect the properties of a component or view selected in the pipeline
@@ -1011,11 +1077,7 @@ function modifyCurrentPipelineElement(fig,pipelineElementTextArea,pipelineListBo
     end
 
     % Find currently selected item in ItemsData
-    for i = 1:length(pipelineListBox.ItemsData)
-        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
-            index = i;
-        end
-    end
+    index = findSelectedIndex(pipelineListBox);
 
     % Check if name has been changed to be a duplicate
     elementName  = getElementNames({pipelineElementTextArea.Value});
@@ -1040,11 +1102,7 @@ end
 function MoveElementUp(pipelineListBox,pipelineElementTextArea)
 
     % Find currently selected item in ItemsData
-    for i = 1:length(pipelineListBox.ItemsData)
-        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
-            index = i;
-        end
-    end
+    index = findSelectedIndex(pipelineListBox);
 
     if size(pipelineListBox.Items,2) > 1
         newOrder = 1:length(pipelineListBox.Items);
@@ -1075,11 +1133,7 @@ end
 function MoveElementDown(pipelineListBox,pipelineElementTextArea)
 
     % Find currently selected item in ItemsData
-    for i = 1:length(pipelineListBox.ItemsData)
-        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
-            index = i;
-        end
-    end
+    index = findSelectedIndex(pipelineListBox);
 
     if size(pipelineListBox.Items,2) > 1
         newOrder = 1:length(pipelineListBox.Items);
@@ -1108,11 +1162,7 @@ end
 function DeleteElement(pipelineListBox,pipelineElementTextArea)
 
     % Find currently selected item in ItemsData
-    for i = 1:length(pipelineListBox.ItemsData)
-        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
-            index = i;
-        end
-    end
+    index = findSelectedIndex(pipelineListBox);
 
     if size(pipelineListBox.Items,2) > 1
         pipelineListBox.Items(index)     = [];
@@ -1133,118 +1183,14 @@ end
 %% Function to inspect the properties of a component selected in the listbox
 function viewComponent(textArea,helpArea,helpHyperlink,parentClass,currentComponent)
     [~,componentName] = fileparts(currentComponent);
-    component = eval(componentName);
-
-    % Get the component type
-    componentType = class(component);
-
-    % Get the list of properties for the component
-    props = properties(component);
-
-    % Get the properties of the parent class(es)
-    % iter = 1;
-    % for i = 1:length(parentClass)
-    %     parentClassProps = meta.class.fromName(parentClass{i});
-    %     for j = 1:length(parentClassProps.PropertyList) 
-    %         parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
-    %         iter = iter + 1;
-    %     end
-    % end
+    component = feval(componentName);
 
     % Only worry about properties from AComponent, ignoring any other input
     % parent classes
     parentClassProps = meta.class.fromName(parentClass{1});
-    iter = 1;
-    for i = 1:length(parentClassProps.PropertyList) 
-        parentClassNames{iter,1} = parentClassProps.PropertyList(i).Name;
-        iter = iter + 1;
-    end
+    parentClassNames = {parentClassProps.PropertyList.Name}';
 
-    % Trying to exclude parent properties that are not set in the
-    % component. This causes problems when using inherited class properties
-    uniqueComponentProperties = setdiff(props,parentClassNames,'stable');
-    uniqueComponentProperties = [uniqueComponentProperties; 'Name']; % add back Name
-
-    % Remove dependent properties as both cannot be used in the component
-    % e.g. MRIIdentifer and CoregistrationIdentifier in Coregistration.m
-    mc = metaclass(component);
-    remDependentIDX = [];
-    iter = 1;
-    for i = 1:length(mc.PropertyList)
-        prop = mc.PropertyList(i);
-        if prop.Dependent && any(ismember(uniqueComponentProperties,prop.Name)) &&...
-                (strcmp(prop.GetAccess, 'public') || strcmp(prop.SetAccess, 'public'))
-            remDependentIDX(iter) = i;
-            iter = iter + 1;
-        end
-    end
-    uniqueComponentProperties(ismember(uniqueComponentProperties,props(remDependentIDX))) = [];
-
-    % Start building the XML string
-    textArea.Value      = {''};
-    textArea.Value{1,1} = [sprintf('<Component Type="%s">', componentType)];
-
-    % Loop through the properties and add them to the XML string
-    for i = 1:length(uniqueComponentProperties)
-        % Get the property value
-        propValue = component.(uniqueComponentProperties{i});
-
-        % Convert the property value to a string if it's not already
-        if ischar(propValue) && isempty(propValue)
-            propValue = '""';
-
-        elseif isnumeric(propValue) && isempty(propValue)
-            propValue = '[]';
-
-        elseif iscell(propValue) && isempty(propValue)
-            propValue = '[""]';
-
-        elseif ischar(propValue) || isstring(propValue)
-            propValue = sprintf('"%s"', propValue);
-
-        elseif isnumeric(propValue) && length(propValue) > 1
-            
-            % build a bracketed vector
-            propValue_holder = '[';
-            for j = 1:length(propValue)
-                propValue_holder = [propValue_holder, sprintf('%g', propValue(j)), ',']; 
-            end
-            propValue_holder(end) = []; % remove trailing comma
-            propValue_holder      = [propValue_holder,']'];
-
-            propValue = propValue_holder;
-
-        elseif isnumeric(propValue)
-            propValue = sprintf('%g', propValue);
-
-        elseif islogical(propValue)
-            propValue = sprintf('"%s"', mat2str(propValue));
-
-        elseif iscell(propValue) && length(propValue) > 1
-
-            % build a bracketed array if more than 1 element
-            propValue_holder = '[';
-            for j = 1:length(propValue)
-                propValue_holder = [propValue_holder, sprintf('"%s"', propValue{j}), ',']; 
-            end
-            propValue_holder(end) = []; % remove trailing comma
-            propValue_holder      = [propValue_holder,']'];
-
-            propValue = propValue_holder;
-
-        elseif iscell(propValue)
-            propValue = sprintf('"%s"', propValue{1}); 
-
-        else
-            propValue = '""';  % For unsupported or complex types
-        end
-
-        % Add property to XML (with the property name as the tag)
-        textArea.Value{i+1,1} = [sprintf('    <%s>%s</%s>', uniqueComponentProperties{i}, propValue, uniqueComponentProperties{i})];
-    end
-
-    % Close the component and XML structure
-    textArea.Value{end+1,1} = '</Component>';
+    textArea.Value = serializeElementToText(component, 'Component', parentClassNames);
 
     % show help of selected component
     [dependencies, optionalDependencies] = getDependencies(componentName);
@@ -1254,112 +1200,117 @@ end
 %% Function to inspect the properties of a view selected in the listbox
 function viewView(textArea,helpArea,helpHyperlink,parentClass,currentView)
     [~,viewName] = fileparts(currentView);
-    view = eval(viewName);
+    view = feval(viewName);
 
-    % Get the view type (e.g., 'uibutton', 'uitable', 'uieditfield', etc.)
-    viewType = class(view);
-
-    % Get the list of properties for the view
-    props = properties(view);
-
-    % Get the properties of the parent class(es)
-    iter = 1;
+    % Get the properties of all parent class(es)
+    parentClassNames = {};
     for i = 1:length(parentClass)
         parentClassProps = meta.class.fromName(parentClass{i});
-        for j = 1:length(parentClassProps.PropertyList) 
-            parentClassNames{iter,1} = parentClassProps.PropertyList(j).Name;
-            iter = iter + 1;
-        end
+        parentClassNames = [parentClassNames; {parentClassProps.PropertyList.Name}'];
     end
 
-    uniqueViewProperties = setdiff(props,parentClassNames,'stable');
-    uniqueViewProperties = [uniqueViewProperties; 'Name']; % add back Name
+    textArea.Value = serializeElementToText(view, 'View', parentClassNames);
 
-    % Remove dependent properties as both cannot be used in the component
+    % show help of selected view
+    [dependencies, optionalDependencies] = getDependencies(viewName);
+    showHelp(helpArea,helpHyperlink,currentView,dependencies,optionalDependencies);
+end
+
+%% Function to serialize a component/view's properties into the pipeline's XML-like text format
+function lines = serializeElementToText(obj, tagName, parentClassNames)
+    props = properties(obj);
+
+    % Trying to exclude parent properties that are not set in the
+    % element. This causes problems when using inherited class properties
+    uniqueProperties = setdiff(props,parentClassNames,'stable');
+    uniqueProperties = [uniqueProperties; 'Name']; % add back Name
+
+    % Remove dependent properties as both cannot be used in the element
     % e.g. MRIIdentifer and CoregistrationIdentifier in Coregistration.m
-    mc = metaclass(view);
+    mc = metaclass(obj);
     remDependentIDX = [];
     iter = 1;
     for i = 1:length(mc.PropertyList)
         prop = mc.PropertyList(i);
-        if prop.Dependent && any(ismember(uniqueViewProperties,prop.Name)) &&...
+        if prop.Dependent && any(ismember(uniqueProperties,prop.Name)) &&...
                 (strcmp(prop.GetAccess, 'public') || strcmp(prop.SetAccess, 'public'))
             remDependentIDX(iter) = i;
             iter = iter + 1;
         end
     end
-    uniqueViewProperties(ismember(uniqueViewProperties,props(remDependentIDX))) = [];
+    uniqueProperties(ismember(uniqueProperties,props(remDependentIDX))) = [];
 
     % Start building the XML string
-    textArea.Value      = {''};
-    textArea.Value{1,1} = [sprintf('<View Type="%s">', viewType)];
+    lines      = {''};
+    lines{1,1} = sprintf('<%s Type="%s">', tagName, class(obj));
 
     % Loop through the properties and add them to the XML string
-    for i = 1:length(uniqueViewProperties)
-        % Get the property value
-        propValue = view.(uniqueViewProperties{i});
-
-        % Convert the property value to a string if it's not already
-        if isempty(propValue)
-            propValue = '""';
-
-        elseif ischar(propValue) || isstring(propValue)
-            propValue = sprintf('"%s"', propValue);
-
-        elseif isnumeric(propValue) && length(propValue) > 1
-            
-            % build a bracketed vector
-            propValue_holder = '[';
-            for j = 1:length(propValue)
-                propValue_holder = [propValue_holder, sprintf('%g', propValue(j)), ',']; 
-            end
-            propValue_holder(end) = []; % remove trailing comma
-            propValue_holder      = [propValue_holder,']'];
-
-            propValue = propValue_holder;
-
-        elseif isnumeric(propValue)
-            propValue = sprintf('%g', propValue);
-
-        elseif islogical(propValue)
-            propValue = sprintf('"%s"', mat2str(propValue));
-
-        elseif iscell(propValue) && length(propValue) > 1
-
-            % build a bracketed array if more than 1 element
-            propValue_holder = '[';
-            for j = 1:length(propValue)
-                propValue_holder = [propValue_holder, sprintf('"%s"', propValue{j}), ',']; 
-            end
-            propValue_holder(end) = []; % remove trailing comma
-            propValue_holder      = [propValue_holder,']'];
-
-            propValue = propValue_holder;
-
-        elseif iscell(propValue)
-            propValue = sprintf('"%s"', propValue{1}); 
-
-        else
-            propValue = '""';  % For unsupported or complex types
-        end
+    for i = 1:length(uniqueProperties)
+        propValue    = obj.(uniqueProperties{i});
+        propValueStr = serializePropertyValue(propValue);
 
         % Add property to XML (with the property name as the tag)
-        textArea.Value{i+1,1} = [sprintf('    <%s>%s</%s>', uniqueViewProperties{i}, propValue, uniqueViewProperties{i})];
+        lines{i+1,1} = sprintf('    <%s>%s</%s>', uniqueProperties{i}, propValueStr, uniqueProperties{i});
     end
 
-    % Close the view and XML structure
-    textArea.Value{end+1,1} = '</View>';
+    % Close the element and XML structure
+    lines{end+1,1} = sprintf('</%s>', tagName);
+end
 
-    % show help of selected view
-    [dependencies, optionalDependencies] = getDependencies(viewName);
-    showHelp(helpArea,helpHyperlink,currentView,dependencies,optionalDependencies);
+%% Function to convert a single property value to its pipeline text representation
+function propValueStr = serializePropertyValue(propValue)
+    if ischar(propValue) && isempty(propValue)
+        propValueStr = '""';
 
+    elseif isnumeric(propValue) && isempty(propValue)
+        propValueStr = '[]';
+
+    elseif iscell(propValue) && isempty(propValue)
+        propValueStr = '[""]';
+
+    elseif ischar(propValue) || isstring(propValue)
+        propValueStr = sprintf('"%s"', propValue);
+
+    elseif isnumeric(propValue) && length(propValue) > 1
+        % build a bracketed vector
+        propValueStr = ['[', strjoin(arrayfun(@(v) sprintf('%g',v), propValue, 'UniformOutput', false), ','), ']'];
+
+    elseif isnumeric(propValue)
+        propValueStr = sprintf('%g', propValue);
+
+    elseif islogical(propValue)
+        propValueStr = sprintf('"%s"', mat2str(propValue));
+
+    elseif iscell(propValue) && length(propValue) > 1
+        % build a bracketed array if more than 1 element
+        propValueStr = ['[', strjoin(cellfun(@(v) sprintf('"%s"',v), propValue, 'UniformOutput', false), ','), ']'];
+
+    elseif iscell(propValue)
+        propValueStr = sprintf('"%s"', propValue{1});
+
+    else
+        propValueStr = '""';  % For unsupported or complex types
+    end
 end
 
 %% Help function to display help text
 function showHelp(helpTextArea,helpHyperlink,element,dependencies,optionalDependencies)
-    helpText = help(element);
-    
+    % help() itself is on MATLAB Compiler's non-deployable exclusion list
+    % (it reads doc comments from source, same limitation as fileread()
+    % elsewhere in this file) - use the text captured at compile time
+    % instead, via the same help() call, while source was still readable.
+    if isdeployed
+        m = loadManifestOnce();
+        [~,elementClassNameForHelp] = fileparts(element);
+        if isKey(m.elementInfo, elementClassNameForHelp) && isfield(m.elementInfo(elementClassNameForHelp),'helpText')
+            helpText = m.elementInfo(elementClassNameForHelp).helpText;
+        else
+            helpText = '';
+        end
+    else
+        helpText = help(element);
+    end
+
     % find and remove documentation text for formatting
     documentationStart = strfind(helpText,['Documentation for ', element]);
     documentationEnd   = strfind(helpText,['doc ', element]) + length(['doc ', element]);
@@ -1378,29 +1329,17 @@ function showHelp(helpTextArea,helpHyperlink,element,dependencies,optionalDepend
     helpText = [helpText, newline, newline, documentation];
     helpText = [helpText, newline, folderName];
 
-    % add dependencies to help text
-    helpText = [helpText, newline, 'Dependencies: ', newline];
-    if ~isempty(dependencies)
-        dependenciesFormatted = [];
-        for i = 1:length(dependencies)
-            dependenciesFormatted = [dependenciesFormatted, dependencies{i}, newline];
-        end
-        helpText = [helpText, dependenciesFormatted];
-    else
-        helpText = [helpText, 'none', newline];
-    end
+    % add inputs/outputs, derived from AddInput/AddOutput calls in source,
+    % the same way dependencies are derived below
+    [~,elementClassName] = fileparts(element);
+    [inputs, outputs]    = getInputsOutputs(elementClassName);
 
-    % add optional dependencies to help text
-    helpText = [helpText, newline, 'Optional Dependencies: ', newline];
-    if ~isempty(optionalDependencies)
-        optDependenciesFormatted = [];
-        for i = 1:length(optionalDependencies)
-            optDependenciesFormatted = [optDependenciesFormatted, optionalDependencies{i}, newline];
-        end
-        helpText = [helpText, optDependenciesFormatted];
-    else
-        helpText = [helpText, 'none'];
-    end
+    helpText = [helpText, formatHelpListSection('Inputs',  inputs)];
+    helpText = [helpText, formatHelpListSection('Outputs', outputs)];
+
+    % add dependencies to help text
+    helpText = [helpText, formatHelpListSection('Dependencies', dependencies)];
+    helpText = [helpText, formatHelpListSection('Optional Dependencies', optionalDependencies)];
 
     % write help text to helpTextArea
     helpTextArea.Value = helpText;
@@ -1409,6 +1348,60 @@ function showHelp(helpTextArea,helpHyperlink,element,dependencies,optionalDepend
     helpHyperlink.URL     = ['https://github.com/neurotechcenter/VERA/wiki/', element];
     helpHyperlink.Tooltip = helpHyperlink.URL;
 
+end
+
+%% Function to format a labeled list section (e.g. Inputs, Dependencies) for the help text
+function section = formatHelpListSection(sectionTitle, items)
+    section = [newline, sectionTitle, ': ', newline];
+    if ~isempty(items)
+        for i = 1:length(items)
+            section = [section, items{i}, newline];
+        end
+    else
+        section = [section, 'none', newline];
+    end
+end
+
+%% Function to get the Inputs/Outputs identifiers a component declares (via AddInput/AddOutput)
+function [inputs, outputs] = getInputsOutputs(className)
+    % Views (and any element with no AddInput/AddOutput calls) simply
+    % yield empty lists here - there is nothing to inherently distinguish
+    % them from a Component with zero declared inputs/outputs.
+    persistent inputsOutputsCache
+    if isempty(inputsOutputsCache)
+        inputsOutputsCache = containers.Map();
+    end
+
+    if isKey(inputsOutputsCache, className)
+        cached  = inputsOutputsCache(className);
+        inputs  = cached.inputs;
+        outputs = cached.outputs;
+        return;
+    end
+
+    % Deployed apps can't fileread() their own bundled .m source - use
+    % the manifest precomputed at compile time instead. See
+    % getAvailableElements for why.
+    if isdeployed
+        m = loadManifestOnce();
+        if isKey(m.elementInfo, className)
+            info    = m.elementInfo(className);
+            inputs  = info.inputs;
+            outputs = info.outputs;
+        else
+            inputs  = {};
+            outputs = {};
+        end
+        cached.inputs = inputs; cached.outputs = outputs;
+        inputsOutputsCache(className) = cached;
+        return;
+    end
+
+    [inputs, outputs] = extractInputsOutputs(className, []);
+
+    cached.inputs          = inputs;
+    cached.outputs         = outputs;
+    inputsOutputsCache(className) = cached;
 end
 
 %% Function to move component or view to pipeline
@@ -1476,12 +1469,14 @@ function [componentType] = getComponentType(className)
     end
     
     componentType = '';
-    
+    inputs  = {};
+    outputs = {};
+
     % Get the class definition
     classInfo = meta.class.fromName(className);
     superclassInfo = classInfo.SuperclassList;
     superclassName = superclassInfo.Name;
-    
+
     % Iterate through the class methods
     for i = 1:length(classInfo.MethodList)
         methodName = classInfo.MethodList(i).Name;
@@ -1552,24 +1547,63 @@ function [dependencies, optionalDependencies] = getDependencies(className)
     if ~exist('className', 'var') || ~ischar(className)
         error('Class name must be a valid string');
     end
-    
+
+    % Dependency extraction requires re-reading and regex-scanning the
+    % component's source file, and the same className is looked up
+    % repeatedly (e.g. every time it's selected in a listbox). Cache the
+    % result per MATLAB session so repeat lookups are free.
+    persistent dependencyCache
+    if isempty(dependencyCache)
+        dependencyCache = containers.Map();
+    end
+
+    if isKey(dependencyCache, className)
+        cached                = dependencyCache(className);
+        dependencies          = cached.dependencies;
+        optionalDependencies  = cached.optionalDependencies;
+        return;
+    end
+
+    % Deployed apps can't fileread() their own bundled .m source - use
+    % the manifest precomputed at compile time instead. See
+    % getAvailableElements for why.
+    if isdeployed
+        m = loadManifestOnce();
+        if isKey(m.elementInfo, className)
+            info = m.elementInfo(className);
+            dependencies         = info.dependencies;
+            optionalDependencies = info.optionalDependencies;
+        else
+            dependencies         = {};
+            optionalDependencies = {};
+        end
+        cached.dependencies         = dependencies;
+        cached.optionalDependencies = optionalDependencies;
+        dependencyCache(className)  = cached;
+        return;
+    end
+
     dependencies         = {};
     optionalDependencies = {};
-    
+
     % Get the class definition
     classInfo = meta.class.fromName(className);
-    
+
     % Iterate through the class methods
     for i = 1:length(classInfo.MethodList)
         methodName = classInfo.MethodList(i).Name;
-        
+
         % Check for GetDependency calls
         if strcmp(methodName, 'Initialize')
             % Look at the GetDependency method to get inputs and outputs
             [dependencies, optionalDependencies] = extractDependencies(className);
         end
-        
+
     end
+
+    cached.dependencies         = dependencies;
+    cached.optionalDependencies = optionalDependencies;
+    dependencyCache(className)  = cached;
 
 end
 
@@ -1640,6 +1674,34 @@ function confirmAction(action)
     end
 end
 
+%% Function to create a fresh temporary project folder for pipeline checking
+function tempProjPath = setupTempProject()
+    currentPath  = fileparts(mfilename('fullpath'));
+    tempProjPath = fullfile(currentPath,'temp/tempProj');
+
+    if exist(tempProjPath,'dir')
+        cleanupTempProject(tempProjPath);
+    end
+    mkdir(tempProjPath);
+end
+
+%% Function to remove the temporary project folder used for pipeline checking
+function cleanupTempProject(tempProjPath)
+    warning off;
+    rmdir(fullfile(tempProjPath,'..'),'s');
+    warning on;
+end
+
+%% Function to find the index of the currently selected pipeline element
+function index = findSelectedIndex(pipelineListBox)
+    index = [];
+    for i = 1:length(pipelineListBox.ItemsData)
+        if isequaln(pipelineListBox.ItemsData{i},pipelineListBox.Value)
+            index = i;
+        end
+    end
+end
+
 %% Function to ensure there are no duplicate names of components or views
 function isDuplicated = checkforDuplicateNames(elementList,currentElement)
     isDuplicated = 0;
@@ -1650,136 +1712,75 @@ function isDuplicated = checkforDuplicateNames(elementList,currentElement)
     end
 end
 
-%% Functions to test if component text is formatted correctly
+%% Function to test if component/view text is well-formed XML
 function [isValid,msg] = testHTMLFormat(inputStr)
-    % Initialize the output to true (assuming valid)
     isValid = true;
     msg     = [];
-    
-    % Clean up input string (remove unnecessary newlines and excess spaces)
-    inputStr = strtrim(inputStr);  % Trim any leading/trailing spaces
-    
-    % Check for matching opening and closing tags
-    isValid = checkTagStructure(inputStr);
-    if ~isValid
-        msg = 'Error: Mismatched or missing attribute names.';
-        % disp(msg);
-        return;
-    end
-    
-    % Check for properly quoted attributes (handles multiline attributes)
-    isValid = checkAttributeQuotes(inputStr);
-    if ~isValid
-        msg = 'Error: Missing or mismatched quotation marks or brackets around attribute values.';
-        % disp(msg);
-        return;
-    end
-    
-end
 
-function isValid = checkTagStructure(inputStr)
-    % This function checks that opening and closing tags are properly paired and nested
-    isValid = true;
-    tagStack = {};  % Stack to keep track of opening tags
-    
-    % Regular expression to match all tags (including multi-line tags)
-    tagPattern = '<\s*(\/?\s*\w+)\s*[^>]*>';
-    
-    % Extract all matched tags (opening and closing tags)
-    tags = regexp(inputStr, tagPattern, 'tokens');
-    
-    for i = 1:length(tags)
-        for j = 1:length(tags{i})
-            tag = tags{i}{j};
-            
-            if contains(tag, '/')  % Closing tag
-                if isempty(tagStack)
-                    isValid = false;
-                    return;
-                end
-                lastTag = tagStack{end};
-                if ~strcmp(tag{1}(2:end), lastTag{1})
-                    isValid = false;
-                    return;
-                end
-                tagStack(end) = [];  % Pop the last tag
-            else  % Opening tag
-                tagStack{end+1} = tag;  % Push the tag onto the stack
-            end
-        end
+    if isempty(strtrim(strjoin(cellstr(inputStr), '')))
+        return;
     end
-    
-    % If the stack is not empty, there are unmatched opening tags
-    if ~isempty(tagStack)
+
+    try
+        parseXMLString(inputStr);
+    catch parseErr
         isValid = false;
+        msg     = ['Error: Invalid XML - ', parseErr.message];
     end
 end
 
-function isValid = checkAttributeQuotes(inputStr)
-    % This function checks that attribute values are properly quoted ("" or
-    % '') and bracketed ([ ])
-    isValid = true;
+%% Build-time only: precompute everything the deployed app needs, while
+%% source is still readable as plain text (see the isdeployed branches in
+%% getAvailableElements/getDependencies/getInputsOutputs/showHelp).
+%% Invoked as PipelineDesigner('BuildManifest', outputMatPath) from a
+%% normal (non-deployed) MATLAB session before compiling.
+function buildPipelineDesignerManifest(mfilePath, outputPath)
+    componentParentClasses = {'AComponent','AFSSubsegmentation'};
+    componentPath          = GetFullPath(fullfile(mfilePath,'..','Components'));
+    viewParentClasses      = {'uix.Grid','AView','IComponentView','SliceViewerXYZ'};
+    viewPath               = GetFullPath(fullfile(mfilePath,'..','classes','GUI','Views'));
 
-    attrPattern = '(?<=[=])\s*([^<>\s]+)(?=>)|(?<=>)\s*([^<>\s]+)(?=<)';
-    
-    % Extract all matched attributes
-    attrs = regexp(inputStr, attrPattern, 'tokens');
-    
-    % Loop over all matched attributes and ensure correct quoting
-    for i = 1:length(attrs)
-        if ~isempty(attrs{i})
-            attr = attrs{i}{1}{1};
+    [compNames, compTypes] = getAvailableElements(componentPath, componentParentClasses, 'component');
+    viewNames               = getAvailableElements(viewPath, viewParentClasses, 'view');
 
-            % if it starts with a quote it needs to end with a quote
-            if strcmp(attr(1),'"') && ~strcmp(attr(end),'"')
-                isValid = false;
-                return;
-            end
+    manifest.compNames   = compNames;
+    manifest.compTypes   = compTypes;
+    manifest.viewNames   = viewNames;
+    manifest.elementInfo = containers.Map();
 
-            % if it ends with a quote it needs to start with a quote
-            if strcmp(attr(end),'"') && ~strcmp(attr(1),'"')
-                isValid = false;
-                return;
-            end
-
-            % if it starts with a bracket it needs to end with a bracket
-            if strcmp(attr(1),'[') && ~strcmp(attr(end),']')
-                isValid = false;
-                return;
-            end
-            % if it ends with a bracket it needs to start with a bracket
-            if strcmp(attr(end),']') && ~strcmp(attr(1),'[')
-                isValid = false;
-                return;
-            end
-
-            % if line starts and ends with bracket, investigate sub attributes
-            if strcmp(attr(1), '[') && strcmp(attr(end), ']')
-                
-                attrSubPattern = '(?<=\[|,)([^,]+)(?=\]|,)';
-                attrSubStrings = regexp(attr, attrSubPattern, 'match');
-
-                for j = 1:length(attrSubStrings)
-                    % if it starts with a quote it needs to end with a quote
-                    if strcmp(attrSubStrings{j}(1),'"') && ~strcmp(attrSubStrings{j}(end),'"')
-                        isValid = false;
-                        return;
-                    end
-        
-                    % if it ends with a quote it needs to start with a quote
-                    if strcmp(attrSubStrings{j}(end),'"') && ~strcmp(attrSubStrings{j}(1),'"')
-                        isValid = false;
-                        return;
-                    end
-                end
-
-            end
-
-            if isempty(attr)
-                isValid = false;
-                return;
-            end
+    allNames = [compNames(:); viewNames(:)];
+    for i = 1:numel(allNames)
+        name               = allNames{i};
+        [deps, optDeps]    = getDependencies(name);
+        [inputs, outputs]  = getInputsOutputs(name);
+        try
+            helpText = help(name);
+        catch
+            helpText = '';
         end
+        info.dependencies         = deps;
+        info.optionalDependencies = optDeps;
+        info.inputs                = inputs;
+        info.outputs                = outputs;
+        info.helpText               = helpText;
+        manifest.elementInfo(name) = info;
     end
+
+    save(outputPath, 'manifest');
+    fprintf('PipelineDesigner manifest saved: %d components, %d views -> %s\n', ...
+        numel(compNames), numel(viewNames), outputPath);
+end
+
+%% Deployed-mode only: load (once per session, then cached) the manifest
+%% precomputed at compile time by buildPipelineDesignerManifest. The
+%% manifest file ships alongside PipelineDesigner.m itself in the bundle.
+function manifest = loadManifestOnce()
+    persistent cachedManifest
+    if isempty(cachedManifest)
+        manifestPath   = fullfile(fileparts(mfilename('fullpath')), 'PipelineDesignerManifest.mat');
+        loaded          = load(manifestPath, 'manifest');
+        cachedManifest  = loaded.manifest;
+    end
+    manifest = cachedManifest;
 end
 
