@@ -78,8 +78,7 @@ function PipelineDesigner(varargin)
         'TEXTAREA_HEIGHT',  230, ...
         'PIPELINE_WIDTH',   520, ...
         'PIPELINE_HEIGHT',  465, ...
-        'HELP_AREA_HEIGHT', 243, ...
-        'HYPERLINK_WIDTH',  400, ...
+        'HELP_AREA_HEIGHT', 235, ...
         'SPACING',          0 ...
         );
     
@@ -97,8 +96,8 @@ function PipelineDesigner(varargin)
         'PROCESSING_LIST', 468, ...
         'OUTPUT_LIST',     305, ...
         'COMPONENT_LABEL', 250, ...
-        'HELP_TEXT',       527, ...
-        'HELP_LINK',       468, ...
+        'HELP_TEXT',       535, ...
+        'HELP_LINK',       465, ...
         'BOTTOM',          20 ...
     );
 
@@ -136,10 +135,10 @@ function PipelineDesigner(varargin)
         ), ...
         'EDITOR_OPEN', struct(...
             'X',      990, ...
-            'Y',      490, ...
+            'Y',      500, ...
             'WIDTH',  150, ...
             'HEIGHT', 30 ...
-        ) ...   
+        ) ...
     );
 
     % Font settings
@@ -149,23 +148,40 @@ function PipelineDesigner(varargin)
     );
     
     %% Create the main figure for the GUI
-    fig = uifigure('Position', [UI.WINDOW.START_X, UI.WINDOW.START_Y, ...
+    % Deliberately a classic figure(), not uifigure - the uifigure family
+    % (and uilabel/uilistbox/uibutton/uitextarea/uihyperlink/uialert/
+    % uiprogressdlg below) depend on MATLAB's CEF-based rendering engine
+    % (MATLABWindow/matlabwindowhelper), confirmed via a real crash report
+    % (EXC_BREAKPOINT/SIGTRAP inside Chromium Embedded Framework's
+    % CrRendererMain, responsibleProc "PipelineDesigner") to be broken in
+    % at least one real deployment environment (a VM using Apple's
+    % Virtualization framework). This whole window is rebuilt on classic
+    % figure/uicontrol (Java Swing, no CEF dependency) instead - see
+    % ClassicListboxAdapter.m/ClassicTextAreaAdapter.m/
+    % ClassicHyperlinkAdapter.m for the widgets uicontrol has no native
+    % equivalent for. Classic uicontrol Position uses the same
+    % [left bottom width height], Y-up-from-parent-bottom convention as
+    % uifigure's child components, so the UI.X/UI.Y pixel layout constants
+    % below are unchanged from the original uifigure version.
+    fig = figure('Position', [UI.WINDOW.START_X, UI.WINDOW.START_Y, ...
                                UI.WINDOW.WIDTH, UI.WINDOW.HEIGHT], ...
-                   'Name', 'Pipeline Designer');
+                   'Name', 'Pipeline Designer', ...
+                   'MenuBar', 'none', 'ToolBar', 'none', 'NumberTitle', 'off');
 
     % Create a menu bar
     filemenu = uimenu(fig, 'Text', 'File');
     VERAmenu = uimenu(fig, 'Text', 'VERA Tools');
     helpmenu = uimenu(fig, 'Text', 'Help');
-    
+
     %% Create the ListBox for writing pipeline code
-     uilabel(fig, ...
+     uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.LEFT_PANEL, UI.Y.TOP, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Pipeline', ...
+        'String', 'Pipeline', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
-    
-    pipelineListBox = uilistbox(fig, ...
+
+    pipelineListBox = ClassicListboxAdapter(fig, ...
         'Position',  [UI.X.LEFT_PANEL, UI.Y.OUTPUT_LIST, UI.COMMON.PIPELINE_WIDTH, UI.COMMON.PIPELINE_HEIGHT], ...
         'Items',     {''}, ...
         'ItemsData', {}, ...
@@ -173,13 +189,14 @@ function PipelineDesigner(varargin)
         'FontSize',  UI.FONT.CODE.SIZE);
 
     %% Create the TextArea for modifying component code
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.LEFT_PANEL, UI.Y.COMPONENT_LABEL, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Current Component in Pipeline', ...
+        'String', 'Current Component in Pipeline', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    pipelineElementTextArea = uitextarea(fig, ...
+    pipelineElementTextArea = ClassicTextAreaAdapter(fig, ...
         'Position', [UI.X.LEFT_PANEL, UI.Y.BOTTOM, UI.COMMON.PIPELINE_WIDTH, UI.COMMON.TEXTAREA_HEIGHT], ...
         'Value', '', ...
         'FontName', UI.FONT.CODE.NAME, ...
@@ -187,105 +204,113 @@ function PipelineDesigner(varargin)
         'Editable', 'on');
 
     %% Listbox of Input components
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.TOP, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Input Components', ...
+        'String', 'Input Components', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
-    
-    availableInputComponentsListBox = uilistbox(fig, ...
+
+    availableInputComponentsListBox = ClassicListboxAdapter(fig, ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.INPUT_LIST, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.LISTBOX_HEIGHT], ...
         'Items', {''}, ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE);
 
     %% Listbox of Processing components
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.PROCESSING_LIST + UI.COMMON.LISTBOX_HEIGHT + UI.COMMON.SPACING, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Processing Components', ...
+        'String', 'Processing Components', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    availableProcessingComponentsListBox = uilistbox(fig, ...
+    availableProcessingComponentsListBox = ClassicListboxAdapter(fig, ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.PROCESSING_LIST, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.LISTBOX_HEIGHT], ...
         'Items', {''}, ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE);
 
     %% Listbox of Output components
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.OUTPUT_LIST + UI.COMMON.LISTBOX_HEIGHT + UI.COMMON.SPACING, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Output Components', ...
+        'String', 'Output Components', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    availableOutputComponentsListBox = uilistbox(fig, ...
+    availableOutputComponentsListBox = ClassicListboxAdapter(fig, ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.OUTPUT_LIST, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.LISTBOX_HEIGHT], ...
         'Items', {''}, ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE);
-    
+
     %% Create the TextArea for modifying component code
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.COMPONENT_LABEL, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Current Component', ...
+        'String', 'Current Component', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    componentTextArea = uitextarea(fig, ...
+    componentTextArea = ClassicTextAreaAdapter(fig, ...
         'Position', [UI.X.MIDDLE_PANEL, UI.Y.BOTTOM, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.TEXTAREA_HEIGHT], ...
         'Value', '', ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE, ...
         'Editable', 'on');
-    
+
     %% Listbox of possible views
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.OUTPUT_LIST + UI.COMMON.LISTBOX_HEIGHT + UI.COMMON.SPACING, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Views', ...
+        'String', 'Views', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
-    
-    availableViewsListBox = uilistbox(fig, ...
+
+    availableViewsListBox = ClassicListboxAdapter(fig, ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.OUTPUT_LIST, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.LISTBOX_HEIGHT], ...
         'Items', {''}, ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE);
-    
+
     %% Create the TextArea for modifying view code
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.COMPONENT_LABEL, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Current View', ...
+        'String', 'Current View', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    viewTextArea = uitextarea(fig, ...
+    viewTextArea = ClassicTextAreaAdapter(fig, ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.BOTTOM, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.TEXTAREA_HEIGHT], ...
         'Value', '', ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE, ...
         'Editable', 'on');
-    
+
     %% Create the TextArea for showing component/view help
-    uilabel(fig, ...
+    uicontrol(fig, 'Style', 'text', ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.TOP, UI.COMMON.LABEL_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
-        'Text', 'Help', ...
+        'String', 'Help', ...
+        'HorizontalAlignment', 'left', ...
         'FontName', UI.FONT.REGULAR.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    helpTextArea = uitextarea(fig, ...
+    helpTextArea = ClassicTextAreaAdapter(fig, ...
+        'Style', 'text', ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.HELP_TEXT, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.HELP_AREA_HEIGHT], ...
         'Value', '', ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.CODE.SIZE, ...
         'Editable', 'off');
-    
-    helpHyperlink = uihyperlink(fig, ...
-        'Position', [UI.X.RIGHT_PANEL, UI.Y.HELP_LINK, UI.COMMON.HYPERLINK_WIDTH, UI.COMMON.LABEL_HEIGHT], ...
+
+    helpHyperlink = ClassicHyperlinkAdapter(fig, ...
+        'Position', [UI.X.RIGHT_PANEL, UI.Y.HELP_LINK, UI.BUTTON.EDITOR_OPEN.WIDTH, UI.BUTTON.EDITOR_OPEN.HEIGHT], ...
         'FontName', UI.FONT.CODE.NAME, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
-    helpHyperlink.Text    = '';
+    helpHyperlink.Text    = 'Help';
     helpHyperlink.URL     = '';
     helpHyperlink.Tooltip = '';
 
@@ -308,39 +333,39 @@ function PipelineDesigner(varargin)
     uimenu(helpmenu, 'Text', 'VERA Wiki', 'MenuSelectedFcn', @(src, event) web('https://github.com/neurotechcenter/VERA/wiki/PipelineDesigner', '-browser'));
 
     %% Create an Add Component button to move current component to the bottom of the pipeline text area
-    uibutton(fig, 'push', 'Text', 'Add Component', ...
+    uicontrol(fig, 'Style', 'pushbutton', 'String', 'Add Component', ...
         'Position', [UI.BUTTON.ADD_COMPONENT.X, UI.BUTTON.ADD_COMPONENT.Y, ...
                     UI.BUTTON.ADD_COMPONENT.WIDTH, UI.BUTTON.ADD_COMPONENT.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) AddElement(fig, pipelineListBox, componentTextArea, pipelineElementTextArea));
+        'Callback', @(btn, event) AddElement(fig, pipelineListBox, componentTextArea, pipelineElementTextArea));
 
     %% Create an Add View button to move current view to the bottom of the pipeline text area
-    uibutton(fig, 'push', 'Text', 'Add View', ...
+    uicontrol(fig, 'Style', 'pushbutton', 'String', 'Add View', ...
         'Position', [UI.BUTTON.ADD_VIEW.X, UI.BUTTON.ADD_VIEW.Y, ...
                     UI.BUTTON.ADD_VIEW.WIDTH, UI.BUTTON.ADD_VIEW.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) AddElement(fig, pipelineListBox, viewTextArea, pipelineElementTextArea));
+        'Callback', @(btn, event) AddElement(fig, pipelineListBox, viewTextArea, pipelineElementTextArea));
 
     %% Create a Move Element Up button
-    uibutton(fig, 'push', 'Text', '^', ...
+    uicontrol(fig, 'Style', 'pushbutton', 'String', '^', ...
         'Position', [UI.BUTTON.MOVE_ELEMENT_UP.X, UI.BUTTON.MOVE_ELEMENT_UP.Y, ...
                     UI.BUTTON.MOVE_ELEMENT_UP.WIDTH, UI.BUTTON.MOVE_ELEMENT_UP.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) MoveElementUp(pipelineListBox,pipelineElementTextArea));
+        'Callback', @(btn, event) MoveElementUp(pipelineListBox,pipelineElementTextArea));
 
     %% Create a Move Element Down button
-    uibutton(fig, 'push', 'Text', 'v', ...
+    uicontrol(fig, 'Style', 'pushbutton', 'String', 'v', ...
         'Position', [UI.BUTTON.MOVE_ELEMENT_DOWN.X, UI.BUTTON.MOVE_ELEMENT_DOWN.Y, ...
                     UI.BUTTON.MOVE_ELEMENT_DOWN.WIDTH, UI.BUTTON.MOVE_ELEMENT_DOWN.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) MoveElementDown(pipelineListBox,pipelineElementTextArea));
+        'Callback', @(btn, event) MoveElementDown(pipelineListBox,pipelineElementTextArea));
 
     %% Create a Delete Element button
-    uibutton(fig, 'push', 'Text', 'x', ...
+    uicontrol(fig, 'Style', 'pushbutton', 'String', 'x', ...
         'Position', [UI.BUTTON.DELETE_ELEMENT.X, UI.BUTTON.DELETE_ELEMENT.Y, ...
                     UI.BUTTON.DELETE_ELEMENT.WIDTH, UI.BUTTON.DELETE_ELEMENT.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) DeleteElement(pipelineListBox,pipelineElementTextArea));
+        'Callback', @(btn, event) DeleteElement(pipelineListBox,pipelineElementTextArea));
     
     %% On startup either display empty pipeline or pipeline of current VERA project
     if ~isempty(startupPipelineFile)
@@ -411,11 +436,11 @@ function PipelineDesigner(varargin)
     addlistener(availableViewsListBox,                'ValueChanged', @(src,event) updateSelectedElement(src));
     addlistener(pipelineListBox,                      'ValueChanged', @(src,event) updateSelectedElement_fromPipeline(src));
 
-    uibutton(fig, 'push', 'Text', 'Open in Editor', ...
+    uicontrol(fig, 'Style', 'pushbutton', 'String', 'Open in Editor', ...
         'Position', [UI.BUTTON.EDITOR_OPEN.X, UI.BUTTON.EDITOR_OPEN.Y, ...
                     UI.BUTTON.EDITOR_OPEN.WIDTH, UI.BUTTON.EDITOR_OPEN.HEIGHT], ...
         'FontSize', UI.FONT.REGULAR.SIZE, ...
-        'ButtonPushedFcn', @(btn, event) OpenInEditor(fig));
+        'Callback', @(btn, event) OpenInEditor(fig));
 
     % Function to open the most recent file (active in help text area) in the matlab editor
     function OpenInEditor(fig,~)
@@ -423,12 +448,12 @@ function PipelineDesigner(varargin)
             % edit() opens the MATLAB source editor, which doesn't exist
             % in a deployed app (and edit.m is itself on MATLAB
             % Compiler's non-deployable exclusion list)
-            uialert(fig, 'Opening source in the MATLAB editor is not available in the standalone app.', 'Not Available');
+            classicAlert(fig, 'Opening source in the MATLAB editor is not available in the standalone app.', 'Not Available');
         elseif exist(selectedElement, 'file') == 2
             edit(selectedElement);
         else
             % Display a warning if the file does not exist
-            uialert(fig, ['File "', selectedElement, '" does not exist.'], 'File Not Found');
+            classicAlert(fig, ['File "', selectedElement, '" does not exist.'], 'File Not Found');
         end
     end
     
@@ -488,7 +513,7 @@ function loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,h
         [dependencies, optionalDependencies] = getDependencies(elementType{1});
         showHelp(helpTextArea,helpHyperlink,elementType{1},dependencies,optionalDependencies);
     else
-        uialert(fig, 'Error reading the file.', 'File Error');
+        classicAlert(fig, 'Error reading the file.', 'File Error');
     end
 end
 
@@ -552,18 +577,18 @@ function [fullPath] = savePipeline(fig,pipelineListBox,startupPipelineFile,varar
                 end
                 fclose(fid);
             else
-                uialert(fig, 'Error saving the file.', 'File Error');
+                classicAlert(fig, 'Error saving the file.', 'File Error');
             end
 
             if ~calledFromCheckPipeline
-                uialert(fig, 'Pipeline saved!', 'Save Success');
+                classicAlert(fig, 'Pipeline saved!', 'Save Success');
             end
         else
-            uialert(fig, 'Pipeline not saved! No file name selected', 'Save Failure');
+            classicAlert(fig, 'Pipeline not saved! No file name selected', 'Save Failure');
         end
 
     else
-        uialert(fig, 'Pipeline cannot be saved because pipeline check failed! See error/warning messages!', 'Save Failure');
+        classicAlert(fig, 'Pipeline cannot be saved because pipeline check failed! See error/warning messages!', 'Save Failure');
     end
 end
 
@@ -603,8 +628,14 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
     errormessage      = [];
     VERAfig           = [];
 
-    checkingPipelineDlg = uiprogressdlg(fig,'Message','Checking Pipeline...','Title','Checking Pipeline',...
-    'Icon','error','Cancelable','on','Indeterminate','on');
+    % Classic waitbar in place of uiprogressdlg (see the note near fig's
+    % construction above for why) - the dialog's Value is never updated
+    % below (this is used purely as a "please wait" indicator until
+    % close(checkingPipelineDlg) at the end of this function), so the lack
+    % of an Indeterminate/spinning mode in classic waitbar has no visible
+    % effect here. Cancelable isn't acted on anywhere in this function
+    % either (no CancelRequested check), so dropping it is a no-op too.
+    checkingPipelineDlg = waitbar(0, 'Checking Pipeline...', 'Name', 'Checking Pipeline');
 
     % Save working pipeline to be loaded into VERA and checked
     tempProjPath = setupTempProject();
@@ -657,7 +688,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
             % delete temporary folder
             cleanupTempProject(tempProjPath);
 
-            uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
+            classicAlert(fig, 'Pipeline check failed!','Pipeline Check Results')
             pipelineStatus = 0;
 
             return;
@@ -679,7 +710,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
             % delete temporary folder
             cleanupTempProject(tempProjPath);
 
-            uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
+            classicAlert(fig, 'Pipeline check failed!','Pipeline Check Results')
             pipelineStatus = 0;
 
             return;
@@ -694,9 +725,9 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
     % Pipeline check results
     if isempty(warnMsg_create) && isempty(warnMsg_configure) && isempty(errormessage)
         pipelineStatus = 1;
-        uialert(fig, 'Pipeline check passed!','Pipeline Check Results')
+        classicAlert(fig, 'Pipeline check passed!','Pipeline Check Results')
     else
-        uialert(fig, 'Pipeline check failed!','Pipeline Check Results')
+        classicAlert(fig, 'Pipeline check failed!','Pipeline Check Results')
         pipelineStatus = 0;
     end
 
@@ -894,8 +925,17 @@ function [Names, componentTypes] = getAvailableElements(dirPath,parentClasses,co
                 % Read the file's contents
                 fileContents = fileread(filePath);
 
-                % Look for a class definition and check for inheritance from parentClass
-                classDefPattern = ['classdef\s+(\w+)\s*(?:\w+\s*<\s*)?[^>]*(', parentClassesString, ')'];
+                % Look for a class definition and check for inheritance from
+                % parentClass. Restricted to the classdef header line only
+                % (no crossing a newline) so it can't wander into a doc
+                % comment or method body and match a parent class name
+                % mentioned in prose; tolerant of the "classdef (Attribute)
+                % Name < Parent" attribute syntax (e.g. "(Abstract)"), which
+                % the previous pattern couldn't match at all; and requires a
+                % word boundary around the parent class name so e.g.
+                % "NotAComponentWrapper" can't match "AComponent" as a
+                % substring.
+                classDefPattern = ['classdef\s+(?:\([^\n)]*\)\s+)?(\w+)\s*(?:<[^\n>]*)?(?<!\w)(', parentClassesString, ')(?!\w)'];
 
                 % Check if the pattern matches
                 if ~isempty(regexp(fileContents, classDefPattern, 'once'))
@@ -945,7 +985,13 @@ function [compNames, viewNames, elements] = getCurrentComponents(pipelineText)
     for i = 1:size(pipelineText, 1)
         line = pipelineText{i};
 
-        if contains(line, '<Component Type="')
+        % Match the start of an opening <Component ...>/<Component> tag
+        % regardless of attribute order or spacing, rather than requiring
+        % the literal substring '<Component Type="' - which breaks if
+        % Type isn't written as the first attribute. The (\s|>) after
+        % 'Component' also keeps this from matching an unrelated tag that
+        % merely starts with the same word, e.g. '<ComponentFoo ...>'.
+        if ~isempty(regexp(line, '<Component(\s|>)', 'once'))
             componentStart(end + 1) = i;
             if contains(line,'/>')
                 componentEnd(end + 1) = i;
@@ -954,7 +1000,7 @@ function [compNames, viewNames, elements] = getCurrentComponents(pipelineText)
             componentEnd(end + 1) = i;
         end
 
-        if contains(line, '<View Type="')
+        if ~isempty(regexp(line, '<View(\s|>)', 'once'))
             viewStart(end + 1) = i;
             if contains(line,'/>')
                 viewEnd(end + 1) = i;
@@ -1073,7 +1119,7 @@ function modifyCurrentPipelineElement(fig,pipelineElementTextArea,pipelineListBo
     % Testing functionality to check element formatting
     [isValid, errormsg] = testHTMLFormat(pipelineElementTextArea.Value);
     if ~isValid
-        uialert(fig,[errormsg, ' Stored anyway, but be cautious.'], 'Warning')
+        classicAlert(fig,[errormsg, ' Stored anyway, but be cautious.'], 'Warning')
     end
 
     % Find currently selected item in ItemsData
@@ -1091,7 +1137,7 @@ function modifyCurrentPipelineElement(fig,pipelineElementTextArea,pipelineListBo
     pipelineListBox.Items            = getElementNames(pipelineListBox.ItemsData);
     
     if isDuplicated
-        uialert(fig, 'Error: Duplicate Names. Elements cannot have the same name.', 'Duplicate Names');
+        classicAlert(fig, 'Error: Duplicate Names. Elements cannot have the same name.', 'Duplicate Names');
         
         % set item to unavailable name
         pipelineListBox.Items{index}     = [elementName{1}, ' - Cannot have duplicate name!'];
@@ -1269,7 +1315,7 @@ function propValueStr = serializePropertyValue(propValue)
         propValueStr = '[""]';
 
     elseif ischar(propValue) || isstring(propValue)
-        propValueStr = sprintf('"%s"', propValue);
+        propValueStr = escapeXMLText(jsonencode(char(propValue)));
 
     elseif isnumeric(propValue) && length(propValue) > 1
         % build a bracketed vector
@@ -1283,14 +1329,30 @@ function propValueStr = serializePropertyValue(propValue)
 
     elseif iscell(propValue) && length(propValue) > 1
         % build a bracketed array if more than 1 element
-        propValueStr = ['[', strjoin(cellfun(@(v) sprintf('"%s"',v), propValue, 'UniformOutput', false), ','), ']'];
+        propValueStr = ['[', strjoin(cellfun(@(v) escapeXMLText(jsonencode(char(v))), propValue, 'UniformOutput', false), ','), ']'];
 
     elseif iscell(propValue)
-        propValueStr = sprintf('"%s"', propValue{1});
+        propValueStr = escapeXMLText(jsonencode(char(propValue{1})));
 
     else
         propValueStr = '""';  % For unsupported or complex types
     end
+end
+
+%% Function to escape XML-reserved characters in element text content, so a
+%% property value containing '&', '<', or '>' still produces well-formed
+%% XML. The runtime pipeline loader (classes/engine/Serializable.m
+%% Deserialize, via Dependencies/xml2struct's real xmlread-based DOM
+%% parser) auto-unescapes these on read, and jsondecode's own string
+%% escaping (backslashes, embedded quotes - handled by jsonencode above)
+%% is a separate, independent layer from XML's - both are required for a
+%% value to round-trip correctly. Verified against the real runtime
+%% deserialization path with matlab -batch, including confirming the
+%% previous unescaped form throws a SAXParseException on an ampersand.
+function s = escapeXMLText(s)
+    s = strrep(s, '&', '&amp;');   % must run first - other entities contain '&'
+    s = strrep(s, '<', '&lt;');
+    s = strrep(s, '>', '&gt;');
 end
 
 %% Help function to display help text
@@ -1344,7 +1406,7 @@ function showHelp(helpTextArea,helpHyperlink,element,dependencies,optionalDepend
     % write help text to helpTextArea
     helpTextArea.Value = helpText;
 
-    helpHyperlink.Text    = element;
+    helpHyperlink.Text    = [elementClassName, ' Wiki Help'];
     helpHyperlink.URL     = ['https://github.com/neurotechcenter/VERA/wiki/', element];
     helpHyperlink.Tooltip = helpHyperlink.URL;
 
@@ -1414,12 +1476,12 @@ function AddElement(fig,pipelineListBox,elementText,pipelineElementTextArea)
     % Throw an error if there are duplicated elements
     isDuplicated = checkforDuplicateNames(elementNames,elementToAddName{1});
     if isDuplicated
-        uialert(fig, 'Error: Duplicate Names. Elements cannot have the same name.', 'Duplicate Names');
+        classicAlert(fig, 'Error: Duplicate Names. Elements cannot have the same name.', 'Duplicate Names');
     else
         % Testing functionality to check element formatting
         [isValid, errormsg] = testHTMLFormat(elementText.Value);
         if ~isValid
-            uialert(fig,[errormsg, ' Added anyway, but be cautious.'], 'Warning')
+            classicAlert(fig,[errormsg, ' Added anyway, but be cautious.'], 'Warning')
         end
 
         % Get index of currently selected element in pipeline ListBox
@@ -1514,12 +1576,18 @@ function [inputs, outputs] = extractInputsOutputs(className,classInfo)
     filePath   = which([className '.m']);
     methodCode = fileread(filePath);
     
-    % Regular expression to find AddInput and AddOutput calls
-    inputPattern  = 'obj.AddInput\((.*?)\);';
-    outputPattern = 'obj.AddOutput\((.*?)\);';
-    
-    optionalInputPattern  = 'obj.AddOptionalInput\((.*?)\);';
-    optionalOutputPattern = 'obj.AddOptionalOutput\((.*?)\);';
+    % Regular expression to find AddInput and AddOutput calls. The
+    % closing paren must be followed by ';', a newline, or end-of-file
+    % (rather than requiring a literal ');') because MATLAB statements
+    % don't require a trailing semicolon - e.g. TalairachProjection.m
+    % declares obj.AddInput(...) with no ';' on some lines, which a bare
+    % '\);' requirement silently fails to match, dropping that input from
+    % the help panel and componentType detection with no error.
+    inputPattern  = 'obj\.AddInput\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
+    outputPattern = 'obj\.AddOutput\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
+
+    optionalInputPattern  = 'obj\.AddOptionalInput\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
+    optionalOutputPattern = 'obj\.AddOptionalOutput\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
 
     % Extract inputs and outputs
     inputsMatch  = regexp(methodCode, inputPattern,  'match');
@@ -1613,10 +1681,12 @@ function [dependencies, optionalDependencies] = extractDependencies(className)
     filePath   = which([className '.m']);
     methodCode = fileread(filePath);
     
-    % Regular expression to find GetDependency calls
-    getDependencyPattern = 'obj.GetDependency\((.*?)\);';
-    reqDependencyPattern = 'obj.RequestDependency\((.*?)\);';
-    optDependencyPattern = 'obj.GetOptionalDependency\((.*?)\);';
+    % Regular expression to find GetDependency calls. See extractInputsOutputs
+    % above for why the closing paren isn't required to be followed by a
+    % literal ';'.
+    getDependencyPattern = 'obj\.GetDependency\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
+    reqDependencyPattern = 'obj\.RequestDependency\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
+    optDependencyPattern = 'obj\.GetOptionalDependency\(([\s\S]*?)\)[ \t]*(?:;|\r?\n|$)';
 
     % Extract dependencies
     getDependenciesMatch = regexp(methodCode, getDependencyPattern, 'match');
@@ -1660,6 +1730,15 @@ function result = parseMatchedString(matches)
         result{end+1} = identifier;
     end
 
+end
+
+%% Classic equivalent of uialert(fig, message, title) - see the note near
+%% fig's construction above for why uialert (uifigure-only) is avoided.
+%% Every uialert(...) call site converted to this in this file omitted the
+%% Icon argument, meaning they all relied on uialert's default Icon of
+%% 'error' - errordlg matches that uniformly.
+function classicAlert(fig, message, title) %#ok<INUSD> fig kept for call-site compatibility with uialert's signature, unused by errordlg
+    errordlg(message, title);
 end
 
 %% Function to show a confirmation dialog
