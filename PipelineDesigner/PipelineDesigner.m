@@ -4,6 +4,21 @@ function PipelineDesigner(varargin)
 
     if ~isdeployed
         addpath(genpath(fullfile(mfilePath,'..')));
+        % The line above sweeps in the whole repo root, including
+        % StandaloneBuild/build/ - a compiled app's Contents/Resources/
+        % *_mcr cache mirrors the original source tree's folder names
+        % (e.g. classes/GUI/waitbar.m) but those files are p-coded/
+        % encrypted, not real text. If which('waitbar','-all') picks one
+        % of those up as its 2nd (non-VERA-shadow) match, classes/GUI/
+        % waitbar.m's non-deployed fallback tries to load it as source
+        % and fails with "Invalid text character" - confirmed via a real
+        % user report reproducing exactly this. Strip it back out here
+        % rather than removing the broad genpath above, in case something
+        % else at the repo root is actually relied upon.
+        standaloneBuildDir = fullfile(mfilePath,'..','StandaloneBuild');
+        if exist(standaloneBuildDir,'dir')
+            rmpath(genpath(standaloneBuildDir));
+        end
         addpath(genpath(fullfile(mfilePath,'..','classes')));
         addpath(genpath(fullfile(mfilePath,'..','Components')));
         addpath(genpath(fullfile(mfilePath,'..','Dependencies')));
@@ -298,7 +313,6 @@ function PipelineDesigner(varargin)
         'FontSize', UI.FONT.REGULAR.SIZE);
 
     helpTextArea = ClassicTextAreaAdapter(fig, ...
-        'Style', 'text', ...
         'Position', [UI.X.RIGHT_PANEL, UI.Y.HELP_TEXT, UI.COMMON.LISTBOX_WIDTH, UI.COMMON.HELP_AREA_HEIGHT], ...
         'Value', '', ...
         'FontName', UI.FONT.CODE.NAME, ...
@@ -306,8 +320,8 @@ function PipelineDesigner(varargin)
         'Editable', 'off');
 
     helpHyperlink = ClassicHyperlinkAdapter(fig, ...
-        'Position', [UI.X.RIGHT_PANEL, UI.Y.HELP_LINK, UI.BUTTON.EDITOR_OPEN.WIDTH, UI.BUTTON.EDITOR_OPEN.HEIGHT], ...
-        'FontName', UI.FONT.CODE.NAME, ...
+        'Position', [UI.X.RIGHT_PANEL, UI.Y.HELP_LINK, UI.COMMON.LISTBOX_WIDTH, UI.BUTTON.EDITOR_OPEN.HEIGHT], ...
+        'MaxWidth', UI.COMMON.LISTBOX_WIDTH, ...
         'FontSize', UI.FONT.REGULAR.SIZE);
 
     helpHyperlink.Text    = 'Help';
@@ -1108,9 +1122,20 @@ function viewElementOfPipeline(textArea,pipelineListBox,helpTextArea,helpHyperli
     % show help of selected element
     % Need element type to show help
     elementType = getElementTypes({pipelineListBox.Value});
+
+    % No pipeline/project loaded (or otherwise a blank selection) means
+    % there's nothing valid to look up - parseElementNameAndType already
+    % returns '' for an empty block. showHelp's own downstream lookups
+    % (getInputsOutputs -> fileread(''), etc.) aren't guarded against an
+    % empty element name, so skip the whole help/dependency lookup here
+    % rather than patching every function in that chain individually.
+    if isempty(elementType{1})
+        return;
+    end
+
     [dependencies, optionalDependencies] = getDependencies(elementType{1});
     showHelp(helpTextArea,helpHyperlink,elementType{1},dependencies,optionalDependencies);
-    
+
 end
 
 %% Function to modify current pipeline when modifying pipeline element text area
@@ -1150,7 +1175,7 @@ function MoveElementUp(pipelineListBox,pipelineElementTextArea)
     % Find currently selected item in ItemsData
     index = findSelectedIndex(pipelineListBox);
 
-    if size(pipelineListBox.Items,2) > 1
+    if numel(pipelineListBox.Items) > 1
         newOrder = 1:length(pipelineListBox.Items);
         if index ~= 1
             idx1 = index;
@@ -1169,6 +1194,13 @@ function MoveElementUp(pipelineListBox,pipelineElementTextArea)
         pipelineListBox.Items     = pipelineListBox.Items(newOrder);
         pipelineListBox.ItemsData = pipelineListBox.ItemsData(newOrder);
 
+        % Reordering above only moves the underlying Items/ItemsData -
+        % the listbox's own raw selection index isn't touched by that,
+        % so without this the highlighted row silently stays put while
+        % a *different* element ends up under it (the one that got
+        % displaced), instead of following the element that just moved.
+        pipelineListBox.Value = pipelineListBox.ItemsData{idx2};
+
     end
 
     pipelineElementTextArea.Value = pipelineListBox.Value;
@@ -1181,7 +1213,7 @@ function MoveElementDown(pipelineListBox,pipelineElementTextArea)
     % Find currently selected item in ItemsData
     index = findSelectedIndex(pipelineListBox);
 
-    if size(pipelineListBox.Items,2) > 1
+    if numel(pipelineListBox.Items) > 1
         newOrder = 1:length(pipelineListBox.Items);
         if index ~= length(pipelineListBox.Items)
             idx1 = index;
@@ -1199,6 +1231,11 @@ function MoveElementDown(pipelineListBox,pipelineElementTextArea)
         pipelineListBox.Items     = pipelineListBox.Items(newOrder);
         pipelineListBox.ItemsData = pipelineListBox.ItemsData(newOrder);
 
+        % See the matching comment in MoveElementUp - keep the selection
+        % on the element that just moved, not on whatever row it left
+        % behind.
+        pipelineListBox.Value = pipelineListBox.ItemsData{idx2};
+
     end
 
     pipelineElementTextArea.Value = pipelineListBox.Value;
@@ -1210,7 +1247,7 @@ function DeleteElement(pipelineListBox,pipelineElementTextArea)
     % Find currently selected item in ItemsData
     index = findSelectedIndex(pipelineListBox);
 
-    if size(pipelineListBox.Items,2) > 1
+    if numel(pipelineListBox.Items) > 1
         pipelineListBox.Items(index)     = [];
         pipelineListBox.ItemsData(index) = [];
         if index > 1
@@ -1495,7 +1532,7 @@ function AddElement(fig,pipelineListBox,elementText,pipelineElementTextArea)
                                  ];
 
         % Update data associated with items
-        if size(pipelineListBox.Items,2) > 1
+        if numel(pipelineListBox.Items) > 1
             pipelineListBox.ItemsData = {
                                          pipelineListBox.ItemsData{1:currentIDX},...
                                          elementText.Value,...
@@ -1614,6 +1651,20 @@ function [dependencies, optionalDependencies] = getDependencies(className)
 % Check if the class exists
     if ~exist('className', 'var') || ~ischar(className)
         error('Class name must be a valid string');
+    end
+
+    % Nothing to look up - happens when the pipeline listbox is clicked
+    % with no project/pipeline loaded (or an otherwise blank selection):
+    % parseElementNameAndType already returns '' for an empty block, and
+    % meta.class.fromName('') returns an empty meta.class array rather
+    % than erroring, which then makes classInfo.MethodList below produce
+    % a zero-element comma-separated list - length() called with that as
+    % its "argument" is really called with none, throwing "Not enough
+    % input arguments" instead of a clear message. Bail out early instead.
+    if isempty(className)
+        dependencies         = {};
+        optionalDependencies = {};
+        return;
     end
 
     % Dependency extraction requires re-reading and regex-scanning the
