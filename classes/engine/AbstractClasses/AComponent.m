@@ -230,24 +230,126 @@ classdef (Abstract) AComponent < Serializable
             % Extract width and height of the primary monitor
             mainMonitorWidth  = mainMonitor(3);
             mainMonitorHeight = mainMonitor(4);
-            
+
             % Calculate the center of the primary monitor
             centerX = mainMonitor(1) + mainMonitorWidth / 2;
             centerY = mainMonitor(2) + mainMonitorHeight / 2;
 
-            boxFig    = uifigure('Name',obj.Name,'Position',[centerX-msgBoxSize(1)/2 centerY-msgBoxSize(2)/2 msgBoxSize]);
+            % Deliberately a classic figure()/uicontrol(), not uifigure/
+            % uilabel/uibutton - the uifigure family depends on MATLAB's
+            % web/CEF-based rendering engine (MATLABWindow/
+            % matlabwindowhelper), which has been observed to crash-loop in
+            % at least one deployment environment (every Output
+            % component's post-save confirmation popup crashing with
+            % TS_PROCESS_CRASHED - the same failure mode as the MATLAB
+            % Runtime installer's own CEF-based GUI crashing on that same
+            % machine). Classic figure/uicontrol render via Java Swing
+            % instead, with no CEF dependency. MainGUI's own window
+            % (obj.window) is a classic figure() for the same reason - see
+            % the comment near its uimenu Tooltip usage in MainGUI.m.
+            boxFig = figure('Name',obj.Name,'Position',[centerX-msgBoxSize(1)/2 centerY-msgBoxSize(2)/2 msgBoxSize], ...
+                'MenuBar','none','ToolBar','none','NumberTitle','off','Resize','off');
+
+            if ischar(message) || (isstring(message) && isscalar(message))
+                message = cellstr(message);
+            end
+
+            % Reserve the strip at the bottom for the OK button, and lay
+            % the text out in whatever's left above it.
+            buttonHeight = 30;
+            margin       = 10;
+            textLeft     = margin;
+            textWidth    = msgBoxSize(1) - 2*margin;
+            textBottom   = margin + buttonHeight + margin;
+            textHeight   = msgBoxSize(2) - textBottom - margin;
 
             % Create a label for the message
-            uilabel(boxFig, ...
-                'Text',                message, ...
-                'Position',            [10, 10, msgBoxSize(1)-10, msgBoxSize(2)], ... % [left, bottom, width, height]
-                'WordWrap',            'on', ...
+            textLabel = uicontrol(boxFig,'Style','text', ...
+                'String',              message, ...
+                'Position',            [textLeft, textBottom, textWidth, textHeight], ... % [left, bottom, width, height]
                 'HorizontalAlignment', 'center', ...
                 'FontSize',            12);
-        
+
+            % Classic uicontrol text has no VerticalAlignment property -
+            % it's always anchored to the TOP of its box, so a box sized
+            % to the full available area left the message looking jammed
+            % against the top instead of centered. Wrap the message to
+            % textWidth (see wrapTextToWidth - built-in textwrap() only
+            % breaks on whitespace, which leaves long unbreakable tokens
+            % like a full file path overflowing the box uncut), then
+            % measure the resulting Extent to shrink the box to what the
+            % wrapped text really needs and re-center it within the
+            % available area so short messages sit in the middle.
+            wrappedMessage = AComponent.wrapTextToWidth(textLabel, message, textWidth);
+            set(textLabel, 'String', wrappedMessage);
+            contentHeight = min(textLabel.Extent(4), textHeight);
+            centeredBottom = textBottom + max(0, (textHeight - contentHeight) / 2);
+            set(textLabel, 'Position', [textLeft, centeredBottom, textWidth, contentHeight]);
+
             % Create an OK button that closes the dialog
-            uibutton(boxFig,'Text','OK','Position',[(msgBoxSize(1)-100)/2, 10, 100 30], ...
-                'ButtonPushedFcn',@(btn, event) close(boxFig));
+            uicontrol(boxFig,'Style','pushbutton','String','OK','Position',[(msgBoxSize(1)-100)/2, margin, 100, buttonHeight], ...
+                'Callback',@(btn, event) close(boxFig));
+        end
+    end
+
+    methods (Static, Access = private)
+        function lines = wrapTextToWidth(hControl, message, maxWidthPx)
+            % Word-wraps message to maxWidthPx like textwrap(), but also
+            % hard-breaks any single "word" (e.g. a filesystem path,
+            % which has no spaces) that is wider than maxWidthPx on its
+            % own, at whatever character boundary fits.
+            if ischar(message)
+                message = cellstr(message);
+            end
+            lines = {};
+            for p = 1:numel(message)
+                words   = strsplit(message{p}, ' ');
+                current = '';
+                for w = 1:numel(words)
+                    word = words{w};
+                    while ~isempty(word)
+                        if isempty(current)
+                            candidate = word;
+                        else
+                            candidate = [current ' ' word];
+                        end
+                        if AComponent.textExtentWidth(hControl, candidate) <= maxWidthPx
+                            current = candidate;
+                            word    = '';
+                        elseif ~isempty(current)
+                            lines{end+1} = current; %#ok<AGROW>
+                            current = '';
+                        else
+                            [chunk, word] = AComponent.splitWordToFit(hControl, word, maxWidthPx);
+                            lines{end+1} = chunk; %#ok<AGROW>
+                        end
+                    end
+                end
+                lines{end+1} = current; %#ok<AGROW>
+            end
+        end
+
+        function [chunk, rest] = splitWordToFit(hControl, word, maxWidthPx)
+            % Binary-searches the longest prefix of word whose rendered
+            % width (in hControl's font) still fits within maxWidthPx.
+            lo = 1; hi = length(word); best = 1;
+            while lo <= hi
+                mid = floor((lo + hi) / 2);
+                if AComponent.textExtentWidth(hControl, word(1:mid)) <= maxWidthPx
+                    best = mid;
+                    lo   = mid + 1;
+                else
+                    hi = mid - 1;
+                end
+            end
+            chunk = word(1:best);
+            rest  = word(best+1:end);
+        end
+
+        function w = textExtentWidth(hControl, str)
+            set(hControl, 'String', str);
+            ext = get(hControl, 'Extent');
+            w   = ext(3);
         end
     end
 end

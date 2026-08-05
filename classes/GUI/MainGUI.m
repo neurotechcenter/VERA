@@ -135,8 +135,9 @@ classdef MainGUI < handle
                 end
 
             catch e
-                VERAErrorLog('openProject', e);
+                logPath = VERAErrorLog('openProject', e);
                 warning(getReport(e,'extended'));
+                errordlg(sprintf('Could not open project: %s%s', e.message, errorLogSuffix(logPath)));
             end
             delete(obj.componentMenu);
             obj.componentMenu=[];
@@ -166,7 +167,9 @@ classdef MainGUI < handle
                     end
 
                 catch e
+                    logPath = VERAErrorLog('reopenProject', e);
                     warning(getReport(e,'extended'));
+                    errordlg(sprintf('Could not reopen project: %s%s', e.message, errorLogSuffix(logPath)));
                 end
                 delete(obj.componentMenu);
                 obj.componentMenu=[];
@@ -263,7 +266,9 @@ classdef MainGUI < handle
                 obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
             end
             catch e
+                logPath = VERAErrorLog('createNewProject', e);
                 warning(getReport(e));
+                errordlg(sprintf('Could not create project: %s%s', e.message, errorLogSuffix(logPath)));
             end
             delete(obj.componentMenu);
             obj.componentMenu=[];
@@ -337,45 +342,85 @@ classdef MainGUI < handle
                 % first-time call into a different top-level bundled
                 % folder from deep inside an already-large, already-running
                 % app, never completing. Launch the standalone
-                % PipelineDesigner.app (shipped as a sibling to this app)
+                % PipelineDesigner app (shipped as a sibling to this app)
                 % as its own OS process instead - it inherits this
                 % process's already-working runtime environment
                 % (DYLD_LIBRARY_PATH etc.) since system() child processes
                 % inherit the parent's environment.
                 try
-                    appBundle = fileparts(fileparts(fileparts(ctfroot))); % .../MainGUI.app
-                    appsDir   = fileparts(appBundle);                     % shared build output dir
-                    pdAppPath = fullfile(appsDir,'PipelineDesigner.app');
-                    if ~exist(pdAppPath,'dir')
-                        error('PipelineDesigner.app not found next to this app (expected at %s)', pdAppPath);
+                    if ispc
+                        % Unlike macOS's fixed, well-known
+                        % .app/Contents/Resources nesting, how deep
+                        % ctfroot() sits relative to the .exe on Windows
+                        % isn't one documented constant across MATLAB
+                        % Compiler versions/packaging options - NOT YET
+                        % VALIDATED against a real Windows deployed build.
+                        % Search upward from ctfroot() for a
+                        % PipelineDesigner.exe sibling instead of
+                        % hardcoding a level count, so this keeps working
+                        % (or fails with a clear message) even if the
+                        % actual extraction depth differs from this guess.
+                        pdAppPath = '';
+                        searchDir = ctfroot;
+                        for i = 1:5
+                            candidate = fullfile(fileparts(searchDir), 'PipelineDesigner.exe');
+                            if exist(candidate, 'file')
+                                pdAppPath = candidate;
+                                break;
+                            end
+                            searchDir = fileparts(searchDir);
+                        end
+                        if isempty(pdAppPath)
+                            error('PipelineDesigner.exe not found near this app (searched upward from %s)', ctfroot);
+                        end
+                        if ~isempty(pipelinePath)
+                            handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
+                            hfid = fopen(handoffFile, 'w');
+                            fprintf(hfid, '%s', pipelinePath);
+                            fclose(hfid);
+                        end
+                        % "start" launches detached (not blocking this
+                        % process) - the empty "" is the required
+                        % window-title placeholder when the target path
+                        % itself is quoted.
+                        system(sprintf('start "" "%s"', pdAppPath));
+                    else
+                        appBundle = fileparts(fileparts(fileparts(ctfroot))); % .../VERA.app
+                        appsDir   = fileparts(appBundle);                     % shared build output dir
+                        pdAppPath = fullfile(appsDir,'PipelineDesigner.app');
+                        if ~exist(pdAppPath,'dir')
+                            error('PipelineDesigner.app not found next to this app (expected at %s)', pdAppPath);
+                        end
+                        % Launch via macOS's "open" rather than exec'ing
+                        % the bundled binary directly with a manually-built
+                        % DYLD_LIBRARY_PATH: system() invokes commands
+                        % through /bin/sh -c, and macOS strips/ignores
+                        % DYLD_* env vars across that exec boundary for
+                        % these binaries (a restricted-binary/SIP
+                        % behavior), so the direct-exec form reliably
+                        % failed to find its own runtime libraries when
+                        % launched this way. "open" resolves everything
+                        % through the app bundle itself and doesn't depend
+                        % on inherited DYLD_LIBRARY_PATH at all.
+                        %
+                        % "open --args" does not reliably deliver argv to
+                        % this app's varargin (confirmed empty even with
+                        % "open -n" forcing a fresh process) - use a small
+                        % handoff file instead, which PipelineDesigner
+                        % checks for at startup (see
+                        % loadStartupPipelineFromHandoff in PipelineDesigner.m).
+                        if ~isempty(pipelinePath)
+                            handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
+                            hfid = fopen(handoffFile, 'w');
+                            fprintf(hfid, '%s', pipelinePath);
+                            fclose(hfid);
+                        end
+                        cmd = sprintf('open -a "%s"', pdAppPath);
+                        system(cmd);
                     end
-                    % Launch via macOS's "open" rather than exec'ing the
-                    % bundled binary directly with a manually-built
-                    % DYLD_LIBRARY_PATH: system() invokes commands through
-                    % /bin/sh -c, and macOS strips/ignores DYLD_* env vars
-                    % across that exec boundary for these binaries (a
-                    % restricted-binary/SIP behavior), so the direct-exec
-                    % form reliably failed to find its own runtime
-                    % libraries when launched this way. "open" resolves
-                    % everything through the app bundle itself and doesn't
-                    % depend on inherited DYLD_LIBRARY_PATH at all.
-                    %
-                    % "open --args" does not reliably deliver argv to this
-                    % app's varargin (confirmed empty even with "open -n"
-                    % forcing a fresh process) - use a small handoff file
-                    % instead, which PipelineDesigner checks for at startup
-                    % (see loadStartupPipelineFromHandoff in PipelineDesigner.m).
-                    if ~isempty(pipelinePath)
-                        handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
-                        hfid = fopen(handoffFile, 'w');
-                        fprintf(hfid, '%s', pipelinePath);
-                        fclose(hfid);
-                    end
-                    cmd = sprintf('open -a "%s"', pdAppPath);
-                    system(cmd);
                 catch e
-                    VERAErrorLog('openPipelineDesigner', e);
-                    errordlg(sprintf('Could not launch Pipeline Designer: %s', e.message));
+                    logPath = VERAErrorLog('openPipelineDesigner', e);
+                    errordlg(sprintf('Could not launch Pipeline Designer: %s%s', e.message, errorLogSuffix(logPath)));
                 end
                 return;
             end
@@ -385,8 +430,8 @@ classdef MainGUI < handle
             try
                 PipelineDesigner(pipelinePath);
             catch e
-                VERAErrorLog('openPipelineDesigner', e);
-                errordlg(sprintf('Could not open Pipeline Designer: %s\n\n(Full details logged to VERA_error_log.txt in your home folder.)', e.message));
+                logPath = VERAErrorLog('openPipelineDesigner', e);
+                errordlg(sprintf('Could not open Pipeline Designer: %s%s', e.message, errorLogSuffix(logPath)));
             end
 
             waitbar(1,f);
@@ -642,6 +687,7 @@ classdef MainGUI < handle
                 try
                      rmdir(tdir,'s');
                 catch e
+                    VERAErrorLog('removeTempPath', e);
                     warning(e.message);
                 end
                 DependencyHandler.Instance.RemoveDependency('TempPath');
@@ -762,6 +808,7 @@ classdef MainGUI < handle
                 vo.TooltipString='';
             catch e
                  vo.TooltipString=e.message;
+                VERAErrorLog(['configureComponent:' compName], e);
                 errordlg(['Could not be configured: ' e.message],'Configure Failed','replace');
             end
             if(updateView)
@@ -790,6 +837,7 @@ classdef MainGUI < handle
                 vo.TooltipString='';
             catch e
                 vo.TooltipString=e.message;
+                VERAErrorLog(['runComponent:' compName], e);
                 errordlg(e.message);
                 success=0;
             end
@@ -876,7 +924,19 @@ classdef MainGUI < handle
                res=true;
            end
         end
-        
+
     end
-    
+
+end
+
+function s = errorLogSuffix(logPath)
+    %errorLogSuffix - "(Full details logged to <path>)" note for an
+    %errordlg, or '' if VERAErrorLog couldn't write anywhere at all (its
+    %candidate list includes MATLAB's temp folder, which is always
+    %writable per OS guarantee, so this should be rare in practice).
+    if isempty(logPath)
+        s = '';
+    else
+        s = sprintf('\n\n(Full details logged to %s)', logPath);
+    end
 end
