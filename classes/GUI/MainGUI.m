@@ -130,7 +130,9 @@ classdef MainGUI < handle
                     %obj.updateTreeView();
                     %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                     obj.fileMenuContent.CloseProject.Enable='on';
-                    obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
+                    if ~isdeployed
+                        obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
+                    end
                     obj.ProgressBarTool.resumeGUI();
                 end
 
@@ -162,7 +164,9 @@ classdef MainGUI < handle
                         %obj.updateTreeView();
                         %obj.Views.UpdateViews(obj.ProjectRunner.CurrentPipelineData);
                         obj.fileMenuContent.CloseProject.Enable='on';
-                        obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
+                        if ~isdeployed
+                            obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
+                        end
                         obj.ProgressBarTool.resumeGUI();
                     end
 
@@ -263,7 +267,9 @@ classdef MainGUI < handle
                 end
                 
                 obj.fileMenuContent.CloseProject.Enable='on';
-                obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
+                if ~isdeployed
+                    obj.multiSubjectMenuContent.PrepareSuperModel.Enable='on';
+                end
             end
             catch e
                 logPath = VERAErrorLog('createNewProject', e);
@@ -476,15 +482,26 @@ classdef MainGUI < handle
             %normally whether or not it is set. '.' is the unresolved
             %placeholder value (see constructor) - never treated as
             %configured, even though it technically is an existing dir.
+            %
+            %Also gray out the whole dropdown (not just Launch) whenever
+            %isdeployed, regardless of whether VERA_SuperModel is
+            %configured - see launchSuperModelViewer for why Launch can
+            %never work there (VERA_SuperModel has no compiled build, only
+            %raw .m source, which a deployed app's MCR cannot execute).
+            %Prepare Project is itself just a file copy and would work
+            %fine deployed, but the whole feature is useless without
+            %Launch, so keep the entire dropdown's on/off state simple
+            %and consistent rather than enabling one option deployed users
+            %still can't do anything with.
             available = DependencyHandler.Instance.IsDependency('VERA_SuperModel') && ...
                 ~strcmp(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'.') && ...
                 exist(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'dir');
-            % Launch (not Prepare) needs VERA_SuperModel's raw launch_viewer.m to
-            % actually execute in-process, which a deployed VERA app can never do
-            % (see launchSuperModelViewer) - grey Launch out with an explanatory
-            % tooltip in that case rather than leaving it clickable-but-broken.
-            launchAvailable = available && ~isdeployed;
-            if available
+            if isdeployed
+                obj.multiSubjectMenu.Enable = 'off';
+                tooltipText = ['The Multi-Subject Viewer (VERA_SuperModel) is not available in this ' ...
+                    'standalone/deployed VERA app - it only ships as raw MATLAB source, which this app ' ...
+                    'cannot execute. Run VERA from MATLAB directly to use this feature.'];
+            elseif available
                 obj.multiSubjectMenu.Enable = 'on';
                 tooltipText = '';
             else
@@ -492,30 +509,20 @@ classdef MainGUI < handle
                 tooltipText = ['VERA_SuperModel is not configured. Get it from ' ...
                     'https://github.com/gtzook/VERA_SuperModel and set its install folder under Configuration > Settings.'];
             end
-            if launchAvailable
-                % LaunchSuperModel's own Enable is independent of whether
-                % a project is open, so it can turn straight on here.
-                % PrepareSuperModel still needs a project open first -
-                % leave its Enable state to openProject/closeProject.
-                obj.multiSubjectMenuContent.LaunchSuperModel.Enable = 'on';
-                launchTooltipText = tooltipText;
-            else
-                obj.multiSubjectMenuContent.LaunchSuperModel.Enable = 'off';
-                if available
-                    launchTooltipText = ['VERA_SuperModel only ships as raw MATLAB source, which this ' ...
-                        'standalone/deployed VERA app cannot run - use Prepare Project instead and run ' ...
-                        'the Multi-Subject Viewer from MATLAB directly.'];
-                else
-                    launchTooltipText = tooltipText;
-                end
-            end
+            % LaunchSuperModel's own Enable is independent of whether a
+            % project is open, so it can mirror the dropdown's state
+            % directly here. PrepareSuperModel still needs a project open
+            % first - leave its Enable state to openProject/closeProject
+            % (also guarded there by isdeployed, so it never flips back on
+            % in a deployed app even once a project is opened).
+            obj.multiSubjectMenuContent.LaunchSuperModel.Enable = obj.multiSubjectMenu.Enable;
             % uimenu's Tooltip property is only supported under a
             % uifigure - obj.window is a legacy figure() window, so this
             % throws there. Not worth the whole MainGUI constructor
             % failing over a hover tooltip - skip it if unsupported.
             try
                 obj.multiSubjectMenu.Tooltip = tooltipText;
-                obj.multiSubjectMenuContent.LaunchSuperModel.Tooltip = launchTooltipText;
+                obj.multiSubjectMenuContent.LaunchSuperModel.Tooltip = tooltipText;
             catch
             end
         end
