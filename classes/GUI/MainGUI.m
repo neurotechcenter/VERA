@@ -440,11 +440,30 @@ classdef MainGUI < handle
 
         function openSettings(obj)
             %openSettings - "Settings" menu callback. Opens SettingsGUI
-            %and refreshes dependency-gated menu items (e.g. the
-            %Multi-Subject Viewer launcher) once that window is closed,
-            %since Dependency values can change while it's open.
+            %and, once that window is closed, persists any Dependency
+            %changes to settings.xml and refreshes dependency-gated menu
+            %items (e.g. the Multi-Subject Viewer launcher), since
+            %Dependency values can change while it's open.
             settingsGUI = SettingsGUI();
-            addlistener(settingsGUI.Parent, 'ObjectBeingDestroyed', @(~,~) obj.refreshSuperModelAvailability());
+            addlistener(settingsGUI.Parent, 'ObjectBeingDestroyed', @(~,~) obj.onSettingsClosed());
+        end
+
+        function onSettingsClosed(obj)
+            %onSettingsClosed - SettingsGUI's table only updates the
+            %in-memory DependencyHandler.Instance singleton
+            %(SetDependency) on edit - it never writes settings.xml
+            %itself. Previously that only happened in onClose/
+            %closeProject, so Dependencies configured here were invisible
+            %to anything that can't see this process's memory - notably
+            %the deployed Pipeline Designer, which launches as its own OS
+            %process (see openPipelineDesigner) and reads Dependencies
+            %solely from settings.xml on disk. Save immediately when this
+            %dialog closes so a freshly-configured Dependency is visible
+            %there without requiring the project or VERA itself to be
+            %closed first.
+            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
+            obj.refreshSuperModelAvailability();
         end
 
         function refreshSuperModelAvailability(obj)
