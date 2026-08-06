@@ -479,19 +479,35 @@ classdef MainGUI < handle
             available = DependencyHandler.Instance.IsDependency('VERA_SuperModel') && ...
                 ~strcmp(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'.') && ...
                 exist(DependencyHandler.Instance.GetDependency('VERA_SuperModel'),'dir');
+            % Launch (not Prepare) needs VERA_SuperModel's raw launch_viewer.m to
+            % actually execute in-process, which a deployed VERA app can never do
+            % (see launchSuperModelViewer) - grey Launch out with an explanatory
+            % tooltip in that case rather than leaving it clickable-but-broken.
+            launchAvailable = available && ~isdeployed;
             if available
                 obj.multiSubjectMenu.Enable = 'on';
+                tooltipText = '';
+            else
+                obj.multiSubjectMenu.Enable = 'off';
+                tooltipText = ['VERA_SuperModel is not configured. Get it from ' ...
+                    'https://github.com/gtzook/VERA_SuperModel and set its install folder under Configuration > Settings.'];
+            end
+            if launchAvailable
                 % LaunchSuperModel's own Enable is independent of whether
                 % a project is open, so it can turn straight on here.
                 % PrepareSuperModel still needs a project open first -
                 % leave its Enable state to openProject/closeProject.
                 obj.multiSubjectMenuContent.LaunchSuperModel.Enable = 'on';
-                tooltipText = '';
+                launchTooltipText = tooltipText;
             else
-                obj.multiSubjectMenu.Enable = 'off';
                 obj.multiSubjectMenuContent.LaunchSuperModel.Enable = 'off';
-                tooltipText = ['VERA_SuperModel is not configured. Get it from ' ...
-                    'https://github.com/gtzook/VERA_SuperModel and set its install folder under Configuration > Settings.'];
+                if available
+                    launchTooltipText = ['VERA_SuperModel only ships as raw MATLAB source, which this ' ...
+                        'standalone/deployed VERA app cannot run - use Prepare Project instead and run ' ...
+                        'the Multi-Subject Viewer from MATLAB directly.'];
+                else
+                    launchTooltipText = tooltipText;
+                end
             end
             % uimenu's Tooltip property is only supported under a
             % uifigure - obj.window is a legacy figure() window, so this
@@ -499,7 +515,7 @@ classdef MainGUI < handle
             % failing over a hover tooltip - skip it if unsupported.
             try
                 obj.multiSubjectMenu.Tooltip = tooltipText;
-                obj.multiSubjectMenuContent.LaunchSuperModel.Tooltip = tooltipText;
+                obj.multiSubjectMenuContent.LaunchSuperModel.Tooltip = launchTooltipText;
             catch
             end
         end
@@ -533,6 +549,26 @@ classdef MainGUI < handle
                 return;
             end
 
+            % Unlike PipelineDesigner (see openPipelineDesigner), VERA_SuperModel
+            % has no compiled/standalone build of its own - it only ever ships as
+            % raw launch_viewer.m source in a user-configured folder. A deployed
+            % VERA app runs inside the MATLAB Compiler Runtime, which can only
+            % execute code baked into its own CTF archive at compile time - it
+            % cannot parse/run arbitrary loose .m source discovered on disk at
+            % runtime, no matter what gets addpath'ed. Calling launch_viewer()
+            % below in that case previously failed silently (uncaught error in
+            % a menu callback - MATLAB just beeps, there's no console window in
+            % a deployed app to show the message), which is what "click the
+            % menu item, hear a beep, nothing happens" was actually caused by.
+            % Tell the user explicitly instead of attempting it.
+            if isdeployed
+                warndlg(['The Multi-Subject Viewer (VERA_SuperModel) cannot be launched from this ' ...
+                    'standalone/deployed VERA app - it only exists as raw MATLAB source, and this ' ...
+                    'app cannot execute unbundled .m files at runtime. Please run VERA from MATLAB ' ...
+                    'directly to use this feature.'], 'Launch Multi-Subject Viewer');
+                return;
+            end
+
             % launch_viewer.m uses paths relative to its own folder (e.g.
             % addpath(genpath('FileFunctions')), a relative javaaddpath),
             % so it needs to run with that folder as the working
@@ -540,9 +576,7 @@ classdef MainGUI < handle
             currentDir = pwd;
             cleanupObj = onCleanup(@() cd(currentDir)); %#ok<NASGU>
             cd(superModelPath);
-            if ~isdeployed
-                addpath(superModelPath);
-            end
+            addpath(superModelPath);
 
             % VERA_SuperModel's own folder picker (selectProjectFolders.m)
             % calls a raw Swing JFileChooser method synchronously, which
@@ -551,7 +585,12 @@ classdef MainGUI < handle
             % for this call rather than editing that file.
             warnState = warning('off','all');
             cleanupWarn = onCleanup(@() warning(warnState)); %#ok<NASGU>
-            launch_viewer();
+            try
+                launch_viewer();
+            catch e
+                logPath = VERAErrorLog('launchSuperModelViewer', e);
+                errordlg(sprintf('Could not launch the Multi-Subject Viewer: %s%s', e.message, errorLogSuffix(logPath)));
+            end
         end
 
         function prepareForSuperModelViewer(obj)
