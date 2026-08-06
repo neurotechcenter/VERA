@@ -667,6 +667,60 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         VERAvisiblity = 'off';
         VERAhandle    = MainGUI(VERAvisiblity);
 
+        % In the compiled app, PipelineDesigner.app and VERA.app are
+        % separate mcc-compiled binaries, each with their own fully
+        % separate embedded copy of MainGUI.m - so the MainGUI constructor
+        % just above loaded ITS OWN bundled settings.xml, which
+        % BuildStandaloneVERAApp.m always ships blank (so no build
+        % machine's paths leak to an end user). PipelineDesigner has no
+        % Settings UI of its own to populate that from, so real
+        % dependency config only ever happens through the separately-
+        % running VERA.app - load its settings.xml here on top of
+        % whatever (blank) state MainGUI's own constructor just set up.
+        % LoadDependencyFile only adds entries, it doesn't clear existing
+        % ones first, so this is safe even though MainGUI() above already
+        % called it once for the (empty) bundled file.
+        if isdeployed
+            try
+                if ispc
+                    % NOT YET VALIDATED against a real Windows deployed
+                    % build - mirrors the equivalent search in
+                    % MainGUI.openPipelineDesigner for the same reason
+                    % (ctfroot's depth relative to the .exe isn't a
+                    % documented constant across MATLAB Compiler versions).
+                    veraAppPath = '';
+                    searchDir = ctfroot;
+                    for i = 1:5
+                        candidate = fullfile(fileparts(searchDir), 'VERA.exe');
+                        if exist(candidate, 'file')
+                            veraAppPath = fileparts(candidate);
+                            break;
+                        end
+                        searchDir = fileparts(searchDir);
+                    end
+                else
+                    appBundle   = fileparts(fileparts(fileparts(ctfroot))); % .../PipelineDesigner.app
+                    appsDir     = fileparts(appBundle);                     % shared build output dir
+                    veraAppPath = fullfile(appsDir,'VERA.app');
+                    if ~exist(veraAppPath,'dir')
+                        veraAppPath = '';
+                    end
+                end
+                if ~isempty(veraAppPath)
+                    settingsMatches = dir(fullfile(veraAppPath, '**', 'settings.xml'));
+                    if ~isempty(settingsMatches)
+                        DependencyHandler.Instance.LoadDependencyFile(fullfile(settingsMatches(1).folder, settingsMatches(1).name));
+                    end
+                end
+            catch
+                % Fall through with whatever (blank) dependencies
+                % MainGUI's own constructor already loaded -
+                % checkResolvedDependencies below reports unresolved
+                % deps same as before this fix existed, not a new
+                % failure mode.
+            end
+        end
+
         % Sort through existing figures and hide the newest VERA figure (used
         % for checking the pipeline)
         % This preserves any open VERA windows
