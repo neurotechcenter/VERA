@@ -8,6 +8,7 @@ classdef FreesurferModelGeneration < AComponent
         AnnotationType
         SegmentationPathIdentifier
         SurfaceType
+        MinFreeMemoryGB %Minimum available system memory (GB) required before starting Freesurfer segmentation
     end
      properties (Dependent, Access = protected)
         LeftSphereIdentifier
@@ -23,6 +24,7 @@ classdef FreesurferModelGeneration < AComponent
             obj.AnnotationType='aparc';
             obj.SegmentationPathIdentifier='SegmentationPath';
             obj.SurfaceType='pial';
+            obj.MinFreeMemoryGB=16;
         end
         
         function value=get.LeftSphereIdentifier(obj)
@@ -64,26 +66,39 @@ classdef FreesurferModelGeneration < AComponent
                 segmentationPath=fullfile(segmentationFolder,'Segmentation');
                 if(~exist(segmentationPath,'dir') || (exist(segmentationPath,'dir') && strcmp(questdlg('Found an Existing Segmentation Folder! Do you want to rerun the Segmentation?','Rerun Segmentation?','Yes','No','No'),'Yes')))
                     disp('Running Freesurfer segmentation, this might take up to 24h, get a coffee...');
-                    if(exist(segmentationPath,'dir')) 
-                        rmdir(segmentationPath,'s'); 
+                    if(exist(segmentationPath,'dir'))
+                        rmdir(segmentationPath,'s');
                     end
+                    obj.CheckAvailableMemory();
                     if(ispc)
                         subsyspath=obj.GetDependency('UbuntuSubsystemPath');
                         w_recon_script=convertToUbuntuSubsystemPath(recon_script,subsyspath);
                         w_freesurferPath=convertToUbuntuSubsystemPath(freesurferPath,subsyspath);
                         w_segmentationFolder=convertToUbuntuSubsystemPath(segmentationFolder,subsyspath);
                         w_mripath=convertToUbuntuSubsystemPath(mri_path,subsyspath);
-                        systemWSL(['chmod +x ''' w_recon_script ''''],'-echo');
+                        [status,cmdout]=systemWSL(['chmod +x ''' w_recon_script ''''],'-echo');
+                        if status ~= 0
+                            error(['Error Generating Freesurfer Segmentation: ',cmdout]);
+                        end
                         shellcmd=['''' w_recon_script ''' ''' w_freesurferPath ''' ''' ...
                         w_segmentationFolder ''' ' ...
                         'Segmentation ''' w_mripath ''''];
-                        systemWSL(shellcmd,'-echo');
+                        [status,cmdout]=systemWSL(shellcmd,'-echo');
+                        if status ~= 0
+                            error(['Error Generating Freesurfer Segmentation: ',cmdout]);
+                        end
                     else
-                        system(['chmod +x ''' recon_script ''''],'-echo');
+                        [status,cmdout]=system(['chmod +x ''' recon_script ''''],'-echo');
+                        if status ~= 0
+                            error(['Error Generating Freesurfer Segmentation: ',cmdout]);
+                        end
                         shellcmd=[recon_script ' ''' freesurferPath ''' ''' ...
                         segmentationFolder ''' ' ...
                         'Segmentation ''' mri_path ''''];
-                        system(shellcmd,'-echo');
+                        [status,cmdout]=system(shellcmd,'-echo');
+                        if status ~= 0
+                            error(['Error Generating Freesurfer Segmentation: ',cmdout]);
+                        end
                     end
                 end
                 
@@ -108,6 +123,20 @@ classdef FreesurferModelGeneration < AComponent
                 [~,b]=fileparts(obj.ComponentPath);
                 pathInfo.Path=fullfile('./',b,'Segmentation');
 
+        end
+
+        function CheckAvailableMemory(obj)
+            freeGB=getAvailableMemoryGB();
+            if isnan(freeGB)
+                warning('Could not determine available system memory before starting Freesurfer segmentation.');
+                return;
+            end
+            if freeGB < obj.MinFreeMemoryGB
+                warning(['Only %.1f GB of memory is available, but Freesurfer segmentation typically needs at ' ...
+                    'least %.1f GB free to avoid being killed by the OS partway through a multi-hour run. ' ...
+                    'Close other applications (browsers, virtual machines, etc.) to free up memory if this fails.'], ...
+                    freeGB, obj.MinFreeMemoryGB);
+            end
         end
     end
 end
