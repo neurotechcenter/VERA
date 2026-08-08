@@ -682,35 +682,13 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         % called it once for the (empty) bundled file.
         if isdeployed
             try
-                if ispc
-                    % NOT YET VALIDATED against a real Windows deployed
-                    % build - mirrors the equivalent search in
-                    % MainGUI.openPipelineDesigner for the same reason
-                    % (ctfroot's depth relative to the .exe isn't a
-                    % documented constant across MATLAB Compiler versions).
-                    veraAppPath = '';
-                    searchDir = ctfroot;
-                    for i = 1:5
-                        candidate = fullfile(fileparts(searchDir), 'VERA.exe');
-                        if exist(candidate, 'file')
-                            veraAppPath = fileparts(candidate);
-                            break;
-                        end
-                        searchDir = fileparts(searchDir);
-                    end
-                else
-                    appBundle   = fileparts(fileparts(fileparts(ctfroot))); % .../PipelineDesigner.app
-                    appsDir     = fileparts(appBundle);                     % shared build output dir
-                    veraAppPath = fullfile(appsDir,'VERA.app');
-                    if ~exist(veraAppPath,'dir')
-                        veraAppPath = '';
-                    end
-                end
-                if ~isempty(veraAppPath)
-                    settingsMatches = dir(fullfile(veraAppPath, '**', 'settings.xml'));
-                    if ~isempty(settingsMatches)
-                        DependencyHandler.Instance.LoadDependencyFile(fullfile(settingsMatches(1).folder, settingsMatches(1).name));
-                    end
+                % Must agree with MainGUI.resolveSettingsPath() on where
+                % VERA.app actually saves settings.xml, rather than
+                % independently rediscovering (and getting wrong) its own
+                % guess at the path.
+                settingsPath = MainGUI.resolveSettingsPath();
+                if exist(settingsPath,'file')
+                    DependencyHandler.Instance.LoadDependencyFile(settingsPath);
                 end
             catch
                 % Fall through with whatever (blank) dependencies
@@ -747,7 +725,10 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         warnMsg_create = formatWarning();
 
         if ~isempty(warnMsg_create)
-            warndlg(warnMsg_create);
+            % Not shown via warndlg: createNewProject already displayed its
+            % own (more useful, deployed-safe) dialog for this - warnMsg_create
+            % is only needed here as a signal to stop before configureAll runs
+            % on a project that failed to create.
 
             % no need to continue testing if we find an issue
             % close VERA
@@ -769,7 +750,10 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         warnMsg_configure = formatWarning();
 
         if ~isempty(warnMsg_configure)
-            warndlg(warnMsg_configure);
+            % Not shown via warndlg - same reasoning as warnMsg_create above:
+            % whatever component threw already showed its own dialog
+            % (configureComponent's scrollableErrordlg), this is just the
+            % stop-here signal.
 
             % no need to continue testing if we find an issue
             % close VERA
@@ -1860,7 +1844,14 @@ end
 
 %% Function to create a fresh temporary project folder for pipeline checking
 function tempProjPath = setupTempProject()
-    currentPath  = fileparts(mfilename('fullpath'));
+    if isdeployed
+        % Same read-only-bundle issue as MainGUI.resolveSettingsPath() -
+        % mkdir here failed silently since callers check pipeline status
+        % before their own try/catch starts. Use the OS temp folder instead.
+        currentPath = tempdir;
+    else
+        currentPath = fileparts(mfilename('fullpath'));
+    end
     tempProjPath = fullfile(currentPath,'temp/tempProj');
 
     if exist(tempProjPath,'dir')

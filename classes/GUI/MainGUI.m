@@ -48,9 +48,9 @@ classdef MainGUI < handle
             'HandleVisibility', 'on','CloseRequestFcn',@obj.onClose);
             cameratoolbar(obj.window,'NoReset');
 
-            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-            if exist(fullfile(rootpath,'settings.xml'),'file')
-                DependencyHandler.Instance.LoadDependencyFile(fullfile(rootpath,'settings.xml'));
+            settingsPath = MainGUI.resolveSettingsPath();
+            if exist(settingsPath,'file')
+                DependencyHandler.Instance.LoadDependencyFile(settingsPath);
             end
 
             % Register the VERA_SuperModel companion tool (a standalone
@@ -139,7 +139,7 @@ classdef MainGUI < handle
             catch e
                 logPath = VERAErrorLog('openProject', e);
                 warning(getReport(e,'extended'));
-                errordlg(sprintf('Could not open project: %s%s', e.message, errorLogSuffix(logPath)));
+                scrollableErrordlg(sprintf('Could not open project: %s%s', e.message, errorLogSuffix(logPath)));
             end
             delete(obj.componentMenu);
             obj.componentMenu=[];
@@ -173,7 +173,7 @@ classdef MainGUI < handle
                 catch e
                     logPath = VERAErrorLog('reopenProject', e);
                     warning(getReport(e,'extended'));
-                    errordlg(sprintf('Could not reopen project: %s%s', e.message, errorLogSuffix(logPath)));
+                    scrollableErrordlg(sprintf('Could not reopen project: %s%s', e.message, errorLogSuffix(logPath)));
                 end
                 delete(obj.componentMenu);
                 obj.componentMenu=[];
@@ -274,7 +274,7 @@ classdef MainGUI < handle
             catch e
                 logPath = VERAErrorLog('createNewProject', e);
                 warning(getReport(e));
-                errordlg(sprintf('Could not create project: %s%s', e.message, errorLogSuffix(logPath)));
+                scrollableErrordlg(sprintf('Could not create project: %s%s', e.message, errorLogSuffix(logPath)));
             end
             delete(obj.componentMenu);
             obj.componentMenu=[];
@@ -300,8 +300,7 @@ classdef MainGUI < handle
             %onClose - close project callback
             obj.removeTempPath();
 
-            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
+            DependencyHandler.Instance.SaveDependencyFile(MainGUI.resolveSettingsPath());
 
             delete(obj.Views);
             delete(obj.ProjectRunner);
@@ -426,7 +425,7 @@ classdef MainGUI < handle
                     end
                 catch e
                     logPath = VERAErrorLog('openPipelineDesigner', e);
-                    errordlg(sprintf('Could not launch Pipeline Designer: %s%s', e.message, errorLogSuffix(logPath)));
+                    scrollableErrordlg(sprintf('Could not launch Pipeline Designer: %s%s', e.message, errorLogSuffix(logPath)));
                 end
                 return;
             end
@@ -437,7 +436,7 @@ classdef MainGUI < handle
                 PipelineDesigner(pipelinePath);
             catch e
                 logPath = VERAErrorLog('openPipelineDesigner', e);
-                errordlg(sprintf('Could not open Pipeline Designer: %s%s', e.message, errorLogSuffix(logPath)));
+                scrollableErrordlg(sprintf('Could not open Pipeline Designer: %s%s', e.message, errorLogSuffix(logPath)));
             end
 
             waitbar(1,f);
@@ -467,8 +466,7 @@ classdef MainGUI < handle
             %dialog closes so a freshly-configured Dependency is visible
             %there without requiring the project or VERA itself to be
             %closed first.
-            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
+            DependencyHandler.Instance.SaveDependencyFile(MainGUI.resolveSettingsPath());
             obj.refreshSuperModelAvailability();
         end
 
@@ -596,7 +594,7 @@ classdef MainGUI < handle
                 launch_viewer();
             catch e
                 logPath = VERAErrorLog('launchSuperModelViewer', e);
-                errordlg(sprintf('Could not launch the Multi-Subject Viewer: %s%s', e.message, errorLogSuffix(logPath)));
+                scrollableErrordlg(sprintf('Could not launch the Multi-Subject Viewer: %s%s', e.message, errorLogSuffix(logPath)));
             end
         end
 
@@ -690,8 +688,7 @@ classdef MainGUI < handle
                 delete(v{1});
             end
 
-            rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
-            DependencyHandler.Instance.SaveDependencyFile(fullfile(rootpath,'settings.xml'));
+            DependencyHandler.Instance.SaveDependencyFile(MainGUI.resolveSettingsPath());
 
             obj.viewTabs = containers.Map();
             obj.fileMenuContent.CloseProject.Enable = 'off';
@@ -874,7 +871,7 @@ classdef MainGUI < handle
             catch e
                  vo.TooltipString=e.message;
                 VERAErrorLog(['configureComponent:' compName], e);
-                errordlg(['Could not be configured: ' e.message],'Configure Failed','replace');
+                scrollableErrordlg(['Could not be configured: ' e.message],'Configure Failed');
             end
             if(updateView)
                 obj.updateTreeView();
@@ -903,7 +900,7 @@ classdef MainGUI < handle
             catch e
                 vo.TooltipString=e.message;
                 VERAErrorLog(['runComponent:' compName], e);
-                errordlg(e.message);
+                scrollableErrordlg(e.message, ['Error running ' compName]);
                 success=0;
             end
             if(updateView)
@@ -990,6 +987,33 @@ classdef MainGUI < handle
            end
         end
 
+    end
+
+    methods (Static, Access = private)
+        function p = resolveSettingsPath()
+            %resolveSettingsPath - Where to read/write settings.xml.
+            %   Deployed apps can't use the old mfilename-based repo path -
+            %   it resolves inside the app bundle's read-only Resources,
+            %   which only worked by accident when run from a self-owned
+            %   build folder. Use the per-user app-data folder instead.
+            if ~isdeployed
+                rootpath = GetFullPath(fullfile(fileparts(mfilename('fullpath')),'..','..'));
+                p = fullfile(rootpath,'settings.xml');
+                return
+            end
+
+            if ispc
+                appDataDir = fullfile(getenv('APPDATA'), 'VERA');
+            else
+                % Covers mac and any other isdeployed unix fallback.
+                appDataDir = fullfile(getenv('HOME'), 'Library', 'Application Support', 'VERA');
+            end
+
+            if ~exist(appDataDir, 'dir')
+                mkdir(appDataDir);
+            end
+            p = fullfile(appDataDir, 'settings.xml');
+        end
     end
 
 end
