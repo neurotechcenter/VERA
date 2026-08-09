@@ -361,14 +361,14 @@ classdef MainGUI < handle
                         % Compiler versions/packaging options - NOT YET
                         % VALIDATED against a real Windows deployed build.
                         % Search upward from ctfroot() for a
-                        % PipelineDesigner.exe sibling instead of
+                        % VERAPipelineDesigner.exe sibling instead of
                         % hardcoding a level count, so this keeps working
                         % (or fails with a clear message) even if the
                         % actual extraction depth differs from this guess.
                         pdAppPath = '';
                         searchDir = ctfroot;
                         for i = 1:5
-                            candidate = fullfile(fileparts(searchDir), 'PipelineDesigner.exe');
+                            candidate = fullfile(fileparts(searchDir), 'VERAPipelineDesigner.exe');
                             if exist(candidate, 'file')
                                 pdAppPath = candidate;
                                 break;
@@ -376,7 +376,7 @@ classdef MainGUI < handle
                             searchDir = fileparts(searchDir);
                         end
                         if isempty(pdAppPath)
-                            error('PipelineDesigner.exe not found near this app (searched upward from %s)', ctfroot);
+                            error('VERAPipelineDesigner.exe not found near this app (searched upward from %s)', ctfroot);
                         end
                         if ~isempty(pipelinePath)
                             handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
@@ -392,9 +392,9 @@ classdef MainGUI < handle
                     else
                         appBundle = fileparts(fileparts(fileparts(ctfroot))); % .../VERA.app
                         appsDir   = fileparts(appBundle);                     % shared build output dir
-                        pdAppPath = fullfile(appsDir,'PipelineDesigner.app');
+                        pdAppPath = fullfile(appsDir,'VERAPipelineDesigner.app');
                         if ~exist(pdAppPath,'dir')
-                            error('PipelineDesigner.app not found next to this app (expected at %s)', pdAppPath);
+                            error('VERAPipelineDesigner.app not found next to this app (expected at %s)', pdAppPath);
                         end
                         % Launch via macOS's "open" rather than exec'ing
                         % the bundled binary directly with a manually-built

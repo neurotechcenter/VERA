@@ -667,7 +667,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         VERAvisiblity = 'off';
         VERAhandle    = MainGUI(VERAvisiblity);
 
-        % In the compiled app, PipelineDesigner.app and VERA.app are
+        % In the compiled app, VERAPipelineDesigner.app and VERA.app are
         % separate mcc-compiled binaries, each with their own fully
         % separate embedded copy of MainGUI.m - so the MainGUI constructor
         % just above loaded ITS OWN bundled settings.xml, which

@@ -7,7 +7,7 @@ function logPath = VERAErrorLog(context, err)
     %   char message) to leave a persistent, inspectable record.
     %
     %   Tries, in order: the build/output directory (next to VERA.app and
-    %   PipelineDesigner.app, or StandaloneBuild/build/StandaloneVERA when
+    %   VERAPipelineDesigner.app, or StandaloneBuild/build/StandaloneVERA when
     %   run interactively) if it exists, then the user's home folder, then
     %   MATLAB's temp folder as a last resort (always writable, per OS
     %   guarantee - this is what keeps a failure under e.g. macOS App
@@ -128,7 +128,7 @@ end
 
 function d = findBuildDir()
     %findBuildDir Best-effort location of "the build directory": the
-    %shared output folder VERA.app/PipelineDesigner.app ship in when
+    %shared output folder VERA.app/VERAPipelineDesigner.app ship in when
     %deployed, or StandaloneBuild/build/StandaloneVERA in an interactive
     %checkout. Returns '' if it can't be determined - the caller falls
     %back to the home folder either way, so this only needs to be a
