@@ -354,29 +354,14 @@ classdef MainGUI < handle
                 % inherit the parent's environment.
                 try
                     if ispc
-                        % Unlike macOS's fixed, well-known
-                        % .app/Contents/Resources nesting, how deep
-                        % ctfroot() sits relative to the .exe on Windows
-                        % isn't one documented constant across MATLAB
-                        % Compiler versions/packaging options - NOT YET
-                        % VALIDATED against a real Windows deployed build.
-                        % Search upward from ctfroot() for a
-                        % VERAPipelineDesigner.exe sibling instead of
-                        % hardcoding a level count, so this keeps working
-                        % (or fails with a clear message) even if the
-                        % actual extraction depth differs from this guess.
-                        pdAppPath = '';
-                        searchDir = ctfroot;
-                        for i = 1:5
-                            candidate = fullfile(fileparts(searchDir), 'VERAPipelineDesigner.exe');
-                            if exist(candidate, 'file')
-                                pdAppPath = candidate;
-                                break;
-                            end
-                            searchDir = fileparts(searchDir);
-                        end
-                        if isempty(pdAppPath)
-                            error('VERAPipelineDesigner.exe not found near this app (searched upward from %s)', ctfroot);
+                        % ctfroot() is unreliable here - Program Files installs
+                        % as admin, so mcc's CTF cache extracts elsewhere for a
+                        % non-admin user. Ask Windows for the running .exe's
+                        % real path instead (see CLAUDE.md for the full story).
+                        exePath = char(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+                        pdAppPath = fullfile(fileparts(exePath), 'VERAPipelineDesigner.exe');
+                        if ~exist(pdAppPath, 'file')
+                            error('VERAPipelineDesigner.exe not found next to this app (expected at %s)', pdAppPath);
                         end
                         if ~isempty(pipelinePath)
                             handoffFile = fullfile(tempdir, 'VERA_PipelineDesigner_startup.txt');
