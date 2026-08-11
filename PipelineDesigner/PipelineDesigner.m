@@ -456,6 +456,23 @@ function PipelineDesigner(varargin)
         'FontSize', UI.FONT.REGULAR.SIZE, ...
         'Callback', @(btn, event) OpenInEditor(fig));
 
+    % Every element above has a fixed pixel Position with no reflow of its
+    % own - snapshot each one now (design size UI.WINDOW.WIDTH x HEIGHT)
+    % and rescale all of them together on every resize. Font sizes aren't
+    % scaled (no simple proportional mechanism for uicontrol), so text can
+    % look cramped/tiny at extreme sizes - a known tradeoff, not a bug.
+    % ResizeFcn (not SizeChangedFcn) matches this file's classic-figure
+    % design - it's the property classic figure() has always had, no CEF/
+    % uifigure dependency.
+    origPositions = struct('Handle', {}, 'Position', {});
+    for i = 1:numel(fig.Children)
+        child = fig.Children(i);
+        if isprop(child, 'Position')
+            origPositions(end+1) = struct('Handle', child, 'Position', child.Position); %#ok<AGROW>
+        end
+    end
+    fig.ResizeFcn = @(src,~) rescaleFixedLayout(src, origPositions, UI.WINDOW.WIDTH, UI.WINDOW.HEIGHT);
+
     % Function to open the most recent file (active in help text area) in the matlab editor
     function OpenInEditor(fig,~)
         if isdeployed
@@ -480,6 +497,21 @@ function PipelineDesigner(varargin)
         selectedElement      = selectedElement_cell{1};
     end
 
+end
+
+%% Function to rescale the Pipeline Designer window's fixed-pixel layout on resize
+function rescaleFixedLayout(fig, origPositions, designWidth, designHeight)
+    figPos = fig.Position;
+    scaleX = max(figPos(3) / designWidth, 0.3);
+    scaleY = max(figPos(4) / designHeight, 0.3);
+    for i = 1:numel(origPositions)
+        h = origPositions(i).Handle;
+        if ~isvalid(h)
+            continue
+        end
+        p = origPositions(i).Position;
+        h.Position = [p(1)*scaleX, p(2)*scaleY, p(3)*scaleX, p(4)*scaleY];
+    end
 end
 
 %% Function to load pipeline from a file
