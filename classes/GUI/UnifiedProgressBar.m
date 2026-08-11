@@ -15,13 +15,19 @@ classdef UnifiedProgressBar < handle
     methods
         function obj=UnifiedProgressBar(handle,supercede)
             obj.supercede=false;
-            obj.suspendBox=uix.HBox('Parent',handle,'Background','w','units','normalized','Position',[0.2 0.3 0.6 0.4],'Visible','off');
-            obj.suspendAnnotation=annotation(obj.suspendBox,'TextBox','string','','BackgroundColor','none','FontSize',15,...
-                'units','normalized','Position',[0 0 1 1],'HorizontalAlignment','Center','VerticalAlignment','middle','LineWidth',4,'Interpreter','none');
 
-            obj.progressBar=uix.HBox('Parent',obj.suspendBox,'units','normalized','Position',[0 0 0 obj.barHeight],'Visible','off','Background',[0.4 0.4 1]);
+            % uipanel, not uix.HBox - HBox auto-columns its children,
+            % ignoring their Position (see CLAUDE.md for the full story).
+            obj.suspendBox=uipanel('Parent',handle,'BackgroundColor','w','Units','normalized',...
+                'Position',[0.2 0.3 0.6 0.4],'Visible','off','BorderType','line','BorderWidth',1,'HighlightColor',[0.6 0.6 0.6]);
+
+            obj.suspendAnnotation=annotation(obj.suspendBox,'TextBox','string','','BackgroundColor','none','FontSize',22,...
+                'units','normalized','Position',[0 0.52 1 0.3],'HorizontalAlignment','Center','VerticalAlignment','middle','LineStyle','none','Interpreter','none');
+
+            obj.progressBar=uipanel('Parent',obj.suspendBox,'Units','normalized','Position',[0 0 0 obj.barHeight],...
+                'Visible','off','BackgroundColor',[0.4 0.4 1],'BorderType','none');
             obj.progressAnnotation=annotation(obj.suspendBox,'TextBox','string','','BackgroundColor','none','FontSize',12,'LineStyle','none',...
-                'units','normalized','Position',[0 obj.barHeight 1 obj.barHeight],'Interpreter','none','VerticalAlignment','middle','HorizontalAlignment','center');
+                'units','normalized','Position',[0 obj.barHeight 1 0.35],'Interpreter','none','VerticalAlignment','bottom','HorizontalAlignment','center');
             if(exist('supercede','var') && supercede)
                 obj.supercede=true;
                 if(DependencyHandler.Instance.IsDependency('unifiedProgressbar')) % if dependency already exists, store old value and restore on release, otherwise create
