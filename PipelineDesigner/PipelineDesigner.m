@@ -520,7 +520,7 @@ function loadPipeline(fig,pipelineListBox,pipelineElementTextArea,helpTextArea,h
         [path, file, ext] = fileparts(varargin{1});
         file = [file,ext];
     else
-        defaultLoadPath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+        defaultLoadPath = resolvePipelineDefinitionsPath();
         fig.Visible     = 'off'; % Hide the main window
         [file, path]    = uigetfile(fullfile(defaultLoadPath,'*.pwf'), 'Select a pipeline file to load');
         fig.Visible     = 'on'; % Show the main window
@@ -588,7 +588,7 @@ function [fullPath] = savePipeline(fig,pipelineListBox,startupPipelineFile,varar
     end
 
     if pipelineStatus
-        defaultSavePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+        defaultSavePath = resolvePipelineDefinitionsPath();
 
         % get save path. Only toggle the main window's visibility around
         % the uiputfile dialog itself (not unconditionally) - a deployed
@@ -622,12 +622,12 @@ function [fullPath] = savePipeline(fig,pipelineListBox,startupPipelineFile,varar
                     fprintf(fid, [pipelineText{i},'\n']);
                 end
                 fclose(fid);
+
+                if ~calledFromCheckPipeline
+                    classicAlert(fig, 'Pipeline saved!', 'Save Success');
+                end
             else
                 classicAlert(fig, 'Error saving the file.', 'File Error');
-            end
-
-            if ~calledFromCheckPipeline
-                classicAlert(fig, 'Pipeline saved!', 'Save Success');
             end
         else
             classicAlert(fig, 'Pipeline not saved! No file name selected', 'Save Failure');
@@ -1897,6 +1897,33 @@ function cleanupTempProject(tempProjPath)
     warning off;
     rmdir(fullfile(tempProjPath,'..'),'s');
     warning on;
+end
+
+%% Function to resolve where pipeline (.pwf) files are read/written
+function p = resolvePipelineDefinitionsPath()
+    % Same read-only-bundle issue as MainGUI.resolveSettingsPath() - a
+    % deployed app can't write into PipelineDefinitions inside its own
+    % bundle, so use a per-user app-data folder instead, seeded from the
+    % bundled pipelines the first time it's created.
+    bundlePath = GetFullPath(fullfile(mfilename('fullpath'),'..','..','PipelineDefinitions'));
+    if ~isdeployed
+        p = bundlePath;
+        return
+    end
+
+    if ispc
+        appDataDir = fullfile(getenv('APPDATA'), 'VERA', 'PipelineDefinitions');
+    else
+        appDataDir = fullfile(getenv('HOME'), 'Library', 'Application Support', 'VERA', 'PipelineDefinitions');
+    end
+
+    if ~exist(appDataDir, 'dir')
+        mkdir(appDataDir);
+        if ~isempty(dir(fullfile(bundlePath,'*.pwf')))
+            copyfile(fullfile(bundlePath,'*.pwf'), appDataDir);
+        end
+    end
+    p = appDataDir;
 end
 
 %% Function to find the index of the currently selected pipeline element
