@@ -674,20 +674,23 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
     errormessage      = [];
     VERAfig           = [];
 
-    % Classic waitbar in place of uiprogressdlg (see the note near fig's
-    % construction above for why) - the dialog's Value is never updated
-    % below (this is used purely as a "please wait" indicator until
-    % close(checkingPipelineDlg) at the end of this function), so the lack
-    % of an Indeterminate/spinning mode in classic waitbar has no visible
-    % effect here. Cancelable isn't acted on anywhere in this function
-    % either (no CancelRequested check), so dropping it is a no-op too.
-    checkingPipelineDlg = waitbar(0, 'Checking Pipeline...', 'Name', 'Checking Pipeline');
+    % UnifiedProgressBar, not classic waitbar() - the latter is a no-op
+    % when deployed here (see CLAUDE.md). persistent avoids leaking a
+    % fresh widget into fig on every check; isvalid guards a stale fig.
+    persistent progressBar
+    if isempty(progressBar) || ~isvalid(progressBar.suspendBox)
+        progressBar = UnifiedProgressBar(fig);
+    end
+    progressBar.suspendGUIWithMessage('Checking Pipeline...');
+    progressBar.ShowProgressBar(0);
 
     % Save working pipeline to be loaded into VERA and checked
     tempProjPath = setupTempProject();
 
     tempPipelinePath = fullfile(tempProjPath,'tempPipeline.pwf');
     pipelinePath     = savePipeline(fig,pipelineListBox,[],tempPipelinePath);
+
+    progressBar.ShowProgressBar(0.1, 'Starting VERA...');
 
     % Create dialog boxes when there are warnings or errors. Everything
     % from here on (including constructing MainGUI) is inside this try -
@@ -751,6 +754,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
         VERAfig = allFigureHandles(VERAfigIDX);
 
         % create VERA project to see if the pipeline is viable
+        progressBar.ShowProgressBar(0.25, 'Creating project...');
         lastwarn('');
         createNewProject(VERAhandle,tempProjPath,pipelinePath);
 
@@ -772,12 +776,15 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
             classicAlert(fig, 'Pipeline check failed!','Pipeline Check Results')
             pipelineStatus = 0;
 
+            progressBar.resumeGUI();
             return;
         end
 
         % configure all components to see if any inputs or outputs are missing
         lastwarn('');
-        configureAll(VERAhandle);
+        % maps each component onto the 0.3-0.95 slice of the progress bar
+        configureAll(VERAhandle, @(ic,total,compName) progressBar.ShowProgressBar( ...
+            0.3 + 0.65*(ic/total), sprintf('Configuring %s (%d/%d)...', compName, ic, total)));
 
         warnMsg_configure = formatWarning();
 
@@ -797,6 +804,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
             classicAlert(fig, 'Pipeline check failed!','Pipeline Check Results')
             pipelineStatus = 0;
 
+            progressBar.resumeGUI();
             return;
         end
     catch me
@@ -823,7 +831,7 @@ function pipelineStatus = checkPipeline(fig,pipelineListBox)
     % delete temporary folder
     cleanupTempProject(tempProjPath);
 
-    close(checkingPipelineDlg);
+    progressBar.resumeGUI();
 end
 
 % reformat matlab warning for nicer display in warn dialog box

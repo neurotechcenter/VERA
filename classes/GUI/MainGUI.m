@@ -282,14 +282,22 @@ classdef MainGUI < handle
              
         end
         
-        function configureAll(obj)
+        function configureAll(obj,progressCallback)
             %configureAll - configure all button callback
-            % configures all 
+            % progressCallback (optional): fn(index,total,componentName), called per component.
+            if nargin < 2
+                progressCallback = [];
+            end
             obj.ProgressBarTool.ShowProgressBar(0,'Configuring... ');
             if(obj.checkResolvedDependencies())
-                for ic=1:length(obj.ProjectRunner.Components)
-                        obj.configureComponent(obj.ProjectRunner.Components{ic},length(obj.ProjectRunner.Components) == ic);
-                        obj.ProgressBarTool.ShowProgressBar(ic/length(obj.ProjectRunner.Components),'Configuring... ');
+                total = length(obj.ProjectRunner.Components);
+                for ic=1:total
+                        compName = obj.ProjectRunner.Components{ic};
+                        obj.configureComponent(compName,ic == total);
+                        obj.ProgressBarTool.ShowProgressBar(ic/total,'Configuring... ');
+                        if ~isempty(progressCallback)
+                            progressCallback(ic,total,compName);
+                        end
                 end
                 obj.updateTreeView();
                 obj.ProgressBarTool.resumeGUI();
@@ -313,12 +321,13 @@ classdef MainGUI < handle
 
         function viewPipelineGraph(obj)
             if(~isempty(obj.ProjectRunner))
-                figure;
+                figure('Name','Pipeline Graph','NumberTitle','off');
                 graph=obj.ProjectRunner.Project.Pipeline.GetDependencyGraph();
                 plot(graph,'Layout','layered','Sources',obj.ProjectRunner.Project.Pipeline.GetInputComponentNames(),...
                     'Sinks',obj.ProjectRunner.Project.Pipeline.GetOutputComponentNames(),'EdgeLabel',graph.Edges.Name,'LineWidth',2,...
                 'EdgeFontSize',12,'EdgeFontAngle','normal','NodeFontSize',16,'NodeFontAngle','normal', 'Interpreter', 'none',...
                 'ArrowSize',12);
+                title('Pipeline Graph','Interpreter','none','FontSize',20);
             end
         end
 
