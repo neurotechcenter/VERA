@@ -49,7 +49,10 @@ classdef IntracranialContactLocalization < AComponent
 
             path = obj.GetDependency('IntracranialContactLocalization');
             if ~isdeployed
-                addpath(genpath(path));
+                % Scoped, not genpath(path) - automated_pipeline/ has a
+                % stale duplicate fit_shank_line_from_blob.m that shadows
+                % the real one (see CLAUDE.md).
+                addpath(genpath(fullfile(path,'localization_external_api')));
             end
         end
         
